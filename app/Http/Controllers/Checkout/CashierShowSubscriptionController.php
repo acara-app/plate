@@ -8,8 +8,10 @@ use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\SnapFunnelStage;
 use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
+use App\Services\Billing\SnapFunnel;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,10 +20,7 @@ use Laravel\Cashier\SubscriptionItem;
 
 final readonly class CashierShowSubscriptionController
 {
-    public function __construct(private StripeServiceContract $stripeService)
-    {
-        //
-    }
+    public function __construct(private StripeServiceContract $stripeService, private SnapFunnel $funnel) {}
 
     public function __invoke(Request $request): Response
     {
@@ -82,6 +81,16 @@ final readonly class CashierShowSubscriptionController
 
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
         $returningFromCheckout = $request->routeIs('checkout.success');
+        $checkoutAttempt = $request->session()->get('checkout.started');
+        $checkoutAttempt = is_string($checkoutAttempt) ? $checkoutAttempt : 'unknown';
+
+        if ($returningFromCheckout) {
+            $this->funnel->record(SnapFunnelStage::CheckoutReturned, $checkoutAttempt, ['entitlement' => $allowance->mode === 'premium' ? 'active' : 'pending']);
+        }
+
+        if ($request->routeIs('checkout.cancel')) {
+            $this->funnel->record(SnapFunnelStage::CheckoutCancelled, $checkoutAttempt);
+        }
 
         if ($returningFromCheckout && $allowance->mode === 'premium' && $request->session()->pull('checkout.started')) {
             Inertia::flash('analytics', ['name' => 'snap_to_track_checkout_returned', 'properties' => ['source' => 'checkout']]);

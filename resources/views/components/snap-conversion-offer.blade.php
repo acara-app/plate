@@ -2,7 +2,7 @@
 
 <article
     @if ($allowance->canUpgrade && ($allowance->exhausted || $allowance->preview !== null))
-        x-data x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') }, @js($placement.':'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt))"
+        x-data x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') }, @js($placement.':'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed(@js($placement))"
     @endif
     class="border border-[#1A1814] bg-[#1A1814] p-6 text-[#F2EBDD] sm:p-8"
 >
@@ -33,7 +33,7 @@
 
     @if ($allowance->canUpgrade && $allowance->offer && ($allowance->exhausted || $allowance->preview !== null))
         <div class="mt-5">
-            <button type="button" wire:click="upgrade" wire:loading.attr="disabled" wire:target="upgrade" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') })" class="inline-flex min-h-12 w-full items-center justify-center bg-[#A04A28] px-4 py-3 text-center font-semibold text-white hover:bg-[#893E20] focus-visible:outline-2 focus-visible:outline-offset-4">
+            <button type="button" wire:click="upgrade(@js($placement))" wire:loading.attr="disabled" wire:target="upgrade" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') })" class="inline-flex min-h-12 w-full items-center justify-center bg-[#A04A28] px-4 py-3 text-center font-semibold text-white hover:bg-[#893E20] focus-visible:outline-2 focus-visible:outline-offset-4">
                 Continue scanning with {{ $allowance->offer->name }} — {{ $allowance->offer->formattedPrice }}/month
             </button>
             <p class="mt-3 text-sm leading-relaxed text-[#F2EBDD]/85">Daily and weekly AI limits apply. Renews monthly. Cancel anytime. No overage charges.</p>

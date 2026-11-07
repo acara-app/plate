@@ -5,19 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Checkout;
 
 use App\Contracts\Billing\OffersSubscriptions;
-use App\Contracts\Billing\TracksPhotoConversion;
 use App\Contracts\Services\StripeServiceContract;
-use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\SnapFunnelStage;
 use App\Http\Requests\CreateSubscriptionRequest;
 use App\Models\SubscriptionProduct;
+use App\Services\Billing\SnapFunnel;
 use Exception;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Symfony\Component\HttpFoundation\Response;
 
 final readonly class CashierSubscriptionController
 {
-    public function __construct(private StripeServiceContract $stripeService) {}
+    public function __construct(private StripeServiceContract $stripeService, private SnapFunnel $funnel) {}
 
     public function __invoke(CreateSubscriptionRequest $request): RedirectResponse|Response
     {
@@ -30,6 +31,10 @@ final readonly class CashierSubscriptionController
         abort_unless(resolve(OffersSubscriptions::class)->available($product), 422, 'This plan is no longer offered.');
         abort_if($data['billing_interval'] === 'yearly' && ! $product->yearly_stripe_lookup_key, 422, 'This plan is monthly only.');
 
+        $attempt = (string) Str::uuid();
+        $checkout = ['plan' => SnapFunnel::plan($product->name), 'interval' => $data['billing_interval']];
+        $this->funnel->record(SnapFunnelStage::CheckoutClicked, $attempt, $checkout);
+
         try {
             $user = $request->user();
 
@@ -38,6 +43,7 @@ final readonly class CashierSubscriptionController
             }
 
             if ($this->stripeService->hasActiveSubscription($user)) {
+                $this->funnel->record(SnapFunnelStage::CheckoutFailed, $attempt, ['reason' => 'already_subscribed']);
                 Inertia::flash('toast', [
                     'type' => 'error',
                     'message' => 'You already have an active subscription. Use the billing portal to manage it.',
@@ -72,16 +78,17 @@ final readonly class CashierSubscriptionController
                     'product_name' => $product->name,
                     'user_id' => (string) $user->id,
                     'billing_interval' => $data['billing_interval'],
-                    ...resolve(TracksPhotoConversion::class)->metadata($user, PhotoAnalysisContext::guestId($request)),
+                    ...$this->funnel->checkoutMetadata($user),
                 ],
                 $trialDays
             );
 
-            $request->session()->put('checkout.started', true);
-            resolve(TracksPhotoConversion::class)->track($user, PhotoAnalysisContext::guestId($request), 'checkout_created', hash('sha256', $checkoutUrl));
+            $request->session()->put('checkout.started', $attempt);
+            $this->funnel->record(SnapFunnelStage::CheckoutStarted, $attempt, $checkout);
 
             return Inertia::location($checkoutUrl);
         } catch (Exception) {
+            $this->funnel->record(SnapFunnelStage::CheckoutFailed, $attempt, ['reason' => 'error']);
             Inertia::flash('toast', [
                 'type' => 'error',
                 'message' => 'Failed to initiate subscription. Please try again.',

@@ -8,10 +8,12 @@ use App\Actions\LogReviewedMealAction;
 use App\Actions\StoreMealPhotoAction;
 use App\Data\ReviewedMealData;
 use App\Enums\AnalysisDraftSource;
+use App\Enums\SnapFunnelStage;
 use App\Http\Requests\SnapToTrack\StoreSnapToTrackMealRequest;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
 use App\Models\User;
+use App\Services\Billing\SnapFunnel;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\UploadedFile;
@@ -23,6 +25,7 @@ final readonly class StoreSnapToTrackMealController
     public function __construct(
         private LogReviewedMealAction $logReviewedMeal,
         private StoreMealPhotoAction $storeMealPhoto,
+        private SnapFunnel $funnel,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -47,6 +50,10 @@ final readonly class StoreSnapToTrackMealController
             $meal->toHealthLogData($draftModel),
             $this->currentUser,
         );
+
+        if ($draftModel->source === AnalysisDraftSource::PublicSnapToTrack) {
+            $this->funnel->record(SnapFunnelStage::MealSaved, (string) $draftModel->id, ['items' => count($meal->items)]);
+        }
 
         Inertia::flash('analytics', [
             'name' => 'snap_to_track_meal_logged',

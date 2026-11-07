@@ -4,22 +4,30 @@ declare(strict_types=1);
 
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
-use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoPreview;
 use App\Data\FoodAnalysisData;
+use App\Enums\SnapFunnelStage;
+use App\Models\SnapAnalyticsEvent;
+use App\Models\SnapJourney;
 use App\Models\User;
+use App\Services\Billing\SnapFunnel;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 it('keeps community installations free of preview grants and commercial attribution', function (): void {
     $user = User::factory()->create();
+    $funnel = resolve(SnapFunnel::class);
+    session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
 
-    expect(resolve(TracksPhotoConversion::class)->metadata($user, null))->toBe([]);
-    resolve(TracksPhotoConversion::class)->track($user, null, 'visit', 'visit');
+    $funnel->record(SnapFunnelStage::UploadSelected, 'community-upload');
 
+    expect($funnel->checkoutMetadata($user))->toBe([])
+        ->and(SnapJourney::query()->count())->toBe(0)
+        ->and(SnapAnalyticsEvent::query()->count())->toBe(0);
     expect(fn () => resolve(ManagesPhotoPreview::class)->activate($user, null))
         ->toThrow(HttpException::class);
 });
