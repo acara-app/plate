@@ -15,7 +15,6 @@ use App\Jobs\ProcessChatStream;
 use App\Jobs\SummarizeConversationJob;
 use App\Models\Conversation;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\StreamEventStore;
 use App\Utilities\ConfigHelper;
 use Laravel\Ai\Files\Base64Image;
@@ -31,9 +30,8 @@ final readonly class StartChatStream
 
     public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web', ?string $locale = null): ChatStreamTurn
     {
-        $agentModels = resolve(ConfiguredAgentModels::class)->snapshot($user);
-        $modelName = AgentModelData::from($agentModels[AgentRunner::class]);
-        $this->enforceAiUsageLimit->handle($user, $modelName);
+        $modelName = AgentModelData::current();
+        $this->enforceAiUsageLimit->handle($user);
 
         $messageCount = $conversation->messages()->count();
 
@@ -57,7 +55,7 @@ final readonly class StartChatStream
             userMessageId: $turn->userMessageId,
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
-            agentModels: resolve(ConfiguredAgentModels::class)->selections($agentModels),
+            agentModels: [AgentRunner::class => $modelName->toSelection()],
         ));
 
         return $turn;

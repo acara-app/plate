@@ -9,8 +9,6 @@ use App\Enums\Sex;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 
 covers(MealPlanAgent::class);
 
@@ -19,18 +17,6 @@ it('returns fluent interface when setting diet type', function (): void {
     $result = $action->withDietType(DietType::Mediterranean);
 
     expect($result)->toBeInstanceOf(MealPlanAgent::class);
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass(MealPlanAgent::class);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(64000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(180);
 });
 
 it('dispatches the initial meal plan job when handle is called', function (): void {

@@ -19,7 +19,7 @@ function comparisonReport(
     float $predictedCarbs,
     float $truthCarbs = 50.0,
     ?float $itemRecall = null,
-    array $paths = [AnalysisPath::Raw, AnalysisPath::Enriched],
+    array $paths = [AnalysisPath::Raw],
 ): HarnessReport {
     $metrics = (new MetricsCalculator)->calculate([
         new MealEvaluation(
@@ -39,7 +39,6 @@ function comparisonReport(
 
     return new HarnessReport(
         analyzerVersion: 'test/p1',
-        referenceLookupEnabled: true,
         repeats: 1,
         skippedMeals: 0,
         paths: new DataCollection(PathMetrics::class, array_map(
@@ -59,13 +58,12 @@ it('computes signed metric deltas per path', function (): void {
 
     $deltas = $this->comparator->compare($current, $previous);
 
-    expect($deltas)->toHaveCount(2)
+    expect($deltas)->toHaveCount(1)
         ->and($deltas[0]->path)->toBe(AnalysisPath::Raw)
         ->and($deltas[0]->carbMae)->toEqualWithDelta(-3.0, 0.0001)
         ->and($deltas[0]->carbMape)->toEqualWithDelta(-6.0, 0.0001)
         ->and($deltas[0]->energyMape)->toEqualWithDelta(0.0, 0.0001)
-        ->and($deltas[0]->itemRecall)->toEqualWithDelta(0.5, 0.0001)
-        ->and($deltas[1]->path)->toBe(AnalysisPath::Enriched);
+        ->and($deltas[0]->itemRecall)->toEqualWithDelta(0.5, 0.0001);
 });
 
 it('propagates null when either side lacks a metric', function (): void {
@@ -80,11 +78,8 @@ it('propagates null when either side lacks a metric', function (): void {
 });
 
 it('skips paths the previous run did not measure', function (): void {
-    $previous = comparisonReport(predictedCarbs: 45.0, paths: [AnalysisPath::Raw]);
+    $previous = comparisonReport(predictedCarbs: 45.0, paths: []);
     $current = comparisonReport(predictedCarbs: 48.0);
 
-    $deltas = $this->comparator->compare($current, $previous);
-
-    expect($deltas)->toHaveCount(1)
-        ->and($deltas[0]->path)->toBe(AnalysisPath::Raw);
+    expect($this->comparator->compare($current, $previous))->toBe([]);
 });

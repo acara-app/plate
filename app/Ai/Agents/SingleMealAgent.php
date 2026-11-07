@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\SingleMealPromptBuilder;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\Ai\GeneratesSingleMeals;
-use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\GeneratedMealData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -23,10 +24,11 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(8000)]
 #[Timeout(60)]
-final class SingleMealAgent implements Agent, GeneratesSingleMeals, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class SingleMealAgent implements Agent, BillsUsageToUser, GeneratesSingleMeals, HasProviderOptions, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     public function __construct(
         private SingleMealPromptBuilder $promptBuilder,

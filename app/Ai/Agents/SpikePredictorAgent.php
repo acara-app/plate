@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\SystemPrompt;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\Ai\PredictsGlucoseSpikes;
-use App\Contracts\Ai\UsesAgentModelProfiles;
 use App\Data\SpikePredictionData;
 use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -20,12 +21,13 @@ use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[MaxTokens(2000)]
+#[MaxTokens(16000)]
 #[Timeout(120)]
-final class SpikePredictorAgent implements Agent, HasProviderOptions, HasStructuredOutput, PredictsGlucoseSpikes, UsesAgentModelProfiles
+final class SpikePredictorAgent implements Agent, BillsUsageToUser, HasProviderOptions, HasStructuredOutput, PredictsGlucoseSpikes
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     private ?string $language = null;
 

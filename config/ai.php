@@ -2,23 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\AgentRunner;
-use App\Ai\Agents\CaffeineGuidanceAgent;
-use App\Ai\Agents\ConversationSummarizerAgent;
-use App\Ai\Agents\ConversationTitleGeneratorAgent;
-use App\Ai\Agents\EnrichAttributeMetadataAgent;
-use App\Ai\Agents\FitnessSpecialist;
-use App\Ai\Agents\FoodItemEstimatorAgent;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Ai\Agents\GlucoseSpikeSpecialist;
-use App\Ai\Agents\GroceryListAgent;
-use App\Ai\Agents\HealthSpecialist;
-use App\Ai\Agents\MealPlanAgent;
-use App\Ai\Agents\MealPlanSpecialist;
-use App\Ai\Agents\NutritionSpecialist;
-use App\Ai\Agents\SingleMealAgent;
-use App\Ai\Agents\SpikePredictorAgent;
-
 return [
 
     /*
@@ -32,7 +15,7 @@ return [
     |
     */
 
-    'default' => 'gemini',
+    'default' => 'openai',
     'default_for_images' => 'gemini',
     'default_for_audio' => 'openai',
     'default_for_transcription' => 'openai',
@@ -49,140 +32,6 @@ return [
     | based on your application's available caching stores and needs.
     |
     */
-
-    'default_model_pricing' => ['input' => 0.50, 'output' => 2.00, 'reasoning' => 0.0, 'cache_read' => 0.25],
-
-    'model_catalog' => [
-        'gpt-5.6-terra' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 2.00, 'output' => 12.00, 'reasoning' => 0.0, 'cache_read' => 0.20],
-        ],
-        'gpt-6-astra' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 10.00, 'output' => 50.00, 'reasoning' => 0.0, 'cache_read' => 1.00],
-        ],
-        'claude-sonnet-5' => [
-            'provider' => 'anthropic', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 2.00, 'output' => 10.00, 'reasoning' => 0.0, 'cache_read' => 0.20, 'cache_write' => 2.50],
-        ],
-        'claude-fable-5-1' => [
-            'provider' => 'anthropic', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 10.00, 'output' => 50.00, 'reasoning' => 0.0, 'cache_read' => 1.00, 'cache_write' => 12.50],
-        ],
-        'gemini-3-flash-preview' => [
-            'provider' => 'gemini', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 0.50, 'output' => 3.00, 'reasoning' => 0.0, 'cache_read' => 0.05],
-        ],
-
-        'gpt-5-mini' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 0.15, 'output' => 2.0, 'reasoning' => 2.0, 'cache_read' => 0.075],
-        ],
-        'gpt-5.4-mini' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 0.75, 'output' => 4.5, 'reasoning' => 4.5, 'cache_read' => 0.075],
-        ],
-        'gpt-5-nano' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 0.1, 'output' => 0.4, 'reasoning' => 0.4, 'cache_read' => 0.05],
-        ],
-        'gpt-6-luna' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 0.10, 'output' => 0.50, 'reasoning' => 0.50, 'cache_read' => 0.01],
-        ],
-        'gpt-6-sol' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.2],
-        ],
-        'gpt-6.1-sol' => [
-            'provider' => 'openai', 'max_output_tokens' => 128000,
-            'capabilities' => ['tools', 'structured_output', 'vision', 'web_search'], 'options' => [],
-            'pricing' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.1],
-        ],
-        'gemini-3.5-flash' => [
-            'provider' => 'gemini', 'max_output_tokens' => 65536,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => ['thinking_level' => 'high', 'thinking_summaries' => 'auto'],
-            'pricing' => ['input' => 1.50, 'output' => 9.00, 'reasoning' => 9.00, 'cache_read' => 0.15],
-        ],
-        'gemini-3.6-flash' => [
-            'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
-            'provider' => 'gemini', 'max_output_tokens' => 65536,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
-        ],
-        'gemini-3.8-flash' => [
-            'pricing_changes' => ['2027-01-01' => ['input' => 1.50, 'output' => 7.50, 'reasoning' => 7.50, 'cache_read' => 0.15]],
-            'provider' => 'gemini', 'max_output_tokens' => 65536,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => [],
-            'pricing' => ['input' => 0.75, 'output' => 3.75, 'reasoning' => 3.75, 'cache_read' => 0.075],
-        ],
-        'gemini-3.1-pro-preview' => [
-            'provider' => 'gemini', 'max_output_tokens' => 65536,
-            'capabilities' => ['tools', 'structured_output', 'vision'], 'options' => ['thinking_level' => 'high', 'thinking_summaries' => 'auto'],
-            'pricing' => ['input' => 2.0, 'output' => 12.0, 'reasoning' => 12.0, 'cache_read' => 0.2],
-        ],
-    ],
-
-    'agent_profiles' => [
-        AgentRunner::class => [
-            'standard' => env('AI_STANDARD_CHAT_MODEL', 'gpt-6-luna'),
-        ],
-        FitnessSpecialist::class => [
-            'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-        ],
-        HealthSpecialist::class => [
-            'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-        ],
-        NutritionSpecialist::class => [
-            'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-        ],
-        MealPlanSpecialist::class => [
-            'standard' => env('AI_STANDARD_SPECIALIST_MODEL', 'gemini-3.6-flash'),
-        ],
-        GlucoseSpikeSpecialist::class => [
-            'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
-        ],
-        CaffeineGuidanceAgent::class => [
-            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-        ],
-        GroceryListAgent::class => [
-            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-        ],
-        MealPlanAgent::class => [
-            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-        ],
-        SingleMealAgent::class => [
-            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-        ],
-        SpikePredictorAgent::class => [
-            'standard' => env('AI_STANDARD_GLUCOSE_MODEL', 'gpt-6-sol'),
-        ],
-        FoodItemEstimatorAgent::class => [
-            'standard' => env('AI_STANDARD_TASK_MODEL', 'gemini-3.6-flash'),
-        ],
-        FoodPhotoAnalyzerAgent::class => [
-            'standard' => env('AI_STANDARD_PHOTO_MODEL', 'gemini-3.8-flash'),
-        ],
-        ConversationTitleGeneratorAgent::class => [
-            'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),
-        ],
-        ConversationSummarizerAgent::class => [
-            'standard' => env('AI_BACKGROUND_TEXT_MODEL', 'gpt-5-nano'),
-        ],
-        EnrichAttributeMetadataAgent::class => [
-            'standard' => env('AI_BACKGROUND_METADATA_MODEL', 'gemini-3.6-flash'),
-        ],
-    ],
 
     'caching' => [
         'embeddings' => [

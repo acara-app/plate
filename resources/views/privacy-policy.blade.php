@@ -14,7 +14,7 @@
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
                 <h1>Privacy Policy</h1>
-                <p><strong>Effective Date: October 18, 2026</strong></p>
+                <p><strong>Effective Date: November 8, 2026</strong></p>
                 <p>
                     At Acara Plate, we value your privacy and are committed to protecting your personal data. This
                     Privacy Policy explains how we collect, use, store, and protect the information you provide through
@@ -104,8 +104,8 @@
                 <p>
                     <strong>a. Providers we currently use:</strong>
                 <ul>
-                    <li><strong>OpenAI</strong> — conversational chat (the primary Altani chat agent, which currently defaults to a GPT-5-family model), conversation summarization, audio transcription, and text embeddings.</li>
-                    <li><strong>Google</strong> — meal-plan generation and day-by-day meal suggestion synthesis, via Gemini and any successor or specialized Google-hosted models (including future variants such as medical- or vision-domain Gemma/Gemini models) served through the same Google API surface.</li>
+                    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal photo analysis, meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, and text embeddings.</li>
+                    <li><strong>Google</strong> — Acara Cloud's long-term memory features, via Gemini and any successor or specialized Google-hosted models served through the same Google API surface.</li>
                 </ul>
                 We disclose <strong>processors</strong>, not individual models. Swapping to a different model offered by the same processor (e.g., a newer Gemini release, or a specialized medical model hosted by Google) does not change which company receives your data and does not require a separate notice. We will update this list only when a new <strong>processor</strong> (a different company or a self-hosted deployment) is introduced for your data.
                 </p>

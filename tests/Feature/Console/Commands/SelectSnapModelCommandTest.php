@@ -34,12 +34,10 @@ function measuredPhotoModelRun(string $model, float $carbsError, float $costUsd 
     );
     $report = new HarnessReport(
         analyzerVersion: "{$model}/p".FoodPhotoAnalyzerAgent::PROMPT_VERSION,
-        referenceLookupEnabled: true,
         repeats: 3,
         skippedMeals: 0,
         paths: new DataCollection(PathMetrics::class, [
             new PathMetrics(path: AnalysisPath::Raw, failedRuns: 0, metrics: $metrics, costUsd: $costUsd, p95LatencyMs: 12_000.0),
-            new PathMetrics(path: AnalysisPath::Enriched, failedRuns: 0, metrics: $metrics, costUsd: $costUsd, p95LatencyMs: 12_000.0),
         ]),
         provider: 'gemini',
         maxTokens: 4096,
@@ -58,7 +56,7 @@ it('recommends the most accurate candidate that clears every release gate', func
     $this->artisan('snap:select-model', ['baseline' => $baseline->id, 'candidates' => [$acceptable->id, $expensive->id, $accurate->id]])
         ->expectsOutputToContain("Run {$expensive->id} failed the release gates.")
         ->expectsOutputToContain("Selected benchmark run {$accurate->id}.")
-        ->expectsOutputToContain('AI_STANDARD_PHOTO_MODEL=gemini-3.8-flash')
+        ->expectsOutputToContain('gemini-3.8-flash')
         ->expectsOutputToContain('Measured cost per 100 successful scans: $1.0000')
         ->assertSuccessful();
 });

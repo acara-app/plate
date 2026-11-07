@@ -6,17 +6,12 @@ use App\Http\Controllers\BroadcastChatController;
 use App\Models\AiUsage;
 use App\Models\Conversation;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 
 covers(BroadcastChatController::class);
 
 beforeEach(function (): void {
     enableBilling();
-    Config::set('plate.ai_usage_preflight', [
-        'token_budget' => ['input' => 2_000, 'output' => 1_000],
-        'fallback_estimate' => 0.01,
-    ]);
 });
 
 it('returns HTTP 402 with limit metadata when a Free user is out of free AI this month', function (): void {

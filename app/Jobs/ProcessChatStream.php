@@ -13,7 +13,6 @@ use App\Data\ChatStreamResult;
 use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
 use App\Services\StreamAggregator;
@@ -75,9 +74,12 @@ final class ProcessChatStream implements ShouldQueue
         CompletePendingChatStreamTurn $complete,
     ): void {
         $user = User::query()->findOrFail($this->userId);
-        $models = resolve(ConfiguredAgentModels::class)->snapshot($user, $this->agentModels ?? [AgentRunner::class => ['model' => $this->modelName]]);
+        $recorded = $this->agentModels[AgentRunner::class] ?? null;
+        $model = $recorded !== null
+            ? new AgentModelData($recorded['provider'], $recorded['model'])
+            : new AgentModelData(config()->string('ai.default'), $this->modelName);
 
-        resolve(AgentModelContext::class)->run($user, $models, fn () => $this->process($user, $models, $agentRunner, $events, $connector, $complete));
+        resolve(AgentModelContext::class)->run($user, $model, fn () => $this->process($user, $model, $agentRunner, $events, $connector, $complete));
     }
 
     public function failed(Throwable $e): void
@@ -106,8 +108,7 @@ final class ProcessChatStream implements ShouldQueue
         ]);
     }
 
-    /** @param array<string, array<string, mixed>> $models */
-    private function process(User $user, array $models, AgentRunner $agentRunner, StreamEventStore $events, BroadcastConnector $connector, CompletePendingChatStreamTurn $complete): void
+    private function process(User $user, AgentModelData $model, AgentRunner $agentRunner, StreamEventStore $events, BroadcastConnector $connector, CompletePendingChatStreamTurn $complete): void
     {
         $previousLocale = App::getLocale();
 
@@ -140,8 +141,7 @@ final class ProcessChatStream implements ShouldQueue
                 images: $this->base64Images($userMessage->attachments ?? []),
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
-                model: AgentModelData::from($models[AgentRunner::class]),
-                agentModels: $models,
+                model: $model,
             );
 
             $decisions = $this->approvalDecisions();

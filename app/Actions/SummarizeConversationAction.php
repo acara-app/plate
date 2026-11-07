@@ -36,7 +36,7 @@ final readonly class SummarizeConversationAction
             $conversationText = $this->formatMessages($messages);
             $participant = $conversation->participant;
             $summaryData = resolve(AgentModelContext::class)->run(
-                $participant instanceof User ? $participant : null, [],
+                $participant instanceof User ? $participant : null, null,
                 fn (): array => $this->agent->summarize($conversationText, $previousSummary),
             );
 

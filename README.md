@@ -109,7 +109,6 @@ flowchart LR
     subgraph ext["External services"]
         ai["AI providers<br/>OpenAI · Anthropic · Gemini"]
         tgapi["Telegram Bot API"]
-        usda["USDA FoodData Central"]
         stripe["Stripe billing"]
     end
 
@@ -118,7 +117,7 @@ flowchart LR
     tguser --- tgapi
     tgapi -->|"webhook updates"| https
     https --> app
-    app -->|"enqueue AI + import jobs"| q
+    app -->|"enqueue AI jobs"| q
     q --> workers
     app --> db
     workers --> db
@@ -129,7 +128,6 @@ flowchart LR
     app & workers --> s3
     app & workers -->|"model + tool calls"| ai
     app -->|"bot replies"| tgapi
-    workers -->|"nutrition imports"| usda
     app --> stripe
 ```
 
@@ -138,7 +136,7 @@ How a chat message moves through the system:
 1. The client sends the message over HTTPS to the web tier, which authenticates the request, persists the conversation, and enqueues an AI job so long-running agent work never blocks a web request.
 2. A queue worker runs the agent loop — health context assembly, tool calls, model requests — and broadcasts tokens, reasoning, and tool events over WebSockets as they stream.
 3. The browser renders the stream live, and the cache keeps resumable stream state so a dropped connection replays instead of losing the response. Telegram users reach the same agent through bot API replies.
-4. PostgreSQL remains the single source of truth for conversations, health entries, and USDA-derived food reference data, while object storage holds uploaded food photos and benchmark datasets.
+4. PostgreSQL remains the single source of truth for conversations and health entries, while object storage holds uploaded food photos and benchmark datasets.
 
 Design principles:
 
@@ -242,13 +240,13 @@ php artisan telegraph:set-webhook
 
 ## Data and Health Context
 
-Acara Plate uses structured profile data, health entries, conversation context, food references, and user-approved device data to generate more relevant AI guidance. Food data is designed around USDA FoodData Central imports and application-specific glycemic context.
+Acara Plate uses structured profile data, health entries, conversation context, and user-approved device data to generate more relevant AI guidance, alongside application-specific glycemic context.
 
 ## Food Photo Analysis
 
-Plate reads food photos with a multimodal AI pipeline: the model identifies each item and estimates its portion, and confidently matched foods have their nutrients computed from USDA FoodData Central reference values instead of recalled, with each value flagged as reference-derived or a model estimate. Results are useful estimates for awareness, not clinically validated measurements — never use them for insulin or medication dosing.
+Plate reads food photos with a multimodal AI pipeline: the model identifies each item, estimates its portion, and estimates its calories and macros. You can review and edit every item before saving it. Results are useful estimates for awareness, not clinically validated measurements — never use them for insulin or medication dosing.
 
-We measure how accurate the analysis really is with a first-party validation benchmark. See the [validation benchmark plan](docs/plan-golden-plate-validation-benchmark.md) and the [data collection protocol](docs/golden-plate-collection-protocol.md).
+We measure how accurate the analysis really is with a first-party validation benchmark. See the [data collection protocol](docs/golden-plate-collection-protocol.md).
 
 ## Contributing
 

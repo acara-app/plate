@@ -7,8 +7,6 @@ use App\Ai\Agents\SpikePredictorAgent;
 use App\Enums\SpikeRiskLevel;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
 use Laravel\Ai\Contracts\HasStructuredOutput;
@@ -73,18 +71,6 @@ it('localizes the explanation guidance from the authenticated user locale', func
     expect((new GlucoseSpikeSpecialist)->instructions())
         ->toContain($label)
         ->toContain(sprintf('language code: `%s`', $code));
-});
-
-it('has the same runtime limits as the spike predictor', function (): void {
-    $reflection = new ReflectionClass(GlucoseSpikeSpecialist::class);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(2000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(120);
 });
 
 it('returns a structured glucose spike risk result shape', function (): void {

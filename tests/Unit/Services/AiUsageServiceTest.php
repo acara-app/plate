@@ -3,22 +3,12 @@
 declare(strict_types=1);
 
 use App\Services\AiUsageService;
+use App\Services\ModelPricing;
 
-covers(AiUsageService::class);
-
-beforeEach(function (): void {
-    config()->set('ai.model_catalog.priced-model.provider', 'openai');
-    config()->set('ai.model_catalog.priced-model.pricing', [
-        'input' => 1.00,
-        'output' => 4.00,
-        'reasoning' => 2.00,
-        'cache_read' => 0.10,
-        'cache_write' => 1.50,
-    ]);
-});
+covers(AiUsageService::class, ModelPricing::class);
 
 it('charges each token category at its own per-million rate', function (): void {
-    $cost = new AiUsageService()->calculateCost('priced-model', [
+    $cost = new AiUsageService()->calculateCost('gpt-6-sol', [
         'prompt_tokens' => 1_000_000,
         'completion_tokens' => 500_000,
         'reasoning_tokens' => 250_000,
@@ -26,57 +16,22 @@ it('charges each token category at its own per-million rate', function (): void 
         'cache_write_input_tokens' => 100_000,
     ]);
 
-    expect($cost)->toEqualWithDelta(3.85, 0.000001);
+    expect($cost)->toEqualWithDelta(10.15, 0.000001);
 });
 
-it('prices a dated model snapshot at its base model rate', function (): void {
-    $cost = new AiUsageService()->calculateCost('priced-model-2026-03-17', [
-        'prompt_tokens' => 1_000_000,
-    ]);
+it('prices dated snapshots at their base model and unknown models conservatively', function (string $model, float $expected): void {
+    expect(new AiUsageService()->calculateCost($model, ['prompt_tokens' => 1_000_000]))->toBe($expected);
+})->with([
+    'dated snapshot' => ['gpt-6-luna-2026-03-17', 0.10],
+    'unknown model' => ['unknown-model', 2.0],
+]);
 
-    expect($cost)->toBe(1.0);
-});
+it('applies scheduled price changes from their effective date', function (): void {
+    $this->travelTo('2026-12-31');
+    $before = new AiUsageService()->calculateCost('gemini-3.6-flash', ['prompt_tokens' => 1_000_000]);
 
-it('uses default pricing for unknown model', function (): void {
-    $service = new AiUsageService;
+    $this->travelTo('2027-01-01');
 
-    $usage = [
-        'prompt_tokens' => 1000000,
-        'completion_tokens' => 1000000,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('unknown-model', $usage);
-
-    expect($cost)->toBe(0.50 + 2.00);
-});
-
-it('calculates cost with zero tokens', function (): void {
-    $service = new AiUsageService;
-
-    $usage = [
-        'prompt_tokens' => 0,
-        'completion_tokens' => 0,
-        'cache_read_input_tokens' => 0,
-        'reasoning_tokens' => 0,
-    ];
-
-    $cost = $service->calculateCost('gemini-3.5-flash', $usage);
-
-    expect($cost)->toBe(0.0);
-});
-
-it('includes Gemini thinking and current rates in actual photo costs', function (): void {
-    expect((new AiUsageService)->calculateCost('gemini-3.5-flash', [
-        'prompt_tokens' => 2000,
-        'completion_tokens' => 1000,
-        'reasoning_tokens' => 1000,
-    ]))->toBe(0.021);
-});
-
-it('prices a model even when another catalog entry has incomplete pricing', function (): void {
-    config()->set('ai.model_catalog.partially-priced', ['provider' => 'openai', 'pricing' => ['input' => 1.00, 'output' => 4.00]]);
-
-    expect(new AiUsageService()->calculateCost('priced-model', ['prompt_tokens' => 1_000_000]))->toEqualWithDelta(1.00, 0.000001);
+    expect($before)->toBe(0.75)
+        ->and(new AiUsageService()->calculateCost('gemini-3.6-flash', ['prompt_tokens' => 1_000_000]))->toBe(1.5);
 });

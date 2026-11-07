@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Services\Billing;
 
 use App\Actions\Billing\EnforceAiUsageLimit;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -21,7 +20,6 @@ use App\Models\SnapPhotoPeriod;
 use App\Models\SnapPhotoRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
@@ -67,10 +65,9 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
         if ($context->user instanceof User && (! $this->enabled() || $this->isPaying($context->user))) {
-            $model = resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class);
-            resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
+            resolve(EnforceAiUsageLimit::class)->handle($context->user);
 
-            return $analyze(PhotoModel::fromAgentModel($model));
+            return $analyze(PhotoModel::standard());
         }
 
         if (! $this->enabled()) {

@@ -6,6 +6,5 @@ namespace App\Enums;
 
 enum FoodValueProvenance: string
 {
-    case Reference = 'reference';
     case Model = 'model';
 }

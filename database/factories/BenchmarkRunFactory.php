@@ -26,18 +26,15 @@ final class BenchmarkRunFactory extends Factory
 
         $report = new HarnessReport(
             analyzerVersion: 'gemini-3.5-flash/p3',
-            referenceLookupEnabled: true,
             repeats: 5,
             skippedMeals: 0,
             paths: new DataCollection(PathMetrics::class, [
                 new PathMetrics(path: AnalysisPath::Raw, failedRuns: 0, metrics: $metrics),
-                new PathMetrics(path: AnalysisPath::Enriched, failedRuns: 0, metrics: $metrics),
             ]),
         );
 
         return [
             'analyzer_version' => 'gemini-3.5-flash/p3',
-            'reference_lookup_enabled' => true,
             'smoke' => false,
             'repeats' => 5,
             'meal_count' => 0,
