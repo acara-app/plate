@@ -6,8 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\CreateUser;
 use App\Actions\DeleteUser;
-use App\Contracts\Billing\TracksPhotoConversion;
-use App\Data\Billing\PhotoAnalysisContext;
 use App\Http\Requests\CreateUserRequest;
 use App\Http\Requests\DeleteUserRequest;
 use App\Models\User;
@@ -43,15 +41,9 @@ final readonly class UserController
 
         $request->session()->regenerate();
 
-        $tracking = resolve(TracksPhotoConversion::class);
-        $tracking->track($user, PhotoAnalysisContext::guestId($request), 'signup', 'signup');
-
         Inertia::flash('analytics', [
             'name' => 'signup_completed',
-            'properties' => [
-                'method' => 'email',
-                ...$tracking->metadata($user, PhotoAnalysisContext::guestId($request)),
-            ],
+            'properties' => ['method' => 'email'],
         ]);
 
         return redirect()->intended(route('dashboard', absolute: false));

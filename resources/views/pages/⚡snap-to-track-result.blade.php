@@ -10,9 +10,13 @@ use App\Data\Billing\PhotoEntitlement;
 use App\Data\DailyNutritionGoalsData;
 use App\Enums\AnalysisDraftStatus;
 use App\Enums\DietType;
+use App\Enums\SnapFunnelStage;
+use App\Services\Billing\SnapFunnel;
+use Livewire\Attributes\Async;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -39,7 +43,7 @@ class extends Component
     #[Locked]
     public ?string $draftToken = null;
 
-    public function mount(RestoreAnalysisDraftAction $restore): void
+    public function mount(RestoreAnalysisDraftAction $restore, SnapFunnel $funnel): void
     {
         $token = $this->resultDraftToken();
 
@@ -77,6 +81,7 @@ class extends Component
         $this->analysis = $analysis->toArray();
         $this->analysisRequestId = is_string($requestId) ? $requestId : null;
         $this->analyzedAt = $resolution->draft?->created_at->toIso8601String();
+        $funnel->record(SnapFunnelStage::ResultViewed, $this->resultKey());
     }
 
     #[Computed]
@@ -91,11 +96,13 @@ class extends Component
         return DailyNutritionGoalsData::forCalories(self::REFERENCE_DAILY_CALORIES, DietType::Balanced);
     }
 
-    public function save(string $intent): void
+    public function save(string $intent, SnapFunnel $funnel): void
     {
         if ($this->draftToken === null || ! in_array($intent, ['register', 'login'], true)) {
             return;
         }
+
+        $funnel->record(SnapFunnelStage::SaveClicked, $this->resultKey(), ['auth_path' => $intent]);
 
         $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
 
@@ -112,9 +119,30 @@ class extends Component
         $this->redirect(route($intent));
     }
 
-    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, SnapFunnel $funnel, string $placement = 'result'): void
     {
+        $placement = in_array($placement, ['result', 'result_bar'], true) ? $placement : 'result';
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $this->photoAllowance->offer?->name, clicked: true);
+
         $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
+    }
+
+    #[Async]
+    #[Renderless]
+    public function offerViewed(string $placement, SnapFunnel $funnel): void
+    {
+        $offer = $this->photoAllowance->canUpgrade ? $this->photoAllowance->offer : null;
+
+        if ($this->draftToken === null || $offer === null || ! in_array($placement, ['result', 'result_bar'], true)) {
+            return;
+        }
+
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name);
+    }
+
+    private function resultKey(): string
+    {
+        return $this->analysisRequestId ?? hash('sha256', (string) $this->draftToken);
     }
 
     private function resultDraftToken(): ?string
@@ -381,7 +409,9 @@ class extends Component
         <div class="fixed inset-x-0 bottom-0 z-30 border-t border-border/60 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden">
             @if ($barOffer)
                 <x-snap-result.button
-                    wire:click="upgrade"
+                    x-data
+                    x-intersect.once="$wire.offerViewed('result_bar')"
+                    wire:click="upgrade('result_bar')"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade"
                     x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"

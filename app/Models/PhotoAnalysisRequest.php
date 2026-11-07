@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
+use App\Services\Billing\SnapFunnel;
 use Carbon\CarbonInterface;
 use Database\Factories\PhotoAnalysisRequestFactory;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -148,6 +150,8 @@ final class PhotoAnalysisRequest extends Model
             'total_ms' => max(0, (int) $this->created_at->diffInMilliseconds(now())),
             'processing_ms' => $this->started_at === null ? null : max(0, (int) $this->started_at->diffInMilliseconds(now())),
         ]);
+
+        DB::afterCommit(fn () => resolve(SnapFunnel::class)->recordAnalysisOutcome($this));
     }
 
     /** @return Builder<self> */
