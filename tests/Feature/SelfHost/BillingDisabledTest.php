@@ -18,7 +18,6 @@ use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;

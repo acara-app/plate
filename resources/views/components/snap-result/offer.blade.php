@@ -36,7 +36,7 @@
     <section
         aria-labelledby="result-offer-heading"
         x-data
-        x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt))"
+        x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed('result')"
         class="flex flex-col gap-5 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-primary/30 sm:p-6"
     >
         <div class="flex flex-col gap-2">
@@ -67,7 +67,7 @@
         <div class="flex flex-col gap-2">
             <x-snap-result.button
                 class="whitespace-normal"
-                wire:click="upgrade"
+                wire:click="upgrade('result')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade"
                 x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', variant: {{ Js::from($variant) }} })"

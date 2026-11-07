@@ -7,17 +7,20 @@ use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RetryPhotoAnalysis;
 use App\Actions\StartPhotoAnalysis;
 use App\Contracts\Billing\ManagesPhotoPreview;
-use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\SnapFunnelStage;
 use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
+use App\Services\Billing\SnapFunnel;
 use App\Utilities\Base64Image;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\Async;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Renderless;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -52,14 +55,16 @@ class extends Component
 
     protected FailPhotoAnalysis $failAnalysis;
 
-    public function boot(FailPhotoAnalysis $failAnalysis): void
+    protected SnapFunnel $funnel;
+
+    public function boot(FailPhotoAnalysis $failAnalysis, SnapFunnel $funnel): void
     {
         $this->failAnalysis = $failAnalysis;
+        $this->funnel = $funnel;
     }
 
-    public function mount(TracksPhotoConversion $tracking): void
+    public function mount(): void
     {
-        $tracking->track(auth()->user(), $this->analysisGuestId(), 'visit', 'visit');
         $this->restoreLatestAnalysis();
         if (auth()->guest() && ! session()->has('snap_to_track.intent')) {
             session()->put('snap_to_track.intent', 'scan');
@@ -95,9 +100,30 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), $this->analysisGuestId());
     }
 
-    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, string $placement = 'wall'): void
     {
+        $placement = in_array($placement, ['wall', 'preview_upload'], true) ? $placement : 'wall';
+        $offer = ['placement' => $placement, 'plan' => SnapFunnel::plan($this->photoAllowance->offer?->name)];
+        $this->funnel->record(SnapFunnelStage::OfferViewed, $placement, $offer);
+        $this->funnel->record(SnapFunnelStage::UpgradeClicked, $placement, $offer);
+
         $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
+    }
+
+    #[Async]
+    #[Renderless]
+    public function offerViewed(string $placement): void
+    {
+        $allowance = $this->photoAllowance;
+
+        if (! in_array($placement, ['wall', 'preview_upload'], true) || ! $allowance->canUpgrade || $allowance->offer === null || ! ($allowance->exhausted || $allowance->preview !== null)) {
+            return;
+        }
+
+        $this->funnel->record(SnapFunnelStage::OfferViewed, $placement, [
+            'placement' => $placement,
+            'plan' => SnapFunnel::plan($allowance->offer->name),
+        ]);
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
@@ -107,8 +133,17 @@ class extends Component
             $this->hasRecoverableResult = false;
             $this->canRetryAnalysis = false;
             $this->analysisRequestId = (string) \Illuminate\Support\Str::uuid();
-            $this->validateUploadChallenge();
-            $this->hitUploadRateLimit();
+            $this->funnel->record(SnapFunnelStage::UploadSelected, $this->analysisRequestId);
+            $rejection = 'verification';
+            try {
+                $this->validateUploadChallenge();
+                $rejection = 'rate_limited';
+                $this->hitUploadRateLimit();
+            } catch (ValidationException $e) {
+                $this->funnel->record(SnapFunnelStage::UploadRejected, $this->analysisRequestId, ['reason' => $rejection]);
+
+                throw $e;
+            }
             $this->rememberVerifiedUploadChallenge();
         }
 
@@ -120,6 +155,7 @@ class extends Component
         try {
             $this->validateOnly('photo', $this->photoRules(), $this->photoMessages());
         } catch (ValidationException $e) {
+            $this->funnel->record(SnapFunnelStage::UploadRejected, (string) $this->analysisRequestId, ['reason' => 'photo']);
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
             throw $e;
@@ -144,6 +180,7 @@ class extends Component
 
         if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
             $this->error = 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.';
+            $this->funnel->record(SnapFunnelStage::UploadRejected, (string) $this->analysisRequestId, ['reason' => 'rate_limited']);
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
 
             return;
@@ -175,10 +212,16 @@ class extends Component
                 auth()->user(), $this->analysisGuestId(), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
             ));
+            $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id);
             $this->showAnalysis($analysis);
         } catch (ValidationException $e) {
+            $this->funnel->record(SnapFunnelStage::UploadRejected, (string) $this->analysisRequestId, [
+                'reason' => array_key_exists('turnstileToken', $e->errors()) ? 'verification' : 'photo',
+            ]);
+
             throw $e;
         } catch (Throwable $e) {
+            $this->funnel->record(SnapFunnelStage::AnalysisFailed, (string) $this->analysisRequestId, ['failure' => 'start_failed']);
             $this->error = 'We could not start the analysis. Please try again.';
             $saved = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
             if ($saved !== null) {
@@ -233,6 +276,7 @@ class extends Component
         try {
             RateLimiter::hit($this->analysisRateLimitKey(), 3600);
             $analysis = $retryAnalysis->handle($previous, auth()->user(), $this->analysisGuestId());
+            $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id, ['retry' => true]);
             $this->showAnalysis($analysis);
         } catch (Throwable $e) {
             $this->error = 'We could not restart the analysis. Please try again.';

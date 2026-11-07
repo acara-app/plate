@@ -64,6 +64,34 @@ function enableBilling(): void
     app()->forgetInstance(PhotoPlanCatalog::class);
 }
 
+function sellPhotoPlans(): SubscriptionProduct
+{
+    enableBilling();
+
+    return SubscriptionProduct::factory()->create([
+        'name' => 'Starter',
+        'price' => 2.99,
+        'stripe_price_id' => 'price_starter',
+        'stripe_lookup_key' => 'acara-plate-starter-monthly-v1',
+        'yearly_stripe_lookup_key' => null,
+        'product_group' => 'subscription',
+        'purchasable' => true,
+        'coming_soon' => false,
+    ]);
+}
+
+function sendSignedStripeWebhook(array $payload): TestResponse
+{
+    $body = json_encode($payload, JSON_THROW_ON_ERROR);
+    $timestamp = time();
+    $signature = hash_hmac('sha256', "{$timestamp}.{$body}", (string) config('cashier.webhook.secret'));
+
+    return test()->call('POST', route('cashier.webhook'), server: [
+        'HTTP_STRIPE_SIGNATURE' => "t={$timestamp},v1={$signature}",
+        'CONTENT_TYPE' => 'application/json',
+    ], content: $body);
+}
+
 function disableBilling(): void
 {
     config(['cashier.secret' => null]);
