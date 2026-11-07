@@ -28,7 +28,7 @@ final class AiTransparency
             ],
             [
                 'q' => 'Is my food photo kept private?',
-                'a' => 'Yes. Your photo is used only to generate the nutrition analysis. Livewire stores it as a temporary upload while the scan runs, then we delete that temporary file as soon as the result or error is returned. We do not retain images, share them with third parties, or use them to train AI models. Authenticated users can opt to log meals with photos to their personal history; on this public tool, no image is saved.',
+                'a' => 'Yes. Your photo is only used to estimate the nutrition in your meal, and we never use it to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, you can also keep meal photos in your private food history.',
             ],
             [
                 'q' => 'How do I use Snap to Track?',

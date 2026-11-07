@@ -2,17 +2,20 @@
 
 declare(strict_types=1);
 
-use App\Actions\AnalyzeFoodPhotoAction;
-use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\FailPhotoAnalysis;
 use App\Actions\PrepareSnapToTrackUpgrade;
-use App\Actions\StoreMealPhotoAction;
+use App\Actions\RetryPhotoAnalysis;
+use App\Actions\StartPhotoAnalysis;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\TracksPhotoConversion;
 use App\Data\Billing\PhotoAnalysisContext;
-use App\Enums\AnalysisDraftSource;
+use App\Models\AnalysisDraft;
+use App\Models\PhotoAnalysisRequest;
 use App\Utilities\Base64Image;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -41,9 +44,23 @@ class extends Component
     #[\Livewire\Attributes\Locked]
     public ?string $analysisRequestId = null;
 
+    #[\Livewire\Attributes\Locked]
+    public bool $hasRecoverableResult = false;
+
+    #[\Livewire\Attributes\Locked]
+    public bool $canRetryAnalysis = false;
+
+    protected FailPhotoAnalysis $failAnalysis;
+
+    public function boot(FailPhotoAnalysis $failAnalysis): void
+    {
+        $this->failAnalysis = $failAnalysis;
+    }
+
     public function mount(TracksPhotoConversion $tracking): void
     {
-        $tracking->track(auth()->user(), PhotoAnalysisContext::guestId(request()), 'visit', 'visit');
+        $tracking->track(auth()->user(), $this->analysisGuestId(), 'visit', 'visit');
+        $this->restoreLatestAnalysis();
         if (auth()->guest() && ! session()->has('snap_to_track.intent')) {
             session()->put('snap_to_track.intent', 'scan');
             if (! session()->has('url.intended')) {
@@ -67,7 +84,7 @@ class extends Component
 
             return;
         }
-        $preview->activate(auth()->user(), PhotoAnalysisContext::guestId(request()));
+        $preview->activate(auth()->user(), $this->analysisGuestId());
         session()->forget(['snap_to_track.preview_draft', 'snap_to_track.intent']);
         unset($this->photoAllowance);
     }
@@ -75,7 +92,7 @@ class extends Component
     #[\Livewire\Attributes\Computed]
     public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
     {
-        return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()));
+        return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), $this->analysisGuestId());
     }
 
     public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade): void
@@ -86,6 +103,9 @@ class extends Component
     public function _startUpload($name, $fileInfo, $isMultiple): void
     {
         if ($name === 'photo') {
+            abort_if($this->loading, 409, 'Your photo is still being analyzed.');
+            $this->hasRecoverableResult = false;
+            $this->canRetryAnalysis = false;
             $this->analysisRequestId = (string) \Illuminate\Support\Str::uuid();
             $this->validateUploadChallenge();
             $this->hitUploadRateLimit();
@@ -106,8 +126,15 @@ class extends Component
         }
     }
 
-    public function analyze(AnalyzeFoodPhotoAction $action, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $storeMealPhoto): void
+    public function analyze(StartPhotoAnalysis $start): void
     {
+        $existing = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
+        if ($existing !== null) {
+            $this->showAnalysis($existing, redirect: true);
+
+            return;
+        }
+
         $this->error = null;
         if ($this->photoAllowance->exhausted) {
             $this->error = 'Your photo allowance is used up. Choose a plan below to continue.';
@@ -123,86 +150,175 @@ class extends Component
         }
 
         $rules = $this->photoRules();
-
         if (app()->environment(['production', 'testing'])) {
             $rules['turnstileToken'] = ['required', 'string'];
         }
-
-        $this->loading = true;
 
         try {
             $this->validate($rules, $this->photoMessages());
             $this->validateVerifiedUploadChallenge();
 
             if (! $this->photo instanceof TemporaryUploadedFile) {
-                $this->error = 'Please select a photo to analyze.'; // @codeCoverageIgnore
-
-                return; // @codeCoverageIgnore
+                return;
             }
 
             $imageContent = $this->photo->get();
-
-            if ($imageContent === null) {
-                throw new RuntimeException('Failed to read uploaded file.'); // @codeCoverageIgnore
-            }
-
-            $base64 = base64_encode($imageContent);
+            $base64 = base64_encode($imageContent ?? '');
             $image = Base64Image::decode($base64);
-
             if (! $image instanceof Base64Image) {
                 throw ValidationException::withMessages(['photo' => $this->photoMessages()['photo.mimes']]);
             }
 
             RateLimiter::hit($this->analysisRateLimitKey(), 3600);
-
-            $this->analysisRequestId ??= (string) \Illuminate\Support\Str::uuid();
-            $analysis = $action->handle($base64, $image->mimeType, context: new \App\Data\Billing\PhotoAnalysisContext(
-                auth()->user(), \App\Data\Billing\PhotoAnalysisContext::guestId(request()), $this->analysisRequestId,
+            $this->analysisRequestId ??= (string) Str::uuid();
+            $analysis = $start->handle($this->analysisRequestId, $base64, $image->mimeType, new PhotoAnalysisContext(
+                auth()->user(), $this->analysisGuestId(), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
             ));
-
-            unset($this->photoAllowance);
-
-            if ($analysis->items->count() === 0) {
-                $this->error = 'No food items were detected. Try a clearer photo with better lighting.';
-
-                return;
-            }
-
-            $token = $drafts->handle($analysis, AnalysisDraftSource::PublicSnapToTrack, auth()->id());
-
-            if (auth()->check()) {
-                try {
-                    $storeMealPhoto->handle(auth()->user(), $imageContent, $token);
-                } catch (Throwable $e) {
-                    report($e);
-                }
-
-                $this->redirect(route('snap-to-track.review', ['draft' => $token]));
-
-                return;
-            }
-
-            session()->put('snap_to_track.result', ['draft' => $token, 'request_id' => $this->analysisRequestId]);
-            $this->redirect(route('snap-to-track.result'));
-        } catch (\App\Exceptions\Billing\PhotoLimitExceeded $e) {
-            $this->error = $e->getMessage();
+            $this->showAnalysis($analysis);
         } catch (ValidationException $e) {
-            $this->deleteTemporaryPhoto(resetUploadChallenge: true);
-
             throw $e;
         } catch (Throwable $e) {
-            $this->error = 'Something went wrong. Please try again.';
+            $this->error = 'We could not start the analysis. Please try again.';
+            $saved = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
+            if ($saved !== null) {
+                $this->showAnalysis($saved);
+            }
             report($e);
         } finally {
             $this->deleteTemporaryPhoto(resetUploadChallenge: true);
-            $this->loading = false;
         }
+    }
+
+    public function refreshAnalysis(): void
+    {
+        $analysis = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
+        if ($analysis === null) {
+            $this->loading = false;
+            $this->hasRecoverableResult = false;
+            $this->canRetryAnalysis = false;
+            $this->error = 'This analysis has expired. Please upload a photo to start again.';
+
+            return;
+        }
+
+        $this->showAnalysis($analysis, redirect: true);
+    }
+
+    public function retryAnalysis(RetryPhotoAnalysis $retryAnalysis): void
+    {
+        $previous = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
+        if ($previous?->retry_request_id !== null) {
+            $retry = $this->ownedAnalyses()->where('request_id', $previous->retry_request_id)->first();
+            if ($retry !== null) {
+                $this->showAnalysis($retry, redirect: true);
+
+                return;
+            }
+        }
+
+        if ($previous === null || ! $previous->canRetry()) {
+            $this->refreshAnalysis();
+
+            return;
+        }
+
+        if (RateLimiter::tooManyAttempts($this->analysisRateLimitKey(), 5)) {
+            $this->error = 'Too many attempts in a short time. Please try again later; this is separate from your scan allowance.';
+
+            return;
+        }
+
+        $this->error = null;
+        try {
+            RateLimiter::hit($this->analysisRateLimitKey(), 3600);
+            $analysis = $retryAnalysis->handle($previous, auth()->user(), $this->analysisGuestId());
+            $this->showAnalysis($analysis);
+        } catch (Throwable $e) {
+            $this->error = 'We could not restart the analysis. Please try again.';
+            $this->restoreLatestAnalysis();
+            report($e);
+        }
+    }
+
+    private function restoreLatestAnalysis(): void
+    {
+        $analysis = $this->ownedAnalyses()->latest('id')->first();
+        if ($analysis !== null) {
+            $this->showAnalysis($analysis);
+        }
+    }
+
+    private function showAnalysis(PhotoAnalysisRequest $analysis, bool $redirect = false): void
+    {
+        $failureCode = $analysis->staleFailureCode();
+        if ($failureCode !== null) {
+            $this->failAnalysis->handle($analysis, $failureCode, onlyIfStale: true);
+        }
+
+        $this->analysisRequestId = $analysis->request_id;
+        $this->loading = $analysis->isPending();
+        $this->hasRecoverableResult = $analysis->draft_token !== null && ! $analysis->isExpired()
+            && AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($analysis->draft_token))
+                ->whereNull('consumed_at')->where('expires_at', '>', now())->exists();
+        $this->canRetryAnalysis = $analysis->canRetry();
+        unset($this->photoAllowance);
+
+        if ($analysis->hasFailed()) {
+            $this->error = $analysis->failureMessage();
+        }
+
+        if ($redirect && $this->hasRecoverableResult) {
+            if ($analysis->user_id !== null) {
+                $this->redirect(route('snap-to-track.review', ['draft' => $analysis->draft_token]));
+
+                return;
+            }
+
+            session()->put('snap_to_track.result', ['draft' => $analysis->draft_token, 'request_id' => $analysis->request_id]);
+            $this->redirect(route('snap-to-track.result'));
+        }
+    }
+
+    private function analysisGuestId(): string
+    {
+        $guestId = PhotoAnalysisContext::guestId(request());
+        if ($guestId !== null) {
+            return $guestId;
+        }
+
+        $guestId = session()->get('snap_to_track.analysis_guest_id');
+        if (! is_string($guestId)) {
+            $guestId = (string) Str::uuid();
+            session()->put('snap_to_track.analysis_guest_id', $guestId);
+        }
+
+        return $guestId;
+    }
+
+    /** @return Builder<PhotoAnalysisRequest> */
+    private function ownedAnalyses(): Builder
+    {
+        $guestId = $this->analysisGuestId();
+        $query = PhotoAnalysisRequest::query()->where('expires_at', '>', now())
+            ->where(function (Builder $query) use ($guestId): void {
+                $query->whereRaw('1 = 0');
+                if (auth()->id() !== null) {
+                    $query->orWhere('user_id', auth()->id());
+                }
+                if ($guestId !== null) {
+                    $query->orWhere(function (Builder $guest) use ($guestId): void {
+                        $guest->whereNull('user_id')->where('guest_hash', hash('sha256', $guestId));
+                    });
+                }
+            });
+
+        return $query->metadata();
     }
 
     public function clearPhoto(): void
     {
-        if ($this->photoAllowance->exhausted) {
+        if ($this->loading || $this->photoAllowance->exhausted) {
             return;
         }
         $this->deleteTemporaryPhoto(resetUploadChallenge: true);
@@ -213,6 +329,10 @@ class extends Component
 
     public function limitReachedGate(): ?string
     {
+        if ($this->loading) {
+            return null;
+        }
+
         if ($this->photoAllowance->exhausted) {
             return 'daily';
         }
@@ -392,6 +512,24 @@ class extends Component
             @if ($error)
                 <p role="alert" class="mb-4 border border-[#B5482E] p-4 text-sm text-[#893E20]">{{ $error }}</p>
             @endif
+            @if ($loading)
+                <div wire:poll.5s="refreshAnalysis" role="status" aria-live="polite" class="mb-6 border border-[#D9CFBC] bg-[#EBE2D0] p-6">
+                    <h2 class="text-xl font-semibold">Your photo is being analyzed</h2>
+                    <p class="mt-2 text-sm">You can refresh this page safely. We’ll recover this analysis without using another scan.</p>
+                    <p class="mt-2 text-sm">Most results arrive in 5–15 seconds. Some photos take longer. Keep this browser session to return to your result.</p>
+                    <button type="button" wire:click="refreshAnalysis" wire:loading.attr="disabled" class="mt-4 underline">Check progress</button>
+                </div>
+            @elseif ($hasRecoverableResult)
+                <div role="status" class="mb-6 border border-[#D9CFBC] p-6">
+                    <p>Your previous analysis is ready. Opening it does not use another scan.</p>
+                    <button type="button" wire:click="refreshAnalysis" class="mt-4 font-semibold underline">View result</button>
+                </div>
+            @elseif ($canRetryAnalysis)
+                <div class="mb-6 border border-[#D9CFBC] p-6">
+                    <p class="text-sm">Your photo is available to retry for up to one hour after upload. You can try it again without uploading it.</p>
+                    <button type="button" wire:click="retryAnalysis" wire:loading.attr="disabled" class="mt-4 font-semibold underline">Try this photo again</button>
+                </div>
+            @endif
             @php
                 $limitGate = $this->limitReachedGate();
             @endphp
@@ -444,10 +582,10 @@ class extends Component
                     @endauth
                 </article>
             @endif
-            @if ($photoAllowance->exhausted())
+            @if (! $loading && $photoAllowance->exhausted())
                 <x-snap-conversion-offer :allowance="$photoAllowance" placement="wall" />
             @endif
-            @unless ($photoAllowance->exhausted())
+            @unless ($loading || $photoAllowance->exhausted())
             <form wire:submit="analyze" class="space-y-6">
                 <div
                     x-data="{
