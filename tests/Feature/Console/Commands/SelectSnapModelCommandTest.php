@@ -56,7 +56,7 @@ it('recommends the most accurate candidate that clears every release gate', func
     $this->artisan('snap:select-model', ['baseline' => $baseline->id, 'candidates' => [$acceptable->id, $expensive->id, $accurate->id]])
         ->expectsOutputToContain("Run {$expensive->id} failed the release gates.")
         ->expectsOutputToContain("Selected benchmark run {$accurate->id}.")
-        ->expectsOutputToContain('AI_STANDARD_PHOTO_MODEL=gemini-3.8-flash')
+        ->expectsOutputToContain("#[Model('gemini-3.8-flash')]")
         ->expectsOutputToContain('Measured cost per 100 successful scans: $1.0000')
         ->assertSuccessful();
 });

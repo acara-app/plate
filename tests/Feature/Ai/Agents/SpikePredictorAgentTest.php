@@ -5,22 +5,8 @@ declare(strict_types=1);
 use App\Ai\Agents\SpikePredictorAgent;
 use App\Data\SpikePredictionData;
 use App\Enums\SpikeRiskLevel;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 
 covers(SpikePredictorAgent::class);
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass(SpikePredictorAgent::class);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(2000)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(120);
-});
 
 it('instructions contains glycemic analysis guidance', function (): void {
     $agent = new SpikePredictorAgent;

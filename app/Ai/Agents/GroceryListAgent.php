@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
 use App\Ai\SystemPrompt;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\ExtractedIngredientData;
 use App\Data\GroceryItemData;
 use App\Data\GroceryListData;
@@ -19,19 +19,20 @@ use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use Spatie\LaravelData\DataCollection;
 
+#[UseCheapestModel]
 #[MaxTokens(67000)]
 #[Timeout(120)]
-final class GroceryListAgent implements Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class GroceryListAgent implements Agent, BillsUsageToUser, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
 
     public function instructions(): string
     {

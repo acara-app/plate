@@ -8,14 +8,14 @@ use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CompactStaleToolResults;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Contracts\Ai\AcceptsImages;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\Ai\AgentModelData;
 use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
 use App\Utilities\ConfigHelper;
 use Illuminate\Support\Facades\Context;
@@ -36,10 +36,11 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProviderOptions, HasTools, UsesAgentModelProfiles
+final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conversational, HasProviderOptions, HasTools
 {
+    use HasUsageUser;
     use Promptable, RemembersConversations;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     private ?User $user = null;
 
@@ -85,7 +86,7 @@ final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProv
         $modelName = $this->prepare($request, $user, appManagedPersistence: false);
 
         return resolve(AgentModelContext::class)->run(
-            $user, $this->modelsForRequest($request, $user, $modelName),
+            $user, $modelName,
             fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
@@ -102,7 +103,7 @@ final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProv
         $modelName = $this->prepare($request, $user, appManagedPersistence: false);
 
         return resolve(AgentModelContext::class)->run(
-            $user, $this->modelsForRequest($request, $user, $modelName),
+            $user, $modelName,
             fn (): AgentResponse => $this
                 ->continue($request->conversationId ?? '', as: $user)
                 ->prompt(
@@ -195,25 +196,15 @@ final class AgentRunner implements AcceptsImages, Agent, Conversational, HasProv
         return $this->compactStaleToolResults->handle($turn);
     }
 
-    /** @return array<string, array<string, mixed>> */
-    private function modelsForRequest(AgentRequest $request, User $user, AgentModelData $model): array
-    {
-        $models = $request->agentModels ?: resolve(ConfiguredAgentModels::class)->snapshot($user);
-        $models[self::class] = $model->toSnapshot();
-
-        return $models;
-    }
-
     private function prepare(AgentRequest $request, User $user, bool $appManagedPersistence): AgentModelData
     {
         $this->setModelUser($user);
-        $modelName = $request->model ?? resolve(AgentModelContext::class)->resolve(self::class, $user);
-        $this->selectedAgentModel = $modelName;
-        $this->enforceAiUsageLimit->handle($user, $modelName);
+        $modelName = $request->model ?? AgentModelData::current();
+        $this->enforceAiUsageLimit->handle($user);
 
         $this->currentRequest = new AgentRequest(
             message: $request->message, images: $request->images, conversationId: $request->conversationId,
-            streamId: $request->streamId, model: $modelName, agentModels: $request->agentModels,
+            streamId: $request->streamId, model: $modelName,
         );
         $this->user = $user;
 

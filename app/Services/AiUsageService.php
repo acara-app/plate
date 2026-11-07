@@ -14,9 +14,9 @@ final class AiUsageService
     /**
      * @param  array{prompt_tokens?: int, completion_tokens?: int, cache_read_input_tokens?: int, cache_write_input_tokens?: int, reasoning_tokens?: int}  $usage
      */
-    public function calculateCost(string $model, array $usage, ?string $provider = null): float
+    public function calculateCost(string $model, array $usage): float
     {
-        $pricing = ModelPricing::forModel($model, $provider);
+        $pricing = ModelPricing::forModel($model);
 
         $inputCost = ($usage['prompt_tokens'] ?? 0) / 1_000_000 * $pricing['input'];
         $outputCost = ($usage['completion_tokens'] ?? 0) / 1_000_000 * $pricing['output'];
@@ -24,7 +24,7 @@ final class AiUsageService
         $cacheCost = ($usage['cache_read_input_tokens'] ?? 0) / 1_000_000 * $pricing['cache_read'];
 
         return $inputCost + $outputCost + $reasoningCost + $cacheCost
-            + ($usage['cache_write_input_tokens'] ?? 0) / 1_000_000 * ($pricing['cache_write'] ?? $pricing['input'] * 1.25);
+            + ($usage['cache_write_input_tokens'] ?? 0) / 1_000_000 * $pricing['cache_write'];
     }
 
     /**

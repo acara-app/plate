@@ -11,7 +11,6 @@ use App\Data\ApprovalDecisionResult;
 use App\Jobs\ProcessChatStream;
 use App\Models\Conversation;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\StreamEventStore;
 use Laravel\Ai\Exceptions\ApprovalMismatchException;
 
@@ -32,9 +31,8 @@ final readonly class ResumeChatStream
     public function handle(Conversation $conversation, User $user, array $decisions, string $channel = 'web', ?string $locale = null): ApprovalDecisionResult
     {
         $paused = $this->recordApprovalDecisions->pausedTurnFor($conversation);
-        $agentModels = resolve(ConfiguredAgentModels::class)->forTurn($paused, $user);
-        $modelName = AgentModelData::from($agentModels[AgentRunner::class]);
-        $this->enforceAiUsageLimit->handle($user, $modelName);
+        $modelName = AgentModelData::forTurn($paused);
+        $this->enforceAiUsageLimit->handle($user);
 
         $recorded = $this->recordApprovalDecisions->handle($conversation, $decisions);
 
@@ -56,7 +54,7 @@ final readonly class ResumeChatStream
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
             decisions: $recorded->toQueuePayload(),
-            agentModels: resolve(ConfiguredAgentModels::class)->selections($agentModels),
+            agentModels: [AgentRunner::class => $modelName->toSelection()],
         ));
 
         return new ApprovalDecisionResult(turn: $turn, awaiting: []);

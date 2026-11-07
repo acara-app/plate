@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
+use App\Ai\Concerns\HasUsageUser;
+use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\SystemPrompt;
 use App\Contracts\Ai\AcceptsImages;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
@@ -26,10 +26,11 @@ use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(35000)]
 #[Timeout(60)]
-final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageToUser, HasProviderOptions, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
+    use ReasonsWithMediumEffort;
 
     public const string PROMPT_VERSION = '5';
 
@@ -43,7 +44,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
 
     public static function pinnedModel(): string
     {
-        return resolve(ConfiguredAgentModels::class)->forAgent(self::class)->model;
+        return PhotoModel::standard()->model;
     }
 
     public static function version(?string $model = null): string
@@ -53,7 +54,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
 
     public function usingModel(PhotoModel $model, ?User $user = null): self
     {
-        $agent = $this->usingAgentModel(resolve(ConfiguredAgentModels::class)->forModel($model->model, $model->provider), $user);
+        $agent = $this->forModelUser($user);
         $agent->photoModel = $model;
         $agent->user = $user;
 
@@ -62,7 +63,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
 
     public function maxTokens(): int
     {
-        return min($this->photoModel->maxTokens ?? 35000, $this->agentModel()->maxOutputTokens);
+        return $this->photoModel->maxTokens ?? 35000;
     }
 
     public function withLanguage(string $language, string $languageCode): self
@@ -146,7 +147,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
 
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
-        $model = $this->model();
+        $model = $this->photoModel ?? PhotoModel::standard();
 
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt(
@@ -154,13 +155,13 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            provider: $this->provider(),
-            model: $model,
+            provider: $model->provider,
+            model: $model->model,
         );
 
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
-        $data['analyzer_version'] = self::version($model);
+        $data['analyzer_version'] = self::version($model->model);
 
         return FoodAnalysisData::from($data);
     }

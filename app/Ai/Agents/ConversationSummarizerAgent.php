@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Ai\Concerns\HasUsageUser;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\SummarizesConversation;
 use App\Models\ConversationSummary;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -13,18 +13,19 @@ use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[MaxTokens(4000)]
+#[UseCheapestModel]
+#[MaxTokens(8000)]
 #[Timeout(90)]
-final class ConversationSummarizerAgent implements Agent, HasProviderOptions, HasStructuredOutput, SummarizesConversation, UsesAgentModelProfiles
+final class ConversationSummarizerAgent implements Agent, BillsUsageToUser, HasStructuredOutput, SummarizesConversation
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
 
     private ?ConversationSummary $previousSummary = null;
 

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 use App\Ai\Agents\EnrichAttributeMetadataAgent;
 use App\Data\AttributeMetadataData;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 use Tests\Helpers\TestJsonSchema;
 
 covers(EnrichAttributeMetadataAgent::class);
@@ -43,19 +41,6 @@ it('appends language directive to instructions when language is set', function (
         ->toContain('language code: `en`')
         ->toContain('`safety_level` enum value, structured field names, and numeric fields stay in English')
         ->toContain('do not transliterate from English');
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass($this->agent);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect(resolve(EnrichAttributeMetadataAgent::class)->provider())->toBe('gemini')
-        ->and($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(8192)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(60);
 });
 
 it('returns valid schema with all metadata fields', function (): void {

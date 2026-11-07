@@ -9,7 +9,6 @@ use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 use App\Services\StreamEventStore;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Messages\MessageRole;
 
@@ -17,10 +16,6 @@ covers(ChatController::class);
 
 beforeEach(function (): void {
     enableBilling();
-    Config::set('plate.ai_usage_preflight', [
-        'token_budget' => ['input' => 2_000, 'output' => 1_000],
-        'fallback_estimate' => 0.01,
-    ]);
 });
 
 it('starts a conversation from a posted message with an image and redirects to the chat page', function (): void {

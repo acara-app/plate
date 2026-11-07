@@ -11,7 +11,6 @@ use App\Data\Ai\AgentModelData;
 use App\Jobs\GenerateConversationTitleJob;
 use App\Models\Conversation;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Decisions;
@@ -83,16 +82,13 @@ final readonly class ProcessAdvisorMessageAction implements ProcessesAdvisorMess
      */
     private function request(string $message, string $conversationId, User $user, array $attachments = [], bool $resume = false): AgentRequest
     {
-        $models = $resume
-            ? resolve(ConfiguredAgentModels::class)->forTurn(Conversation::query()->findOrFail($conversationId)->pausedApprovalTurn(), $user)
-            : resolve(ConfiguredAgentModels::class)->snapshot($user);
-
         return new AgentRequest(
             message: $message,
             images: $attachments,
             conversationId: $conversationId,
-            model: AgentModelData::from($models[AgentRunner::class]),
-            agentModels: $models,
+            model: $resume
+                ? AgentModelData::forTurn(Conversation::query()->findOrFail($conversationId)->pausedApprovalTurn())
+                : AgentModelData::current(),
         );
     }
 

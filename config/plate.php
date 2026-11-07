@@ -60,13 +60,7 @@ return [
 
     'credit_multiplier' => 1_000,
 
-    'ai_usage_preflight' => [
-        'token_budget' => [
-            'input' => 2_000,
-            'output' => 1_000,
-        ],
-        'fallback_estimate' => 0.01,
-    ],
+    'ai_call_estimate_usd' => 0.02,
 
     'ai_allowance' => [
         'free' => ['usd' => 0.50, 'resets' => 'monthly'],

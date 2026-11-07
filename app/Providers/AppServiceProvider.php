@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\OffersSubscriptions;
@@ -21,7 +20,6 @@ use App\Listeners\TrackAiUsage;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
-use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
 use App\Services\Billing\DatabaseFailedPhotoAnalysisResolver;
 use App\Services\Billing\MeteredPhotoAnalyses;
@@ -59,7 +57,6 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->bind(ResolvesAgentModel::class, ConfiguredAgentModels::class);
         $this->app->scoped(AgentModelContext::class);
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
         $this->app->scoped(PhotoPlanCatalog::class);

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Ai\AgentRequest;
-use App\Services\Ai\ConfiguredAgentModels;
+use App\Data\Ai\AgentModelData;
 use Laravel\Ai\Files\Base64Image;
 
 covers(AgentRequest::class);
@@ -26,7 +26,7 @@ it('creates request with all parameters', function (): void {
         images: $images,
         conversationId: 'conv-123',
         streamId: 'stream-123',
-        model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'),
+        model: new AgentModelData('openai', 'gpt-5-mini'),
     );
 
     expect($request->message)->toBe('Hello')
@@ -80,7 +80,7 @@ describe('shouldEnableWebSearch', function (): void {
     it('returns true for GPT-5 models that support web search', function (): void {
         $request = new AgentRequest(
             message: 'Hello',
-            model: resolve(ConfiguredAgentModels::class)->forModel('gpt-5-mini'),
+            model: new AgentModelData('openai', 'gpt-5-mini'),
         );
 
         expect($request->shouldEnableWebSearch())->toBeTrue();
@@ -89,7 +89,7 @@ describe('shouldEnableWebSearch', function (): void {
     it('returns false for Gemini models that do not support web search', function (): void {
         $request = new AgentRequest(
             message: 'Hello',
-            model: resolve(ConfiguredAgentModels::class)->forModel('gemini-3.5-flash'),
+            model: new AgentModelData('gemini', 'gemini-3.5-flash'),
         );
 
         expect($request->shouldEnableWebSearch())->toBeFalse();

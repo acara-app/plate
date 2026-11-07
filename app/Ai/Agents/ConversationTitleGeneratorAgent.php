@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Concerns\UsesConfiguredAgentModel;
-use App\Contracts\Ai\UsesAgentModelProfiles;
+use App\Ai\Concerns\HasUsageUser;
+use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\GeneratesConversationTitle;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
-use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
-#[MaxTokens(1000)]
+#[UseCheapestModel]
+#[MaxTokens(8000)]
 #[Timeout(30)]
-final class ConversationTitleGeneratorAgent implements Agent, GeneratesConversationTitle, HasProviderOptions, HasStructuredOutput, UsesAgentModelProfiles
+final class ConversationTitleGeneratorAgent implements Agent, BillsUsageToUser, GeneratesConversationTitle, HasStructuredOutput
 {
+    use HasUsageUser;
     use Promptable;
-    use UsesConfiguredAgentModel;
 
     private string $language = 'English';
 

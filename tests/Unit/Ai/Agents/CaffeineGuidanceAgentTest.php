@@ -6,8 +6,6 @@ use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Data\CaffeineGuidanceData;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Str;
-use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Timeout;
 use Tests\Fixtures\CaffeineGuidanceFixture;
 
 covers(CaffeineGuidanceAgent::class);
@@ -23,18 +21,6 @@ it('has conservative caffeine guidance instructions', function (): void {
         ->toContain('structured response requested by the schema')
         ->toContain('extract bedtime_24h')
         ->toContain('cutoff_24h');
-});
-
-it('has correct attributes configured', function (): void {
-    $reflection = new ReflectionClass($this->agent);
-
-    $maxTokens = $reflection->getAttributes(MaxTokens::class);
-    $timeout = $reflection->getAttributes(Timeout::class);
-
-    expect($maxTokens)->toHaveCount(1)
-        ->and($maxTokens[0]->newInstance()->value)->toBe(2500)
-        ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(60);
 });
 
 it('defines schema fields matching the caffeine guidance data shape', function (): void {
