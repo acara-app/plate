@@ -35,6 +35,13 @@ it('brings the chosen plan and billing interval back after sign-up', function ()
             ->where('selectedInterval', 'yearly'));
 });
 
+it('sends a returning chat user to log in rather than sign up', function (): void {
+    offerAllSubscriptions();
+    $product = SubscriptionProduct::factory()->create(['price' => 9, 'stripe_price_id' => 'price_test']);
+
+    $this->get(route('checkout.start', ['product' => $product, 'returning' => 1]))->assertRedirect(route('login'));
+});
+
 it('refuses to start checkout for a plan that is not on offer', function (): void {
     $snapPro = SubscriptionProduct::query()->where('name', 'Snap Pro')->sole();
     $snapPro->update(['stripe_price_id' => 'price_snap_pro_monthly']);
