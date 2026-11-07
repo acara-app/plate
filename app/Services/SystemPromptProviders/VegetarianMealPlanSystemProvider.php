@@ -44,7 +44,6 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );

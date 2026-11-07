@@ -51,6 +51,5 @@ it('includes tools usage rules', function (): void {
     $result = $provider->run();
 
     expect($result)
-        ->toContain('TOOLS USAGE RULES')
-        ->and($result)->toContain('file_search');
+        ->toContain('TOOLS USAGE RULES');
 });

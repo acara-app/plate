@@ -26,7 +26,7 @@ final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
                 'DIETITIAN ROLE: Elimination is key. No grains, no legumes, no dairy, no processed oils. Focus on gut health.',
                 'CHEF ROLE: Focus on roasting, grilling, and raw preparations. Let the quality of the meat and produce shine.',
                 'NUTRITIONIST ROLE: Balance energy with '.$targets['protein'].'% Protein and '.$targets['fat'].'% Fat, using fruit/tubers for the '.$targets['carbs'].'% Carbs.',
-                'PANTRY RULE: Use skill guidelines for Paleo-approved foods. Use only whole, single-ingredient foods from the USDA database.',
+                'PANTRY RULE: Use skill guidelines for Paleo-approved foods. Use only whole, single-ingredient foods with standard USDA reference values.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -44,7 +44,6 @@ final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );
