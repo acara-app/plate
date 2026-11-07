@@ -17,16 +17,11 @@ use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Str;
 
 it('recovers the charged meal into the same request after the worker fails before saving its draft', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
-    }
-
     $this->freezeTime();
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
@@ -65,10 +60,6 @@ it('recovers the charged meal into the same request after the worker fails befor
 
 it('releases a timed-out pending scan and rejects its late result without charging the replacement twice', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
-    }
-
     $this->freezeTime();
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
@@ -110,10 +101,6 @@ it('releases a timed-out pending scan and rejects its late result without chargi
 
 it('releases a reservation created after the host request has already failed without calling the provider', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
-    }
-
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
         'plate.enable_premium_upgrades' => true,
@@ -160,10 +147,6 @@ it('releases a reservation created after the host request has already failed wit
 it('preserves the allowance when queued work has too little recovery time remaining', function (): void {
     $this->freezeTime();
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
-    }
-
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
         'plate.enable_premium_upgrades' => true,
@@ -190,10 +173,6 @@ it('preserves the allowance when queued work has too little recovery time remain
 it('releases the allowance when reservation delays leave too little time for provider work', function (): void {
     $this->freezeTime();
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses) {
-        $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
-    }
-
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
         'plate.enable_premium_upgrades' => true,
