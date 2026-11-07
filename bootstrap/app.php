@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Billing\RenderSnapBurstLimit;
+use App\Http\Middleware\EnsureEmailIsVerifiedOrSubscribed;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\IdentifyPhotoGuest;
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'abilities' => CheckAbilities::class,
+            'verified' => EnsureEmailIsVerifiedOrSubscribed::class,
         ]);
 
         $middleware->web(append: [

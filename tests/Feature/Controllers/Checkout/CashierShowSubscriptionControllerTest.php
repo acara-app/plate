@@ -5,10 +5,12 @@ declare(strict_types=1);
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Services\StripeServiceContract;
 use App\Http\Controllers\Checkout\CashierShowSubscriptionController;
+use App\Models\AnalysisDraft;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
 use Laravel\Cashier\Subscription;
 
@@ -331,19 +333,24 @@ it('renders page when user has no active subscription', function (): void {
         ->and($stripeMock->getBillingPortalUrlCalled)->toBeFalse();
 });
 
-it('asks signed-in visitors to verify their email before subscribing', function (?string $visitor, bool $required): void {
-    if ($visitor !== null) {
-        $factory = $visitor === 'unverified' ? User::factory()->unverified() : User::factory();
-        actingAs($factory->create(['stripe_id' => null]));
-    }
+it('continues to the waiting meal only once the paid plan is active', function (bool $subscribed, array $draft, bool $continues, bool $expired): void {
+    $user = $subscribed
+        ? User::factory()->unverified()->has(Subscription::factory()->active(), 'subscriptions')->create(['stripe_id' => 'cus_paid_before_verifying'])
+        : User::factory()->unverified()->create(['stripe_id' => 'cus_paid_before_verifying']);
+    $token = Str::random(64);
+    AnalysisDraft::factory()->create(['token_hash' => AnalysisDraft::hashToken($token), ...$draft]);
 
-    $this->get(route('checkout.subscription'))->assertOk()
+    actingAs($user)
+        ->withSession(['snap_to_track.result' => ['draft' => $token], 'checkout.started' => 'checkout-attempt'])
+        ->get(route('checkout.success'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('requiresEmailVerification', $required));
+            ->where('paymentPending', ! $subscribed)
+            ->where('continueToMeal', $continues)
+            ->where('meal.expired', $expired));
 })->with([
-    'guest' => [null, false],
-    'verified user' => ['verified', false],
-    'unverified user' => ['unverified', true],
+    'plan active and meal still valid' => [true, [], true, false],
+    'payment still being confirmed' => [false, [], false, false],
+    'plan active but meal expired' => [true, ['expires_at' => now()->subMinute()], false, true],
 ]);
 
 it('lets guests view prices without contacting Stripe', function (): void {

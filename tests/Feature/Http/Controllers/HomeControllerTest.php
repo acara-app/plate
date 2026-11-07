@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\HomeController;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Laravel\Cashier\Subscription;
 
 covers(HomeController::class);
 
@@ -25,8 +26,8 @@ it('passes featured foods to the view', function (): void {
     expect($featuredFoods)->toBeInstanceOf(Collection::class);
 });
 
-it('opens the in-app scanner from the hero and the scan card for verified accounts', function (): void {
-    $this->actingAs(User::factory()->create());
+it('opens the in-app scanner from the hero and the scan card for accounts that can use the app', function (User $user): void {
+    $this->actingAs($user);
 
     $response = $this->get(route('home'))
         ->assertOk()
@@ -35,7 +36,12 @@ it('opens the in-app scanner from the hero and the scan card for verified accoun
         ->assertDontSee('"snap_to_track_cta_click"', false);
 
     expect(mb_substr_count((string) $response->getContent(), 'href="'.route('snap-to-track.index').'"'))->toBe(2);
-});
+})->with([
+    'verified account' => fn (): User => User::factory()->create(),
+    'unverified subscriber' => fn (): User => User::factory()->unverified()
+        ->has(Subscription::factory()->active(), 'subscriptions')
+        ->create(),
+]);
 
 it('keeps the free public scanner for guests and unverified accounts', function (bool $signedIn): void {
     if ($signedIn) {

@@ -18,7 +18,7 @@ final readonly class HomeController
 
         return view('welcome', [
             'featuredFoods' => $featuredFoods,
-            'canUseApp' => $request->user()?->hasVerifiedEmail() === true,
+            'canUseApp' => $request->user()?->canUseApp() === true,
         ]);
     }
 }
