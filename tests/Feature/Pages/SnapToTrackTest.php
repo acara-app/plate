@@ -10,12 +10,16 @@ use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
+use App\Enums\PhotoAnalysisStatus;
+use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
+use App\Models\PhotoAnalysisRequest;
 use App\Models\ReferenceFood;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
@@ -52,11 +56,22 @@ function analyzePhotoForSnapToTrack(array $analysis, string $fileName = 'food.jp
     fakeTurnstileForSnapToTrack();
 
     FoodPhotoAnalyzerAgent::fake([$analysis]);
+    Queue::fake([ProcessPhotoAnalysis::class]);
 
-    return Livewire::test('pages::snap-to-track')
+    $component = Livewire::test('pages::snap-to-track')
         ->set('photo', UploadedFile::fake()->image($fileName))
         ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
         ->call('analyze');
+
+    return finishQueuedSnapAnalysis($component);
+}
+
+function finishQueuedSnapAnalysis(Testable $component): Testable
+{
+    Queue::assertPushed(ProcessPhotoAnalysis::class, 1);
+    app()->call([new ProcessPhotoAnalysis(PhotoAnalysisRequest::query()->latest('id')->firstOrFail()->id), 'handle']);
+
+    return $component->call('refreshAnalysis');
 }
 
 function finishDirectUploadForSnapToTrack(Testable $component, UploadedFile $photo): string
@@ -112,14 +127,17 @@ it('validates photo max size', function (): void {
 it('previews and analyzes JPG, PNG and WebP photos', function (string $fileName, string $mimeType): void {
     fakeTurnstileForSnapToTrack();
     FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+    Queue::fake([ProcessPhotoAnalysis::class]);
 
-    Livewire::test('pages::snap-to-track')
+    $component = Livewire::test('pages::snap-to-track')
         ->set('photo', UploadedFile::fake()->image($fileName))
         ->assertHasNoErrors('photo')
         ->assertSee('Food photo preview')
         ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
         ->call('analyze')
-        ->assertRedirect(route('snap-to-track.result'));
+        ->assertNoRedirect();
+
+    finishQueuedSnapAnalysis($component)->assertRedirect(route('snap-to-track.result'));
 
     FoodPhotoAnalyzerAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->attachments->sole()->mimeType() === $mimeType);
 })->with([
@@ -313,6 +331,7 @@ it('displays error when analysis fails', function (): void {
     FoodPhotoAnalyzerAgent::fake(function (): void {
         throw new Exception('AI analysis failed');
     });
+    Queue::fake([ProcessPhotoAnalysis::class]);
 
     $file = UploadedFile::fake()->image('food.jpg');
 
@@ -328,7 +347,14 @@ it('displays error when analysis fails', function (): void {
     $component
         ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
         ->call('analyze')
-        ->assertSet('error', 'Something went wrong. Please try again.')
+        ->assertSet('loading', true);
+
+    Queue::assertPushed(ProcessPhotoAnalysis::class, 1);
+    expect(fn () => app()->call([new ProcessPhotoAnalysis(PhotoAnalysisRequest::query()->sole()->id), 'handle']))
+        ->toThrow(Exception::class, 'AI analysis failed');
+
+    $component->call('refreshAnalysis')
+        ->assertSet('canRetryAnalysis', true)
         ->assertSet('photo', null)
         ->assertNoRedirect();
 
@@ -613,4 +639,98 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
         ->assertSee('Your free scans are complete.')
         ->assertSee('Continue scanning with Starter — $2.99/month')
         ->assertDontSee('Tap to take photo or upload');
+});
+
+it('recovers an accepted scan after losing the response even when the last allowance is reserved', function (): void {
+    Queue::fake([ProcessPhotoAnalysis::class]);
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+    fakeTurnstileForSnapToTrack();
+    stubSnapPhotoAllowance(used: 1);
+
+    $submitted = Livewire::test('pages::snap-to-track')
+        ->set('photo', UploadedFile::fake()->image('meal.jpg'))
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze')
+        ->assertSet('loading', true)
+        ->assertNoRedirect();
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+
+    $requestId = $submitted->instance()->analysisRequestId;
+    stubSnapPhotoAllowance(used: 2);
+    session()->forget('snap_to_track.result');
+
+    Livewire::test('pages::snap-to-track')
+        ->assertSet('analysisRequestId', $requestId)
+        ->assertSet('loading', true)
+        ->assertSee('Your photo is being analyzed')
+        ->assertDontSee('Your free scans are complete.')
+        ->call('analyze');
+
+    app()->call([new ProcessPhotoAnalysis(PhotoAnalysisRequest::query()->sole()->id), 'handle']);
+
+    Livewire::test('pages::snap-to-track')
+        ->assertSet('hasRecoverableResult', true)
+        ->assertNoRedirect()
+        ->call('refreshAnalysis')
+        ->assertRedirect(route('snap-to-track.result'));
+
+    Queue::assertPushed(ProcessPhotoAnalysis::class, 1);
+    expect(PhotoAnalysisRequest::query()->count())->toBe(1)
+        ->and(AnalysisDraft::query()->count())->toBe(1)
+        ->and(session('snap_to_track.result.request_id'))->toBe($requestId);
+});
+
+it('does not expose an account scan to another account sharing its guest identity', function (): void {
+    $owner = User::factory()->create();
+    $other = User::factory()->create();
+    $guestId = (string) Str::uuid();
+    session()->put('snap_to_track.analysis_guest_id', $guestId);
+    PhotoAnalysisRequest::factory()->create([
+        'user_id' => $owner->id,
+        'guest_id' => $guestId,
+        'guest_hash' => hash('sha256', $guestId),
+    ]);
+
+    $this->actingAs($other);
+    Livewire::test('pages::snap-to-track')
+        ->assertSet('analysisRequestId', null)
+        ->assertSet('loading', false)
+        ->assertSet('hasRecoverableResult', false)
+        ->assertDontSee('Your photo is being analyzed');
+});
+
+it('does not offer an already saved draft as a recoverable analysis', function (): void {
+    analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
+    AnalysisDraft::query()->sole()->update(['consumed_at' => now()]);
+
+    Livewire::test('pages::snap-to-track')
+        ->assertSet('hasRecoverableResult', false)
+        ->assertDontSee('Your previous analysis is ready.')
+        ->assertSee('Tap to take photo or upload');
+});
+
+it('resumes one retry after losing its response without requiring another upload', function (): void {
+    Queue::fake([ProcessPhotoAnalysis::class]);
+    $guestId = (string) Str::uuid();
+    session()->put('snap_to_track.analysis_guest_id', $guestId);
+    $failed = PhotoAnalysisRequest::factory()->create([
+        'guest_id' => $guestId,
+        'guest_hash' => hash('sha256', $guestId),
+        'status' => PhotoAnalysisStatus::Failed,
+        'failure_code' => 'provider_error',
+    ]);
+
+    $first = Livewire::test('pages::snap-to-track')->assertSet('canRetryAnalysis', true);
+    $lostResponse = Livewire::test('pages::snap-to-track');
+    $first->call('retryAnalysis')->assertSet('loading', true);
+    exhaustSnapToTrackAnalysisLimit();
+
+    $lostResponse->call('retryAnalysis')
+        ->assertSet('loading', true)
+        ->assertSet('analysisRequestId', $first->instance()->analysisRequestId)
+        ->assertSet('photo', null);
+
+    Queue::assertPushed(ProcessPhotoAnalysis::class, 1);
+    expect(PhotoAnalysisRequest::query()->count())->toBe(2)
+        ->and($failed->refresh()->retry_request_id)->toBe($first->instance()->analysisRequestId);
 });
