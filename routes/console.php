@@ -6,10 +6,13 @@ use App\Console\Commands\AggregateHealthDailyCommand;
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
 use App\Console\Commands\PurgeDeletedUserDataCommand;
 use App\Console\Commands\PurgeExpiredConversationsCommand;
+use App\Models\PhotoAnalysisRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('model:prune')->daily();
+
+Schedule::command('model:prune', ['--model' => [PhotoAnalysisRequest::class]])->hourly()->withoutOverlapping();
 
 Schedule::command(PurgeExpiredConversationsCommand::class)->hourly()->withoutOverlapping();
 

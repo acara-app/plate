@@ -63,7 +63,7 @@ it('has correct attributes configured', function (): void {
     expect($maxTokens)->toHaveCount(1)
         ->and($maxTokens[0]->newInstance()->value)->toBe(35000)
         ->and($timeout)->toHaveCount(1)
-        ->and($timeout[0]->newInstance()->value)->toBe(120);
+        ->and($timeout[0]->newInstance()->value)->toBe(60);
 });
 
 it('analyzes food photo and returns analysis data', function (): void {

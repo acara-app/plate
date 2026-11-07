@@ -31,11 +31,11 @@ final readonly class AnalyzeFoodPhotoAction
 
         return resolve(ManagesPhotoAnalyses::class)->analyze(
             $context,
-            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user),
+            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user, $context->requestId),
         );
     }
 
-    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?User $user = null): FoodAnalysisData
+    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?User $user = null, ?string $requestId = null): FoodAnalysisData
     {
         $agent = $this->agent->usingModel($model, $user);
 
@@ -43,13 +43,29 @@ final readonly class AnalyzeFoodPhotoAction
             $agent->withLanguage($language, $languageCode);
         }
 
-        $analysis = $agent->analyze($imageBase64, $mimeType);
+        $startedAt = microtime(true);
+        try {
+            $analysis = $agent->analyze($imageBase64, $mimeType);
+        } finally {
+            Log::info('food_photo_provider_finished', [
+                'request_id' => $requestId,
+                'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            ]);
+        }
 
         if (! $this->lookupEnabled()) {
             return $analysis;
         }
 
-        return $this->enrichWithReferenceData($analysis);
+        $startedAt = microtime(true);
+        try {
+            return $this->enrichWithReferenceData($analysis);
+        } finally {
+            Log::info('food_photo_enrichment_finished', [
+                'request_id' => $requestId,
+                'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
+            ]);
+        }
     }
 
     private function enrichWithReferenceData(FoodAnalysisData $analysis): FoodAnalysisData
