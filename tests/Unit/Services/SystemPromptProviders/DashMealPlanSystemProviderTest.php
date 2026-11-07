@@ -16,7 +16,6 @@ it('returns a system prompt string with DASH diet content', function (): void {
         ->and($result)->toContain('Hypertension Specialist')
         ->and($result)->toContain('Sodium')
         ->and($result)->toContain('Potassium')
-        ->and($result)->toContain('USDA')
         ->and($result)->toContain('IDENTITY AND PURPOSE');
 });
 
@@ -52,5 +51,6 @@ it('includes tools usage rules', function (): void {
     $result = $provider->run();
 
     expect($result)
-        ->toContain('TOOLS USAGE RULES');
+        ->toContain('TOOLS USAGE RULES')
+        ->not->toContain('file_search');
 });

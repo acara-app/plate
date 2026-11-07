@@ -15,7 +15,6 @@ it('returns a system prompt string with Paleo diet content', function (): void {
         ->and($result)->toContain('Evolutionary Biologist')
         ->and($result)->toContain('Farm-to-Table Chef')
         ->and($result)->toContain('Elimination')
-        ->and($result)->toContain('USDA')
         ->and($result)->toContain('IDENTITY AND PURPOSE');
 });
 
@@ -51,5 +50,6 @@ it('includes tools usage rules', function (): void {
     $result = $provider->run();
 
     expect($result)
-        ->toContain('TOOLS USAGE RULES');
+        ->toContain('TOOLS USAGE RULES')
+        ->not->toContain('file_search');
 });

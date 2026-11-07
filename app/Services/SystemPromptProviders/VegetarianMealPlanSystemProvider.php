@@ -26,7 +26,7 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
                 'DIETITIAN ROLE: No flesh foods (Meat/Fish). Use Eggs and Dairy strategically to boost protein quality.',
                 'CHEF ROLE: Create diverse, colorful plates. Use cheese and eggs to add richness that vegan diets often lack.',
                 'NUTRITIONIST ROLE: Hit '.$targets['carbs'].'% Carbs / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat by balancing produce with dairy/eggs.',
-                'PANTRY RULE: Use skill guidelines for Vegetarian-approved foods. Use USDA data to ensure ingredients are meat-free but nutrient-dense.',
+                'PANTRY RULE: Use skill guidelines for Vegetarian-approved foods. Ensure ingredients are meat-free but nutrient-dense.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -35,7 +35,7 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
                 '3. CHEF: Use whole grains for nuttiness and texture.',
                 '4. NUTRITIONIST: Calculate the macro balance to prevent excessive Saturated Fat from the dairy.',
                 '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "vegetarian", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Compile the structured meal plan using USDA data.',
+                '6. TEAM: Compile the structured meal plan.',
             ],
             output: [
                 'Return the structured response requested by the schema.',

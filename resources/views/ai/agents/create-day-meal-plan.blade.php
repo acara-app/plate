@@ -364,9 +364,8 @@ Return the requested structured meal plan fields. The schema controls the exact 
 3. Ensure daily totals approach the target calories ({{ $context->dailyCalorieTarget ?? $context->tdee ?? 2000 }} calories)
 4. Match macronutrient ratios ({{ $context->macronutrientRatios->protein }}% protein, {{ $context->macronutrientRatios->carbs }}% carbs, {{ $context->macronutrientRatios->fat }}% fat)
 5. All numeric fields MUST be numbers, not strings
-6. Include USDA nutritional calculations in meal descriptions or preparation_instructions if helpful
 @if($previousDaysContext)
-7. **VARIETY**: Create different meals than those listed in the "Previous Days' Meals" section above
+6. **VARIETY**: Create different meals than those listed in the "Previous Days' Meals" section above
 @endif
 
 **RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.**

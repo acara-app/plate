@@ -34,7 +34,7 @@ final readonly class MediterraneanMealPlanSystemProvider implements SystemPrompt
                 '2. CHEF: Create a coherent dish using Mediterranean ingredients (e.g., Pan-Seared Scallops with Roasted Asparagus).',
                 '3. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "mediterranean", "reference_name": "med-diet-nutrient-score-card"} to fetch detailed nutrient data for verification.',
                 '4. DIETITIAN: Verify that the fiber count is high using the nutrient score card data.',
-                '5. NUTRITIONIST: Use USDA data to calculate the olive oil and side ingredients to hit the '.$targets['fat'].'% Fat target.',
+                '5. NUTRITIONIST: Use standard nutrition reference values to calculate the olive oil and side ingredients to hit the '.$targets['fat'].'% Fat target.',
                 '6. TEAM: Generate the structured response using exact ingredient names.',
             ],
             output: [
