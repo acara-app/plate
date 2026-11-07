@@ -389,7 +389,8 @@ it('renders the seo definition block', function (): void {
 it('renders authority and freshness signals', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('AI vision analysis')
-        ->assertSee('USDA-aligned nutrition references')
+        ->assertSee('Informed by standard nutrition references')
+        ->assertSee('These are AI estimates, not database lookups.')
         ->assertSee('Last updated:');
 });
 
@@ -427,7 +428,8 @@ it('validates turnstile token before generating a temporary upload URL', functio
     Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('_startUpload', 'photo', [['name' => 'food.jpg', 'size' => 1024, 'type' => 'image/jpeg']], false)
-        ->assertHasErrors(['turnstileToken']);
+        ->assertHasErrors(['turnstileToken'])
+        ->assertDispatched('upload:errored', name: 'photo');
 });
 
 it('blocks temporary upload URL generation once the upload limit is exhausted', function (): void {
@@ -442,7 +444,8 @@ it('blocks temporary upload URL generation once the upload limit is exhausted', 
     Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('_startUpload', 'photo', [['name' => 'food.jpg', 'size' => 1024, 'type' => 'image/jpeg']], false)
-        ->assertHasErrors(['photo']);
+        ->assertHasErrors(['photo'])
+        ->assertDispatched('upload:errored', name: 'photo');
 });
 
 it('configures Livewire temporary uploads for photo-only hourly throttling', function (): void {
@@ -632,7 +635,7 @@ it('recovers an accepted scan after losing the response even when the last allow
     Livewire::test('pages::snap-to-track')
         ->assertSet('analysisRequestId', $requestId)
         ->assertSet('loading', true)
-        ->assertSee('Your photo is being analyzed')
+        ->assertSee('Analyzing your meal')
         ->assertDontSee('Your free scans are complete.')
         ->call('analyze');
 
@@ -640,6 +643,7 @@ it('recovers an accepted scan after losing the response even when the last allow
 
     Livewire::test('pages::snap-to-track')
         ->assertSet('hasRecoverableResult', true)
+        ->assertSee('Your last scan is ready')
         ->assertNoRedirect()
         ->call('refreshAnalysis')
         ->assertRedirect(route('snap-to-track.result'));
@@ -666,7 +670,7 @@ it('does not expose an account scan to another account sharing its guest identit
         ->assertSet('analysisRequestId', null)
         ->assertSet('loading', false)
         ->assertSet('hasRecoverableResult', false)
-        ->assertDontSee('Your photo is being analyzed');
+        ->assertDontSee('Analyzing your meal');
 });
 
 it('analyzes the selected photo when a different scan is pending in another tab', function (PhotoAnalysisStatus $pendingStatus): void {
@@ -715,7 +719,7 @@ it('does not offer an already saved draft as a recoverable analysis', function (
 
     Livewire::test('pages::snap-to-track')
         ->assertSet('hasRecoverableResult', false)
-        ->assertDontSee('Your previous analysis is ready.')
+        ->assertDontSee('Your last scan is ready')
         ->assertSee('Tap to take photo or upload');
 });
 
