@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Actions\StartPhotoAnalysis;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoEntitlement;
 use App\Data\FoodAnalysisData;
 use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
@@ -13,6 +15,7 @@ use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
 use App\Services\Billing\NullFailedPhotoAnalysisResolver;
+use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\DB;
@@ -257,4 +260,36 @@ it('keeps the retry child recoverable when queue dispatch fails after its outer 
     expect($retry->status)->toBe(PhotoAnalysisStatus::Failed)
         ->and($retry->failure_code)->toBe('dispatch_failed')
         ->and($retry->image_base64)->not->toBeNull();
+});
+
+it('does not call the provider when the host analysis fails before the manager starts', function (): void {
+    $request = PhotoAnalysisRequest::factory()->create();
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class($request) implements ManagesPhotoAnalyses
+    {
+        public function __construct(private PhotoAnalysisRequest $request) {}
+
+        public function enabled(): bool
+        {
+            return false;
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return new PhotoEntitlement;
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            $this->request->markFailed('timeout');
+
+            return new NullPhotoAnalyses()->analyze($context, $analyze);
+        }
+    });
+
+    expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
+        ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and(AnalysisDraft::query()->count())->toBe(0);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
 });

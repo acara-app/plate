@@ -66,7 +66,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
                 return;
             }
 
-            $result = $analyze->handle($base64, $request->mime_type, context: $context);
+            $result = $analyze->handle($base64, $request->mime_type, context: $context, analysisRequestId: $request->id);
 
             if ($result->items->count() === 0) {
                 $request->markFailed('no_food');
