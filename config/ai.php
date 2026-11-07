@@ -235,6 +235,13 @@ return [
         'gemini' => [
             'driver' => 'gemini',
             'key' => env('GEMINI_API_KEY'),
+            'models' => [
+                'text' => [
+                    'default' => 'gemini-3.6-flash',
+                    'cheapest' => 'gemini-3.1-flash-lite',
+                    'smartest' => 'gemini-3.6-flash',
+                ],
+            ],
         ],
 
         'groq' => [

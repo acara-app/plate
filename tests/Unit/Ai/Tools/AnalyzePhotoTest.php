@@ -4,6 +4,12 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Ai\Tools\AnalyzePhoto;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoEntitlement;
+use App\Data\Billing\PhotoOffer;
+use App\Data\FoodAnalysisData;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
@@ -53,6 +59,33 @@ it('analyzes food photo and returns structured data', function (): void {
         ->and($result['total_calories'])->toBe(165)
         ->and($result)->toHaveKey('items')
         ->and($result['items'])->toHaveCount(1);
+});
+
+it('tells the model the free scans are used up instead of failing the chat turn', function (): void {
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+    {
+        public function enabled(): bool
+        {
+            return true;
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return new PhotoEntitlement;
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            throw new PhotoLimitExceeded(new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial', canUpgrade: true, offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99')));
+        }
+    });
+
+    $tool = new AnalyzePhoto([new Base64Image(base64_encode('fake-image-data'), 'image/jpeg')]);
+
+    expect(json_decode($tool->handle(new Request(['query' => 'What is this?'])), true))->toBe([
+        'error' => 'Your free photo scans have been used. Choose a plan to analyze another photo.',
+        'upgrade' => ['plan' => 'Starter', 'price' => '$2.99/month', 'url' => route('checkout.start', ['product' => 7])],
+    ]);
 });
 
 it('has a schema with query parameter', function (): void {

@@ -7,7 +7,9 @@ namespace App\Ai\Tools;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Data\Billing\PhotoOffer;
 use App\Enums\DataSensitivity;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
@@ -59,13 +61,17 @@ final readonly class AnalyzePhoto implements Tool
             ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
         }
 
-        $analysis = resolve(AnalyzeFoodPhotoAction::class)->handle(
-            $image->base64,
-            $image->mime ?? 'image/jpeg',
-            $language,
-            $languageCode,
-            new PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
-        );
+        try {
+            $analysis = resolve(AnalyzeFoodPhotoAction::class)->handle(
+                $image->base64,
+                $image->mime ?? 'image/jpeg',
+                $language,
+                $languageCode,
+                new PhotoAnalysisContext($user, null, $this->requestId, 'chat', hash('sha256', $image->base64)),
+            );
+        } catch (PhotoLimitExceeded $photoLimitExceeded) {
+            return (string) json_encode($this->limitReached($photoLimitExceeded));
+        }
 
         return (string) json_encode($analysis->toArray());
     }
@@ -79,6 +85,27 @@ final readonly class AnalyzePhoto implements Tool
             'query' => $schema->string()
                 ->description('Optional context about what the user wants to know about the photo (e.g., "How many calories?", "Is this healthy?"). Defaults to general food analysis.')
                 ->required(),
+        ];
+    }
+
+    /**
+     * @return array{error: string, upgrade?: array{plan: string, price: string, url: string}}
+     */
+    private function limitReached(PhotoLimitExceeded $exception): array
+    {
+        $offer = $exception->entitlement->canUpgrade ? $exception->entitlement->offer : null;
+
+        if (! $offer instanceof PhotoOffer) {
+            return ['error' => $exception->getMessage()];
+        }
+
+        return [
+            'error' => $exception->getMessage(),
+            'upgrade' => [
+                'plan' => $offer->name,
+                'price' => $offer->formattedPrice.'/month',
+                'url' => route('checkout.start', ['product' => $offer->productId]),
+            ],
         ];
     }
 }
