@@ -96,14 +96,13 @@ class extends Component
         return DailyNutritionGoalsData::forCalories(self::REFERENCE_DAILY_CALORIES, DietType::Balanced);
     }
 
-    public function save(string $intent, SnapFunnel $funnel, string $placement = 'meal'): void
+    public function save(string $intent, SnapFunnel $funnel): void
     {
         if ($this->draftToken === null || ! in_array($intent, ['register', 'login'], true)) {
             return;
         }
 
-        $placement = in_array($placement, ['meal', 'result', 'result_bar', 'header'], true) ? $placement : 'meal';
-        $funnel->record(SnapFunnelStage::SaveClicked, $this->resultKey(), ['auth_path' => $intent, 'placement' => $placement]);
+        $funnel->record(SnapFunnelStage::SaveClicked, $this->resultKey(), ['auth_path' => $intent]);
 
         $reviewUrl = route('snap-to-track.review', ['draft' => $this->draftToken], absolute: false);
 
@@ -171,7 +170,7 @@ class extends Component
             @if ($analysis !== null)
                 <button
                     type="button"
-                    wire:click="save('login', 'header')"
+                    wire:click="save('login')"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade"
                     class="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-medium outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
@@ -213,7 +212,7 @@ class extends Component
             x-data="{
                 at: new Date(@js($analyzedAt ?? now()->toIso8601String())),
                 photo: window.acaraRecallSnapPhoto?.(@js($analysisRequestId)) ?? null,
-                actionsOnScreen: { meal: false, offer: false },
+                actionsOnScreen: { meal: true, offer: false },
                 get mealType() {
                     const hour = this.at.getHours();
 
@@ -332,11 +331,7 @@ class extends Component
 
             <section id="meal-result" aria-labelledby="meal-result-heading" class="flex scroll-mt-20 flex-col gap-3">
                 <h2 id="meal-result-heading" class="text-xl font-semibold tracking-tight">Your meal</h2>
-                <article
-                    x-intersect:enter="actionsOnScreen.meal = true"
-                    x-intersect:leave="actionsOnScreen.meal = false"
-                    class="flex flex-col overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-primary/30"
-                >
+                <article class="flex flex-col overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-primary/30">
                     <div class="flex min-h-28">
                         <div class="relative w-28 shrink-0 overflow-hidden sm:w-32">
                             <template x-if="photo">
@@ -391,7 +386,9 @@ class extends Component
                             Preview · not saved yet
                         </p>
                         <x-snap-result.button
-                            wire:click="save('register', 'meal')"
+                            x-intersect:enter.margin.-56px.0.-120px.0="actionsOnScreen.meal = true"
+                            x-intersect:leave.margin.-56px.0.-120px.0="actionsOnScreen.meal = false"
+                            wire:click="save('register')"
                             wire:loading.attr="disabled"
                             wire:target="save,upgrade"
                             x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal' })"
@@ -401,7 +398,7 @@ class extends Component
                         <p class="text-sm text-muted-foreground">Saving is free. You’ll create an account or log in next, then check the portions before the meal goes into your food log.</p>
                         <button
                             type="button"
-                            wire:click="save('login', 'meal')"
+                            wire:click="save('login')"
                             wire:loading.attr="disabled"
                             wire:target="save,upgrade"
                             class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
@@ -438,7 +435,11 @@ class extends Component
                 </p>
             </section>
 
-            <x-snap-result.offer :allowance="$photoAllowance" />
+            <x-snap-result.offer
+                :allowance="$photoAllowance"
+                x-intersect:enter.margin.-56px.0.-120px.0="actionsOnScreen.offer = true"
+                x-intersect:leave.margin.-56px.0.-120px.0="actionsOnScreen.offer = false"
+            />
 
             <p class="text-xs text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 
@@ -452,10 +453,11 @@ class extends Component
             <div
                 x-show="! actionsOnScreen.meal && ! actionsOnScreen.offer"
                 x-transition.opacity.duration.150ms
+                style="display: none;"
                 class="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-1 border-t border-border/60 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden"
             >
                 <x-snap-result.button
-                    wire:click="save('register', 'result_bar')"
+                    wire:click="save('register')"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade"
                     x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"

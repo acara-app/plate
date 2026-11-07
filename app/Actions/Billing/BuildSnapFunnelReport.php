@@ -45,7 +45,7 @@ final readonly class BuildSnapFunnelReport
 
     /** @var list<string> */
     private const array HISTORY = [
-        '2026-11-07: the guest result page added a Save button to the meal card, and its mobile action bar now leads with saving, with the plan offer as a link beneath it. Save clicks record their placement from this date.',
+        '2026-11-07: the guest result page added a Save button to the meal card, and its mobile action bar now leads with saving, with the plan offer as a link beneath it. Umami save clicks carry a placement from this date.',
         '2026-11-04: guest results moved to /tools/snap-to-track/result, so Umami result and offer counts before and after this date come from different pages.',
         '2026-10-24: Umami events changed meaning. snap_to_track_upload_click became snap_to_track_upload_selected (a photo was chosen), snap_to_track_payment_verified became snap_to_track_checkout_returned (a browser return, not a payment), result and offer views became on-screen and de-duplicated, offer and upgrade events dropped the exhausted property, and save clicks stopped also sending snap_to_track_auth_started. Umami totals across this date are not comparable.',
     ];

@@ -65,11 +65,15 @@ it('shows the daily overview first, then the meal estimate with its Save action'
             'Daily calories',
             'a general reference, not goals calculated for you',
             'Your meal',
+            'Grilled chicken breast, Steamed rice',
+            '490 kcal',
             'AI estimate',
             'Save this meal',
             'Saving is free',
+            'Already have an account? Log in',
             '1 breast (170g)',
             'never dose insulin',
+            'Analyze another photo',
         ]);
 
     expect(AnalysisDraft::query()->sole()->user_id)->toBeNull();
@@ -159,6 +163,8 @@ it('offers the plan and its price after the meal and its Save action', function 
         ->assertSeeInOrder([
             'Save this meal',
             'Keep tracking with Starter — US$2.99/month',
+            'Renews monthly. Cancel anytime.',
+            'Not now — save this meal free',
             'Or keep tracking with Starter · US$2.99/month',
         ]);
 });

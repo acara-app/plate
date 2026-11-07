@@ -34,7 +34,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Analysis failed | `snap_to_track_analysis_failed` | The analysis ended without a usable result (`no_food`, `timeout`, `provider_error`, `start_failed`, …). Error state. |
 | Result viewed | `snap_to_track_result_viewed` | The guest result page showed an unexpired, unsaved meal. |
 | Offer viewed | `snap_to_track_offer_viewed` | A paid plan offer was on screen: `result`, `result_bar` (mobile action bar) or `wall` (scan limit). Clicking it also counts as seeing it. |
-| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). `placement` is `meal` (the meal card), `result` (the plan offer), `result_bar` (mobile action bar) or `header`. Recorded before the page navigates away. |
+| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). Recorded before the page navigates away. |
 | Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. |
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
@@ -82,7 +82,7 @@ These are listed beside the funnel, not inside it:
 
 ## What Umami still shows
 
-Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links. Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
+Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links, and names the button in `placement`: `meal` (the meal card), `result` (the plan offer) or `result_bar` (mobile action bar). Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
 
 ## Recording a change
 

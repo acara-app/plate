@@ -9,9 +9,8 @@
 @if ($offer !== null)
     <section
         aria-labelledby="result-offer-heading"
+        x-data
         x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed('result')"
-        x-intersect:enter="actionsOnScreen.offer = true"
-        x-intersect:leave="actionsOnScreen.offer = false"
         class="flex flex-col gap-5 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-border/60 sm:p-6"
     >
         <div class="flex flex-col gap-2">
@@ -45,7 +44,7 @@
             @endforeach
         </ul>
 
-        <div class="flex flex-col gap-2">
+        <div {{ $attributes->class(['flex flex-col gap-2']) }}>
             <x-snap-result.button
                 class="whitespace-normal"
                 wire:click="upgrade('result')"
@@ -61,7 +60,7 @@
         <div class="flex justify-center border-t border-border/60 pt-4 text-sm">
             <button
                 type="button"
-                wire:click="save('register', 'result')"
+                wire:click="save('register')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade"
                 x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result' })"
