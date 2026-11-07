@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Billing;
 
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Enums\PhotoPlan;
 use App\Models\SubscriptionProduct;
-use App\Services\Ai\ConfiguredAgentModels;
 use Illuminate\Database\Eloquent\Builder;
-use InvalidArgumentException;
 
 final class PhotoPlanCatalog
 {
@@ -22,18 +19,7 @@ final class PhotoPlanCatalog
 
     public function isSelling(): bool
     {
-        return $this->selling ??= $this->stripe->isConfigured() && $this->hasReadyPaidModel() && $this->product() instanceof SubscriptionProduct;
-    }
-
-    public function hasReadyPaidModel(): bool
-    {
-        try {
-            $model = resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class, 'paid');
-
-            return $model->supports('vision') && $model->supports('structured_output');
-        } catch (InvalidArgumentException) {
-            return false;
-        }
+        return $this->selling ??= $this->stripe->isConfigured() && $this->product() instanceof SubscriptionProduct;
     }
 
     public function product(?string $name = null): ?SubscriptionProduct

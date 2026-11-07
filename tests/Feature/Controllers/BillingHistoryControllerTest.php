@@ -2,133 +2,41 @@
 
 declare(strict_types=1);
 
-use App\Enums\SubscriptionTier;
 use App\Http\Controllers\BillingHistoryController;
-use App\Models\SubscriptionProduct;
+use App\Models\AiUsage;
 use App\Models\User;
 use Laravel\Cashier\Subscription;
 
 covers(BillingHistoryController::class);
 
 beforeEach(function (): void {
-    enableBilling();
-
-    SubscriptionProduct::factory()->create([
-        'name' => 'Basic',
-        'stripe_price_id' => 'price_basic_monthly',
-        'yearly_stripe_price_id' => 'price_basic_yearly',
-    ]);
-
-    SubscriptionProduct::factory()->create([
-        'name' => 'Plus',
-        'stripe_price_id' => 'price_plus_monthly',
-        'yearly_stripe_price_id' => 'price_plus_yearly',
-    ]);
+    $this->withoutVite();
 });
 
-it('renders billing history page', function (): void {
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    $this->withoutVite();
+it("shows a paying member today's AI allowance", function (): void {
+    sellPhotoPlans();
+    $user = User::factory()->create(['stripe_id' => 'cus_test_latest']);
+    Subscription::factory()->for($user)->active()->withPrice('price_starter')->create();
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.25]);
 
     $this->actingAs($user)
         ->get(route('billing.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
             ->component('billing/index')
-            ->where('aiUsage.tier', SubscriptionTier::Free->value)
-            ->where('aiUsage.tier_label', 'Free')
-            ->where('aiUsage.premium_enforcement_active', true)
-            ->where('aiUsage.payment_pending', false));
+            ->where('hasStripeCustomer', true)
+            ->where('aiAllowance.tier', 'starter')
+            ->where('aiAllowance.resets', 'daily')
+            ->where('aiAllowance.percentage', 50));
 });
 
-it('shows subscription management for users with a stripe customer', function (): void {
-    $user = User::factory()->create(['stripe_id' => 'cus_test_latest']);
-
-    $this->withoutVite();
-
-    $this->actingAs($user)
-        ->get(route('billing.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('hasStripeCustomer', true));
-});
-
-it('hides subscription management for users without a stripe customer', function (): void {
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    $this->withoutVite();
-
-    $this->actingAs($user)
-        ->get(route('billing.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('hasStripeCustomer', false));
-});
-
-it('handles exception when fetching invoices', function (): void {
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    $this->withoutVite();
-
-    $response = $this->actingAs($user)
-        ->get(route('billing.index'));
-
-    $response->assertOk();
-});
-
-it('shows the resolved tier limits for a Basic subscriber', function (): void {
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    Subscription::factory()
-        ->for($user)
-        ->active()
-        ->withPrice('price_basic_monthly')
-        ->create();
-
-    $this->withoutVite();
-
-    $this->actingAs($user)
-        ->get(route('billing.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('aiUsage.tier', SubscriptionTier::Basic->value)
-            ->where('aiUsage.tier_label', 'Supporter')
-            ->where('aiUsage.rolling.limit', 1500)
-            ->where('aiUsage.weekly.limit', 6000));
-});
-
-it("does not leak another user's subscription tier into the response", function (): void {
-    $basicUser = User::factory()->create(['stripe_id' => null]);
-    Subscription::factory()
-        ->for($basicUser)
-        ->active()
-        ->withPrice('price_basic_monthly')
-        ->create();
-
-    $freeUser = User::factory()->create(['stripe_id' => null]);
-
-    $this->withoutVite();
-
-    $this->actingAs($freeUser)
-        ->get(route('billing.index'))
-        ->assertOk()
-        ->assertInertia(fn ($page) => $page
-            ->where('aiUsage.tier', SubscriptionTier::Free->value)
-            ->where('aiUsage.rolling.limit', 400));
-});
-
-it('flags self-host mode by setting premium_enforcement_active to false', function (): void {
+it('has no allowance on a self-hosted install without billing', function (): void {
     disableBilling();
 
-    $user = User::factory()->create(['stripe_id' => null]);
-
-    $this->withoutVite();
-
-    $this->actingAs($user)
+    $this->actingAs(User::factory()->create(['stripe_id' => null]))
         ->get(route('billing.index'))
         ->assertOk()
         ->assertInertia(fn ($page) => $page
-            ->where('aiUsage.premium_enforcement_active', false)
-            ->where('aiUsage.tier', SubscriptionTier::Free->value));
+            ->where('hasStripeCustomer', false)
+            ->where('aiAllowance', null));
 });

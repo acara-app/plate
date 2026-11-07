@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Actions\Billing\ResolveSnapBurstCap;
 use App\Contracts\Ai\ResolvesAgentModel;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\OffersSubscriptions;
-use App\Contracts\Billing\ProvidesAiBudget;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Contracts\Memory\DispatchesMemoryExtraction;
@@ -23,11 +21,10 @@ use App\Listeners\TrackAiUsage;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
+use App\Services\Ai\ConfiguredAgentModels;
 use App\Services\Ai\PlateConversationStore;
-use App\Services\Ai\SubscriptionAgentModels;
 use App\Services\Billing\DatabaseFailedPhotoAnalysisResolver;
 use App\Services\Billing\MeteredPhotoAnalyses;
-use App\Services\Billing\MonthlyAiBudget;
 use App\Services\Billing\NullPhotoPreview;
 use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\PhotoPlanOffers;
@@ -62,10 +59,9 @@ final class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->scoped(ResolvesAgentModel::class, SubscriptionAgentModels::class);
+        $this->app->bind(ResolvesAgentModel::class, ConfiguredAgentModels::class);
         $this->app->scoped(AgentModelContext::class);
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
-        $this->app->bind(ProvidesAiBudget::class, MonthlyAiBudget::class);
         $this->app->scoped(PhotoPlanCatalog::class);
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
         $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
@@ -101,14 +97,7 @@ final class AppServiceProvider extends ServiceProvider
 
     private function bootRateLimiters(): void
     {
-        RateLimiter::for(ResolveSnapBurstCap::LIMITER, function (Request $request): Limit {
-            $user = $request->user();
-            $burstCap = resolve(ResolveSnapBurstCap::class);
-
-            return Limit::perHour($burstCap->handle($user))
-                ->by(ResolveSnapBurstCap::keyFor($user, $request->ip()));
-        });
-
+        RateLimiter::for('photo-scans', fn (Request $request): Limit => Limit::perMinute(20)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
         RateLimiter::for('checkout', fn (Request $request): Limit => Limit::perMinute(10)->by($request->user()?->getAuthIdentifier() ?? $request->ip()));
     }
 

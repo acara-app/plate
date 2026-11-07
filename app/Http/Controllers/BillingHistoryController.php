@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\GetAiUsageForBillingAction;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Contracts\Billing\ProvidesAiBudget;
 use App\Data\Billing\PhotoAnalysisContext;
 use Exception;
 use Illuminate\Http\Request;
@@ -17,7 +16,7 @@ use Laravel\Cashier\Invoice;
 final readonly class BillingHistoryController
 {
     public function __construct(
-        private GetAiUsageForBillingAction $getAiUsageForBilling,
+        private ResolveAiAllowance $resolveAiAllowance,
     ) {}
 
     public function index(Request $request): Response
@@ -25,8 +24,7 @@ final readonly class BillingHistoryController
         $user = $request->user();
 
         $billingHistory = [];
-        $aiUsage = null;
-        $monthlyBudget = null;
+        $aiAllowance = null;
 
         if ($user !== null) {
             try {
@@ -44,15 +42,13 @@ final readonly class BillingHistoryController
                 $billingHistory = [];
             }
 
-            $aiUsage = $this->getAiUsageForBilling->handle($user);
-            $monthlyBudget = resolve(ProvidesAiBudget::class)->forUser($user)?->toArray();
+            $aiAllowance = $this->resolveAiAllowance->handle($user)?->toArray();
         }
 
         return Inertia::render('billing/index', [
             'photoAllowance' => resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request))->toArray(),
-            'monthlyBudget' => $monthlyBudget,
             'billingHistory' => $billingHistory,
-            'aiUsage' => $aiUsage,
+            'aiAllowance' => $aiAllowance,
             'hasStripeCustomer' => ($user?->stripe_id) !== null,
         ]);
     }

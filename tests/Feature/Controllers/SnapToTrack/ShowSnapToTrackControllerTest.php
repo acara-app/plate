@@ -35,12 +35,14 @@ it('renders the scanner without a saved meal confirmation from an older session'
             ->missing('savedDate'));
 });
 
-it('discards a stale credit warning when another scan is allowed', function (): void {
+it('shows a signed-in scanner their AI allowance', function (): void {
+    enableBilling();
+
     actingAs($this->user)
-        ->withSession(['snap_to_track_credit_limit' => ['tier' => 'free', 'limit_credits' => 400, 'current_credits' => 401, 'resets_in' => '3 hours 10 minutes']])
         ->get(route('snap-to-track.index'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->where('creditLimit', null));
+            ->where('aiAllowance.exhausted', false)
+            ->where('aiAllowance.resets', 'monthly'));
 });
 
 it('completes the auth funnel when a limit-recovery signup lands on the module', function (): void {

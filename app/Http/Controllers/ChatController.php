@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\Billing\BuildCreditWarning;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Actions\BuildConversationMessagesAction;
 use App\Actions\DeleteConversationHistory;
 use App\Actions\GetOrCreateConversationAction;
@@ -33,7 +33,7 @@ final readonly class ChatController
         #[CurrentUser] private User $user,
         private BuildConversationMessagesAction $messagesAction,
         private GetOrCreateConversationAction $conversationAction,
-        private BuildCreditWarning $buildCreditWarning,
+        private ResolveAiAllowance $resolveAiAllowance,
         private DeleteConversationHistory $deleteConversationHistory,
         private StartChatStream $startChatStream,
         private PinConversation $pinConversation,
@@ -68,9 +68,7 @@ final readonly class ChatController
             'initialPrompt' => $request->initialPrompt(),
             'autoSendInitialPrompt' => $request->shouldAutoSendPrompt(),
             'initialStreaming' => $conversation->hasPendingChatStream(),
-            'creditWarning' => $this->buildCreditWarning
-                ->currentState($this->user)
-                ?->toArray(),
+            'aiAllowance' => $this->resolveAiAllowance->handle($this->user)?->toArray(),
         ]);
     }
 

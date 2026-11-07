@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\MealResponseData;
 use App\Enums\DietType;
 use App\Enums\MealPlanGenerationStatus;
-use App\Enums\SubscriptionTier;
 use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -25,7 +23,6 @@ final readonly class ShowMealPlansController
 {
     public function __construct(
         #[CurrentUser] private User $user,
-        private ResolvesUserTier $tierResolver,
     ) {}
 
     public function __invoke(Request $request): Response
@@ -37,10 +34,6 @@ final readonly class ShowMealPlansController
         $userDietType = ($this->user->profile->calculated_diet_type ?? DietType::Balanced)->value;
         $dietTypes = DietType::toArray();
 
-        $entitlement = $this->tierResolver->resolve($this->user);
-        $proModelUpsell = $entitlement->premiumEnforcementActive
-            && $entitlement->tier !== SubscriptionTier::Plus;
-
         if (! $mealPlan) {
             return Inertia::render('meal-plans/show', [
                 'mealPlan' => null,
@@ -48,7 +41,6 @@ final readonly class ShowMealPlansController
                 'navigation' => null,
                 'userDietType' => $userDietType,
                 'dietTypes' => $dietTypes,
-                'proModelUpsell' => $proModelUpsell,
             ]);
         }
 
@@ -133,7 +125,6 @@ final readonly class ShowMealPlansController
             'navigation' => $navigation,
             'userDietType' => $userDietType,
             'dietTypes' => $dietTypes,
-            'proModelUpsell' => $proModelUpsell,
         ]);
     }
 

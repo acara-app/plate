@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Billing\ResolveSnapBurstCap;
 use App\Models\MobileSyncDevice;
 use App\Models\UserChatPlatformLink;
 use Database\Factories\MobileSyncDeviceFactory;
@@ -16,7 +15,6 @@ arch()->preset()->security()->ignoring([
     UserChatPlatformLink::class,
     MobileSyncDeviceFactory::class,
     MobileSyncDevice::class,
-    ResolveSnapBurstCap::class,
 ]);
 
 arch('controllers')

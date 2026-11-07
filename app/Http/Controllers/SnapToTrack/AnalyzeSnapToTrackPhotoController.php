@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Controllers\SnapToTrack;
 
 use App\Actions\AnalyzeFoodPhotoAction;
-use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Actions\LogAnalyzedMeal;
 use App\Actions\StoreMealPhotoAction;
-use App\Ai\Agents\FoodPhotoAnalyzerAgent;
-use App\Contracts\Ai\ResolvesAgentModel;
-use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
@@ -32,7 +28,6 @@ final readonly class AnalyzeSnapToTrackPhotoController
     public function __construct(
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
-        private EnforceAiUsageLimit $enforceAiUsageLimit,
         private StoreMealPhotoAction $storeMealPhoto,
         private LogAnalyzedMeal $logAnalyzedMeal,
         #[CurrentUser()] private User $currentUser,
@@ -44,29 +39,6 @@ final readonly class AnalyzeSnapToTrackPhotoController
 
         if (! $photo instanceof UploadedFile) {
             return back()->withErrors(['photo' => __('Please select a photo to analyze.')]);
-        }
-
-        try {
-            if (! resolve(ManagesPhotoAnalyses::class)->entitlement($this->currentUser, null)->enabled) {
-                $this->enforceAiUsageLimit->handle(
-                    $this->currentUser,
-                    resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $request->user()),
-                );
-            }
-        } catch (UsageLimitExceededException $usageLimitExceededException) {
-            $this->deleteUploadedPhoto($photo);
-
-            Inertia::flash('analytics', [
-                'name' => 'snap_to_track_limit_reached',
-                'properties' => [
-                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                    'gate' => 'credits',
-                    'tier' => $usageLimitExceededException->tier->value,
-                ],
-            ]);
-
-            return to_route('snap-to-track.index')
-                ->with('snap_to_track_credit_limit', $usageLimitExceededException->toPayload());
         }
 
         try {
@@ -84,6 +56,17 @@ final readonly class AnalyzeSnapToTrackPhotoController
             );
         } catch (PhotoLimitExceeded $exception) {
             return to_route('snap-to-track.index')->withErrors(['photo' => $exception->getMessage()]);
+        } catch (UsageLimitExceededException $exception) {
+            Inertia::flash('analytics', [
+                'name' => 'snap_to_track_limit_reached',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'gate' => 'credits',
+                    'tier' => $exception->allowance->tier->value,
+                ],
+            ]);
+
+            return to_route('snap-to-track.index')->withErrors(['photo' => $exception->userMessage()]);
         } catch (Throwable $throwable) {
             report($throwable);
 

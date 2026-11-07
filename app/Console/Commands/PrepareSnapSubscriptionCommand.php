@@ -44,7 +44,7 @@ final class PrepareSnapSubscriptionCommand extends Command
             $product->update(['stripe_price_id' => $priceId]);
         }
 
-        $this->info("{$plan->productName()} prepared. Sales require a valid paid photo model, Stripe configuration, and a purchasable product.");
+        $this->info("{$plan->productName()} prepared. Sales require Stripe configuration and a purchasable product.");
 
         return self::SUCCESS;
     }

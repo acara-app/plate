@@ -110,19 +110,18 @@ it('freezes the resolved models when a chat turn is queued', function (): void {
 
 it('restores model ownership and profiles after a failed delegated run', function (): void {
     config()->set('ai.agent_profiles.'.NutritionSpecialist::class.'.standard', 'gemini-3.6-flash');
-    config()->set('ai.agent_profiles.'.NutritionSpecialist::class.'.paid', 'gpt-6.1-sol');
 
     $user = User::factory()->create();
     $other = User::factory()->create();
     $context = resolve(AgentModelContext::class);
     $models = resolve(ConfiguredAgentModels::class);
     $snapshot = $models->snapshot($user);
-    $snapshot[NutritionSpecialist::class] = $models->forAgent(NutritionSpecialist::class, 'paid')->toArray();
-    NutritionSpecialist::fake(['paid response', 'other response', 'standard response']);
+    $snapshot[NutritionSpecialist::class] = $models->forModel('gpt-6.1-sol')->toArray();
+    NutritionSpecialist::fake(['delegated response', 'other response', 'standard response']);
 
     try {
         $context->run($user, $snapshot, function () use ($other): void {
-            resolve(NutritionSpecialist::class)->prompt('paid task');
+            resolve(NutritionSpecialist::class)->prompt('delegated task');
             resolve(NutritionSpecialist::class)->forModelUser($other)->prompt('other task');
             throw new RuntimeException('failed task');
         });
@@ -132,7 +131,7 @@ it('restores model ownership and profiles after a failed delegated run', functio
 
     resolve(NutritionSpecialist::class)->prompt('standard task');
 
-    NutritionSpecialist::assertPrompted(fn ($prompt): bool => $prompt->prompt === 'paid task' && $prompt->model === 'gpt-6.1-sol');
+    NutritionSpecialist::assertPrompted(fn ($prompt): bool => $prompt->prompt === 'delegated task' && $prompt->model === 'gpt-6.1-sol');
     NutritionSpecialist::assertPrompted(fn ($prompt): bool => $prompt->prompt === 'other task' && $prompt->model === 'gemini-3.6-flash');
     NutritionSpecialist::assertPrompted(fn ($prompt): bool => $prompt->prompt === 'standard task' && $prompt->model === 'gemini-3.6-flash');
     expect($context->user())->toBeNull();
@@ -314,11 +313,8 @@ it('records the turn models on a telegram reply that pauses for approval', funct
 it('ships a registered, capable and priced model for every agent profile', function (): void {
     $models = resolve(ConfiguredAgentModels::class);
 
-    foreach (config()->array('ai.agent_profiles') as $agentClass => $profiles) {
-        expect(is_a($agentClass, UsesAgentModelProfiles::class, true))->toBeTrue();
-
-        foreach (array_keys($profiles) as $profile) {
-            expect($models->forAgent($agentClass, $profile)->pricing['input'])->toBeGreaterThan(0);
-        }
+    foreach (array_keys(config()->array('ai.agent_profiles')) as $agentClass) {
+        expect(is_a($agentClass, UsesAgentModelProfiles::class, true))->toBeTrue()
+            ->and($models->forAgent($agentClass)->pricing['input'])->toBeGreaterThan(0);
     }
 });

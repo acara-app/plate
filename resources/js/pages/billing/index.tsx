@@ -2,7 +2,7 @@ import {
     PhotoAllowanceCard,
     type PhotoAllowance,
 } from '@/components/photo-allowance';
-import { type BreadcrumbItem } from '@/types';
+import { type AiAllowance, type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
@@ -10,7 +10,8 @@ import { useTranslation } from 'react-i18next';
 import HeadingSmall from '@/components/heading-small';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { UsageWidget } from '@/components/usage-widget';
+import { AiAllowanceBar } from '@/components/billing/ai-allowance';
+import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import billing from '@/routes/billing';
@@ -24,28 +25,10 @@ interface Invoice {
     download_url: string;
 }
 
-interface AiUsageData {
-    current: number;
-    limit: number;
-    percentage: number;
-    resets_in: string;
-    over_limit: boolean;
-}
-
-interface AiUsage {
-    tier: 'free' | 'basic' | 'plus' | 'snap';
-    tier_label: string;
-    payment_pending: boolean;
-    premium_enforcement_active: boolean;
-    rolling: AiUsageData;
-    weekly: AiUsageData;
-}
-
 interface Props {
     photoAllowance?: PhotoAllowance;
-    monthlyBudget?: { used: number; limit: number; resets_at: string } | null;
     billingHistory: Invoice[];
-    aiUsage?: AiUsage;
+    aiAllowance?: AiAllowance | null;
     hasStripeCustomer?: boolean;
 }
 
@@ -58,14 +41,14 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
 
 export default function Index({
     billingHistory,
-    aiUsage,
+    aiAllowance,
     photoAllowance,
-    monthlyBudget,
     hasStripeCustomer,
 }: Props) {
     const { t } = useTranslation('common');
 
-    const showTierBadge = aiUsage?.premium_enforcement_active === true;
+    const { entitlement } = useSharedProps();
+    const showTierBadge = entitlement?.premium_enforcement_active === true;
 
     return (
         <AppLayout breadcrumbs={getBreadcrumbs(t)}>
@@ -74,61 +57,30 @@ export default function Index({
             <SettingsLayout>
                 <div className="space-y-6">
                     <PhotoAllowanceCard allowance={photoAllowance} />
-                    {monthlyBudget && (
-                        <p className="text-sm text-muted-foreground">
-                            Other AI:{' '}
-                            {Math.max(
-                                0,
-                                Math.round(
-                                    (1 -
-                                        monthlyBudget.used /
-                                            monthlyBudget.limit) *
-                                        100,
-                                ),
-                            )}
-                            % of your monthly allowance remains. Photo scans
-                            have a separate allowance.
-                        </p>
-                    )}
                     <HeadingSmall
                         title={t('billing.title')}
                         description={t('billing.description')}
                     />
 
-                    {aiUsage && !monthlyBudget && (
+                    {showTierBadge && (
                         <div className="space-y-4">
-                            {showTierBadge && (
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="text-xs font-medium text-muted-foreground">
-                                        {t('billing.tier.current_plan')}
-                                    </span>
-                                    <Badge variant="secondary">
-                                        {aiUsage.tier_label}
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-xs font-medium text-muted-foreground">
+                                    {t('billing.tier.current_plan')}
+                                </span>
+                                <Badge variant="secondary">
+                                    {entitlement?.tier_label}
+                                </Badge>
+                                {entitlement?.payment_pending && (
+                                    <Badge variant="destructive">
+                                        {t('billing.tier.payment_pending')}
                                     </Badge>
-                                    {aiUsage.payment_pending && (
-                                        <Badge variant="destructive">
-                                            {t('billing.tier.payment_pending')}
-                                        </Badge>
-                                    )}
-                                </div>
-                            )}
-
-                            <div className="grid gap-4 sm:grid-cols-2">
-                                <UsageWidget
-                                    title={t('billing.usage.rolling')}
-                                    currentAmount={aiUsage.rolling.current}
-                                    limit={aiUsage.rolling.limit}
-                                    resetsIn={aiUsage.rolling.resets_in}
-                                    overLimit={aiUsage.rolling.over_limit}
-                                />
-                                <UsageWidget
-                                    title={t('billing.usage.weekly')}
-                                    currentAmount={aiUsage.weekly.current}
-                                    limit={aiUsage.weekly.limit}
-                                    resetsIn={aiUsage.weekly.resets_in}
-                                    overLimit={aiUsage.weekly.over_limit}
-                                />
+                                )}
                             </div>
+
+                            {aiAllowance && aiAllowance.tier !== 'free' && (
+                                <AiAllowanceBar allowance={aiAllowance} />
+                            )}
                         </div>
                     )}
 

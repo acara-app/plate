@@ -9,25 +9,11 @@ export interface Entitlement {
 }
 
 export type SubscriptionTier = 'free' | 'starter' | 'snap' | 'basic' | 'plus';
-export type PaidSubscriptionTier = Exclude<SubscriptionTier, 'free'>;
-export type LimitType = 'rolling' | 'weekly' | 'monthly';
-
-export interface CreditWarning {
-    limit_type: LimitType;
+export interface AiAllowance {
     tier: SubscriptionTier;
-    tier_label: string;
-    current_credits: number;
-    limit_credits: number;
-    percentage: number;
+    resets: 'daily' | 'monthly';
     resets_at: string;
-    resets_in: string;
-}
-
-export interface PaywallCapTrigger {
-    kind: 'cap';
-    limitType: LimitType;
-    currentTier: SubscriptionTier;
-    currentCredits: number;
-    limitCredits: number;
-    resetsIn: string;
+    percentage: number;
+    exhausted: boolean;
+    can_upgrade: boolean;
 }

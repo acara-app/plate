@@ -136,7 +136,7 @@ Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(
         ->group(function (): void {
             Route::get('/', Web\SnapToTrack\ShowSnapToTrackController::class)->name('index');
             Route::post('analyze', Web\SnapToTrack\AnalyzeSnapToTrackPhotoController::class)
-                ->middleware('throttle:snap-to-track-analyze')
+                ->middleware('throttle:photo-scans')
                 ->name('analyze');
             Route::get('save/{draft}', Web\SnapToTrack\SaveSnapToTrackMealController::class)->name('save');
             Route::post('save/{draft}/photo', Web\SnapToTrack\StoreSnapToTrackPhotoController::class)->name('save.photo');

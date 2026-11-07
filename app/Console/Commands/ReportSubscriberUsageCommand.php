@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
-use App\Actions\GetAiUsageForBillingAction;
+use App\Actions\Billing\ResolveAiAllowance;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
+use App\Data\Billing\AiAllowance;
 use App\Models\AiUsage;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
@@ -16,12 +17,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Laravel\Cashier\Subscription;
 
-#[Description('Report paid subscribers with their daily and weekly AI usage, photo scans, and new subscriptions')]
+#[Description('Report paid subscribers with their AI allowance usage, photo scans, and new subscriptions')]
 #[Signature('billing:usage-report
         {--days=7 : How many days of photo scans and new subscriptions to include}')]
 final class ReportSubscriberUsageCommand extends Command
 {
-    public function handle(GetAiUsageForBillingAction $usage): int
+    public function handle(ResolveAiAllowance $allowances): int
     {
         $days = max(1, (int) $this->option('days'));
         $since = now()->subDays($days);
@@ -45,19 +46,18 @@ final class ReportSubscriberUsageCommand extends Command
                 continue;
             }
 
-            $snapshot = $usage->handle($user);
+            $allowance = $allowances->handle($user);
             $rows[] = [
                 $user->id,
                 $planOf($subscription),
                 $subscription->created_at?->toDateString() ?? '—',
-                $snapshot['rolling']['current'].' / '.$snapshot['rolling']['limit'],
-                $snapshot['weekly']['current'].' / '.$snapshot['weekly']['limit'],
+                $allowance instanceof AiAllowance ? sprintf('$%.2f / $%.2f (%d%%)', $allowance->used, $allowance->limit, $allowance->percentage) : '—',
                 $this->photoScans($user, today()),
                 $this->photoScans($user, $since),
             ];
         }
 
-        $this->table(['User', 'Plan', 'Since', 'Daily credits (24h)', 'Weekly credits', 'Scans today', sprintf('Scans %dd', $days)], $rows);
+        $this->table(['User', 'Plan', 'Since', 'AI allowance used', 'Scans today', sprintf('Scans %dd', $days)], $rows);
 
         $activeByPlan = $active->countBy($planOf);
         $newByPlan = $new->countBy($planOf);

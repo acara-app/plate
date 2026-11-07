@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Actions\Billing\BuildCreditWarning;
 use App\Actions\Billing\EnforceAiUsageLimit;
 use App\Ai\AgentBuilder;
 use App\Ai\AgentRequest;
@@ -47,19 +46,6 @@ it('does not gate the meal planner when billing is off', function (): void {
     $response->assertRedirect();
 
     expect($user->mealPlans()->count())->toBe(1);
-});
-
-it('does not gate the meal planner UI when billing is off', function (): void {
-    $user = User::factory()->create();
-
-    $response = $this->actingAs($user)->get(route('meal-plans.index'));
-
-    $response->assertSuccessful()
-        ->assertInertia(fn ($page) => $page
-            ->where('proModelUpsell', false)
-            ->where('entitlement.premium_enforcement_active', false)
-            ->where('entitlement.tier', 'free')
-        );
 });
 
 it('lets the AnalyzePhoto tool run for free users when billing is off', function (): void {
@@ -116,19 +102,6 @@ it('returns no 402 from chat stream preflight when billing is off', function ():
     ]);
 
     expect($response->getStatusCode())->toBe(202);
-});
-
-it('returns null from BuildCreditWarning when billing is off', function (): void {
-    $user = User::factory()->create();
-
-    AiUsage::factory()->create([
-        'user_id' => $user->id,
-        'cost' => 10.0,
-    ]);
-
-    $warning = resolve(BuildCreditWarning::class)->currentState($user);
-
-    expect($warning)->toBeNull();
 });
 
 it('resolves an unrestricted entitlement even with an incomplete subscription when billing is off', function (): void {

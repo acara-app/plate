@@ -52,7 +52,6 @@
             <p class="text-center text-xs text-muted-foreground">{{ __('common.photo_plans.offer.terms') }}</p>
         </div>
 
-        <x-photo-plan-limits :limits="$offer->limits" />
 
         <div class="flex justify-center border-t border-border/60 pt-4 text-sm">
             <button
