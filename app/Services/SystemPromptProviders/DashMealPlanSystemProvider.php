@@ -26,7 +26,7 @@ final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
                 'DIETITIAN ROLE: Lower blood pressure. Your enemies are Sodium and Saturated Fat. Your allies are Potassium and Magnesium.',
                 'CHEF ROLE: Flavor without Salt. Use citrus, vinegar, spices, and heat to make low-sodium food taste exciting.',
                 'NUTRITIONIST ROLE: Hit the '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat targets using whole grains and fruits.',
-                'PANTRY RULE: Use skill guidelines for DASH-approved foods. Use USDA data to verify low sodium content in every ingredient.',
+                'PANTRY RULE: Use skill guidelines for DASH-approved foods. Use standard nutrition reference values to keep sodium low in every ingredient.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -35,7 +35,7 @@ final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
                 '3. CHEF: Use yogurt or low-fat dairy to add creaminess without the saturated fat.',
                 '4. NUTRITIONIST: Verify calcium and magnesium levels are adequate in the daily total.',
                 '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "dash", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Create the structured response using accurate USDA metrics.',
+                '6. TEAM: Create the structured response using standard nutrition reference values.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +44,6 @@ final readonly class DashMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );

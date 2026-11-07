@@ -16,7 +16,6 @@ it('returns a system prompt string with Balanced diet content', function (): voi
         ->and($result)->toContain('Dietitian')
         ->and($result)->toContain('Home Cook Chef')
         ->and($result)->toContain('MyPlate')
-        ->and($result)->toContain('USDA')
         ->and($result)->toContain('IDENTITY AND PURPOSE');
 });
 
@@ -53,5 +52,5 @@ it('includes tools usage rules', function (): void {
 
     expect($result)
         ->toContain('TOOLS USAGE RULES')
-        ->and($result)->toContain('file_search');
+        ->not->toContain('file_search');
 });

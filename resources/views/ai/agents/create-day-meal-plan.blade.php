@@ -240,19 +240,12 @@ The user is taking the following medications. Consider potential food-drug inter
 - No glucose monitoring data available for this user
 @endif
 
-## Available Ingredients
-
-You have access to a comprehensive database of USDA-verified whole food nutrition data from FoodData Central. This database contains:
-- **Foundation Foods**: Nutrient profiles for common whole foods (fruits, vegetables, proteins, grains, dairy)
-- **Branded Products**: Nutritional information for thousands of packaged food products
-- **Nutritional Details**: Complete macronutrient, micronutrient, and calorie information
+## Ingredients and Nutrition Values
 
 **CRITICAL**: When selecting ingredients and calculating nutritional values:
-- Use the file search tool to query the FoodData Central database for accurate nutrition data
-- Verify calorie and macronutrient values for each ingredient before including in meal plans
-- Prioritize whole, minimally processed foods from the Foundation Foods dataset
-- For branded products, use actual product data when available
-- Cross-reference all nutritional calculations with the database to ensure accuracy
+- Use standard nutrition reference values (such as USDA FoodData Central) for every ingredient
+- Check the calorie and macronutrient values of each ingredient before including it in the meal plan
+- Prioritize whole, minimally processed foods
 
 @if($prompt)
 ## User's Custom Instructions
@@ -276,7 +269,7 @@ Create a comprehensive and personalized single-day meal plan that:
 5. **Achieves goals**: Support the user's primary goal of {{ $context->goal ?? 'maintaining health' }}
 6. **Provides variety**: Include diverse meals — avoid repeating meals from previous days
 7. **Is practical**: Use common ingredients and reasonable preparation times
-8. **Uses verified data**: Leverage the FoodData Central database to ensure accurate nutritional information
+8. **Uses realistic nutrition values**: Base calories and macros on standard nutrition references such as USDA FoodData Central
 
 For Day {{ $dayNumber }}, provide:
 - **Breakfast** (with estimated calories and macros)
@@ -371,10 +364,8 @@ Return the requested structured meal plan fields. The schema controls the exact 
 3. Ensure daily totals approach the target calories ({{ $context->dailyCalorieTarget ?? $context->tdee ?? 2000 }} calories)
 4. Match macronutrient ratios ({{ $context->macronutrientRatios->protein }}% protein, {{ $context->macronutrientRatios->carbs }}% carbs, {{ $context->macronutrientRatios->fat }}% fat)
 5. All numeric fields MUST be numbers, not strings
-6. Include USDA nutritional calculations in meal descriptions or preparation_instructions if helpful
-7. Use only ingredients found in the FoodData Central database
 @if($previousDaysContext)
-8. **VARIETY**: Create different meals than those listed in the "Previous Days' Meals" section above
+6. **VARIETY**: Create different meals than those listed in the "Previous Days' Meals" section above
 @endif
 
 **RETURN ONLY THE JSON OBJECT. NO OTHER TEXT.**

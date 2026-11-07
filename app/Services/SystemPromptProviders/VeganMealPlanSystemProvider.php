@@ -26,7 +26,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 'DIETITIAN ROLE: Ensure "Complete Proteins" by combining legumes and grains. Watch out for Iron and B12 deficiencies.',
                 'CHEF ROLE: Transform plants into hearty meals. Use roasting, fermenting, and spices to create "meaty" satisfaction (Umami).',
                 'NUTRITIONIST ROLE: Manage the '.$targets['carbs'].'% Carb / '.$targets['protein'].'% Protein / '.$targets['fat'].'% Fat split without letting the meal become just "bread and pasta."',
-                'PANTRY RULE: Use skill guidelines for Vegan-approved foods. Strictly no animal products. Use USDA data to find high-protein plants.',
+                'PANTRY RULE: Use skill guidelines for Vegan-approved foods. Strictly no animal products. Favor high-protein plants.',
             ],
             context: $skillContent ? [$skillContent] : [],
             steps: [
@@ -35,7 +35,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 '3. CHEF: Use nuts/seeds for texture and essential fats.',
                 '4. NUTRITIONIST: Verify that the total protein count meets the daily requirement despite lower bioavailability.',
                 '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "vegan", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Generate the structured plan using USDA verified plant ingredients.',
+                '6. TEAM: Generate the structured plan using whole plant ingredients.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +44,6 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
             ],
             toolsUsage: [
-                'Use the file_search tool to find USDA nutritional data for ingredients',
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
             ],
         );

@@ -61,7 +61,7 @@
 
                 <h3>How does AI meal planning work?</h3>
                 <p>
-                    Acara Plate uses AI to analyze your complete health profile (age, weight, height, activity level, dietary preferences, health conditions) and generates personalized meal plans. The system considers USDA-verified food data, your restrictions, and continuously learns from your feedback to improve recommendations.
+                    Acara Plate uses AI to analyze your complete health profile (age, weight, height, activity level, dietary preferences, health conditions) and generates personalized meal plans. The system considers standard nutrition references, your restrictions, and continuously learns from your feedback to improve recommendations.
                 </p>
 
                 <h3>Can I use this with my diabetes medication?</h3>
@@ -76,7 +76,7 @@
 
                 <h3>How accurate is the nutrition data?</h3>
                 <p>
-                    It depends on the feature. Meal planning and the food database are grounded in USDA FoodData Central reference data. Photo-based meal analysis works differently: those values are AI-generated estimates, not database lookups, and they come with real limitations. We explain exactly how that works — and where it fails — on our <a href="{{ route('ai-accuracy') }}">AI Accuracy &amp; Limitations</a> page.
+                    Meal plan and photo nutrition values are AI-generated estimates based on standard nutrition references such as USDA FoodData Central. They are not database lookups, and they come with real limitations. We explain exactly how that works — and where it fails — on our <a href="{{ route('ai-accuracy') }}">AI Accuracy &amp; Limitations</a> page.
                 </p>
 
                 <h3>Can I export my health data?</h3>
