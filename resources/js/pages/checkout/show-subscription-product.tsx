@@ -164,40 +164,43 @@ export default function CashierSubscription({
         <Layout breadcrumbs={getBreadcrumbs(t)}>
             <Head title={t('checkout_subscription.title')} />
 
-            <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
                 <div className="space-y-8">
                     {paymentPending && (
                         <div className="space-y-2">
                             <PaymentConfirmation />
                             {meal?.review_url && (
                                 <p className="text-sm text-muted-foreground">
-                                    Your meal preview is kept. We’ll open it as
-                                    soon as your plan is active.
+                                    {t('photo_plans.checkout.pending_meal')}
                                 </p>
                             )}
                         </div>
                     )}
                     {planActive && (
                         <div role="status" className="rounded-lg border p-4">
-                            Your plan is active.{' '}
+                            {t('photo_plans.checkout.active')}{' '}
                             {meal?.review_url ? (
                                 <Link
                                     href={meal.review_url}
                                     className="underline"
                                 >
-                                    Review and save your meal
+                                    {t('photo_plans.checkout.review')}
                                 </Link>
                             ) : (
                                 <>
                                     {meal?.expired &&
-                                        'Meal previews last 60 minutes, and this one has expired. '}
+                                        t('photo_plans.checkout.expired')}{' '}
                                     <Link
                                         href={ShowSnapToTrackController()}
                                         className="underline"
                                     >
                                         {meal?.expired
-                                            ? 'Scan your meal again'
-                                            : 'Continue scanning'}
+                                            ? t(
+                                                  'photo_plans.checkout.try_another',
+                                              )
+                                            : t(
+                                                  'photo_plans.checkout.continue_scanning',
+                                              )}
                                     </Link>
                                 </>
                             )}
@@ -210,25 +213,36 @@ export default function CashierSubscription({
                         >
                             {checkoutCancelled && (
                                 <p className="text-sm text-muted-foreground">
-                                    Checkout was cancelled, so you haven’t been
-                                    charged.
+                                    {t('photo_plans.checkout.cancelled')}
                                 </p>
                             )}
                             <h2
                                 id="selected-plan-heading"
                                 className="text-lg font-semibold"
                             >
-                                Continue with {selectedPlan.name}
+                                {t('photo_plans.checkout.continue', {
+                                    name: selectedPlan.name,
+                                })}
                             </h2>
                             <p className="text-2xl font-bold">
                                 {selectedInterval === 'yearly'
-                                    ? `${selectedPlan.formatted_yearly_price}/year`
-                                    : `${selectedPlan.formatted_price}/month`}
+                                    ? `${selectedPlan.formatted_yearly_price}${t('checkout_subscription.per_year')}`
+                                    : `${selectedPlan.formatted_price}${t('checkout_subscription.per_month')}`}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                Pay securely with Stripe. Renews{' '}
-                                {selectedInterval}. Cancel anytime.
+                                {t(
+                                    `photo_plans.checkout.${selectedInterval}_terms`,
+                                    {
+                                        price:
+                                            selectedInterval === 'yearly'
+                                                ? selectedPlan.formatted_yearly_price
+                                                : selectedPlan.formatted_price,
+                                    },
+                                )}
                             </p>
+                            <PhotoPlanLimitsDetails
+                                limits={selectedPlan.photo_limits}
+                            />
                             <Button
                                 onClick={() =>
                                     handleSubscribe(
@@ -237,11 +251,11 @@ export default function CashierSubscription({
                                     )
                                 }
                                 disabled={isSubscribing}
-                                className="w-full sm:w-auto"
+                                className="h-auto min-h-11 w-full whitespace-normal sm:w-auto"
                             >
                                 {isSubscribing
                                     ? t('checkout_subscription.processing')
-                                    : 'Continue to payment'}
+                                    : t('photo_plans.checkout.pay')}
                             </Button>
                             {meal?.review_url &&
                                 (emailVerified ? (
@@ -249,18 +263,18 @@ export default function CashierSubscription({
                                         href={meal.review_url}
                                         className="block text-sm underline"
                                     >
-                                        Back to your meal
+                                        {t('photo_plans.checkout.back_meal')}
                                     </Link>
                                 ) : (
                                     <p className="text-sm text-muted-foreground">
-                                        Not ready to pay?{' '}
                                         <Link
                                             href={meal.review_url}
                                             className="underline"
                                         >
-                                            Save your meal free
-                                        </Link>{' '}
-                                        after verifying your email.
+                                            {t(
+                                                'photo_plans.checkout.verify_save',
+                                            )}
+                                        </Link>
                                     </p>
                                 ))}
                         </section>
@@ -311,7 +325,7 @@ export default function CashierSubscription({
                                     )}
                                 </h2>
                             </div>
-                            <div className="px-6 py-6">
+                            <div className="p-4 sm:p-6">
                                 <div className="mb-6 flex items-start justify-between">
                                     <div>
                                         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
@@ -416,14 +430,6 @@ export default function CashierSubscription({
                         allowance={photoAllowance}
                         showUpgrade={false}
                     />
-                    {photoAllowance?.offer && (
-                        <p className="text-sm text-muted-foreground">
-                            {photoAllowance.offer.name} renews at{' '}
-                            {photoAllowance.offer.formatted_price} every month
-                            and unlocks every Acara feature with daily and
-                            weekly limits. Cancel anytime from billing settings.
-                        </p>
-                    )}
                     {photoPlan && (
                         <PhotoPlanBand
                             plan={photoPlan}
@@ -495,7 +501,7 @@ export default function CashierSubscription({
                                 )}
                             </div>
                         </div>
-                        <div className="px-6 py-6">
+                        <div className="p-4 sm:p-6">
                             <div
                                 className={clsx(
                                     'grid grid-cols-1 gap-6',
@@ -508,7 +514,7 @@ export default function CashierSubscription({
                                     <div
                                         key={product.id}
                                         className={clsx(
-                                            'relative flex flex-col rounded-lg border p-6 transition-shadow hover:shadow-lg',
+                                            'relative flex min-w-0 flex-col rounded-lg border p-4 wrap-break-word transition-shadow hover:shadow-lg sm:p-6',
                                             product.popular
                                                 ? 'border-blue-500 shadow-lg ring-2 ring-blue-500 dark:border-blue-400 dark:ring-blue-400'
                                                 : 'border-gray-200 dark:border-gray-700',
@@ -530,7 +536,9 @@ export default function CashierSubscription({
                                                 {selectedProductId ===
                                                     product.id && (
                                                     <span className="block text-sm text-muted-foreground">
-                                                        Your selected plan
+                                                        {t(
+                                                            'photo_plans.checkout.selected',
+                                                        )}
                                                     </span>
                                                 )}
                                             </h3>
@@ -547,6 +555,12 @@ export default function CashierSubscription({
                                                                 'checkout_subscription.contact_us',
                                                             )}
                                                         </div>
+                                                    </div>
+                                                ) : product.price === 0 ? (
+                                                    <div className="text-3xl font-bold">
+                                                        {t(
+                                                            'photo_plans.free.price',
+                                                        )}
                                                     </div>
                                                 ) : billingInterval ===
                                                   'monthly' ? (
@@ -618,7 +632,7 @@ export default function CashierSubscription({
                                                     <Button
                                                         asChild
                                                         variant="outline"
-                                                        className="w-full"
+                                                        className="h-auto min-h-11 w-full whitespace-normal"
                                                     >
                                                         <a href={support().url}>
                                                             {t(
@@ -634,7 +648,7 @@ export default function CashierSubscription({
                                                         <Button
                                                             asChild
                                                             variant="outline"
-                                                            className="w-full"
+                                                            className="h-auto min-h-11 w-full whitespace-normal"
                                                         >
                                                             <a
                                                                 href={
@@ -642,27 +656,32 @@ export default function CashierSubscription({
                                                                         .url
                                                                 }
                                                             >
-                                                                Try your free
-                                                                scan
+                                                                {t(
+                                                                    'photo_plans.free.try',
+                                                                )}
                                                             </a>
                                                         </Button>
                                                     ) : (
                                                         <Button
                                                             disabled
                                                             variant="outline"
-                                                            className="w-full"
+                                                            className="h-auto min-h-11 w-full whitespace-normal"
                                                         >
                                                             {photoAllowance.mode ===
                                                             'premium'
-                                                                ? 'Premium active'
-                                                                : 'Trial scan used'}
+                                                                ? t(
+                                                                      'photo_plans.checkout.premium_active',
+                                                                  )
+                                                                : t(
+                                                                      'photo_plans.free.used',
+                                                                  )}
                                                         </Button>
                                                     )
                                                 ) : product.price === 0 ? (
                                                     <Button
                                                         disabled
                                                         variant="outline"
-                                                        className="w-full"
+                                                        className="h-auto min-h-11 w-full whitespace-normal"
                                                     >
                                                         {currentSubscription
                                                             ? t(
@@ -687,7 +706,7 @@ export default function CashierSubscription({
                                                                     ? !product.stripe_price_id
                                                                     : !product.yearly_stripe_price_id)
                                                             }
-                                                            className="w-full"
+                                                            className="h-auto min-h-11 w-full whitespace-normal"
                                                             variant={
                                                                 product.popular
                                                                     ? 'default'
@@ -698,18 +717,30 @@ export default function CashierSubscription({
                                                                 ? t(
                                                                       'checkout_subscription.processing',
                                                                   )
-                                                                : photoAllowance
-                                                                        ?.offer
-                                                                        ?.product_id ===
-                                                                    product.id
-                                                                  ? isGuest
-                                                                      ? 'Create an account to subscribe'
-                                                                      : `Subscribe — ${photoAllowance.offer.formatted_price}/month`
+                                                                : isGuest
+                                                                  ? t(
+                                                                        'checkout_subscription.photo_plan.guest_cta',
+                                                                    )
                                                                   : t(
-                                                                        'checkout_subscription.choose_plan_button',
+                                                                        'photo_plans.checkout.choose',
+                                                                        {
+                                                                            name: product.name,
+                                                                        },
                                                                     )}
                                                         </Button>
 
+                                                        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                                                            {t(
+                                                                `photo_plans.checkout.${billingInterval}_terms`,
+                                                                {
+                                                                    price:
+                                                                        billingInterval ===
+                                                                        'yearly'
+                                                                            ? product.formatted_yearly_price
+                                                                            : product.formatted_price,
+                                                                },
+                                                            )}
+                                                        </p>
                                                         {((billingInterval ===
                                                             'monthly' &&
                                                             !product.stripe_price_id) ||
@@ -771,11 +802,15 @@ function GuestPricingLayout({
     children: ReactNode;
     breadcrumbs?: BreadcrumbItem[];
 }) {
+    const { t } = useTranslation('common');
+
     return (
         <main className="min-h-screen bg-background text-foreground">
             <nav className="mx-auto flex max-w-7xl justify-between px-6 py-4">
                 <a href={snapToTrack().url}>Snap to Track</a>
-                <Link href={login().url}>Log in</Link>
+                <Link href={login().url}>
+                    {t('photo_plans.checkout.login')}
+                </Link>
             </nav>
             {children}
         </main>

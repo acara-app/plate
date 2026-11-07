@@ -629,7 +629,7 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
     stubSnapPhotoAllowance(used: 1);
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSee('1 free scan left')
+        ->assertSee('1 free scan remaining')
         ->assertSee('Keep tracking with Starter — $2.99/month')
         ->assertSee('Not now — save this meal free');
 
@@ -638,7 +638,7 @@ it('withholds the paid offer until a scan has proven the value', function (): vo
     Livewire::test('pages::snap-to-track')
         ->assertSee('Scan limit reached')
         ->assertSee('Your free scans are complete.')
-        ->assertSee('Continue scanning with Starter — $2.99/month')
+        ->assertSee('Keep tracking with Starter — $2.99/month')
         ->assertDontSee('Tap to take photo or upload');
 });
 

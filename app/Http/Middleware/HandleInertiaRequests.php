@@ -48,7 +48,8 @@ final class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $user = $request->user();
-        $locale = $user instanceof User ? ($user->locale ?? 'en') : 'en';
+        $locale = LanguageUtil::resolve($user instanceof User ? $user->locale : null)['code'];
+        app()->setLocale($locale);
 
         return [
             ...parent::share($request),

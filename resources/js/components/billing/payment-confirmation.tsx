@@ -1,17 +1,11 @@
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import billing from '@/routes/billing';
 import { Link, usePoll } from '@inertiajs/react';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 
-const paymentStatusMessages = {
-    checking:
-        'We’re confirming your payment. Your scans will unlock when payment is verified.',
-    timeout:
-        'Payment confirmation is taking longer than expected. Check again or open billing settings to view your subscription.',
-    error: 'We couldn’t check your payment status. Check your connection and try again, or open billing settings.',
-};
-
 export function PaymentConfirmation() {
+    const { t } = useTranslation('common');
     const [status, setStatus] = useState<'checking' | 'timeout' | 'error'>(
         'checking',
     );
@@ -68,14 +62,14 @@ export function PaymentConfirmation() {
 
     return (
         <div role="status" className="space-y-3 rounded-lg border p-4">
-            <p>{paymentStatusMessages[status]}</p>
+            <p>{t(`photo_plans.payment.${status}`)}</p>
             {status !== 'checking' && (
                 <Button variant="outline" onClick={() => setStatus('checking')}>
-                    Check again
+                    {t('photo_plans.payment.retry')}
                 </Button>
             )}
             <Link href={billing.index().url} className="block underline">
-                Open billing settings
+                {t('photo_plans.payment.billing')}
             </Link>
         </div>
     );

@@ -56,7 +56,11 @@ export function BurstLimitNotice({ limit }: BurstLimitNoticeProps) {
                 </p>
                 {offer ? (
                     <>
-                        <Button asChild size="sm">
+                        <Button
+                            asChild
+                            size="sm"
+                            className="h-auto min-h-11 text-center whitespace-normal"
+                        >
                             <Link
                                 href={checkout.start(offer.product_id).url}
                                 data-umami-event="snap_to_track_upgrade_click"

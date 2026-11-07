@@ -70,7 +70,7 @@ export function PhotoPlanBand({
                         </p>
                     </div>
                 </div>
-                <div className="shrink-0 sm:text-right">
+                <div className="min-w-0 shrink-0 sm:max-w-64 sm:text-right">
                     {isCurrent ? (
                         <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1.5 text-sm font-medium text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200">
                             <Check className="size-4" />
@@ -84,15 +84,21 @@ export function PhotoPlanBand({
                                 disabled={isSubscribing}
                                 data-umami-event="snap_to_track_upgrade_click"
                                 data-umami-event-gate="pricing"
+                                className="h-auto min-h-11 whitespace-normal"
                             >
                                 {isGuest
                                     ? t(
                                           'checkout_subscription.photo_plan.guest_cta',
                                       )
-                                    : t('checkout_subscription.photo_plan.cta')}
+                                    : t(
+                                          'checkout_subscription.photo_plan.cta',
+                                          { name: plan.name },
+                                      )}
                             </Button>
                             <p className="mt-2 text-xs text-muted-foreground">
-                                {t('checkout_subscription.photo_plan.renewal')}
+                                {t('photo_plans.checkout.monthly_terms', {
+                                    price: plan.formatted_price,
+                                })}
                             </p>
                         </>
                     )}

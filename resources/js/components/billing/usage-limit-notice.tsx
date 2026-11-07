@@ -39,7 +39,7 @@ export function UsageLimitNotice({
 
     const heading =
         trigger.limitType === 'monthly'
-            ? 'Your monthly allowance for other AI tools is used up'
+            ? t('photo_plans.monthly.heading')
             : t('billing.paywall.cap_title', {
                   tier: t(`billing.tier.labels.${trigger.currentTier}`, {
                       defaultValue: trigger.currentTier,
@@ -47,11 +47,16 @@ export function UsageLimitNotice({
                   limit: t(`billing.usage.${trigger.limitType}`),
               });
 
-    const body = t('billing.paywall.cap_description', {
-        current: trigger.currentCredits.toLocaleString(),
-        total: trigger.limitCredits.toLocaleString(),
-        time: trigger.resetsIn,
-    });
+    const body = t(
+        trigger.limitType === 'monthly'
+            ? 'photo_plans.monthly.body'
+            : 'billing.paywall.cap_description',
+        {
+            current: trigger.currentCredits.toLocaleString(),
+            total: trigger.limitCredits.toLocaleString(),
+            time: trigger.resetsIn,
+        },
+    );
 
     const handleUpgrade = (tier: PaidSubscriptionTier) => {
         onUpgradeClick?.(tier);
@@ -72,8 +77,7 @@ export function UsageLimitNotice({
                 <p className="text-xs text-muted-foreground">{body}</p>
                 {trigger.limitType === 'monthly' && (
                     <p className="text-xs text-muted-foreground">
-                        Upgrade for higher daily and weekly limits across every
-                        feature.
+                        {t('photo_plans.monthly.upgrade')}
                     </p>
                 )}
                 {targetTier && (
