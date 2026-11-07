@@ -31,7 +31,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
     use Promptable;
     use UsesConfiguredAgentModel;
 
-    public const string PROMPT_VERSION = '4';
+    public const string PROMPT_VERSION = '5';
 
     public ?User $user = null;
 
@@ -81,7 +81,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
             'carbs is total carbohydrate including dietary fiber; fiber is reported separately as well and is never subtracted from carbs',
             'Do NOT put all macros in the totals only — each food item must carry its own calorie and macro breakdown',
             'grams is the item\'s estimated total weight as a number, e.g. 150 for 150g of rice — provide it for every item',
-            'match_name is the food\'s canonical English name suitable for matching a nutrition reference database, e.g. "rice, white, cooked" or "chicken breast, grilled" — always English, even when name is in another language',
+            'match_name is the food\'s short canonical English name, e.g. "rice, white, cooked" or "chicken breast, grilled" — always English, even when name is in another language',
             'confidence is a percentage (0-100) indicating how confident you are in the analysis',
             'All nutritional values should be rounded to 1 decimal place',
             'If no food is detected in the image, return empty items array with zeros for totals and confidence of 0',
@@ -107,7 +107,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, HasProviderO
             steps: [
                 '1. Carefully identify ALL distinct food items visible in the image — do not merge separate ingredients into one entry',
                 '2. Estimate each item\'s portion as readable text (e.g., "1 medium apple", "150g rice", "50g feta cheese") AND as a numeric weight in the grams field',
-                '3. Give each item a canonical English match_name for nutrition-database lookup, even when name is localized to another language',
+                '3. Give each item a canonical English match_name, even when name is localized to another language',
                 '4. Calculate calories, macros (protein, carbs, fat), and fiber for EACH identified food item individually — these per-item values are critical',
                 '5. Sum up total calories, macros, and fiber for the entire meal (must equal the sum of individual items)',
                 '6. Provide a confidence score based on image clarity and food recognizability',

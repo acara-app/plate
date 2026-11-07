@@ -421,9 +421,6 @@ class extends Component
                                     @endif
                                 </span>
                             </span>
-                            @if (($item['provenance'] ?? 'model') === 'reference')
-                                <p class="text-xs text-muted-foreground"><span class="text-primary" aria-hidden="true">◆</span> USDA reference</p>
-                            @endif
                         </li>
                     @endforeach
                 </ul>

@@ -16,7 +16,6 @@ use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
 use App\Models\PhotoAnalysisRequest;
-use App\Models\ReferenceFood;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Cache;
@@ -516,32 +515,6 @@ it('shows the app shortcut instead of signup actions to a limited member', funct
         ->assertSee('Open Snap to Track')
         ->assertSee('pick up right where you left off')
         ->assertDontSee('Keep analyzing — free');
-});
-
-it('flags reference-derived items in the guest draft when the lookup is enabled', function (): void {
-    config()->set('plate.food_photo_analyzer.reference_lookup.enabled', true);
-
-    ReferenceFood::factory()->create([
-        'description' => 'Hummus, commercial',
-        'match_name' => ReferenceFood::normalizeName('Hummus, commercial'),
-        'calories_per_100g' => 166,
-        'protein_per_100g' => 7.9,
-        'carbs_per_100g' => 14.3,
-        'fat_per_100g' => 9.6,
-    ]);
-
-    analyzePhotoForSnapToTrack([
-        'items' => [
-            ['name' => 'Hummus', 'calories' => 200, 'protein' => 5, 'carbs' => 10, 'fat' => 15, 'portion' => '100g', 'grams' => 100, 'match_name' => 'hummus commercial'],
-        ],
-        'total_calories' => 200,
-        'total_protein' => 5,
-        'total_carbs' => 10,
-        'total_fat' => 15,
-        'confidence' => 80,
-    ])->assertRedirect(route('snap-to-track.result'));
-
-    expect(AnalysisDraft::query()->sole()->payload['items'][0]['provenance'])->toBe('reference');
 });
 
 it('shows how it works section', function (): void {
