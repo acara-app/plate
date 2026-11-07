@@ -27,7 +27,7 @@ beforeEach(function (): void {
 
 describe('build', function (): void {
     it('gives the agent Acara billing facts and the plan tool when plans are sold', function (): void {
-        config(['plate.enable_premium_upgrades' => true]);
+        enableBilling();
 
         $result = $this->builder->build(new AgentRequest(message: 'Cancel my subscription'), User::factory()->create());
 

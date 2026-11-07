@@ -6,11 +6,10 @@ use App\Contracts\Billing\ResolvesUserTier;
 use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',
@@ -100,8 +99,8 @@ it('drops to Free after the grace period ends', function (): void {
         );
 });
 
-it('exposes premium_enforcement_active=false when the flag is off', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+it('exposes premium_enforcement_active=false when billing is off', function (): void {
+    disableBilling();
 
     $user = User::factory()->create();
 

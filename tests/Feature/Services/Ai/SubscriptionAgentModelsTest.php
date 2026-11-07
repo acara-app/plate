@@ -42,7 +42,7 @@ it('keeps everyone else on the standard model', function (TierEntitlement $entit
     expect(modelResolvedFor($entitlement, $agentClass))->toBe($model);
 })->with([
     'free member' => [TierEntitlement::free(), NutritionSpecialist::class, 'gemini-3.6-flash'],
-    'premium upgrades switched off' => [new TierEntitlement(SubscriptionTier::Snap, premiumEnforcementActive: false), NutritionSpecialist::class, 'gemini-3.6-flash'],
+    'billing switched off' => [new TierEntitlement(SubscriptionTier::Snap, premiumEnforcementActive: false), NutritionSpecialist::class, 'gemini-3.6-flash'],
     'first payment still pending' => [new TierEntitlement(SubscriptionTier::Snap, paymentPending: true), NutritionSpecialist::class, 'gemini-3.6-flash'],
     'agent without a paid model' => [new TierEntitlement(SubscriptionTier::Snap), ConversationTitleGeneratorAgent::class, 'gpt-5-nano'],
 ]);

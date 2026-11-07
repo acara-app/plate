@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Models\SubscriptionProduct;
+use App\Services\Billing\PhotoPlanCatalog;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -51,4 +52,20 @@ function offerAllSubscriptions(): void
             return true;
         }
     });
+}
+
+function enableBilling(): void
+{
+    config([
+        'cashier.key' => 'pk_test_fake',
+        'cashier.secret' => 'sk_test_fake',
+        'cashier.webhook.secret' => 'whsec_test',
+    ]);
+    app()->forgetInstance(PhotoPlanCatalog::class);
+}
+
+function disableBilling(): void
+{
+    config(['cashier.secret' => null]);
+    app()->forgetInstance(PhotoPlanCatalog::class);
 }

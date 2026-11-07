@@ -12,11 +12,10 @@ use App\Models\User;
 use App\Services\Memory\NullConversationHistoryPuller;
 use App\Services\Memory\NullMemoryExtractionDispatcher;
 use App\Services\Memory\NullMemoryPromptContext;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',

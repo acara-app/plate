@@ -6,13 +6,12 @@ use App\Enums\SubscriptionTier;
 use App\Http\Controllers\BillingHistoryController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 covers(BillingHistoryController::class);
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',
@@ -120,7 +119,7 @@ it("does not leak another user's subscription tier into the response", function 
 });
 
 it('flags self-host mode by setting premium_enforcement_active to false', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+    disableBilling();
 
     $user = User::factory()->create(['stripe_id' => null]);
 

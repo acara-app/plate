@@ -31,6 +31,7 @@ use App\Services\Billing\MeteredPhotoAnalyses;
 use App\Services\Billing\MonthlyAiBudget;
 use App\Services\Billing\NullPhotoConversion;
 use App\Services\Billing\NullPhotoPreview;
+use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\PhotoPlanOffers;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
@@ -67,7 +68,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->scoped(AgentModelContext::class);
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
         $this->app->bind(ProvidesAiBudget::class, MonthlyAiBudget::class);
-        $this->app->scoped(MeteredPhotoAnalyses::class);
+        $this->app->scoped(PhotoPlanCatalog::class);
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
         $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
         $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);

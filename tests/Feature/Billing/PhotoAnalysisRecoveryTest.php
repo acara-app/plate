@@ -25,7 +25,6 @@ it('recovers the charged meal into the same request after the worker fails befor
     $this->freezeTime();
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
@@ -63,7 +62,6 @@ it('releases a timed-out pending scan and rejects its late result without chargi
     $this->freezeTime();
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
@@ -103,7 +101,6 @@ it('releases a reservation created after the host request has already failed wit
     $access = resolve(ManagesPhotoAnalyses::class);
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
@@ -149,7 +146,6 @@ it('preserves the allowance when queued work has too little recovery time remain
     $access = resolve(ManagesPhotoAnalyses::class);
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
@@ -175,7 +171,6 @@ it('releases the allowance when reservation delays leave too little time for pro
     $access = resolve(ManagesPhotoAnalyses::class);
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',
