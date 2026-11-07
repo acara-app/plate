@@ -6,13 +6,17 @@ namespace App\Http\Controllers\SnapToTrack;
 
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
+use App\Actions\LogAnalyzedMeal;
 use App\Actions\StoreMealPhotoAction;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\ConfidenceBand;
+use App\Enums\PhotoAnalysisFailure;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Http\Requests\SnapToTrack\AnalyzeSnapToTrackPhotoRequest;
+use App\Models\AnalysisDraft;
+use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Utilities\LanguageUtil;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -27,6 +31,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         private AnalyzeFoodPhotoAction $analyzeFoodPhoto,
         private CreateAnalysisDraftAction $createAnalysisDraft,
         private StoreMealPhotoAction $storeMealPhoto,
+        private LogAnalyzedMeal $logAnalyzedMeal,
         #[CurrentUser()] private User $currentUser,
     ) {}
 
@@ -72,6 +77,10 @@ final readonly class AnalyzeSnapToTrackPhotoController
             $this->deleteUploadedPhoto($photo);
         }
 
+        if ($analysis->items->count() === 0) {
+            return to_route('snap-to-track.index')->withErrors(['photo' => __(PhotoAnalysisFailure::NoFood->message())]);
+        }
+
         $token = $this->createAnalysisDraft->handle(
             $analysis,
             AnalysisDraftSource::AuthenticatedSnapToTrack,
@@ -84,16 +93,31 @@ final readonly class AnalyzeSnapToTrackPhotoController
             report($throwable);
         }
 
+        $meal = $this->logAnalyzedMeal->handle(
+            AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($token))->firstOrFail(),
+            $this->currentUser,
+        );
+
         Inertia::flash('analytics', [
-            'name' => 'snap_to_track_result_viewed',
-            'properties' => [
-                'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                'items_count' => $analysis->items->count(),
-                'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
+            [
+                'name' => 'snap_to_track_result_viewed',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'items_count' => $analysis->items->count(),
+                    'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
+                ],
+            ],
+            [
+                'name' => 'snap_to_track_meal_logged',
+                'properties' => [
+                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                    'items_count' => $analysis->items->count(),
+                ],
             ],
         ]);
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('common.snap_to_track.saved')]);
 
-        return to_route('snap-to-track.review', ['draft' => $token]);
+        return $meal instanceof HealthSyncSample ? to_route('health-entries.show', $meal) : to_route('health-entries.index');
     }
 
     private function deleteUploadedPhoto(UploadedFile $photo): void

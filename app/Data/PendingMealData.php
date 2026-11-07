@@ -10,6 +10,6 @@ final class PendingMealData extends Data
 {
     public function __construct(
         public bool $expired,
-        public ?string $reviewUrl = null,
+        public ?string $saveUrl = null,
     ) {}
 }

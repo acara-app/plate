@@ -19,7 +19,7 @@
         ],
         [
             'question' => 'How accurate are photo nutrition estimates?',
-            'answer' => 'Photo nutrition values are AI estimates, not measurements. Lighting, portion sizes, and hidden ingredients such as oils and sauces can affect the result. Review and correct the analysis before saving it, and verify important nutritional information independently.',
+            'answer' => 'Photo nutrition values are AI estimates, not measurements. Lighting, portion sizes, and hidden ingredients such as oils and sauces can affect the result. Adjust the ingredients and portions once the meal is saved, and verify important nutritional information independently.',
         ],
         [
             'question' => 'Who is Acara Plate for?',
@@ -551,9 +551,9 @@
                                 class="absolute -top-3 left-5 flex h-7 w-7 items-center justify-center rounded-full bg-[#FF6B4A] text-sm font-bold text-white">
                                 2</div>
                             <div class="pt-2">
-                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Review and save</h3>
+                                <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Save and adjust</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Check the estimated ingredients, portions, and macros. Make corrections and save the meal with your account.
+                                    Save the meal to your food log with your account, then fix any ingredient, portion, or macro the photo got wrong.
                                 </p>
                             </div>
                         </div>

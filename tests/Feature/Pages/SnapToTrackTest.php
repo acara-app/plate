@@ -282,16 +282,16 @@ it('keeps every detected item in the guest draft', function (): void {
     expect(array_column(AnalysisDraft::query()->sole()->payload['items'], 'name'))->toBe(['Rice', 'Chicken']);
 });
 
-it('sends a signed-in member straight to the claimed draft review', function (): void {
+it('sends a signed-in member straight to saving the claimed draft', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
 
     $component = analyzePhotoForSnapToTrack(saveMealAnalysisFixture())->assertRedirect();
 
     $draft = AnalysisDraft::query()->sole();
-    $token = Str::afterLast($component->effects['redirect'], '/review/');
+    $token = Str::afterLast($component->effects['redirect'], '/save/');
 
-    expect($component->effects['redirect'])->toBe(route('snap-to-track.review', ['draft' => $token]))
+    expect($component->effects['redirect'])->toBe(route('snap-to-track.save', ['draft' => $token]))
         ->and(AnalysisDraft::hashToken($token))->toBe($draft->token_hash)
         ->and($draft->user_id)->toBe($user->id)
         ->and($draft->claimed_at)->not->toBeNull()
@@ -312,11 +312,7 @@ it('keeps a signed-in member photo with the meal they log from the public tool',
         ->and($photo->analysis_draft_id)->toBe($draft->id);
     Storage::disk('s3')->assertExists($photo->path);
 
-    $token = Str::afterLast($component->effects['redirect'], '/review/');
-    $this->post(route('snap-to-track.review.store', ['draft' => $token]), [
-        'items' => [['name' => 'Grilled Chicken', 'portion' => '100g', 'calories' => 165, 'protein' => 31, 'carbs' => 0, 'fat' => 3.6, 'provenance' => 'model']],
-        'measured_at' => now()->toIso8601String(),
-    ])->assertRedirect();
+    $this->get($component->effects['redirect'])->assertRedirect();
 
     $groupId = (string) $draft->refresh()->health_group_id;
 
