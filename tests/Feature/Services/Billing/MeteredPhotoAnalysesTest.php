@@ -22,7 +22,6 @@ covers(MeteredPhotoAnalyses::class);
 
 beforeEach(function (): void {
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake',
         'cashier.secret' => 'sk_test_fake',
         'cashier.webhook.secret' => 'whsec_test',

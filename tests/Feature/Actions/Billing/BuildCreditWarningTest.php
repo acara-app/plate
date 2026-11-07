@@ -11,7 +11,6 @@ use App\Models\AiUsage;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 covers(BuildCreditWarning::class);
@@ -22,7 +21,7 @@ function buildWarning(): BuildCreditWarning
 }
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',
@@ -101,7 +100,7 @@ it('returns the same derived warning on repeated calls', function (): void {
 });
 
 it('returns null when premium enforcement is off', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+    disableBilling();
 
     $user = User::factory()->create();
 

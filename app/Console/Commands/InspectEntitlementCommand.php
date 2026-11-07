@@ -7,7 +7,8 @@ namespace App\Console\Commands;
 use App\Actions\GetAiUsageForBillingAction;
 use App\Contracts\Billing\ResolvesUserTier;
 use App\Models\User;
-use App\Services\Billing\PremiumRolloutGate;
+use App\Services\Billing\PhotoPlanCatalog;
+use App\Services\Billing\StripeBilling;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Attributes\Description;
 use Illuminate\Console\Attributes\Signature;
@@ -25,7 +26,8 @@ final class InspectEntitlementCommand extends Command
 {
     public function handle(
         ResolvesUserTier $resolver,
-        PremiumRolloutGate $rolloutGate,
+        StripeBilling $stripeBilling,
+        PhotoPlanCatalog $photoPlans,
         GetAiUsageForBillingAction $usage,
     ): int {
         $identifier = (string) $this->argument('user');
@@ -39,7 +41,6 @@ final class InspectEntitlementCommand extends Command
 
         $entitlement = $resolver->resolve($user);
         $usageSnapshot = $usage->handle($user);
-        $rolloutReason = $rolloutGate->reasonFor($user);
         $subscriptionLine = $this->describeSubscription($user);
 
         if ($this->option('json')) {
@@ -48,8 +49,8 @@ final class InspectEntitlementCommand extends Command
                     'id' => $user->id,
                     'email' => $user->email,
                 ],
-                'rollout_reason' => $rolloutReason,
-                'rollout_active' => $rolloutGate->isActiveFor($user),
+                'billing_enabled' => $stripeBilling->isConfigured(),
+                'selling_photo_plans' => $photoPlans->isSelling(),
                 'entitlement' => [
                     'tier' => $entitlement->tier->value,
                     'premium_enforcement_active' => $entitlement->premiumEnforcementActive,
@@ -72,13 +73,10 @@ final class InspectEntitlementCommand extends Command
         $this->info(sprintf('User #%d <%s>', $user->id, $user->email));
 
         $this->newLine();
-        $this->line('Premium rollout');
+        $this->line('Billing');
         $this->table(['Field', 'Value'], [
-            ['Reason', $rolloutReason],
-            ['Active', $rolloutGate->isActiveFor($user) ? 'yes' : 'no'],
-            ['Global flag', config()->boolean('plate.enable_premium_upgrades', false) ? 'on' : 'off'],
-            ['Allowlist size', count(config()->array('plate.premium_rollout.allowlist', []))],
-            ['Percentage cohort', config()->integer('plate.premium_rollout.percentage', 0).'%'],
+            ['Stripe configured', $stripeBilling->isConfigured() ? 'yes' : 'no'],
+            ['Selling photo plans', $photoPlans->isSelling() ? 'yes' : 'no'],
         ]);
 
         $this->newLine();

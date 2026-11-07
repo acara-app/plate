@@ -58,7 +58,6 @@ final class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'subscribed' => $user?->hasActiveSubscription() ?? false,
             ],
-            'enablePremiumUpgrades' => enable_premium_upgrades_for($user instanceof User ? $user : null),
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'locale' => $locale,
             'availableLanguages' => LanguageUtil::all(),

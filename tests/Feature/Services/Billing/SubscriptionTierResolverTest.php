@@ -8,13 +8,12 @@ use App\Enums\SubscriptionTier;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Billing\SubscriptionTierResolver;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 covers(SubscriptionTierResolver::class, TierEntitlement::class, SubscriptionTier::class);
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Free',
@@ -145,8 +144,8 @@ it('returns Free with payment_pending for an incomplete subscription', function 
         ->and($entitlement->inGracePeriod())->toBeFalse();
 });
 
-it('short-circuits to unrestricted Free when premium upgrades are disabled', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+it('short-circuits to unrestricted Free when billing is off', function (): void {
+    disableBilling();
 
     $user = User::factory()->create();
 

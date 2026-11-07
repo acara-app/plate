@@ -10,7 +10,6 @@ export default function useSharedProps() {
     return {
         currentUser: props.auth.user,
         sidebarOpen: page.props.sidebarOpen as boolean,
-        enablePremiumUpgrades: page.props.enablePremiumUpgrades as boolean,
         locale: page.props.locale as string,
         availableLanguages: page.props.availableLanguages as Record<
             string,

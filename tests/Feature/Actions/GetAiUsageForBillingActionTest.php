@@ -7,7 +7,6 @@ use App\Enums\SubscriptionTier;
 use App\Models\AiUsage;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use Illuminate\Support\Facades\Config;
 use Laravel\Cashier\Subscription;
 
 covers(GetAiUsageForBillingAction::class);
@@ -18,7 +17,7 @@ function billingUsageAction(): GetAiUsageForBillingAction
 }
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
 
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',
@@ -155,8 +154,8 @@ it('flags payment_pending when the user has only an incomplete subscription', fu
         ->and($result['rolling']['limit'])->toBe(400);
 });
 
-it('returns unrestricted free state when premium upgrades are disabled', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+it('returns unrestricted free state when billing is off', function (): void {
+    disableBilling();
 
     $user = User::factory()->create();
 

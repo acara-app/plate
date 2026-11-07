@@ -24,11 +24,7 @@ use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Tools\Request;
 use Laravel\Cashier\Subscription;
 
-beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
-});
-
-it('does not block AI invocations when the flag is off, even for users far over their cap', function (): void {
+it('does not block AI invocations when billing is off, even for users far over their cap', function (): void {
     $user = User::factory()->create();
 
     AiUsage::factory()->create([
@@ -41,7 +37,7 @@ it('does not block AI invocations when the flag is off, even for users far over 
     expect(true)->toBeTrue();
 });
 
-it('does not gate the meal planner when the flag is off', function (): void {
+it('does not gate the meal planner when billing is off', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
@@ -54,7 +50,7 @@ it('does not gate the meal planner when the flag is off', function (): void {
     expect($user->mealPlans()->count())->toBe(1);
 });
 
-it('does not gate the meal planner UI when the flag is off', function (): void {
+it('does not gate the meal planner UI when billing is off', function (): void {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->get(route('meal-plans.index'));
@@ -67,7 +63,7 @@ it('does not gate the meal planner UI when the flag is off', function (): void {
         );
 });
 
-it('lets the AnalyzePhoto tool run for free users when the flag is off', function (): void {
+it('lets the AnalyzePhoto tool run for free users when billing is off', function (): void {
     FoodPhotoAnalyzerAgent::fake([
         [
             'items' => [],
@@ -89,7 +85,7 @@ it('lets the AnalyzePhoto tool run for free users when the flag is off', functio
         ->and($result)->not->toHaveKey('error');
 });
 
-it('lets the StartMealPlanGeneration tool run for free users when the flag is off', function (): void {
+it('lets the StartMealPlanGeneration tool run for free users when billing is off', function (): void {
     $generator = Mockery::mock(GeneratesMealPlans::class);
     $generator->shouldReceive('handle')->once()->andReturnNull();
     $this->app->instance(GeneratesMealPlans::class, $generator);
@@ -103,7 +99,7 @@ it('lets the StartMealPlanGeneration tool run for free users when the flag is of
     expect($result)->not->toHaveKey('error');
 });
 
-it('returns no 402 from chat stream preflight when the flag is off', function (): void {
+it('returns no 402 from chat stream preflight when billing is off', function (): void {
     Queue::fake();
 
     $user = User::factory()->create();
@@ -123,7 +119,7 @@ it('returns no 402 from chat stream preflight when the flag is off', function ()
     expect($response->getStatusCode())->toBe(202);
 });
 
-it('returns null from BuildCreditWarning when the flag is off', function (): void {
+it('returns null from BuildCreditWarning when billing is off', function (): void {
     $user = User::factory()->create();
 
     AiUsage::factory()->create([
@@ -136,7 +132,7 @@ it('returns null from BuildCreditWarning when the flag is off', function (): voi
     expect($warning)->toBeNull();
 });
 
-it('resolves an unrestricted entitlement even with an incomplete subscription when the flag is off', function (): void {
+it('resolves an unrestricted entitlement even with an incomplete subscription when billing is off', function (): void {
     SubscriptionProduct::factory()->create([
         'name' => 'Basic',
         'stripe_price_id' => 'price_basic_monthly',
@@ -173,12 +169,12 @@ it('exposes premium_enforcement_active=false on the shared entitlement prop ever
             ->assertSuccessful()
             ->assertInertia(fn ($page) => $page
                 ->where('entitlement.premium_enforcement_active', false)
-                ->where('enablePremiumUpgrades', false)
+                ->missing('enablePremiumUpgrades')
             );
     }
 });
 
-it('does not require subscription middleware to gate verified=null users when the flag is off', function (): void {
+it('lets unverified members use the meal planner when billing is off', function (): void {
     $user = User::factory()->create(['is_verified' => false]);
 
     $response = $this->actingAs($user)->get(route('meal-plans.index'));
@@ -186,7 +182,7 @@ it('does not require subscription middleware to gate verified=null users when th
     $response->assertSuccessful();
 });
 
-it('leaves Acara billing guidance out of the chat instructions when the flag is off', function (): void {
+it('leaves Acara billing guidance out of the chat instructions when billing is off', function (): void {
     $instructions = resolve(AgentBuilder::class)->buildInstructions(new AgentRequest(message: 'Cancel my subscription'), User::factory()->create());
 
     expect($instructions)->not->toContain('## Account & Billing')

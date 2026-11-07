@@ -8,7 +8,6 @@ declare module '@inertiajs/core' {
             sidebarOpen: boolean;
             locale: string;
             translations: Record<string, unknown>;
-            enablePremiumUpgrades: boolean;
             canManagePasskeys: boolean;
             needsBiometricsReview: boolean;
 

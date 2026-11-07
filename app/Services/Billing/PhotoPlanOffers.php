@@ -10,11 +10,11 @@ use App\Models\SubscriptionProduct;
 
 final readonly class PhotoPlanOffers implements OffersSubscriptions
 {
-    public function __construct(private MeteredPhotoAnalyses $photos) {}
+    public function __construct(private PhotoPlanCatalog $catalog) {}
 
     public function present(SubscriptionProduct $product): SubscriptionProduct
     {
-        if ($product->name !== 'Free' || ! $this->photos->enabled()) {
+        if ($product->name !== 'Free' || ! $this->catalog->isSelling()) {
             return $product;
         }
 
@@ -30,6 +30,6 @@ final readonly class PhotoPlanOffers implements OffersSubscriptions
     public function available(SubscriptionProduct $product): bool
     {
         return $product->name === 'Free' || (PhotoPlan::fromProductName($product->name) instanceof PhotoPlan
-            && $this->photos->enabled() && $this->photos->purchaseProduct($product->name)?->id === $product->id);
+            && $this->catalog->isSelling() && $this->catalog->product($product->name)?->id === $product->id);
     }
 }

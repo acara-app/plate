@@ -21,7 +21,6 @@ beforeEach(function (): void {
     }
 
     config([
-        'plate.enable_premium_upgrades' => true,
         'cashier.key' => 'pk_test_fake', 'cashier.secret' => 'sk_test_fake', 'cashier.webhook.secret' => 'whsec_test',
         'snap.experiment.enabled' => true,
         'snap.two_free_scans_enabled' => true,

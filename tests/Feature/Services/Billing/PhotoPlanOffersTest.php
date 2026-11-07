@@ -5,9 +5,10 @@ declare(strict_types=1);
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Models\SubscriptionProduct;
+use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\PhotoPlanOffers;
 
-covers(PhotoPlanOffers::class);
+covers(PhotoPlanOffers::class, PhotoPlanCatalog::class);
 
 beforeEach(function (): void {
     config([

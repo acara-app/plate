@@ -14,7 +14,6 @@ use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
-use App\Enums\PhotoPlan;
 use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Models\AiUsage;
 use App\Models\SnapAnalyticsEvent;
@@ -23,7 +22,6 @@ use App\Models\SnapPhotoPeriod;
 use App\Models\SnapPhotoRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Ai\ConfiguredAgentModels;
 use Carbon\CarbonImmutable;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,51 +30,16 @@ use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 
-final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
+final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 {
-    private ?bool $enabled = null;
-
-    /** @var array<string, SubscriptionProduct|null> */
-    private array $purchaseProducts = [];
+    public function __construct(private PhotoPlanCatalog $catalog) {}
 
     public function enabled(): bool
     {
-        return $this->enabled ??= $this->premiumReady() && $this->purchaseProduct() instanceof SubscriptionProduct
-            && filled(config('cashier.key')) && filled(config('cashier.secret')) && filled(config('cashier.webhook.secret'));
-    }
-
-    public function premiumReady(): bool
-    {
-        try {
-            $model = resolve(ConfiguredAgentModels::class)->forAgent(FoodPhotoAnalyzerAgent::class, 'paid');
-
-            return $model->supports('vision') && $model->supports('structured_output');
-        } catch (InvalidArgumentException) {
-            return false;
-        }
-    }
-
-    public function purchaseProduct(?string $name = null): ?SubscriptionProduct
-    {
-        $key = $name ?? '';
-
-        if (! array_key_exists($key, $this->purchaseProducts)) {
-            $this->purchaseProducts[$key] = SubscriptionProduct::query()->where('purchasable', true)
-                ->where(function (Builder $catalog): void {
-                    foreach (PhotoPlan::cases() as $plan) {
-                        $catalog->orWhere(fn (Builder $query): Builder => $query->where('name', $plan->productName())
-                            ->where('price', $plan->monthlyPriceCents() / 100)->where('stripe_lookup_key', $plan->lookupKey()));
-                    }
-                })
-                ->when($name !== null, fn (Builder $query): Builder => $query->where('name', $name))
-                ->whereNotNull('stripe_price_id')->where('stripe_price_id', '!=', '')->orderBy('price')->first();
-        }
-
-        return $this->purchaseProducts[$key];
+        return $this->catalog->isSelling();
     }
 
     public function isPaying(User $user): bool
@@ -104,7 +67,7 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
     {
         if ($context->user instanceof User && $this->isPaying($context->user)) {
-            abort_if(! $this->premiumReady(), 503, 'Premium analysis is temporarily unavailable.');
+            abort_if(! $this->catalog->hasReadyPaidModel(), 503, 'Premium analysis is temporarily unavailable.');
             $model = resolve(ResolvesAgentModel::class)->resolve(FoodPhotoAnalyzerAgent::class, $context->user);
             resolve(EnforceAiUsageLimit::class)->handle($context->user, $model);
 
@@ -253,7 +216,7 @@ final class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
     private function meteredEntitlement(int $limit, int $used, ?string $resetsAt, string $mode): PhotoEntitlement
     {
-        $product = $this->purchaseProduct();
+        $product = $this->catalog->product();
         $offer = $product instanceof SubscriptionProduct ? new PhotoOffer($product->id, $product->name, $product->formatted_price) : null;
 
         return new PhotoEntitlement(true, $limit, $used, $resetsAt, $mode, $mode === 'trial' && $offer instanceof PhotoOffer, $offer);

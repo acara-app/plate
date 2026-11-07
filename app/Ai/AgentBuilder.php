@@ -11,6 +11,7 @@ use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\ToolSensitivityReader;
+use App\Services\Billing\StripeBilling;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
@@ -28,6 +29,7 @@ final readonly class AgentBuilder
         private ManagesMemoryContext $memoryContext,
         private ToolSensitivityReader $toolSensitivity,
         private LoadsSkills $skillLoader,
+        private StripeBilling $stripeBilling,
     ) {}
 
     /**
@@ -58,7 +60,7 @@ final readonly class AgentBuilder
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
             'availableSkills' => $this->skillLoader->loadAll(),
-            'billingEnabled' => enable_premium_upgrades_for($user),
+            'billingEnabled' => $this->stripeBilling->isConfigured(),
         ])->render();
 
         $memories = $this->renderMemories($request, $user);

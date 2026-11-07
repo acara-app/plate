@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Billing\EnforceAiUsageLimit;
+use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Enums\SubscriptionTier;
 use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
@@ -20,7 +21,7 @@ function enforceUsage(): EnforceAiUsageLimit
 }
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
     Config::set('plate.ai_usage_preflight', [
         'token_budget' => ['input' => 2_000, 'output' => 1_000],
         'fallback_estimate' => 0.01,
@@ -97,8 +98,8 @@ it('throws at the 99% mark when the next call would push the user past 100', fun
     }
 });
 
-it('does not throw when the flag is off, even for users far over their cap', function (): void {
-    Config::set('plate.enable_premium_upgrades', false);
+it('does not throw when billing is off, even for users far over their cap', function (): void {
+    disableBilling();
 
     $user = User::factory()->create();
 
@@ -215,4 +216,17 @@ it('falls back to now+period_hours for the rolling reset when no in-window usage
         expect($usageLimitExceededException->limitType)->toBe('rolling')
             ->and(now()->diffInHours($usageLimitExceededException->resetsAt, true))->toBeGreaterThanOrEqual(23);
     }
+});
+
+it('keeps credit limits on when a misconfigured paid photo model pauses photo plans', function (): void {
+    SubscriptionProduct::factory()->create([
+        'name' => 'Starter', 'price' => 2.99, 'stripe_price_id' => 'price_starter',
+        'stripe_lookup_key' => 'acara-plate-starter-monthly-v1', 'purchasable' => true,
+    ]);
+    config(['ai.agent_profiles.'.FoodPhotoAnalyzerAgent::class.'.paid' => 'unregistered-model']);
+    $user = User::factory()->create();
+    AiUsage::factory()->for($user)->create(['cost' => 5.0]);
+
+    expect(fn () => resolve(EnforceAiUsageLimit::class)->handle($user, resolve(ConfiguredAgentModels::class)->forModel('gpt-5.4-mini')))
+        ->toThrow(UsageLimitExceededException::class);
 });

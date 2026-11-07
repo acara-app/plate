@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Queue;
 covers(BroadcastChatController::class);
 
 beforeEach(function (): void {
-    Config::set('plate.enable_premium_upgrades', true);
+    enableBilling();
     Config::set('plate.ai_usage_preflight', [
         'token_budget' => ['input' => 2_000, 'output' => 1_000],
         'fallback_estimate' => 0.01,
@@ -75,10 +75,10 @@ it('does not block a Free user who is well under the cap', function (): void {
     expect($response->getStatusCode())->toBe(202);
 });
 
-it('does not enforce when premium upgrades are disabled, even for users far over the cap', function (): void {
+it('does not enforce when billing is off, even for users far over the cap', function (): void {
     Queue::fake();
 
-    Config::set('plate.enable_premium_upgrades', false);
+    disableBilling();
 
     $user = User::factory()->create();
     $conversation = Conversation::factory()->create(Conversation::participantAttributes($user));

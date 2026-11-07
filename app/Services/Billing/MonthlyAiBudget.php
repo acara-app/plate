@@ -6,6 +6,7 @@ namespace App\Services\Billing;
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ProvidesAiBudget;
+use App\Contracts\Billing\ResolvesUserTier;
 use App\Data\Billing\AiBudget;
 use App\Models\AiUsage;
 use App\Models\User;
@@ -13,11 +14,11 @@ use Carbon\CarbonImmutable;
 
 final readonly class MonthlyAiBudget implements ProvidesAiBudget
 {
-    public function __construct(private MeteredPhotoAnalyses $photos) {}
+    public function __construct(private PhotoPlanCatalog $catalog, private ResolvesUserTier $tiers) {}
 
     public function forUser(User $user): ?AiBudget
     {
-        if (! $this->photos->enabled() || $this->photos->isPaying($user)) {
+        if (! $this->catalog->isSelling() || $this->tiers->resolve($user)->isPaying()) {
             return null;
         }
 
