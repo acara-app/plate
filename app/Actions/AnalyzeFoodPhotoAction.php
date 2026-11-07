@@ -11,13 +11,10 @@ use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Data\FoodItemData;
 use App\Enums\FoodValueProvenance;
-use App\Enums\PhotoAnalysisStatus;
-use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
 use App\Services\Nutrition\ReferenceFoodMatcher;
 use App\Services\Nutrition\ReferenceMatch;
 use Illuminate\Support\Facades\Log;
-use RuntimeException;
 use Spatie\LaravelData\DataCollection;
 use Throwable;
 
@@ -28,23 +25,13 @@ final readonly class AnalyzeFoodPhotoAction
         private ReferenceFoodMatcher $matcher,
     ) {}
 
-    public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null, ?PhotoAnalysisContext $context = null, ?int $analysisRequestId = null): FoodAnalysisData
+    public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null, ?PhotoAnalysisContext $context = null): FoodAnalysisData
     {
         $context ??= PhotoAnalysisContext::fromRequest(request(), 'photo_tool', $imageBase64);
 
         return resolve(ManagesPhotoAnalyses::class)->analyze(
             $context,
-            function (PhotoModel $model) use ($imageBase64, $mimeType, $language, $languageCode, $context, $analysisRequestId): FoodAnalysisData {
-                if ($analysisRequestId !== null) {
-                    $request = PhotoAnalysisRequest::query()->metadata()->whereKey($analysisRequestId)
-                        ->where('request_id', $context->requestId)->where('fingerprint', $context->fingerprint)->where('source', $context->source)
-                        ->where('status', PhotoAnalysisStatus::Processing)->whereFuture('deadline_at')->where('expires_at', '>', now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS))->first();
-
-                    throw_if(! $request instanceof PhotoAnalysisRequest || ! $request->ownedBy($context->user, $context->guestId), RuntimeException::class, 'This photo analysis is no longer processing.');
-                }
-
-                return $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user, $context->requestId);
-            },
+            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user, $context->requestId),
         );
     }
 

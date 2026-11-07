@@ -8,7 +8,6 @@ use App\Actions\Billing\ResolvePhotoAnalysisReservation;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\FoodAnalysisData;
-use Illuminate\Support\Facades\Crypt;
 
 final readonly class DatabaseFailedPhotoAnalysisResolver implements ResolvesFailedPhotoAnalysis
 {
@@ -28,6 +27,6 @@ final readonly class DatabaseFailedPhotoAnalysisResolver implements ResolvesFail
             return null;
         }
 
-        return FoodAnalysisData::from(json_decode(Crypt::decryptString($result), true, flags: JSON_THROW_ON_ERROR));
+        return FoodAnalysisData::from(json_decode($result, true, flags: JSON_THROW_ON_ERROR));
     }
 }

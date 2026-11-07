@@ -10,6 +10,7 @@ use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
@@ -757,7 +758,7 @@ it('resumes one retry after losing its response without requiring another upload
         'guest_id' => $guestId,
         'guest_hash' => hash('sha256', $guestId),
         'status' => PhotoAnalysisStatus::Failed,
-        'failure_code' => 'provider_error',
+        'failure_code' => PhotoAnalysisFailure::ProviderError,
     ]);
 
     $first = Livewire::test('pages::snap-to-track')->assertSet('canRetryAnalysis', true);
@@ -784,7 +785,7 @@ it('asks for a new photo when too little recovery time remains to retry safely',
         'guest_id' => $guestId,
         'guest_hash' => hash('sha256', $guestId),
         'status' => PhotoAnalysisStatus::Failed,
-        'failure_code' => 'timeout',
+        'failure_code' => PhotoAnalysisFailure::Timeout,
         'expires_at' => now()->addSeconds(30),
     ]);
 

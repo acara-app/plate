@@ -2,72 +2,40 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\ResolvePhotoAnalysisReservation;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\FoodAnalysisData;
 use App\Models\AnalysisDraft;
+use App\Models\SnapPhotoAccount;
+use App\Models\SnapPhotoPeriod;
+use App\Models\SnapPhotoRequest;
 use App\Models\User;
 use App\Services\Billing\DatabaseFailedPhotoAnalysisResolver;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Crypt;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Str;
 
-it('returns no recoverable analysis when the optional ledger is unavailable', function (array $tables): void {
-    foreach ($tables as $table) {
-        Schema::create($table, function (Blueprint $blueprint): void {
-            $blueprint->id();
-        });
-    }
-
-    $context = new PhotoAnalysisContext(null, (string) Str::uuid(), (string) Str::uuid(), 'public_snap_to_track', 'photo');
-
-    expect(resolve(DatabaseFailedPhotoAnalysisResolver::class)->handle($context))->toBeNull();
-})->with([
-    'neither ledger table exists' => [[]],
-    'requests ledger is missing' => [['snap_photo_accounts']],
-    'identity ledger is missing' => [['snap_photo_requests']],
-]);
+covers(DatabaseFailedPhotoAnalysisResolver::class, ResolvePhotoAnalysisReservation::class, SnapPhotoPeriod::class);
 
 it('recovers completed results or releases only the failed logical request reservation', function (array $changes, bool $released): void {
-    $this->freezeTime();
-    Schema::create('snap_photo_accounts', function (Blueprint $table): void {
-        $table->string('subject')->primary();
-        $table->string('owner')->nullable();
-    });
-    Schema::create('snap_photo_requests', function (Blueprint $table): void {
-        $table->id();
-        $table->string('subject');
-        $table->string('request_key', 64);
-        $table->string('fingerprint', 64);
-        $table->string('guest_id')->nullable();
-        $table->string('status');
-        $table->uuid('attempt');
-        $table->string('source');
-        $table->text('result')->nullable();
-        $table->timestamp('created_at');
-        $table->unique(['subject', 'request_key']);
-    });
-    DB::table('snap_photo_accounts')->insert(['subject' => 'guest:original', 'owner' => $changes['owner'] ?? null]);
-    $requestId = (string) Str::uuid();
+    SnapPhotoAccount::factory()->create(['subject' => 'guest:original', 'owner' => $changes['owner'] ?? null]);
     $analysis = FoodAnalysisData::from(AnalysisDraft::factory()->make()->payload);
-    $reservation = [
+    $status = $changes['status'] ?? 'pending';
+    $reservations = SnapPhotoRequest::factory()->state([
         'subject' => $changes['subject'] ?? 'guest:original',
-        'request_key' => $requestId, 'fingerprint' => 'original-photo', 'guest_id' => 'original',
-        'status' => $changes['status'] ?? 'pending', 'attempt' => (string) Str::uuid(),
-        'source' => 'public_snap_to_track',
-        'result' => ($changes['status'] ?? 'pending') === 'succeeded' ? Crypt::encryptString($analysis->toJson()) : null,
-        'created_at' => isset($changes['expired']) ? now('UTC')->subDays(2) : now('UTC'),
-    ];
-    $id = DB::table('snap_photo_requests')->insertGetId($reservation);
-    $replacement = DB::table('snap_photo_requests')->insertGetId([
-        ...$reservation, 'request_key' => (string) Str::uuid(), 'attempt' => (string) Str::uuid(),
+        'fingerprint' => 'original-photo',
+        'guest_id' => 'original',
+        'status' => $status,
+        'created_at' => isset($changes['expired']) ? now()->subDays(2) : now(),
     ]);
-    $before = DB::table('snap_photo_requests')->where('id', $replacement)->first();
+    if ($status === 'succeeded') {
+        $reservations = $reservations->succeeded($analysis);
+    }
+
+    $reservation = $reservations->create();
+    $replacement = $reservations->create();
+    $replacementBefore = $replacement->fresh()?->getAttributes();
     $context = new PhotoAnalysisContext(
         isset($changes['user_id']) ? User::factory()->make(['id' => $changes['user_id']]) : null,
         array_key_exists('guest_id', $changes) ? $changes['guest_id'] : 'original',
-        $changes['request_id'] ?? $requestId,
+        $changes['request_id'] ?? $reservation->request_key,
         $changes['source'] ?? 'public_snap_to_track',
         $changes['fingerprint'] ?? 'original-photo',
     );
@@ -78,10 +46,10 @@ it('recovers completed results or releases only the failed logical request reser
         expect($result?->toArray())->toBe(($changes['recover'] ?? false) ? $analysis->toArray() : null);
     }
 
-    $actual = DB::table('snap_photo_requests')->where('id', $id)->first();
-    expect($actual->status)->toBe($released ? 'failed' : $reservation['status'])
-        ->and($actual->result)->toBe($reservation['result'])
-        ->and(DB::table('snap_photo_requests')->where('id', $replacement)->first())->toEqual($before);
+    $reservation->refresh();
+    expect($reservation->status)->toBe($released ? 'failed' : $status)
+        ->and($reservation->result)->toBe($status === 'succeeded' ? $analysis->toJson() : null)
+        ->and($replacement->fresh()?->getAttributes())->toBe($replacementBefore);
 })->with([
     'guest request' => [[], true],
     'guest request after account registration' => [['owner' => 'user:7', 'subject' => 'user:7'], true],

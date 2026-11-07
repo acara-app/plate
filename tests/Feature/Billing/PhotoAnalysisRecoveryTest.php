@@ -10,20 +10,20 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
-use App\Services\Billing\NullFailedPhotoAnalysisResolver;
 use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Str;
 
 it('recovers the charged meal into the same request after the worker fails before saving its draft', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses || resolve(ResolvesFailedPhotoAnalysis::class) instanceof NullFailedPhotoAnalysisResolver) {
+    if ($access instanceof NullPhotoAnalyses) {
         $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
     }
 
@@ -65,7 +65,7 @@ it('recovers the charged meal into the same request after the worker fails befor
 
 it('releases a timed-out pending scan and rejects its late result without charging the replacement twice', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses || resolve(ResolvesFailedPhotoAnalysis::class) instanceof NullFailedPhotoAnalysisResolver) {
+    if ($access instanceof NullPhotoAnalyses) {
         $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
     }
 
@@ -110,7 +110,7 @@ it('releases a timed-out pending scan and rejects its late result without chargi
 
 it('releases a reservation created after the host request has already failed without calling the provider', function (): void {
     $access = resolve(ManagesPhotoAnalyses::class);
-    if ($access instanceof NullPhotoAnalyses || resolve(ResolvesFailedPhotoAnalysis::class) instanceof NullFailedPhotoAnalysisResolver) {
+    if ($access instanceof NullPhotoAnalyses) {
         $this->markTestSkipped('Requires the Cloud photo analysis recovery integration.');
     }
 
@@ -143,14 +143,13 @@ it('releases a reservation created after the host request has already failed wit
 
         public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            resolve(FailPhotoAnalysis::class)->handle($this->request, 'timeout');
+            resolve(FailPhotoAnalysis::class)->handle($this->request, PhotoAnalysisFailure::Timeout);
 
             return $this->access->analyze($context, $analyze);
         }
     });
 
-    expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
-        ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
         ->and(AnalysisDraft::query()->count())->toBe(0)
@@ -182,7 +181,7 @@ it('preserves the allowance when queued work has too little recovery time remain
     app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($request->failure_code)->toBe('expired')
+        ->and($request->failure_code)->toBe(PhotoAnalysisFailure::Expired)
         ->and(AnalysisDraft::query()->count())->toBe(0)
         ->and($access->entitlement(null, $context->guestId)->remaining)->toBe(2);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
@@ -233,11 +232,10 @@ it('releases the allowance when reservation delays leave too little time for pro
         }
     });
 
-    expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
-        ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($request->failure_code)->toBe('expired')
+        ->and($request->failure_code)->toBe(PhotoAnalysisFailure::Expired)
         ->and(AnalysisDraft::query()->count())->toBe(0)
         ->and($access->entitlement(null, $context->guestId)->remaining)->toBe(2);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();

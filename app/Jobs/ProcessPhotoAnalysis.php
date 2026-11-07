@@ -8,9 +8,14 @@ use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Actions\FailPhotoAnalysis;
 use App\Actions\StoreMealPhotoAction;
+use App\Contracts\Billing\ManagesPhotoAnalyses;
+use App\Data\Billing\PhotoModel;
+use App\Data\FoodAnalysisData;
 use App\Enums\AnalysisDraftSource;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use App\Exceptions\Billing\PhotoLimitExceeded;
+use App\Exceptions\PhotoAnalysisNotProcessingException;
 use App\Models\PhotoAnalysisRequest;
 use App\Utilities\Base64Image;
 use Illuminate\Contracts\Queue\ShouldBeEncrypted;
@@ -33,7 +38,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
 
     public function __construct(public int $analysisRequestId) {}
 
-    public function handle(AnalyzeFoodPhotoAction $analyze, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $photos, FailPhotoAnalysis $failures): void
+    public function handle(ManagesPhotoAnalyses $photoAnalyses, AnalyzeFoodPhotoAction $analyzer, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $photos, FailPhotoAnalysis $failures): void
     {
         $request = PhotoAnalysisRequest::query()->metadata()->find($this->analysisRequestId);
 
@@ -41,15 +46,15 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             return;
         }
 
-        $failureCode = $request->staleFailureCode();
-        if ($failureCode !== null) {
-            $failures->handle($request, $failureCode, onlyIfStale: true);
+        $staleFailure = $request->staleFailureCode();
+        if ($staleFailure instanceof PhotoAnalysisFailure) {
+            $failures->handle($request, $staleFailure, onlyIfStale: true);
 
             return;
         }
 
         $claimed = PhotoAnalysisRequest::query()->whereKey($request->id)
-            ->where('status', PhotoAnalysisStatus::Queued)->whereFuture('deadline_at')->where('expires_at', '>', now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS))
+            ->where('status', PhotoAnalysisStatus::Queued)->admissible()
             ->update(['status' => PhotoAnalysisStatus::Processing, 'started_at' => now(), 'deadline_at' => now()->addSeconds(PhotoAnalysisRequest::PROCESSING_BUDGET_SECONDS)]);
 
         if ($claimed === 0) {
@@ -69,15 +74,19 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             $image = Base64Image::decode($base64 ?? '');
 
             if ($base64 === null || ! $image instanceof Base64Image) {
-                $failures->handle($request, 'invalid_photo');
+                $failures->handle($request, PhotoAnalysisFailure::InvalidPhoto);
 
                 return;
             }
 
-            $result = $analyze->handle($base64, $request->mime_type, context: $context, analysisRequestId: $request->id);
+            $result = $photoAnalyses->analyze($context, function (PhotoModel $model) use ($analyzer, $request, $base64, $context): FoodAnalysisData {
+                throw_unless($request->isStillProcessing(), PhotoAnalysisNotProcessingException::class);
+
+                return $analyzer->analyzeUsingModel($base64, $request->mime_type, $model, user: $context->user, requestId: $request->request_id);
+            });
 
             if ($result->items->count() === 0) {
-                $failures->handle($request, 'no_food');
+                $failures->handle($request, PhotoAnalysisFailure::NoFood);
 
                 return;
             }
@@ -103,13 +112,12 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
                     report($exception);
                 }
             }
+        } catch (PhotoAnalysisNotProcessingException) {
+            $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::Timeout : PhotoAnalysisFailure::Expired);
+        } catch (PhotoLimitExceeded) {
+            $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::LimitReached : PhotoAnalysisFailure::Expired);
         } catch (Throwable $throwable) {
-            $code = match (true) {
-                ! $request->hasProcessingBudget() => 'expired',
-                $throwable instanceof PhotoLimitExceeded => 'limit_reached',
-                default => 'provider_error',
-            };
-            $failures->handle($request, $code);
+            $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::ProviderError : PhotoAnalysisFailure::Expired);
 
             throw $throwable;
         }
@@ -119,7 +127,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
     {
         $request = PhotoAnalysisRequest::query()->metadata()->find($this->analysisRequestId);
         if ($request !== null) {
-            resolve(FailPhotoAnalysis::class)->handle($request, $exception instanceof TimeoutExceededException ? 'timeout' : 'interrupted');
+            resolve(FailPhotoAnalysis::class)->handle($request, $exception instanceof TimeoutExceededException ? PhotoAnalysisFailure::Timeout : PhotoAnalysisFailure::Interrupted);
         }
     }
 }

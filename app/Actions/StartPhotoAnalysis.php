@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\PhotoAnalysisRequest;
@@ -41,7 +42,7 @@ final readonly class StartPhotoAnalysis
 
         try {
             return DB::transaction(function () use ($requestId, $base64, $mimeType, $context, &$createdId): PhotoAnalysisRequest {
-                $request = PhotoAnalysisRequest::query()->firstOrCreate(['request_id' => $requestId], [
+                $request = PhotoAnalysisRequest::query()->createOrFirst(['request_id' => $requestId], [
                     'user_id' => $context->user?->id,
                     'guest_hash' => $context->guestId === null ? null : hash('sha256', $context->guestId),
                     'guest_id' => $context->guestId,
@@ -68,7 +69,7 @@ final readonly class StartPhotoAnalysis
         } catch (Throwable $throwable) {
             $request = $createdId === null ? null : PhotoAnalysisRequest::query()->metadata()->find($createdId);
             if ($request !== null) {
-                $this->failures->handle($request, 'dispatch_failed');
+                $this->failures->handle($request, PhotoAnalysisFailure::DispatchFailed);
             }
 
             throw $throwable;

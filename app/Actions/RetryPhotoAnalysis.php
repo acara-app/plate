@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\PhotoAnalysisFailure;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,7 @@ final readonly class RetryPhotoAnalysis
         } catch (Throwable $throwable) {
             $request = $retryId === null ? null : PhotoAnalysisRequest::query()->metadata()->find($retryId);
             if ($request !== null) {
-                $this->failures->handle($request, 'dispatch_failed');
+                $this->failures->handle($request, PhotoAnalysisFailure::DispatchFailed);
             }
 
             throw $throwable;

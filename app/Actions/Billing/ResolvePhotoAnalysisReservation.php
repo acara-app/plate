@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Actions\Billing;
 
-use Carbon\CarbonImmutable;
-use Illuminate\Database\Query\Builder;
+use App\Models\SnapPhotoAccount;
+use App\Models\SnapPhotoRequest;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 final readonly class ResolvePhotoAnalysisReservation
 {
@@ -17,15 +17,11 @@ final readonly class ResolvePhotoAnalysisReservation
             return null;
         }
 
-        if (! Schema::hasTable('snap_photo_requests') || ! Schema::hasTable('snap_photo_accounts')) {
-            return null;
-        }
-
-        $member = $userId === null ? null : 'user:'.$userId;
-        $guest = $guestId === null ? null : 'guest:'.$guestId;
+        $member = $userId === null ? null : "user:{$userId}";
+        $guest = $guestId === null ? null : "guest:{$guestId}";
 
         return DB::transaction(function () use ($member, $guest, $guestId, $requestId, $fingerprint, $source): ?string {
-            $reservation = DB::table('snap_photo_requests')
+            $reservation = SnapPhotoRequest::query()
                 ->where('request_key', $requestId)
                 ->where('fingerprint', $fingerprint)
                 ->where('source', $source)
@@ -35,32 +31,29 @@ final readonly class ResolvePhotoAnalysisReservation
                         $query->where('subject', $member);
 
                         if ($guest !== null) {
-                            $query->orWhere(fn (Builder $guestRequest): Builder => $guestRequest
-                                ->where('subject', $guest)
-                                ->whereExists(fn (Builder $account): Builder => $account->selectRaw('1')
-                                    ->from('snap_photo_accounts')->where('subject', $guest)->where('owner', $member)));
+                            $query->orWhere(fn (Builder $guestRequest): Builder => $guestRequest->where('subject', $guest)
+                                ->whereExists(SnapPhotoAccount::query()->whereKey($guest)->where('owner', $member)->toBase()));
                         }
 
                         return;
                     }
 
                     $query->where('subject', $guest)
-                        ->orWhereIn('subject', DB::table('snap_photo_accounts')->select('owner')
-                            ->where('subject', $guest)->whereNotNull('owner'));
+                        ->orWhereIn('subject', SnapPhotoAccount::query()->whereKey($guest)->whereNotNull('owner')->select('owner'));
                 })
-                ->lockForUpdate()->first();
+                ->lockForUpdate()
+                ->first();
 
             if ($reservation === null) {
                 return null;
             }
 
-            if ($reservation->status === 'succeeded' && is_string($reservation->result) && is_string($reservation->created_at)
-                && CarbonImmutable::parse($reservation->created_at)->addDay()->isFuture()) {
-                return $reservation->result;
+            if ($reservation->status === 'succeeded') {
+                return $reservation->created_at->addDay()->isFuture() ? $reservation->result : null;
             }
 
             if ($reservation->status === 'pending') {
-                DB::table('snap_photo_requests')->where('id', $reservation->id)
+                SnapPhotoRequest::query()->whereKey($reservation->id)
                     ->where('attempt', $reservation->attempt)->where('status', 'pending')
                     ->update(['status' => 'failed', 'result' => null]);
             }

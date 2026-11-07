@@ -28,7 +28,7 @@ final class AiTransparency
             ],
             [
                 'q' => 'Is my food photo kept private?',
-                'a' => 'Your photo is sent to the configured AI provider to generate the nutrition estimate. We keep an encrypted recovery copy while the scan runs so a lost connection does not require another upload. The recovery copy is removed on success; failed scans can be retried for up to one hour, then expired copies are removed by scheduled cleanup. Recovery results are available only to the originating browser session or account. Signed-in users can also keep meal photos in their private food history.',
+                'a' => 'Yes. Your photo is only used to estimate the nutrition in your meal, and we never use it to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, you can also keep meal photos in your private food history.',
             ],
             [
                 'q' => 'How do I use Snap to Track?',

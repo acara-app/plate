@@ -68,7 +68,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bindIf(OffersSubscriptions::class, DefaultSubscriptionOffers::class);
         $this->app->bindIf(ProvidesAiBudget::class, NullAiBudget::class);
         $this->app->bindIf(ManagesPhotoAnalyses::class, NullPhotoAnalyses::class);
-        $this->app->bindIf(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
+        $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
         $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);
         $this->app->bindIf(TracksPhotoConversion::class, NullPhotoConversion::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);

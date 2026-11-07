@@ -11,23 +11,22 @@ use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoEntitlement;
 use App\Data\FoodAnalysisData;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
+use App\Exceptions\Billing\PhotoLimitExceeded;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
+use App\Models\MealPhoto;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
-use App\Services\Billing\NullFailedPhotoAnalysisResolver;
 use App\Services\Billing\NullPhotoAnalyses;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-
-beforeEach(function (): void {
-    app()->bind(ResolvesFailedPhotoAnalysis::class, NullFailedPhotoAnalysisResolver::class);
-});
 
 it('accepts an encrypted recoverable analysis once without contacting the provider', function (): void {
     Queue::fake();
@@ -79,7 +78,7 @@ it('keeps an ordinary provider failure recoverable without creating a draft', fu
 
     $request->refresh();
     expect($request->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($request->failure_code)->toBe('provider_error')
+        ->and($request->failure_code)->toBe(PhotoAnalysisFailure::ProviderError)
         ->and($request->image_base64)->not->toBeNull()
         ->and($request->canRetry())->toBeTrue()
         ->and(AnalysisDraft::query()->count())->toBe(0);
@@ -103,7 +102,30 @@ it('recovers a charged result if the worker dies before it creates the public dr
         ->and(AnalysisDraft::query()->count())->toBe(1);
 });
 
-it('reconciles stale processing or abandoned queued work without starting it again', function (PhotoAnalysisStatus $status, string $code): void {
+it("keeps a signed-in member's meal photo when their charged result is recovered", function (): void {
+    Storage::fake('s3');
+    $member = User::factory()->create();
+    $photo = UploadedFile::fake()->image('meal.jpg');
+    $image = base64_encode((string) file_get_contents($photo->getRealPath()));
+    $request = PhotoAnalysisRequest::factory()->create([
+        'status' => PhotoAnalysisStatus::Processing, 'user_id' => $member->id, 'guest_id' => null, 'guest_hash' => null,
+        'image_base64' => $image, 'fingerprint' => hash('sha256', $image), 'mime_type' => 'image/jpeg',
+    ]);
+    $resolver = Mockery::mock(ResolvesFailedPhotoAnalysis::class);
+    $resolver->shouldReceive('handle')->once()->andReturn(FoodAnalysisData::from(AnalysisDraft::factory()->make()->payload));
+    app()->instance(ResolvesFailedPhotoAnalysis::class, $resolver);
+
+    new ProcessPhotoAnalysis($request->id)->failed(new TimeoutExceededException('Timed out'));
+
+    $mealPhoto = MealPhoto::query()->sole();
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Succeeded)
+        ->and($request->image_base64)->toBeNull()
+        ->and($mealPhoto->user_id)->toBe($member->id)
+        ->and($mealPhoto->analysis_draft_id)->toBe(AnalysisDraft::query()->sole()->id);
+    Storage::disk('s3')->assertExists($mealPhoto->path);
+});
+
+it('reconciles stale processing or abandoned queued work without starting it again', function (PhotoAnalysisStatus $status, PhotoAnalysisFailure $code): void {
     $request = PhotoAnalysisRequest::factory()->create(['status' => $status, 'deadline_at' => now()->subSecond()]);
     FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
 
@@ -118,8 +140,8 @@ it('reconciles stale processing or abandoned queued work without starting it aga
         ->and($request->canRetry())->toBeTrue();
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
 })->with([
-    'worker stopped' => [PhotoAnalysisStatus::Processing, 'timeout'],
-    'queue abandoned' => [PhotoAnalysisStatus::Queued, 'queue_timeout'],
+    'worker stopped' => [PhotoAnalysisStatus::Processing, PhotoAnalysisFailure::Timeout],
+    'queue abandoned' => [PhotoAnalysisStatus::Queued, PhotoAnalysisFailure::QueueTimeout],
 ]);
 
 it('retries a failed photo once with a new immutable request id after a lost retry response', function (): void {
@@ -170,7 +192,7 @@ it('expires a stalled input and refuses retrying it past its recovery window', f
     Queue::fake();
     $request = PhotoAnalysisRequest::factory()->create(['deadline_at' => now()->subHour(), 'expires_at' => now()->subSecond()]);
 
-    expect(resolve(FailPhotoAnalysis::class)->handle($request, 'expired', onlyIfStale: true))->toBeTrue()
+    expect(resolve(FailPhotoAnalysis::class)->handle($request, PhotoAnalysisFailure::Expired, onlyIfStale: true))->toBeTrue()
         ->and($request->image_base64)->toBeNull()
         ->and($request->canRetry())->toBeFalse()
         ->and(new PhotoAnalysisRequest()->prunable()->whereKey($request->id)->exists())->toBeTrue();
@@ -241,7 +263,7 @@ it('keeps a failed queue submission recoverable when dispatch fails after commit
 
     $stored = PhotoAnalysisRequest::query()->sole();
     expect($stored->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($stored->failure_code)->toBe('dispatch_failed')
+        ->and($stored->failure_code)->toBe(PhotoAnalysisFailure::DispatchFailed)
         ->and($stored->canRetry())->toBeTrue()
         ->and($stored->image_base64)->not->toBeNull();
 });
@@ -262,7 +284,7 @@ it('keeps the retry child recoverable when queue dispatch fails after its outer 
 
     $retry = PhotoAnalysisRequest::query()->where('request_id', $previous->refresh()->retry_request_id)->sole();
     expect($retry->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($retry->failure_code)->toBe('dispatch_failed')
+        ->and($retry->failure_code)->toBe(PhotoAnalysisFailure::DispatchFailed)
         ->and($retry->image_base64)->not->toBeNull();
 });
 
@@ -285,14 +307,13 @@ it('does not call the provider when the host analysis fails before the manager s
 
         public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
         {
-            resolve(FailPhotoAnalysis::class)->handle($this->request, 'timeout');
+            resolve(FailPhotoAnalysis::class)->handle($this->request, PhotoAnalysisFailure::Timeout);
 
             return new NullPhotoAnalyses()->analyze($context, $analyze);
         }
     });
 
-    expect(fn () => app()->call([new ProcessPhotoAnalysis($request->id), 'handle']))
-        ->toThrow(RuntimeException::class, 'This photo analysis is no longer processing.');
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
         ->and(AnalysisDraft::query()->count())->toBe(0);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
@@ -343,9 +364,48 @@ it('does not start nearly expired queued work after waiting for a worker', funct
     app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
 
     expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
-        ->and($request->failure_code)->toBe('expired')
+        ->and($request->failure_code)->toBe(PhotoAnalysisFailure::Expired)
         ->and($request->canRetry())->toBeFalse()
         ->and($request->failureMessage())->toContain('Choose a photo to start a new scan.')
         ->and(AnalysisDraft::query()->count())->toBe(0);
     FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
+it('settles a scan that runs out of allowance without failing the job', function (): void {
+    $request = PhotoAnalysisRequest::factory()->create();
+    FoodPhotoAnalyzerAgent::fake()->preventStrayPrompts();
+    app()->instance(ManagesPhotoAnalyses::class, new readonly class implements ManagesPhotoAnalyses
+    {
+        public function enabled(): bool
+        {
+            return true;
+        }
+
+        public function entitlement(?User $user, ?string $guestId): PhotoEntitlement
+        {
+            return new PhotoEntitlement(enabled: true, limit: 2, used: 2, mode: 'trial');
+        }
+
+        public function analyze(PhotoAnalysisContext $context, Closure $analyze): FoodAnalysisData
+        {
+            throw new PhotoLimitExceeded($this->entitlement($context->user, $context->guestId));
+        }
+    });
+
+    app()->call([new ProcessPhotoAnalysis($request->id), 'handle']);
+
+    expect($request->refresh()->status)->toBe(PhotoAnalysisStatus::Failed)
+        ->and($request->failure_code)->toBe(PhotoAnalysisFailure::LimitReached)
+        ->and($request->failureMessage())->toBe('Your scan allowance is used up. Choose a plan to continue.')
+        ->and(AnalysisDraft::query()->count())->toBe(0);
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+});
+
+it('leaves an analysis running when it stops being stale before the poll can settle it', function (): void {
+    $request = PhotoAnalysisRequest::factory()->create(['status' => PhotoAnalysisStatus::Processing, 'deadline_at' => now()->subSecond()]);
+    PhotoAnalysisRequest::query()->whereKey($request->id)->update(['deadline_at' => now()->addMinute()]);
+
+    expect($request->staleFailureCode())->toBe(PhotoAnalysisFailure::Timeout)
+        ->and(resolve(FailPhotoAnalysis::class)->handle($request, PhotoAnalysisFailure::Timeout, onlyIfStale: true))->toBeFalse()
+        ->and($request->fresh()?->status)->toBe(PhotoAnalysisStatus::Processing);
 });

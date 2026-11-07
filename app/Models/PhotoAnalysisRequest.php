@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Data\Billing\PhotoAnalysisContext;
+use App\Enums\PhotoAnalysisFailure;
 use App\Enums\PhotoAnalysisStatus;
 use Carbon\CarbonInterface;
 use Database\Factories\PhotoAnalysisRequestFactory;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -29,13 +31,14 @@ use Illuminate\Support\Facades\Log;
  * @property string|null $image_base64
  * @property string|null $draft_token
  * @property PhotoAnalysisStatus $status
- * @property string|null $failure_code
+ * @property PhotoAnalysisFailure|null $failure_code
  * @property CarbonInterface $deadline_at
  * @property CarbonInterface $expires_at
  * @property CarbonInterface|null $started_at
  * @property CarbonInterface|null $completed_at
  * @property CarbonInterface|null $failed_at
  * @property CarbonInterface $created_at
+ * @property-read User|null $user
  */
 #[Hidden(['image_base64', 'guest_id', 'draft_token'])]
 final class PhotoAnalysisRequest extends Model
@@ -49,8 +52,11 @@ final class PhotoAnalysisRequest extends Model
 
     public const int PROCESSING_BUDGET_SECONDS = 120;
 
-    /** @var list<string> */
-    protected $guarded = [];
+    /** @return BelongsTo<User, $this> */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 
     public function ownedBy(?User $user, ?string $guestId): bool
     {
@@ -89,26 +95,25 @@ final class PhotoAnalysisRequest extends Model
     public function failureMessage(): string
     {
         if ($this->isExpired()) {
-            return 'This photo has expired. Choose a photo to start a new scan.';
+            return PhotoAnalysisFailure::Expired->message();
         }
 
         if (! $this->hasProcessingBudget()) {
             return 'This photo is too close to expiry to retry. Choose a photo to start a new scan.';
         }
 
-        return match ($this->failure_code) {
-            'no_food' => 'No food items were detected. Try a clearer photo with better lighting.',
-            'expired' => 'This photo has expired. Choose a photo to start a new scan.',
-            'limit_reached' => 'Your scan allowance is used up. Choose a plan to continue.',
-            'timeout', 'queue_timeout', 'interrupted' => 'This analysis could not finish. Your photo is ready to retry without uploading again.',
-            default => 'This analysis could not finish. Please try again.',
-        };
+        return $this->failure_code?->message() ?? PhotoAnalysisFailure::ProviderError->message();
+    }
+
+    public function isStillProcessing(): bool
+    {
+        return self::query()->whereKey($this->id)->where('status', PhotoAnalysisStatus::Processing)->admissible()->exists();
     }
 
     public function context(): PhotoAnalysisContext
     {
         return new PhotoAnalysisContext(
-            $this->user_id === null ? null : User::query()->find($this->user_id),
+            $this->user,
             $this->guest_id,
             $this->request_id,
             $this->source,
@@ -116,21 +121,21 @@ final class PhotoAnalysisRequest extends Model
         );
     }
 
-    public function staleFailureCode(): ?string
+    public function staleFailureCode(): ?PhotoAnalysisFailure
     {
         if (! $this->isPending()) {
             return null;
         }
 
         if ($this->isExpired() || ($this->status === PhotoAnalysisStatus::Queued && ! $this->hasProcessingBudget())) {
-            return 'expired';
+            return PhotoAnalysisFailure::Expired;
         }
 
         if ($this->deadline_at->isFuture()) {
             return null;
         }
 
-        return $this->status === PhotoAnalysisStatus::Queued ? 'queue_timeout' : 'timeout';
+        return $this->status === PhotoAnalysisStatus::Queued ? PhotoAnalysisFailure::QueueTimeout : PhotoAnalysisFailure::Timeout;
     }
 
     public function recordOutcome(): void
@@ -139,7 +144,7 @@ final class PhotoAnalysisRequest extends Model
             'request_id' => $this->request_id,
             'source' => $this->source,
             'outcome' => $this->status->value,
-            'failure_code' => $this->failure_code,
+            'failure_code' => $this->failure_code?->value,
             'total_ms' => max(0, (int) $this->created_at->diffInMilliseconds(now())),
             'processing_ms' => $this->started_at === null ? null : max(0, (int) $this->started_at->diffInMilliseconds(now())),
         ]);
@@ -160,12 +165,20 @@ final class PhotoAnalysisRequest extends Model
             'image_base64' => 'encrypted',
             'draft_token' => 'encrypted',
             'status' => PhotoAnalysisStatus::class,
+            'failure_code' => PhotoAnalysisFailure::class,
             'deadline_at' => 'datetime',
             'expires_at' => 'datetime',
             'started_at' => 'datetime',
             'completed_at' => 'datetime',
             'failed_at' => 'datetime',
         ];
+    }
+
+    /** @param Builder<self> $query */
+    #[Scope]
+    protected function admissible(Builder $query): void
+    {
+        $query->whereFuture('deadline_at')->where('expires_at', '>', now()->addSeconds(self::PROCESSING_BUDGET_SECONDS));
     }
 
     /** @param Builder<self> $query */
