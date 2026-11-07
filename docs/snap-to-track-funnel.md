@@ -34,16 +34,16 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Analysis failed | `snap_to_track_analysis_failed` | The analysis ended without a usable result (`no_food`, `timeout`, `provider_error`, `start_failed`, …). Error state. |
 | Result viewed | `snap_to_track_result_viewed` | The guest result page showed an unexpired, unsaved meal. |
 | Offer viewed | `snap_to_track_offer_viewed` | A paid plan offer was on screen: `result`, `result_bar` (mobile action bar) or `wall` (scan limit). Clicking it also counts as seeing it. |
-| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal, recorded before the page navigates away. |
+| Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). Recorded before the page navigates away. |
 | Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. |
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
 | Checkout clicked | `snap_to_track_checkout_click` | The plan page asked the server to open a Stripe checkout. |
 | Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. |
 | Checkout failed | `snap_to_track_checkout_failed` | The checkout could not open (`already_subscribed` or `error`). Error state. |
-| Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment. |
+| Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment, and a payment doesn't need it. |
 | Checkout cancelled | `snap_to_track_checkout_cancelled` | The browser came back from Stripe through the cancel link. |
-| First payment | `snap_to_track_first_payment` | A signed Stripe webhook confirmed the first paid invoice of a subscription. |
+| First payment | `snap_to_track_first_payment` | A signed Stripe webhook confirmed the paid invoice that created a subscription. |
 
 `--definitions` prints the same list with each stage's de-duplication rule.
 
@@ -51,15 +51,15 @@ The report counts three ordered paths:
 
 - **Scan:** Photo selected → Analysis requested → Result viewed → Offer viewed
 - **Save path:** Result viewed → Save clicked → Signed up or logged in → Meal saved
-- **Upgrade path:** Offer viewed → Upgrade clicked → Signed up or logged in → Checkout clicked → Checkout opened → Returned from checkout → First payment
+- **Upgrade path:** Offer viewed → Upgrade clicked → Signed up or logged in → Checkout clicked → Checkout opened → First payment
 
-A journey counts at a step only if it reached every earlier step of that path first, in order. "Signed up or logged in" also counts when the journey was already signed in before the previous step.
+A journey counts at a step only if it reached every earlier step of that path first, in order. "Signed up or logged in" also counts when the journey was already signed in before the previous step. "Returned from checkout" isn't a step: Stripe often confirms the payment before the browser comes back, and some buyers never come back. Returns appear under errors and pending states and in the raw totals.
 
 ## De-duplication
 
 - Every event has a unique key built from its stage, its journey and the attempt it belongs to (an upload, an analysis request, a result, a checkout). Reloads, re-renders, double clicks and repeated success-page visits therefore write nothing new.
 - Funnel numbers count unique journeys. Raw event totals are listed separately and do include repeats, such as several uploads, a retried analysis or offers seen on two results.
-- First payments are counted once per Stripe subscription. Only signed `invoice.paid` and `invoice.payment_succeeded` webhooks with `amount_paid` above zero count. None of the following adds another: a trial start, a failed or unpaid invoice, a renewal, a webhook replay, a success-page visit or an entitlement change.
+- First payments are counted once per Stripe subscription. Only signed `invoice.paid` and `invoice.payment_succeeded` webhooks count, and only for the invoice that created the subscription (`billing_reason` `subscription_create`) with `amount_paid` above zero. None of the following adds one: a renewal (including renewals of subscriptions that started before the ledger), a trial start, a failed or unpaid invoice, a webhook replay, a success-page visit or an entitlement change. A trial that converts later wouldn't be counted; no current plan has a trial.
 - While `STRIPE_WEBHOOK_SECRET` is unset, Cashier skips signature checks, so no payment is recorded at all.
 
 ## Errors and pending states
@@ -71,7 +71,7 @@ These are listed beside the funnel, not inside it:
 - analysis requested with no outcome recorded (still running, or interrupted with nobody left to check it);
 - checkout failed, by reason;
 - checkout cancelled;
-- checkout opened but never returned or paid (abandoned);
+- checkout opened but never returned, cancelled or paid (abandoned);
 - returned from checkout but payment not confirmed.
 
 ## Payments and reconciliation
@@ -81,11 +81,11 @@ These are listed beside the funnel, not inside it:
 
 ## What Umami still shows
 
-Umami keeps the raw browser events and acquisition analytics. Where its event names overlap with the stage names above, they're identical. Its counts are raw events, not journeys. Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
+Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links. Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
 
 ## Recording a change
 
-There are no flow versions. When a change alters the journey's screens, copy or offer, add a dated line to the history notes below and to `BuildSnapFunnelReport::HISTORY`, so every later report flags the break. Treat before-and-after differences as observational evidence, not proof that the change caused them.
+There are no flow versions. When a change alters the journey's screens, copy or offer, add a dated line to `BuildSnapFunnelReport::HISTORY`. Every later report then prints it in its notes. Treat before-and-after differences as observational evidence, not proof that the change caused them.
 
 ## Privacy
 
@@ -93,11 +93,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-- **Ledger start (the deploy date of this change, printed by the report):** journeys and confirmed first payments before this date were never recorded and are not estimated. Don't build a "comparable" historical funnel from Umami totals.
-- **2026-11-04:** guest results moved to `/tools/snap-to-track/result`. Umami result and offer counts before and after this date come from different pages.
-- **2026-10-24:** Umami events changed meaning, so totals across this date aren't comparable:
-  - `snap_to_track_upload_click` became `snap_to_track_upload_selected`: a photo was chosen, not just the button clicked.
-  - `snap_to_track_payment_verified` became `snap_to_track_checkout_returned`: a browser return, not a payment.
-  - Result and offer views moved from render time to on-screen, with de-duplication.
-  - The `exhausted` and `authenticated` properties were dropped.
-  - Save clicks stopped also sending `snap_to_track_auth_started`.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes and the 2026-11-04 move of guest results to their own page. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.

@@ -57,16 +57,16 @@ enum SnapFunnelStage: string
             self::AnalysisFailed => 'The analysis ended without a usable result (failure). Error state. Once per analysis request.',
             self::ResultViewed => 'The guest result page showed an unexpired, unsaved meal. Once per analysis; reloads do not repeat it.',
             self::OfferViewed => 'A paid plan offer was on screen (placement, plan); clicking it also counts as seeing it. Once per placement and result.',
-            self::SaveClicked => 'The guest chose to save the meal (auth_path), recorded before the page navigates away. Once per result.',
+            self::SaveClicked => 'The guest chose to save the meal (auth_path): a Save button, or a Log in link that continues to saving. Recorded before the page navigates away. Once per result.',
             self::UpgradeClicked => 'The guest chose a paid plan from an offer (placement, plan), recorded before the page navigates away. Once per placement and result.',
             self::AuthCompleted => "The journey's browser finished sign-up or log-in (method). Once per account.",
             self::MealSaved => 'A meal from the public Snap to Track result was saved to the food log. Once per meal.',
             self::CheckoutClicked => 'The plan page asked the server to open a Stripe checkout (plan, interval). Every request counts as a raw event.',
             self::CheckoutStarted => 'Stripe created the checkout session and the browser was sent to it (plan, interval). Once per checkout request.',
             self::CheckoutFailed => 'The checkout could not open (reason). Error state.',
-            self::CheckoutReturned => 'The browser came back to the success page (entitlement). Not proof of payment. Once per checkout.',
+            self::CheckoutReturned => 'The browser came back to the success page (entitlement). Not proof of payment, and not needed for one. Once per checkout.',
             self::CheckoutCancelled => 'The browser came back from Stripe through the cancel link. Once per checkout.',
-            self::FirstPayment => 'A signed Stripe webhook confirmed the first paid invoice of a subscription (plan, amount, live). Once per subscription; replays, renewals, trials and unpaid invoices never add another.',
+            self::FirstPayment => 'A signed Stripe webhook confirmed the paid invoice that created a subscription (plan, amount, live). Once per subscription; replays, renewals, trial starts and unpaid invoices never add another.',
         };
     }
 }

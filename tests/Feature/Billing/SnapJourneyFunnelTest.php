@@ -103,7 +103,7 @@ function snapFunnelSteps(array $report, string $path): array
     return array_column($report['paths'][$path], 'journeys');
 }
 
-it('follows a guest from a selected photo to a first payment confirmed after the browser session ends', function (): void {
+it('follows a guest from a selected photo to a payment confirmed after they leave Stripe without returning', function (): void {
     $starter = sellPhotoPlans();
     $guest = (string) Str::uuid();
     session()->put('snap_to_track.analysis_guest_id', $guest);
@@ -125,8 +125,6 @@ it('follows a guest from a selected photo to a first payment confirmed after the
     $metadata = fakeSnapJourneyCheckout();
     $this->post(route('checkout.subscription.store'), ['product_id' => $starter->id, 'billing_interval' => 'monthly'])
         ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_snap');
-    $this->get(route('checkout.success'))->assertOk();
-    $this->get(route('checkout.success'))->assertOk();
 
     Auth::logout();
     $this->flushSession();
@@ -147,10 +145,9 @@ it('follows a guest from a selected photo to a first payment confirmed after the
         ->device->toBe('mobile')
         ->acquisition_source->toBe('newsletter')
         ->and(snapFunnelSteps($report, 'scan'))->toBe([1, 1, 1, 1])
-        ->and(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 1, 1])
+        ->and(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 1])
         ->and($report['raw_events'])->toMatchArray([
             SnapFunnelStage::ResultViewed->value => 1,
-            SnapFunnelStage::CheckoutReturned->value => 1,
             SnapFunnelStage::FirstPayment->value => 1,
         ])
         ->and($report['payments'])->toMatchArray(['live' => 1, 'attributed' => 1, 'subscriptions' => 1, 'subscriptions_paid' => 1]);
@@ -172,11 +169,11 @@ it('shows an abandoned checkout from the limit wall without inventing a payment'
 
     $report = snapFunnelReport(['--by' => 'placement']);
 
-    expect(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 0, 0])
+    expect(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 0])
         ->and(array_keys($report['segments']))->toBe(['wall'])
         ->and(array_column($report['problems'], 'journeys', 'label'))->toMatchArray([
             'Checkout cancelled' => 1,
-            'Checkout opened, never returned or paid' => 1,
+            'Checkout opened, never returned or paid' => 0,
         ]);
 });
 
@@ -218,8 +215,9 @@ it('leaves staff journeys out of the funnel unless asked', function (): void {
     $guest = (string) Str::uuid();
     session()->put('snap_to_track.analysis_guest_id', $guest);
     SnapJourney::factory()->create(['guest_hash' => hash('sha256', $guest)]);
+    User::factory()->withoutTwoFactor()->create(['email' => 'staff@example.com']);
 
-    Auth::login(User::factory()->create(['email' => 'staff@example.com']));
+    $this->withCookie('photo_guest', $guest)->post(route('login.store'), ['email' => 'staff@example.com', 'password' => 'password']);
 
     expect(snapFunnelReport()['journeys'])->toBe(0)
         ->and(snapFunnelReport(['--include-internal' => true])['journeys'])->toBe(1);

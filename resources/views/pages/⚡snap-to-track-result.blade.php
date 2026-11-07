@@ -122,9 +122,7 @@ class extends Component
     public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, SnapFunnel $funnel, string $placement = 'result'): void
     {
         $placement = in_array($placement, ['result', 'result_bar'], true) ? $placement : 'result';
-        $offer = ['placement' => $placement, 'plan' => SnapFunnel::plan($this->photoAllowance->offer?->name)];
-        $funnel->record(SnapFunnelStage::OfferViewed, "{$placement}:{$this->resultKey()}", $offer);
-        $funnel->record(SnapFunnelStage::UpgradeClicked, "{$placement}:{$this->resultKey()}", $offer);
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $this->photoAllowance->offer?->name, clicked: true);
 
         $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
     }
@@ -139,10 +137,7 @@ class extends Component
             return;
         }
 
-        $funnel->record(SnapFunnelStage::OfferViewed, "{$placement}:{$this->resultKey()}", [
-            'placement' => $placement,
-            'plan' => SnapFunnel::plan($offer->name),
-        ]);
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name);
     }
 
     private function resultKey(): string

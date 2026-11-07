@@ -15,7 +15,7 @@ final readonly class RecordSnapJourneySignIn
 
     public function handle(Login $event): void
     {
-        if ($event->user instanceof User) {
+        if ($event->user instanceof User && request()->hasSession()) {
             $this->funnel->record(
                 SnapFunnelStage::AuthCompleted,
                 (string) $event->user->id,

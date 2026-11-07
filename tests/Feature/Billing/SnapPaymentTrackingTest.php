@@ -51,7 +51,7 @@ it('counts the first paid invoice of each subscription once', function (): void 
         'snap_to_track_first_payment:sub_first_payment' => $journey->id,
         'snap_to_track_first_payment:sub_elsewhere' => null,
     ])->and(SnapAnalyticsEvent::query()->where('journey_id', $journey->id)->sole()->properties)
-        ->toMatchArray(['plan' => 'starter', 'amount' => 299, 'billing_reason' => 'subscription_create', 'live' => true]);
+        ->toMatchArray(['plan' => 'starter', 'amount' => 299, 'live' => true]);
 });
 
 it('rejects forged Stripe callbacks before recording a payment', function (): void {

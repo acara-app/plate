@@ -103,9 +103,7 @@ class extends Component
     public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, string $placement = 'wall'): void
     {
         $placement = in_array($placement, ['wall', 'preview_upload'], true) ? $placement : 'wall';
-        $offer = ['placement' => $placement, 'plan' => SnapFunnel::plan($this->photoAllowance->offer?->name)];
-        $this->funnel->record(SnapFunnelStage::OfferViewed, $placement, $offer);
-        $this->funnel->record(SnapFunnelStage::UpgradeClicked, $placement, $offer);
+        $this->funnel->recordOffer($placement, $placement, $this->photoAllowance->offer?->name, clicked: true);
 
         $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
     }
@@ -120,10 +118,7 @@ class extends Component
             return;
         }
 
-        $this->funnel->record(SnapFunnelStage::OfferViewed, $placement, [
-            'placement' => $placement,
-            'plan' => SnapFunnel::plan($allowance->offer->name),
-        ]);
+        $this->funnel->recordOffer($placement, $placement, $allowance->offer->name);
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void

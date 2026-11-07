@@ -54,6 +54,16 @@ final readonly class SnapFunnel
         });
     }
 
+    public function recordOffer(string $key, string $placement, ?string $productName, bool $clicked = false): void
+    {
+        $offer = ['placement' => $placement, 'plan' => self::plan($productName)];
+        $this->record(SnapFunnelStage::OfferViewed, $key, $offer);
+
+        if ($clicked) {
+            $this->record(SnapFunnelStage::UpgradeClicked, $key, $offer);
+        }
+    }
+
     /** @param array<string, mixed> $invoice */
     public function recordFirstPayment(array $invoice, bool $live): void
     {
@@ -78,7 +88,7 @@ final readonly class SnapFunnel
         $subscription = data_get($invoice, 'parent.subscription_details.subscription', data_get($invoice, 'subscription'));
         $amount = data_get($invoice, 'amount_paid');
 
-        if (! is_string($subscription) || ! is_int($amount) || $amount <= 0 || data_get($invoice, 'status') !== 'paid') {
+        if (! is_string($subscription) || ! is_int($amount) || $amount <= 0 || data_get($invoice, 'status') !== 'paid' || data_get($invoice, 'billing_reason') !== 'subscription_create') {
             return;
         }
 
@@ -89,13 +99,11 @@ final readonly class SnapFunnel
         $journey = is_string($journeyId) && Str::isUuid($journeyId) ? SnapJourney::query()->find($journeyId) : null;
         $plan = $metadata['product_name'] ?? null;
         $currency = data_get($invoice, 'currency');
-        $billingReason = data_get($invoice, 'billing_reason');
 
         $this->write($journey?->id, SnapFunnelStage::FirstPayment, SnapFunnelStage::FirstPayment->value.":{$subscription}", [
             'plan' => self::plan(is_string($plan) ? $plan : null),
             'amount' => $amount,
             'currency' => is_string($currency) ? $currency : null,
-            'billing_reason' => is_string($billingReason) ? $billingReason : null,
             'live' => $live,
         ]);
     }
@@ -133,7 +141,7 @@ final readonly class SnapFunnel
                 ->when($userId !== null, fn (Builder $query): Builder => $query->where(
                     fn (Builder $owner): Builder => $owner->whereNull('user_id')->orWhere('user_id', $userId),
                 ))
-                ->latest('started_at')->first();
+                ->latest('started_at')->latest('id')->first();
 
             if ($journey instanceof SnapJourney) {
                 return $journey;
@@ -144,7 +152,7 @@ final readonly class SnapFunnel
             return null;
         }
 
-        return SnapJourney::query()->where('user_id', $userId)->whereFuture('expires_at')->latest('started_at')->first();
+        return SnapJourney::query()->where('user_id', $userId)->whereFuture('expires_at')->latest('started_at')->latest('id')->first();
     }
 
     private function startJourney(string $guestHash): SnapJourney

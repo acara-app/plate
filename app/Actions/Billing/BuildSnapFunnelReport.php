@@ -36,7 +36,6 @@ final readonly class BuildSnapFunnelReport
             SnapFunnelStage::AuthCompleted,
             SnapFunnelStage::CheckoutClicked,
             SnapFunnelStage::CheckoutStarted,
-            SnapFunnelStage::CheckoutReturned,
             SnapFunnelStage::FirstPayment,
         ],
     ];
@@ -47,7 +46,7 @@ final readonly class BuildSnapFunnelReport
     /** @var list<string> */
     private const array HISTORY = [
         '2026-11-04: guest results moved to /tools/snap-to-track/result, so Umami result and offer counts before and after this date come from different pages.',
-        '2026-10-24: Umami events changed meaning. snap_to_track_upload_click became snap_to_track_upload_selected (a photo was chosen), snap_to_track_payment_verified became snap_to_track_checkout_returned (a browser return, not a payment), and result and offer views became on-screen and de-duplicated. Umami totals across this date are not comparable.',
+        '2026-10-24: Umami events changed meaning. snap_to_track_upload_click became snap_to_track_upload_selected (a photo was chosen), snap_to_track_payment_verified became snap_to_track_checkout_returned (a browser return, not a payment), result and offer views became on-screen and de-duplicated, offer and upgrade events dropped the exhausted property, and save clicks stopped also sending snap_to_track_auth_started. Umami totals across this date are not comparable.',
     ];
 
     public function handle(CarbonImmutable $from, CarbonImmutable $to, bool $includeInternal = false, ?string $segmentBy = null): SnapFunnelReportData
@@ -197,7 +196,8 @@ final readonly class BuildSnapFunnelReport
         $rows[] = ['label' => 'Analysis requested, no outcome recorded', 'journeys' => $count(fn (Collection $events): bool => $this->hasUnfinishedAnalysis($events))];
         $rows[] = ['label' => SnapFunnelStage::CheckoutCancelled->label(), 'journeys' => $count(fn (Collection $events): bool => $this->has($events, SnapFunnelStage::CheckoutCancelled))];
         $rows[] = ['label' => 'Checkout opened, never returned or paid', 'journeys' => $count(fn (Collection $events): bool => $this->has($events, SnapFunnelStage::CheckoutStarted)
-            && ! $this->has($events, SnapFunnelStage::CheckoutReturned) && ! $this->has($events, SnapFunnelStage::FirstPayment))];
+            && ! $this->has($events, SnapFunnelStage::CheckoutReturned) && ! $this->has($events, SnapFunnelStage::CheckoutCancelled)
+            && ! $this->has($events, SnapFunnelStage::FirstPayment))];
         $rows[] = ['label' => 'Returned from checkout, payment not confirmed', 'journeys' => $count(fn (Collection $events): bool => $this->has($events, SnapFunnelStage::CheckoutReturned)
             && ! $this->has($events, SnapFunnelStage::FirstPayment))];
 

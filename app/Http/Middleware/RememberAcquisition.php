@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Services\Billing\PhotoPlanCatalog;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -11,10 +12,12 @@ use Symfony\Component\HttpFoundation\Response;
 
 final readonly class RememberAcquisition
 {
+    public function __construct(private PhotoPlanCatalog $catalog) {}
+
     /** @param Closure(Request): Response $next */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->isMethod('GET') && ! $request->ajax() && ! $request->hasHeader('X-Inertia') && $request->hasSession() && ! $request->session()->has('acquisition')) {
+        if ($request->isMethod('GET') && ! $request->ajax() && ! $request->hasHeader('X-Inertia') && $request->hasSession() && ! $request->session()->has('acquisition') && $this->catalog->isSelling()) {
             $request->session()->put('acquisition', ['device' => $this->device($request), ...$this->source($request)]);
         }
 
@@ -33,7 +36,7 @@ final readonly class RememberAcquisition
         $medium = $this->label($request->query('utm_medium'));
         $referrer = parse_url((string) $request->headers->get('referer'), PHP_URL_HOST);
 
-        if ($source === null && is_string($referrer) && $referrer !== $request->getHost()) {
+        if ($source === null && is_string($referrer) && Str::chopStart($referrer, 'www.') !== Str::chopStart($request->getHost(), 'www.')) {
             $source = $this->label(Str::chopStart($referrer, 'www.'));
             $medium ??= 'referral';
         }
