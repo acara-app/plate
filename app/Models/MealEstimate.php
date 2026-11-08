@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Data\ReviewedMealData;
 use App\Enums\AnalysisDraftSource;
 use App\Enums\EstimateValidationStatus;
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Database\Factories\MealEstimateFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,6 +56,28 @@ final class MealEstimate extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return array{items: list<array<string, mixed>>|null, totals: array{calories: int|null, protein: float|null, carbs: float|null, fat: float|null, fiber: float|null}}
+     */
+    public function predictedMeal(): array
+    {
+        $prediction = new ReviewedMealData(
+            items: ReviewedMealData::normalizeItems($this->original_prediction['items'] ?? null),
+            measuredAt: CarbonImmutable::now(),
+        )->toHealthLogDataWithMetadata([]);
+
+        return [
+            'items' => $prediction->foodItems,
+            'totals' => [
+                'calories' => $prediction->calories,
+                'protein' => $prediction->proteinGrams,
+                'carbs' => $prediction->carbsGrams,
+                'fat' => $prediction->fatGrams,
+                'fiber' => $prediction->fiberGrams,
+            ],
+        ];
     }
 
     /**

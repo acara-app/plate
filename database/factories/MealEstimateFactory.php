@@ -51,4 +51,30 @@ final class MealEstimateFactory extends Factory
             'corrected_at' => null,
         ];
     }
+
+    /**
+     * @param  list<array<string, mixed>>  $items
+     */
+    public function corrected(array $items): self
+    {
+        $total = fn (string $nutrient): float => round(array_sum(array_map(
+            fn (array $item): float => is_numeric($item[$nutrient] ?? null) ? (float) $item[$nutrient] : 0.0,
+            $items,
+        )), 1);
+
+        return $this->state(fn (): array => [
+            'corrected_value' => [
+                'items' => $items,
+                'totals' => [
+                    'calories' => $total('calories'),
+                    'protein' => $total('protein'),
+                    'carbs' => $total('carbs'),
+                    'fat' => $total('fat'),
+                    'fiber' => null,
+                ],
+            ],
+            'validation_status' => EstimateValidationStatus::UserCorrected,
+            'corrected_at' => now(),
+        ]);
+    }
 }

@@ -9,7 +9,6 @@ use App\Enums\EstimateValidationStatus;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\MealEstimate;
-use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
 
 final readonly class RecordMealCorrection
@@ -30,7 +29,7 @@ final readonly class RecordMealCorrection
             ->where('group_id', $groupId)
             ->get());
 
-        $isCorrected = $this->comparable($saved) !== $this->comparable($this->predictedMeal($estimate));
+        $isCorrected = $this->comparable($saved) !== $this->comparable($estimate->predictedMeal());
         $correctionChanged = $estimate->corrected_value === null || $this->comparable($estimate->corrected_value) !== $this->comparable($saved);
 
         $estimate->update([
@@ -61,28 +60,6 @@ final readonly class RecordMealCorrection
                 'carbs' => $total(HealthSyncType::Carbohydrates),
                 'fat' => $total(HealthSyncType::TotalFat),
                 'fiber' => $total(HealthSyncType::Fiber),
-            ],
-        ];
-    }
-
-    /**
-     * @return array{items: list<array<string, mixed>>|null, totals: array<string, float|int|null>}
-     */
-    private function predictedMeal(MealEstimate $estimate): array
-    {
-        $prediction = new ReviewedMealData(
-            items: ReviewedMealData::normalizeItems($estimate->original_prediction['items'] ?? null),
-            measuredAt: CarbonImmutable::now(),
-        )->toHealthLogDataWithMetadata([]);
-
-        return [
-            'items' => $prediction->foodItems,
-            'totals' => [
-                'calories' => $prediction->calories,
-                'protein' => $prediction->proteinGrams,
-                'carbs' => $prediction->carbsGrams,
-                'fat' => $prediction->fatGrams,
-                'fiber' => $prediction->fiberGrams,
             ],
         ];
     }
