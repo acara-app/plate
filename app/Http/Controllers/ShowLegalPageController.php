@@ -15,7 +15,7 @@ final readonly class ShowLegalPageController
     /**
      * @var list<string>
      */
-    public const array TRANSLATIONS = ['fr'];
+    public const array TRANSLATIONS = ['fr', 'mn'];
 
     public function __invoke(Request $request): View|RedirectResponse
     {
@@ -29,16 +29,35 @@ final readonly class ShowLegalPageController
 
         app()->setLocale($locale);
 
-        $effectiveDate = CarbonImmutable::parse(config()->string($page->versionConfigKey()))->settings(['locale' => $locale]);
-
         return view('legal-page', [
             'page' => $page,
             'locale' => $locale,
-            'effectiveDate' => $locale === 'en' ? $effectiveDate->format('F j, Y') : $effectiveDate->translatedFormat('j F Y'),
+            'ogLocale' => match ($locale) {
+                'fr' => 'fr_CA',
+                'mn' => 'mn_MN',
+                default => 'en_US',
+            },
+            'effectiveDate' => $this->formatDate(CarbonImmutable::parse(config()->string($page->versionConfigKey())), $locale),
             'alternates' => [
                 'en' => route($page->routeName()),
                 ...array_combine(self::TRANSLATIONS, array_map(fn (string $translation): string => route("{$page->routeName()}.locale", ['locale' => $translation]), self::TRANSLATIONS)),
             ],
         ]);
+    }
+
+    private function formatDate(CarbonImmutable $date, string $locale): string
+    {
+        if ($locale === 'mn') {
+            $monthOrdinal = in_array($date->month, [1, 4, 9, 11], true) ? 'дүгээр' : 'дугаар';
+            $daySuffix = in_array($date->day % 10, [1, 4, 9], true) ? 'ний' : 'ны';
+
+            return "{$date->year} оны {$date->month} {$monthOrdinal} сарын {$date->day}-{$daySuffix} өдөр";
+        }
+
+        if ($locale === 'en') {
+            return $date->format('F j, Y');
+        }
+
+        return $date->settings(['locale' => $locale])->translatedFormat('j F Y');
     }
 }
