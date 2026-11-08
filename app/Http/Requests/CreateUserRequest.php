@@ -34,7 +34,19 @@ final class CreateUserRequest extends FormRequest
                 Password::defaults(),
             ],
             'accepted_disclaimer' => ['required', 'accepted'],
+            'health_data_consent' => ['required', 'accepted'],
             'improve_food_recognition' => ['nullable', 'boolean'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'health_data_consent.required' => __('auth.register.health_data_consent_required'),
+            'health_data_consent.accepted' => __('auth.register.health_data_consent_required'),
         ];
     }
 }

@@ -14,7 +14,7 @@
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
                 <h1>Terms of Service</h1>
-                <p><strong>Last Updated: April 3, 2026</strong></p>
+                <p><strong>Last Updated: {{ \Illuminate\Support\Carbon::parse(config('plate.terms_version'))->format('F j, Y') }}</strong></p>
                 <p>
                     Welcome to Acara Plate, an open-source platform designed to provide personalized nutrition guidance through
                     AI-driven meal plans and dietary tools, including the Acara Health Sync companion app for iOS. By accessing or using our website, applications, and

@@ -2,14 +2,27 @@
 
 declare(strict_types=1);
 
+use App\Actions\RecordSignUpAgreements;
+use App\Enums\ConsentPurpose;
 use App\Http\Controllers\DisclaimerController;
+use App\Http\Controllers\UserController;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\post;
 
-covers(DisclaimerController::class);
+covers(DisclaimerController::class, UserController::class, RecordSignUpAgreements::class);
+
+function expectSignUpAgreementsRecorded(User $user): void
+{
+    expect($user->accepted_disclaimer_at)->not->toBeNull()
+        ->and($user->terms_accepted_at)->not->toBeNull()
+        ->and($user->privacy_accepted_at)->not->toBeNull()
+        ->and($user->consent_version)->toBe(config('plate.terms_version'))
+        ->and($user->privacy_version)->toBe(config('plate.privacy_policy_version'))
+        ->and($user->consentDecision(ConsentPurpose::ProcessHealthData))->toBeTrue();
+}
 
 it('renders disclaimer page for user who has not accepted', function (): void {
     $this->withoutVite();
@@ -30,21 +43,21 @@ it('requires accepted_disclaimer checkbox during registration', function (): voi
     ])->assertSessionHasErrors('accepted_disclaimer');
 });
 
-it('creates user with accepted_disclaimer_at when checkbox is accepted', function (): void {
+it('records the disclaimer, terms, privacy policy and health-data consent at email sign-up', function (): void {
     post(route('register.store'), [
         'name' => 'Test User',
         'email' => 'test@example.com',
         'password' => 'Password123!',
         'password_confirmation' => 'Password123!',
         'accepted_disclaimer' => '1',
+        'health_data_consent' => '1',
     ])->assertRedirect();
 
     assertDatabaseHas('users', [
         'email' => 'test@example.com',
     ]);
 
-    $user = User::query()->where('email', 'test@example.com')->first();
-    expect($user->accepted_disclaimer_at)->not->toBeNull();
+    expectSignUpAgreementsRecorded(User::query()->where('email', 'test@example.com')->sole());
 });
 
 it('redirects to disclaimer page when user has not accepted', function (): void {
@@ -87,19 +100,33 @@ it('redirects to the intended destination after accepting the disclaimer', funct
     actingAs($user)->get(route('dashboard'));
 
     actingAs($user)
-        ->post(route('disclaimer.accept'), ['accepted' => '1'])
+        ->post(route('disclaimer.accept'), ['accepted' => '1', 'health_data_consent' => '1'])
         ->assertRedirect(route('dashboard'));
 });
 
-it('accepts disclaimer and redirects to dashboard', function (): void {
+it('records the same agreements when a Google or Apple sign-up accepts the disclaimer', function (): void {
     $user = User::factory()->create([
         'accepted_disclaimer_at' => null,
     ]);
 
     actingAs($user)
-        ->post(route('disclaimer.accept'), ['accepted' => '1'])
+        ->post(route('disclaimer.accept'), ['accepted' => '1', 'health_data_consent' => '1'])
         ->assertRedirect();
 
-    $user->refresh();
-    expect($user->accepted_disclaimer_at)->not->toBeNull();
+    expectSignUpAgreementsRecorded($user->refresh());
+});
+
+it('requires the health-data consent at sign-up and on the disclaimer step', function (): void {
+    post(route('register.store'), [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'Password123!',
+        'accepted_disclaimer' => '1',
+    ])->assertSessionHasErrors(['health_data_consent' => __('auth.register.health_data_consent_required')]);
+
+    actingAs(User::factory()->withoutDisclaimer()->create())
+        ->post(route('disclaimer.accept'), ['accepted' => '1'])
+        ->assertSessionHasErrors('health_data_consent');
+
+    expect(User::query()->where('email', 'test@example.com')->exists())->toBeFalse();
 });

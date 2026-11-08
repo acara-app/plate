@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\CreateUser;
 use App\Actions\DeleteUser;
 use App\Actions\RecordConsent;
+use App\Actions\RecordSignUpAgreements;
 use App\Enums\ConsentPurpose;
 use App\Enums\ConsentSource;
 use App\Http\Requests\CreateUserRequest;
@@ -27,18 +28,17 @@ final readonly class UserController
         ]);
     }
 
-    public function store(CreateUserRequest $request, CreateUser $action, RecordConsent $recordConsent): RedirectResponse
+    public function store(CreateUserRequest $request, CreateUser $action, RecordSignUpAgreements $recordSignUpAgreements, RecordConsent $recordConsent): RedirectResponse
     {
         /** @var array<string, mixed> $attributes */
-        $attributes = [
-            ...$request->safe()->only(['name', 'email']),
-            'accepted_disclaimer_at' => now(),
-        ];
+        $attributes = $request->safe()->only(['name', 'email']);
 
         $user = $action->handle(
             $attributes,
             $request->string('password')->value(),
         );
+
+        $recordSignUpAgreements->handle($user);
 
         if ($request->boolean('improve_food_recognition')) {
             $recordConsent->handle($user, ConsentPurpose::ImproveFoodRecognition, true, ConsentSource::SignUp);

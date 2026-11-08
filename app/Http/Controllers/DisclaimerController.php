@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\RecordSignUpAgreements;
 use App\Http\Requests\AcceptDisclaimerRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -18,9 +19,9 @@ final readonly class DisclaimerController
         return Inertia::render('disclaimer/show');
     }
 
-    public function accept(AcceptDisclaimerRequest $request, #[CurrentUser] User $user): RedirectResponse
+    public function accept(AcceptDisclaimerRequest $request, #[CurrentUser] User $user, RecordSignUpAgreements $recordSignUpAgreements): RedirectResponse
     {
-        $user->update(['accepted_disclaimer_at' => now()]);
+        $recordSignUpAgreements->handle($user);
 
         return redirect()->intended(route('dashboard', absolute: false));
     }
