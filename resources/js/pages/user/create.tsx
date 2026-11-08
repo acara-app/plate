@@ -172,6 +172,26 @@ export default function Register({
                                 />
                             </div>
 
+                            <div className="grid gap-2">
+                                <div className="flex items-start gap-2">
+                                    <Checkbox
+                                        id="health_data_consent"
+                                        name="health_data_consent"
+                                        value="1"
+                                        className="mt-0.5"
+                                    />
+                                    <Label
+                                        htmlFor="health_data_consent"
+                                        className="text-xs leading-snug font-normal text-muted-foreground"
+                                    >
+                                        {t('register.health_data_consent')}
+                                    </Label>
+                                </div>
+                                <InputError
+                                    message={errors.health_data_consent}
+                                />
+                            </div>
+
                             <div className="flex items-start gap-2">
                                 <Checkbox
                                     id="improve_food_recognition"

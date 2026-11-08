@@ -29,6 +29,7 @@ it('may register a new user', function (): void {
             'email' => 'test@example.com',
             'password' => 'password1234',
             'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
         ]);
 
     $response->assertRedirectToRoute('dashboard');
@@ -58,6 +59,7 @@ it('keeps a newly registered user signed in after their session expires', functi
             'email' => 'test@example.com',
             'password' => 'password1234',
             'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
         ]);
 
     revisitAfterSessionExpires($response)->assertOk();
@@ -157,6 +159,7 @@ it('signs remembered devices out when the account is deleted', function (): void
             'email' => 'test@example.com',
             'password' => 'password1234',
             'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
         ]);
 
     $this->fromRoute('user-profile.edit')

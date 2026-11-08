@@ -70,6 +70,7 @@ it('carries a guest draft through email registration and verification into a sav
             'password' => 'SnapPassword123!',
             'password_confirmation' => 'SnapPassword123!',
             'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
         ])
         ->assertRedirect($saveUrl);
 
@@ -124,7 +125,7 @@ it('carries a guest draft through Google signup and the disclaimer gate into a s
 
     expect(session('url.intended'))->toBe(url($saveUrl));
 
-    $this->post(route('disclaimer.accept'), ['accepted' => '1'])
+    $this->post(route('disclaimer.accept'), ['accepted' => '1', 'health_data_consent' => '1'])
         ->assertRedirect($saveUrl);
 
     $this->get($saveUrl)->assertRedirectContains('/health-entries/');
