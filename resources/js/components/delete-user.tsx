@@ -17,8 +17,8 @@ import billing from '@/routes/billing';
 import { Form, Link, usePage } from '@inertiajs/react';
 import { useRef } from 'react';
 
-export default function DeleteUser() {
-    const passwordInput = useRef<HTMLInputElement>(null);
+export default function DeleteUser({ hasPassword }: { hasPassword: boolean }) {
+    const confirmationInput = useRef<HTMLInputElement>(null);
     const { auth } = usePage().props;
 
     return (
@@ -64,9 +64,10 @@ export default function DeleteUser() {
                             <DialogDescription>
                                 Once your account is deleted, all of its
                                 resources and data will also be permanently
-                                deleted. Please enter your password to confirm
-                                you would like to permanently delete your
-                                account.
+                                deleted.{' '}
+                                {hasPassword
+                                    ? 'Please enter your password to confirm you would like to permanently delete your account.'
+                                    : `Please type your email address (${auth.user.email}) to confirm you would like to permanently delete your account.`}
                             </DialogDescription>
 
                             <Form
@@ -74,7 +75,9 @@ export default function DeleteUser() {
                                 options={{
                                     preserveScroll: true,
                                 }}
-                                onError={() => passwordInput.current?.focus()}
+                                onError={() =>
+                                    confirmationInput.current?.focus()
+                                }
                                 resetOnSuccess
                                 className="space-y-6"
                             >
@@ -84,27 +87,53 @@ export default function DeleteUser() {
                                     errors,
                                 }) => (
                                     <>
-                                        <div className="grid gap-2">
-                                            <Label
-                                                htmlFor="password"
-                                                className="sr-only"
-                                            >
-                                                Password
-                                            </Label>
+                                        {hasPassword ? (
+                                            <div className="grid gap-2">
+                                                <Label
+                                                    htmlFor="password"
+                                                    className="sr-only"
+                                                >
+                                                    Password
+                                                </Label>
 
-                                            <Input
-                                                id="password"
-                                                type="password"
-                                                name="password"
-                                                ref={passwordInput}
-                                                placeholder="Password"
-                                                autoComplete="current-password"
-                                            />
+                                                <Input
+                                                    id="password"
+                                                    type="password"
+                                                    name="password"
+                                                    ref={confirmationInput}
+                                                    placeholder="Password"
+                                                    autoComplete="current-password"
+                                                />
 
-                                            <InputError
-                                                message={errors.password}
-                                            />
-                                        </div>
+                                                <InputError
+                                                    message={errors.password}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <div className="grid gap-2">
+                                                <Label
+                                                    htmlFor="email"
+                                                    className="sr-only"
+                                                >
+                                                    Email address
+                                                </Label>
+
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    name="email"
+                                                    ref={confirmationInput}
+                                                    placeholder={
+                                                        auth.user.email
+                                                    }
+                                                    autoComplete="off"
+                                                />
+
+                                                <InputError
+                                                    message={errors.email}
+                                                />
+                                            </div>
+                                        )}
 
                                         <DialogFooter className="gap-2">
                                             <DialogClose asChild>

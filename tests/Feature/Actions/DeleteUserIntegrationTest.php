@@ -11,15 +11,17 @@ use App\Models\GroceryItem;
 use App\Models\GroceryList;
 use App\Models\HealthSyncSample;
 use App\Models\History;
+use App\Models\MealPhoto;
 use App\Models\MealPlan;
 use App\Models\MobileSyncDevice;
 use App\Models\User;
 use App\Models\UserChatPlatformLink;
 use App\Models\UserProfile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
-covers(DeleteUser::class);
+covers(DeleteUser::class, User::class);
 
 beforeEach(function (): void {
     Storage::fake('s3');
@@ -191,4 +193,18 @@ it('does not affect another user when deleting and purging', function (): void {
     $this->assertDatabaseHas('agent_conversations', ['participant_type' => 'user', 'participant_id' => $otherUser->id]);
     $this->assertDatabaseHas('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $otherUser->id]);
     $this->assertDatabaseHas('sessions', ['user_id' => $otherUser->id]);
+});
+
+it('cleans up a pruned unverified account like a deleted one, without emailing it', function (): void {
+    Notification::fake();
+    $user = User::factory()->unverified()->create(['stripe_id' => null, 'created_at' => now()->subDays(31)]);
+    $photo = MealPhoto::directoryFor($user).'/meal.jpg';
+    Storage::disk('s3')->put($photo, 'jpeg-bytes');
+
+    $this->artisan('model:prune', ['--model' => [User::class]])->assertSuccessful();
+
+    expect($user->fresh())->toBeNull();
+    $this->assertDatabaseHas('deleted_users', ['user_id' => $user->id, 'email' => $user->email]);
+    Storage::disk('s3')->assertMissing($photo);
+    Notification::assertNothingSent();
 });
