@@ -149,6 +149,12 @@ return [
         'dismiss' => 'Dismiss privacy update',
     ],
 
+    'privacy_policy_page' => [
+        'title' => 'Privacy Policy | How We Protect Your Health Data',
+        'meta_description' => 'Your privacy is paramount. Read the Acara Plate Privacy Policy to understand how we collect, use, and protect your biometrics, health conditions, and dietary data.',
+        'back' => 'Back',
+    ],
+
     'health_data_consent_prompt' => [
         'title' => 'Please confirm how we use your health information',
         'policy_updated' => 'We\'ve also updated our Privacy Policy.',
