@@ -81,7 +81,7 @@
 
                 <h3>Can I export my health data?</h3>
                 <p>
-                    Yes! As an open source project, Acara Plate gives you complete control over your data. You can self-host the entire platform on your own infrastructure, ensuring everything stays on your servers. See the self-hosting instructions in our <a href="https://github.com/acara-app/plate" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">GitHub README</a> for full data portability.
+                    Yes. Email us at team@acara.app and we'll send you a copy of your data in a structured, machine-readable format within 30 days. If you'd rather keep everything on your own servers, Acara Plate is open source and you can self-host it. See the self-hosting instructions in our <a href="https://github.com/acara-app/plate" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">GitHub README</a> for full data portability.
                 </p>
 
                 <h3>What should I do if the app isn't working?</h3>

@@ -58,15 +58,15 @@
                 <p>
                     <strong>b. Data Usage:</strong>
                     By submitting data, you grant Acara Plate a non-exclusive, worldwide, royalty-free license to use,
-                    store, and process your data to provide personalized nutrition services, such as meal plans and
-                    dietary recommendations. This license ends when you delete your data or account, unless the data is
+                    store, and process your data to provide the Services, such as meal plans and dietary
+                    recommendations, as described in our Privacy Policy. This license ends when you delete your data or account, unless the data is
                     anonymized or shared in aggregate form.
                 </p>
                 <p>
                     <strong>c. Data Privacy:</strong>
                     Acara Plate protects your data under GDPR and other applicable laws. Your data (e.g., health
-                    conditions, dietary preferences) is stored securely and used only for generating personalized
-                    nutrition recommendations. See our Privacy Policy for details on your rights and data handling.
+                    conditions, dietary preferences) is stored securely and used only as described in our Privacy
+                    Policy, which also explains your rights and how we handle your data.
                 </p>
                 <p>
                     <strong>d. Prohibited Data:</strong>
