@@ -332,6 +332,19 @@ export function summarizeActivity(
         };
     }
 
+    const declined = steps.filter((step) => step.status === 'declined').length;
+
+    if (declined > 0) {
+        return {
+            status: 'declined',
+            label: t('chat.activity.declined', {
+                declined,
+                total: steps.length,
+            }),
+            showStatusWord: false,
+        };
+    }
+
     return {
         status: 'done',
         label: t('chat.activity.completed', { count: steps.length }),

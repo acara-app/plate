@@ -1082,6 +1082,7 @@ return [
             'completed_other' => '{{count}} étapes terminées',
             'failed' => '{{failed}} étape(s) sur {{total}} en échec',
             'stopped' => 'Arrêté après {{done}} étape(s) sur {{total}}',
+            'declined' => '{{declined}} étape(s) sur {{total}} non enregistrée(s)',
             'awaiting' => 'En attente de votre accord',
             'status' => [
                 'running' => 'En cours',
