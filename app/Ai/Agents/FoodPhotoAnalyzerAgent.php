@@ -32,7 +32,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     use Promptable;
     use ReasonsWithMediumEffort;
 
-    public const string PROMPT_VERSION = '5';
+    public const string PROMPT_VERSION = '6';
 
     public ?User $user = null;
 
@@ -103,15 +103,16 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
                 'Your task is to analyze food photos and identify ALL distinct food items with accurate per-item nutritional data.',
                 'You have extensive knowledge of food portions, calories, macronutrients (protein, carbs, fat), and dietary fiber.',
                 'You can accurately estimate portion sizes from visual inspection.',
-                'Accuracy per ingredient matters more than speed — users track per-item carbohydrate values closely and review every estimate before saving.',
+                'Accuracy per ingredient matters more than speed — users track per-item carbohydrate values closely.',
             ],
             steps: [
                 '1. Carefully identify ALL distinct food items visible in the image — do not merge separate ingredients into one entry',
-                '2. Estimate each item\'s portion as readable text (e.g., "1 medium apple", "150g rice", "50g feta cheese") AND as a numeric weight in the grams field',
-                '3. Give each item a canonical English match_name, even when name is localized to another language',
-                '4. Calculate calories, macros (protein, carbs, fat), and fiber for EACH identified food item individually — these per-item values are critical',
-                '5. Sum up total calories, macros, and fiber for the entire meal (must equal the sum of individual items)',
-                '6. Provide a confidence score based on image clarity and food recognizability',
+                '2. Estimate how much of each item is actually in the photo, not a standard serving size — use the plate, bowl, cutlery, or hands for scale. Give it as readable text (e.g., "200g rice", "2 slices of toast", "half an avocado") AND as a numeric weight in the grams field',
+                '3. Account for fats that are easy to miss — when food looks fried, sautéed, roasted, glossy, or dressed, include the cooking oil, butter, sauce, or dressing it likely contains in that item\'s values',
+                '4. Give each item a canonical English match_name, even when name is localized to another language',
+                '5. Calculate calories, macros (protein, carbs, fat), and fiber for EACH identified food item individually — these per-item values are critical',
+                '6. Sum up total calories, macros, and fiber for the entire meal (must equal the sum of individual items)',
+                '7. Provide a confidence score based on image clarity and food recognizability',
             ],
             output: $output,
         );

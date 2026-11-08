@@ -5,7 +5,8 @@ declare(strict_types=1);
 it('renders the ai accuracy page', function (): void {
     $this->get(route('ai-accuracy'))
         ->assertSuccessful()
-        ->assertSee('AI Accuracy & Limitations');
+        ->assertSee('AI Accuracy & Limitations')
+        ->assertSee('scans save straight to your food log');
 });
 
 it('keeps unbacked quantitative accuracy claims off public pages', function (string $path): void {

@@ -50,7 +50,7 @@ final class AiTransparency
             'Your photo goes through Acara\'s multimodal AI pipeline — a single pass that combines image understanding with nutrition reasoning to read your meal.',
             'In that one pass, the model identifies each distinct food item it can see, estimates the portion size visually, and generates calories, protein, carbohydrate, fat, and fiber for every item plus meal totals — values drawn from its training knowledge of standard nutrition references such as USDA FoodData Central, not retrieved from a database.',
             "Every analysis also returns a confidence score from 0 to 100, which is the model's own assessment of how clearly it could see and recognize the meal.",
-            'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, you review and can edit every item and portion before anything is saved to your history.',
+            'The same engine powers both the free Snap to Track tool and the full app. The difference: in the full app, scans save straight to your food log, where you can edit any item or portion at any time.',
         ];
     }
 
@@ -119,7 +119,7 @@ final class AiTransparency
         return [
             'Acara Plate is a wellness and awareness aid. It is not a medical device, and it does not diagnose, treat, or manage any medical condition.',
             'Photo-estimated values are explicitly not validated for insulin dosing or clinical carb counting. If a number feeds a medication decision, it needs to come from a scale, a label, or your care team — not a photo.',
-            'In the full app, every analysis is presented for your review — you can correct items and portions before anything is logged. We built it that way because the estimates are starting points, not verdicts.',
+            'In the full app, you can correct any item or portion of a logged meal at any time. We built it that way because the estimates are starting points, not verdicts.',
         ];
     }
 
