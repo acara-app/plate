@@ -60,6 +60,7 @@ final readonly class HealthEntryAssembler
                 'exercise_duration_minutes' => null,
                 'source' => $primary->entry_source?->value,
                 'meal_type' => null,
+                'meal_name' => null,
                 'food_analysis' => null,
                 'photo_url' => $primary->group_id !== null && $photoGroupIds->has($primary->group_id)
                     ? $photoRoute->urlFor($primary->group_id)
@@ -81,6 +82,10 @@ final readonly class HealthEntryAssembler
 
                 if (is_string($metadata['meal_type'] ?? null)) {
                     $entry['meal_type'] = MealType::tryFrom($metadata['meal_type'])?->value;
+                }
+
+                if (is_string($metadata['meal_name'] ?? null)) {
+                    $entry['meal_name'] = $metadata['meal_name'];
                 }
 
                 $this->mapSampleToEntry($sample, $metadata, $entry, $glucoseUnit);

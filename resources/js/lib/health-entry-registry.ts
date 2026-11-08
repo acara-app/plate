@@ -147,9 +147,14 @@ export function mealTitle(
 }
 
 export function entryTitle(entry: HealthEntry, t: TranslateFn): string {
-    return hasFood(entry)
-        ? mealTitle(entry.food_analysis?.items ?? [], entry.notes, t)
-        : t(getTypeConfig(getPrimaryType(entry)).labelKey);
+    if (!hasFood(entry)) {
+        return t(getTypeConfig(getPrimaryType(entry)).labelKey);
+    }
+
+    return (
+        entry.meal_name?.trim() ||
+        mealTitle(entry.food_analysis?.items ?? [], entry.notes, t)
+    );
 }
 
 export interface EntryBadge {

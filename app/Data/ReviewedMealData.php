@@ -22,6 +22,8 @@ final class ReviewedMealData extends Data
         public CarbonImmutable $measuredAt,
         public ?string $notes = null,
         public ?MealType $mealType = null,
+        public ?string $mealName = null,
+        public bool $mealNameProvided = false,
     ) {}
 
     /**
@@ -34,6 +36,8 @@ final class ReviewedMealData extends Data
             measuredAt: Date::parse(is_string($data['measured_at'] ?? null) ? $data['measured_at'] : 'now')->toImmutable(),
             notes: is_string($data['notes'] ?? null) && mb_trim($data['notes']) !== '' ? $data['notes'] : null,
             mealType: MealType::tryFrom(is_string($data['meal_type'] ?? null) ? $data['meal_type'] : ''),
+            mealName: is_string($data['meal_name'] ?? null) && mb_trim($data['meal_name']) !== '' ? mb_trim($data['meal_name']) : null,
+            mealNameProvided: array_key_exists('meal_name', $data),
         );
     }
 
@@ -97,6 +101,8 @@ final class ReviewedMealData extends Data
             draftReference: is_string($metadata['draft_reference'] ?? null) ? $metadata['draft_reference'] : null,
             mealType: $this->mealType,
             fiberGrams: $this->hasAny('fiber') ? $this->totalOf('fiber') : null,
+            mealName: $this->mealName,
+            mealNameProvided: $this->mealNameProvided,
         );
     }
 

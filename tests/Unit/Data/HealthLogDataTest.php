@@ -550,16 +550,18 @@ test('toSampleArrays converts pounds to kilograms', function (): void {
         ->and(round((float) $samples[0]['value'], 1))->toBe(80.0);
 });
 
-test('a manually logged meal keeps the chosen meal type on every nutrition sample', function (): void {
+test('a manually logged meal keeps the chosen meal type and name on every nutrition sample', function (): void {
     $samples = HealthLogData::fromParsedArray([
         'log_type' => 'food',
         'carbs_grams' => 45,
         'calories' => 400,
         'meal_type' => 'lunch',
+        'meal_name' => 'Pho',
     ])->toSampleArrays();
 
     expect($samples)->toHaveCount(2)
-        ->and(array_column(array_column($samples, 'metadata'), 'meal_type'))->toBe([MealType::Lunch->value, MealType::Lunch->value]);
+        ->and(array_column(array_column($samples, 'metadata'), 'meal_type'))->toBe([MealType::Lunch->value, MealType::Lunch->value])
+        ->and(array_column(array_column($samples, 'metadata'), 'meal_name'))->toBe(['Pho', 'Pho']);
 });
 
 test('a meal records fiber as its own sample only when fiber is known', function (?float $fiber, int $samples): void {

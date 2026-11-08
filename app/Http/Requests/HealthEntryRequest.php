@@ -90,6 +90,7 @@ final class HealthEntryRequest extends FormRequest
             'calories' => ['nullable', 'integer', 'min:0', 'max:5000'],
             'fiber_grams' => ['nullable', 'numeric', 'min:0', 'max:300'],
             'meal_type' => ['nullable', Rule::enum(MealType::class)],
+            'meal_name' => ['nullable', 'string', 'max:100'],
 
             'exercise_type' => [
                 $logType === HealthEntryType::Exercise->value ? 'required' : 'nullable',

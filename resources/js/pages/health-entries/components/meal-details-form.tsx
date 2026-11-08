@@ -6,14 +6,16 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
-type Details = { measured_at: string; notes: string };
+type Details = { meal_name: string; measured_at: string; notes: string };
 
 export default function DetailsForm({
     details,
+    automaticName,
     errors,
     onApply,
 }: {
     details: Details;
+    automaticName: string;
     errors: Record<string, string>;
     onApply: (details: Details) => void;
 }) {
@@ -27,6 +29,22 @@ export default function DetailsForm({
 
     return (
         <form onSubmit={submit} className="flex flex-col gap-5 px-5 pb-6">
+            <div className="flex flex-col gap-2">
+                <Label htmlFor="meal-name">
+                    {t('health_entries.detail.meal_name')}
+                </Label>
+                <Input
+                    id="meal-name"
+                    value={draft.meal_name}
+                    maxLength={100}
+                    placeholder={automaticName}
+                    className="h-12 rounded-xl text-base"
+                    onChange={(event) =>
+                        setDraft({ ...draft, meal_name: event.target.value })
+                    }
+                />
+                <InputError message={errors.meal_name} />
+            </div>
             <div className="flex flex-col gap-2">
                 <Label htmlFor="meal-measured-at">
                     {t('health_entries.common.date_time_label')}

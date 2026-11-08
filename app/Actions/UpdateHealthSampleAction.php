@@ -122,10 +122,15 @@ final readonly class UpdateHealthSampleAction
         $storedMealType = HealthSyncSample::firstMetadataIn($replaced, 'meal_type');
         $data->mealType ??= MealType::tryFrom(is_string($storedMealType) ? $storedMealType : '');
 
+        if (! $data->mealNameProvided) {
+            $storedMealName = HealthSyncSample::firstMetadataIn($replaced, 'meal_name');
+            $data->mealName = is_string($storedMealName) ? $storedMealName : null;
+        }
+
         $metadata = HealthSyncSample::firstMetadataIn($replaced, 'snap_to_track');
 
         if ($data->foodItems === null && is_array($metadata) && is_array($metadata['items'] ?? null)) {
-            $previous = new ReviewedMealData(ReviewedMealData::normalizeItems($metadata['items']), $measuredAt, mealType: $data->mealType)
+            $previous = new ReviewedMealData(ReviewedMealData::normalizeItems($metadata['items']), $measuredAt, mealType: $data->mealType, mealName: $data->mealName)
                 ->toHealthLogDataWithMetadata($metadata);
 
             $sameFiber = ! $data->fiberGramsProvided || $data->fiberGrams === $previous->fiberGrams;
