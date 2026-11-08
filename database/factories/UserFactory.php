@@ -33,6 +33,7 @@ final class UserFactory extends Factory
             'is_verified' => false,
             'locale' => 'en',
             'accepted_disclaimer_at' => now(),
+            'privacy_version' => null,
         ];
     }
 

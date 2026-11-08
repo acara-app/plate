@@ -237,7 +237,11 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     public function canUseApp(): bool
     {
-        return $this->hasVerifiedEmail() || $this->hasActiveSubscription();
+        if ($this->hasVerifiedEmail()) {
+            return true;
+        }
+
+        return $this->hasActiveSubscription();
     }
 
     public function activeSubscription(): ?Subscription
@@ -262,6 +266,14 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function requiresConsent(): bool
     {
         return $this->accepted_disclaimer_at === null;
+    }
+
+    public function needsPrivacyPolicyNotice(): bool
+    {
+        $version = config()->string('plate.privacy_policy_version');
+
+        return $this->privacy_version !== $version
+            && $this->created_at->toDateString() <= $version;
     }
 
     public function needsBiometricsReview(): bool

@@ -14,7 +14,7 @@
         <div class="mt-6">
             <div class="prose prose-slate dark:prose-invert mx-auto max-w-4xl">
                 <h1>Privacy Policy</h1>
-                <p><strong>Effective Date: November 8, 2026</strong></p>
+                <p><strong>Effective Date: {{ \Illuminate\Support\Carbon::parse(config('plate.privacy_policy_version'))->format('F j, Y') }}</strong></p>
                 <p>
                     At Acara Plate, we value your privacy and are committed to protecting your personal data. This
                     Privacy Policy explains how we collect, use, store, and protect the information you provide through
