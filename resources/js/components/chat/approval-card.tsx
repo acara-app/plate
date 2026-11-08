@@ -1,14 +1,22 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import type {
-    ApprovalCardData,
-    ApprovalDecisionsPayload,
-    ApprovalStatus,
-} from '@/types/chat';
-import { AlertCircle, Check, Clock, Loader2, X } from 'lucide-react';
-import { type ComponentType, useState } from 'react';
+import type { ApprovalCardData, ApprovalDecisionsPayload } from '@/types/chat';
+import {
+    CircleAlert,
+    CircleCheck,
+    CircleDashed,
+    CircleMinus,
+    CirclePause,
+    type LucideIcon,
+} from 'lucide-react';
+import { useId, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
+type Intent = 'approve' | 'reject';
+
+interface Decision {
+    intent: Intent;
+    outcome: 'resumed' | 'recorded';
+}
 
 interface ApprovalCardProps {
     approval: ApprovalCardData;
@@ -17,55 +25,10 @@ interface ApprovalCardProps {
     ) => Promise<'resumed' | 'recorded'>;
 }
 
-interface StatusPresentation {
-    badgeLabel: string;
-    badgeClassName: string;
-    footerLabel: string;
-    footerClassName: string;
-    FooterIcon: ComponentType<{ className?: string }>;
-    footerSpin?: boolean;
-}
+const COPY_GROUPS = ['log_health_entry'];
 
-const STATUS_PRESENTATION: Record<ApprovalStatus, StatusPresentation> = {
-    pending: {
-        badgeLabel: 'Awaiting review',
-        badgeClassName: 'bg-muted text-muted-foreground',
-        footerLabel: 'Please approve or dismiss.',
-        footerClassName: 'text-muted-foreground',
-        FooterIcon: Clock,
-    },
-    submitted: {
-        badgeLabel: 'Submitted',
-        badgeClassName:
-            'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
-        footerLabel: 'Waiting on the other entries.',
-        footerClassName: 'text-amber-600 dark:text-amber-400',
-        FooterIcon: Loader2,
-        footerSpin: true,
-    },
-    approved: {
-        badgeLabel: 'Saved',
-        badgeClassName:
-            'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
-        footerLabel: 'Saved successfully.',
-        footerClassName: 'text-emerald-600 dark:text-emerald-400',
-        FooterIcon: Check,
-    },
-    rejected: {
-        badgeLabel: 'Dismissed',
-        badgeClassName: 'bg-muted text-muted-foreground',
-        footerLabel: 'Nothing was saved.',
-        footerClassName: 'text-muted-foreground',
-        FooterIcon: X,
-    },
-    abandoned: {
-        badgeLabel: 'Not confirmed',
-        badgeClassName: 'bg-muted text-muted-foreground',
-        footerLabel: 'The conversation moved on, so nothing was saved.',
-        footerClassName: 'text-muted-foreground',
-        FooterIcon: Clock,
-    },
-};
+const FOCUS_RING =
+    'focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
 
 function summaryOf(approval: ApprovalCardData): string {
     if (approval.reason) {
@@ -77,122 +40,202 @@ function summaryOf(approval: ApprovalCardData): string {
     return typeof summary === 'string' ? summary : approval.tool;
 }
 
+function useApprovalCopy(tool: string) {
+    const { t } = useTranslation('common');
+    const group = COPY_GROUPS.includes(tool) ? tool : 'generic';
+
+    return (key: string): string => t(`chat.approval.${group}.${key}`);
+}
+
+function ResolvedApproval({
+    Icon,
+    iconClassName,
+    label,
+    summary,
+}: {
+    Icon: LucideIcon;
+    iconClassName: string;
+    label: string;
+    summary: string;
+}) {
+    return (
+        <div role="status" className="flex items-start gap-2 text-sm">
+            <Icon
+                className={cn('mt-0.5 size-4 shrink-0', iconClassName)}
+                strokeWidth={1.75}
+                aria-hidden="true"
+            />
+            <div className="min-w-0">
+                <p className="text-foreground/80">{label}</p>
+                <p className="mt-0.5 text-[13px] leading-5 text-muted-foreground">
+                    {summary}
+                </p>
+            </div>
+        </div>
+    );
+}
+
 export function ApprovalCard({ approval, onDecide }: ApprovalCardProps) {
-    const { t } = useTranslation();
+    const { t } = useTranslation('common');
+    const copy = useApprovalCopy(approval.tool);
+    const titleId = useId();
+    const descriptionId = useId();
     const [processing, setProcessing] = useState(false);
-    const [submitted, setSubmitted] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    const [decision, setDecision] = useState<Decision | null>(null);
+    const [failed, setFailed] = useState(false);
 
-    // A decision only queues a turn, so the card stays non-committal until the
-    // resumed turn reports the tool's result — or a reload reads it back.
-    const status: ApprovalStatus =
-        approval.status === 'pending' && submitted
-            ? 'submitted'
-            : approval.status;
+    const summary = summaryOf(approval);
 
-    const isFoodEntry = approval.arguments.log_type === 'food';
-    const canDecide = approval.status === 'pending' && !submitted && !!onDecide;
-
-    async function submit(intent: 'approve' | 'reject') {
+    async function decide(intent: Intent) {
         if (!onDecide || processing) {
             return;
         }
 
         setProcessing(true);
-        setError(null);
+        setFailed(false);
 
         try {
-            await onDecide({ [approval.toolCallId]: { action: intent } });
-            setSubmitted(true);
+            const outcome = await onDecide({
+                [approval.toolCallId]: { action: intent },
+            });
+            setDecision({ intent, outcome });
         } catch {
-            setError('Something went wrong. Please try again.');
+            setFailed(true);
         } finally {
             setProcessing(false);
         }
     }
 
+    if (approval.status === 'approved') {
+        return (
+            <ResolvedApproval
+                Icon={CircleCheck}
+                iconClassName="text-emerald-600 dark:text-emerald-400"
+                label={copy('approved')}
+                summary={summary}
+            />
+        );
+    }
+
+    if (approval.status === 'rejected' || approval.status === 'abandoned') {
+        return (
+            <ResolvedApproval
+                Icon={CircleMinus}
+                iconClassName="text-muted-foreground"
+                label={
+                    approval.status === 'rejected'
+                        ? copy('rejected')
+                        : t('chat.approval.abandoned')
+                }
+                summary={summary}
+            />
+        );
+    }
+
+    if (approval.status === 'submitted' || decision?.outcome === 'recorded') {
+        return (
+            <ResolvedApproval
+                Icon={CirclePause}
+                iconClassName="text-amber-600 dark:text-amber-400"
+                label={t('chat.approval.recorded')}
+                summary={summary}
+            />
+        );
+    }
+
+    if (decision) {
+        return (
+            <ResolvedApproval
+                Icon={CircleDashed}
+                iconClassName="text-foreground/70 motion-safe:animate-spin motion-safe:[animation-duration:2.4s]"
+                label={copy(
+                    decision.intent === 'approve' ? 'approving' : 'declining',
+                )}
+                summary={summary}
+            />
+        );
+    }
+
+    const isFoodEntry = approval.arguments.log_type === 'food';
+
     return (
-        <Card className="my-2 gap-0 overflow-hidden border border-border/60 bg-card/80 backdrop-blur-sm">
-            <CardContent className="px-4 py-3">
-                <div className="flex items-start justify-between gap-3">
-                    <p className="text-sm text-foreground">
-                        {summaryOf(approval)}
-                    </p>
-                    <StatusBadge status={status} />
-                </div>
+        <section
+            aria-labelledby={titleId}
+            aria-describedby={descriptionId}
+            className="rounded-xl border border-border bg-card p-4 duration-300 motion-safe:animate-in motion-safe:fade-in sm:p-5"
+        >
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+                <h3
+                    id={titleId}
+                    className="flex items-center gap-2 text-sm font-semibold text-foreground"
+                >
+                    <CirclePause
+                        className="size-4 shrink-0 text-amber-600 dark:text-amber-400"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                    />
+                    {copy('title')}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                    {t('chat.approval.waiting')}
+                </p>
+            </div>
+
+            <p className="mt-3 text-base leading-7 font-medium text-foreground">
+                {summary}
+            </p>
+
+            <div id={descriptionId} className="mt-1 space-y-1.5">
+                <p className="text-sm leading-6 text-muted-foreground">
+                    {copy('body')}
+                </p>
                 {isFoodEntry && (
-                    <p className="mt-2 text-xs text-muted-foreground">
+                    <p className="text-xs leading-5 text-muted-foreground">
                         {t('tools:carb_boundary_notice')}
                     </p>
                 )}
-                {error && (
-                    <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500 dark:text-red-400">
-                        <AlertCircle className="size-3.5 shrink-0" />
-                        {error}
-                    </p>
-                )}
-            </CardContent>
+            </div>
 
-            <CardFooter className="border-t border-border/40 px-4 py-2.5">
-                {canDecide ? (
-                    <div className="flex w-full gap-2">
-                        <Button
-                            size="sm"
-                            className="flex-1 bg-linear-to-br from-emerald-500 to-emerald-600 text-white shadow-sm transition-all hover:from-emerald-600 hover:to-emerald-700 hover:shadow-md active:scale-[0.98]"
-                            disabled={processing}
-                            onClick={() => void submit('approve')}
-                        >
-                            {processing ? (
-                                <Loader2 className="size-4 animate-spin" />
-                            ) : (
-                                <Check className="size-4" />
-                            )}
-                            Approve
-                        </Button>
-                        <Button
-                            size="sm"
-                            variant="outline"
-                            className="flex-1 transition-all hover:bg-destructive/5 hover:text-destructive active:scale-[0.98]"
-                            disabled={processing}
-                            onClick={() => void submit('reject')}
-                        >
-                            <X className="size-4" />
-                            Dismiss
-                        </Button>
-                    </div>
-                ) : (
-                    <StatusFooter status={status} />
-                )}
-            </CardFooter>
-        </Card>
-    );
-}
-
-function StatusBadge({ status }: { status: ApprovalStatus }) {
-    const { badgeLabel, badgeClassName } = STATUS_PRESENTATION[status];
-
-    return (
-        <span
-            className={cn(
-                'shrink-0 rounded-full px-2 py-0.5 text-xs font-medium',
-                badgeClassName,
+            {failed && (
+                <p
+                    role="alert"
+                    className="mt-3 flex items-center gap-1.5 text-[13px] text-red-700 dark:text-red-300"
+                >
+                    <CircleAlert
+                        className="size-4 shrink-0"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                    />
+                    {t('chat.approval.error')}
+                </p>
             )}
-        >
-            {badgeLabel}
-        </span>
-    );
-}
 
-function StatusFooter({ status }: { status: ApprovalStatus }) {
-    const { footerLabel, footerClassName, FooterIcon, footerSpin } =
-        STATUS_PRESENTATION[status];
-
-    return (
-        <p className={cn('flex items-center gap-1.5 text-xs', footerClassName)}>
-            <FooterIcon
-                className={cn('size-3.5', footerSpin && 'animate-spin')}
-            />
-            {footerLabel}
-        </p>
+            {onDecide && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                    <button
+                        type="button"
+                        disabled={processing}
+                        onClick={() => void decide('approve')}
+                        className={cn(
+                            'inline-flex h-10 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400',
+                            FOCUS_RING,
+                        )}
+                    >
+                        {copy('approve')}
+                    </button>
+                    <button
+                        type="button"
+                        disabled={processing}
+                        onClick={() => void decide('reject')}
+                        className={cn(
+                            'inline-flex h-10 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none',
+                            FOCUS_RING,
+                        )}
+                    >
+                        {copy('reject')}
+                    </button>
+                </div>
+            )}
+        </section>
     );
 }

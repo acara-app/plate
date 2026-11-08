@@ -1,4 +1,3 @@
-import { Button } from '@/components/ui/button';
 import {
     Tooltip,
     TooltipContent,
@@ -6,10 +5,11 @@ import {
 } from '@/components/ui/tooltip';
 import { cn, generateUUID } from '@/lib/utils';
 import type { FileUIPart } from 'ai';
-import { ArrowUp, Paperclip, Square, X } from 'lucide-react';
+import { ArrowUp, ImagePlus, Square, X } from 'lucide-react';
 import {
     forwardRef,
     useEffect,
+    useId,
     useImperativeHandle,
     useRef,
     useState,
@@ -32,6 +32,11 @@ export interface ChatInputHandle {
     focus: () => void;
 }
 
+const MAX_TEXTAREA_HEIGHT = 240;
+
+const FOCUS_RING =
+    'focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
+
 function readFileAsDataURL(file: File): Promise<FileUIPart> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -48,29 +53,35 @@ function readFileAsDataURL(file: File): Promise<FileUIPart> {
     });
 }
 
-function FilePreview({
+function PhotoPreview({
     file,
     onRemove,
 }: {
     file: FileUIPart;
     onRemove: () => void;
 }) {
+    const { t } = useTranslation('common');
+    const name = file.filename ?? t('chat.attachment.photo');
+
     return (
-        <div className="group relative duration-200 animate-in fade-in-0 zoom-in-95">
+        <li className="relative duration-200 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:zoom-in-95">
             <img
                 src={file.url}
-                alt={file.filename ?? 'Attached image'}
-                className="size-16 rounded-xl border border-border/60 object-cover shadow-sm transition-shadow group-hover:shadow-md sm:size-20"
+                alt={name}
+                className="size-16 rounded-lg border border-border object-cover"
             />
             <button
                 type="button"
                 onClick={onRemove}
-                aria-label={`Remove ${file.filename ?? 'attached image'}`}
-                className="absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border-2 border-background bg-destructive text-white shadow-md transition-all duration-200 hover:scale-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95"
+                aria-label={t('chat.composer.remove_photo', { name })}
+                className={cn(
+                    'absolute -top-1.5 -right-1.5 flex size-6 cursor-pointer items-center justify-center rounded-full bg-foreground text-background shadow-xs transition-transform hover:scale-105 active:scale-95',
+                    FOCUS_RING,
+                )}
             >
-                <X className="size-3.5" strokeWidth={2.5} />
+                <X className="size-3.5" strokeWidth={2.25} aria-hidden="true" />
             </button>
-        </div>
+        </li>
     );
 }
 
@@ -88,11 +99,11 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     ref,
 ) {
     const { t } = useTranslation('common');
+    const hintId = useId();
     const [message, setMessage] = useState(initialMessage ?? '');
     const [selectedFiles, setSelectedFiles] = useState<
         { id: string; part: FileUIPart }[]
     >([]);
-    const [isFocused, setIsFocused] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -105,43 +116,52 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         [],
     );
 
-    const hasContent = message.trim() || selectedFiles.length > 0;
+    const hasContent = message.trim() !== '' || selectedFiles.length > 0;
+    const canSend = hasContent && !disabled && !isLoading;
+    const showStop = isLoading && onStop !== undefined;
 
     useEffect(() => {
         const textarea = textareaRef.current;
+
         if (!textarea) {
             return;
         }
+
         textarea.style.height = 'auto';
-        textarea.style.height = `${Math.min(textarea.scrollHeight, 240)}px`;
+        textarea.style.height = `${Math.min(textarea.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`;
     }, [message]);
 
     const handleSubmit = () => {
-        if (!hasContent) {
+        if (!canSend) {
             return;
         }
 
         const text =
             message.trim() ||
-            (selectedFiles.length > 0 ? 'Analyze this image' : '');
+            (selectedFiles.length > 0 ? t('chat.composer.photo_prompt') : '');
         const fileParts = selectedFiles.map((file) => file.part);
+
         onSubmit(text, fileParts.length > 0 ? fileParts : undefined);
         setMessage('');
         setSelectedFiles([]);
-        if (textareaRef.current) {
-            textareaRef.current.style.height = 'auto';
-        }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (
+            event.key === 'Enter' &&
+            !event.shiftKey &&
+            !event.nativeEvent.isComposing
+        ) {
+            event.preventDefault();
             handleSubmit();
         }
     };
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = e.target.files;
+    const handleFileSelect = async (
+        event: React.ChangeEvent<HTMLInputElement>,
+    ) => {
+        const files = event.target.files;
+
         if (!files || files.length === 0) {
             return;
         }
@@ -149,54 +169,72 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         const fileParts = await Promise.all(
             Array.from(files).map(readFileAsDataURL),
         );
-        setSelectedFiles((prev) => [
-            ...prev,
+
+        setSelectedFiles((previous) => [
+            ...previous,
             ...fileParts.map((part) => ({ id: generateUUID(), part })),
         ]);
 
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
+
+        textareaRef.current?.focus();
     };
 
     const removeFile = (id: string) => {
-        setSelectedFiles((prev) => prev.filter((file) => file.id !== id));
+        setSelectedFiles((previous) =>
+            previous.filter((file) => file.id !== id),
+        );
+        textareaRef.current?.focus();
     };
 
     return (
         <div
             role="group"
-            aria-label="Message composer"
-            className={cn(
-                'mx-auto flex w-full items-end px-2 py-3 sm:px-4 sm:py-4',
-                className,
-            )}
+            aria-label={t('chat.composer.label')}
+            className={cn('w-full', className)}
         >
-            <div className="flex w-full flex-col gap-2">
+            <div
+                className={cn(
+                    'rounded-2xl border border-border bg-background shadow-xs transition-[border-color,box-shadow] duration-150 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/40 dark:bg-muted/30',
+                    disabled && 'opacity-60',
+                )}
+            >
                 {selectedFiles.length > 0 && (
-                    <div
-                        className="flex flex-wrap gap-2 px-2"
-                        aria-label={`${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''} attached`}
+                    <ul
+                        aria-label={t('chat.composer.attached', {
+                            count: selectedFiles.length,
+                        })}
+                        className="flex flex-wrap gap-3 px-3 pt-3"
                     >
                         {selectedFiles.map((file) => (
-                            <FilePreview
+                            <PhotoPreview
                                 key={file.id}
                                 file={file.part}
                                 onRemove={() => removeFile(file.id)}
                             />
                         ))}
-                    </div>
+                    </ul>
                 )}
 
-                <div
-                    className={cn(
-                        'flex w-full items-end rounded-3xl border bg-card shadow-md transition-all duration-200',
-                        isFocused && !disabled
-                            ? 'border-emerald-500/50 shadow-[0_0_0_3px_rgba(16,185,129,0.12),0_4px_20px_rgba(0,0,0,0.08)] dark:border-emerald-400/40 dark:shadow-[0_0_0_3px_rgba(52,211,153,0.08)]'
-                            : 'border-border shadow-md',
-                        disabled && 'opacity-60',
-                    )}
-                >
+                <textarea
+                    ref={textareaRef}
+                    value={message}
+                    onChange={(event) => {
+                        setMessage(event.target.value);
+                        onInputChange?.();
+                    }}
+                    onKeyDown={handleKeyDown}
+                    placeholder={placeholder ?? t('chat.placeholder')}
+                    disabled={disabled}
+                    aria-label={t('chat.composer.label')}
+                    aria-describedby={hintId}
+                    rows={1}
+                    className="block max-h-60 min-h-13 w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base leading-6 text-foreground placeholder:text-muted-foreground/80 focus:outline-none disabled:cursor-not-allowed"
+                />
+
+                <div className="flex items-center justify-between gap-2 px-2 pb-2">
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -204,98 +242,83 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         multiple
                         onChange={handleFileSelect}
                         className="hidden"
+                        tabIndex={-1}
                         aria-hidden="true"
                     />
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="m-1.5 size-11 shrink-0 rounded-xl text-muted-foreground transition-colors hover:bg-accent hover:text-foreground active:scale-95"
+                            <button
+                                type="button"
                                 disabled={disabled}
                                 onClick={() => fileInputRef.current?.click()}
-                                aria-label="Attach image"
+                                aria-label={t('chat.composer.add_photo')}
+                                className={cn(
+                                    'inline-flex size-9 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                                    FOCUS_RING,
+                                )}
                             >
-                                <Paperclip className="size-5" />
-                            </Button>
+                                <ImagePlus
+                                    className="size-[18px]"
+                                    strokeWidth={1.75}
+                                    aria-hidden="true"
+                                />
+                            </button>
                         </TooltipTrigger>
-                        <TooltipContent side="top">Attach image</TooltipContent>
+                        <TooltipContent side="top">
+                            {t('chat.composer.add_photo')}
+                        </TooltipContent>
                     </Tooltip>
 
-                    <textarea
-                        ref={textareaRef}
-                        value={message}
-                        onChange={(e) => {
-                            setMessage(e.target.value);
-                            onInputChange?.();
-                        }}
-                        onKeyDown={handleKeyDown}
-                        onFocus={() => setIsFocused(true)}
-                        onBlur={() => setIsFocused(false)}
-                        placeholder={placeholder ?? t('chat.placeholder')}
-                        disabled={disabled}
-                        aria-label="Message input"
-                        aria-describedby="chat-input-hint"
-                        className="max-h-[240px] min-h-12 w-full flex-1 resize-none bg-transparent py-3.5 text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 focus:outline-none disabled:cursor-not-allowed"
-                        rows={1}
-                    />
-
-                    {isLoading && onStop ? (
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button
-                                    type="button"
-                                    variant="default"
-                                    size="icon"
-                                    className="m-1.5 size-11 shrink-0 rounded-full bg-linear-to-br from-red-500 to-rose-600 text-white shadow-lg ring-1 shadow-red-500/30 ring-white/20 transition-all duration-200 ring-inset hover:scale-105 hover:from-red-600 hover:to-rose-700 hover:shadow-red-500/40 active:scale-95"
-                                    onClick={onStop}
-                                    aria-label="Stop generating"
-                                >
-                                    <Square className="size-4 fill-current" />
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent side="top">
-                                Stop generating
-                            </TooltipContent>
-                        </Tooltip>
+                    {showStop ? (
+                        <button
+                            type="button"
+                            onClick={onStop}
+                            aria-label={t('chat.composer.stop')}
+                            className={cn(
+                                'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-foreground pr-3.5 pl-3 text-sm font-medium text-background transition-colors hover:bg-foreground/85',
+                                FOCUS_RING,
+                            )}
+                        >
+                            <Square
+                                className="size-3 fill-current"
+                                aria-hidden="true"
+                            />
+                            {t('chat.stop')}
+                        </button>
                     ) : (
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <Button
+                                <button
                                     type="button"
-                                    variant={
-                                        hasContent && !disabled
-                                            ? 'default'
-                                            : 'ghost'
-                                    }
-                                    size="icon"
-                                    className={cn(
-                                        'group m-1.5 size-11 shrink-0 rounded-full transition-all duration-200 active:scale-90',
-                                        hasContent && !disabled
-                                            ? 'bg-linear-to-br from-emerald-500 to-teal-600 text-white shadow-lg ring-1 shadow-emerald-500/30 ring-white/20 ring-inset hover:scale-105 hover:from-emerald-400 hover:to-teal-500 hover:shadow-emerald-400/40'
-                                            : 'text-muted-foreground/70 hover:text-muted-foreground',
-                                    )}
                                     onClick={handleSubmit}
-                                    disabled={!hasContent || disabled}
-                                    aria-label="Send message"
+                                    disabled={!canSend}
+                                    aria-label={t('chat.composer.send')}
+                                    className={cn(
+                                        'inline-flex size-9 items-center justify-center rounded-full transition-colors',
+                                        FOCUS_RING,
+                                        canSend
+                                            ? 'cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400'
+                                            : 'cursor-not-allowed bg-muted text-muted-foreground/70',
+                                    )}
                                 >
                                     <ArrowUp
-                                        className="size-5 transition-transform duration-200 group-enabled:group-hover:-translate-y-0.5"
-                                        strokeWidth={2.5}
+                                        className="size-[18px]"
+                                        strokeWidth={2.25}
+                                        aria-hidden="true"
                                     />
-                                </Button>
+                                </button>
                             </TooltipTrigger>
                             <TooltipContent side="top">
-                                Send message
+                                {t('chat.composer.send')}
                             </TooltipContent>
                         </Tooltip>
                     )}
                 </div>
-
-                <span id="chat-input-hint" className="sr-only">
-                    Press Enter to send, Shift+Enter for a new line
-                </span>
             </div>
+
+            <span id={hintId} className="sr-only">
+                {t('chat.composer.hint')}
+            </span>
         </div>
     );
 });
