@@ -8,8 +8,34 @@ use App\Models\DeletedUser;
 use App\Models\History;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 covers(PurgeDeletedUserDataCommand::class);
+
+function snapMeteringFor(string $subject, ?string $owner = null): void
+{
+    DB::table('snap_photo_accounts')->insert(['subject' => $subject, 'owner' => $owner]);
+
+    $periodId = DB::table('snap_photo_periods')->insertGetId([
+        'subject' => $subject,
+        'starts_at' => now()->subDay(),
+        'ends_at' => now()->addMonth(),
+        'allowance' => 2,
+        'mode' => 'lifetime',
+    ]);
+
+    DB::table('snap_photo_requests')->insert([
+        'period_id' => $periodId,
+        'subject' => $subject,
+        'request_key' => Str::random(20),
+        'fingerprint' => hash('sha256', $subject),
+        'status' => 'succeeded',
+        'attempt' => Str::uuid()->toString(),
+        'source' => 'test',
+        'created_at' => now(),
+        'expires_at' => now()->addHour(),
+    ]);
+}
 
 it('purges orphaned data for users deleted over 30 days ago', function (string $userType): void {
     $user = User::factory()->create();
@@ -193,4 +219,37 @@ it('removes tokens and notifications left by accounts that no longer exist', fun
 
     expect(DB::table('personal_access_tokens')->pluck('tokenable_id')->all())->toEqualCanonicalizing([$active->id, 9001])
         ->and(DB::table('notifications')->pluck('notifiable_id')->all())->toEqualCanonicalizing([$active->id, 9001]);
+});
+
+it('removes scan usage records and Telegram chats of deleted accounts', function (): void {
+    $active = User::factory()->create();
+    $deleted = User::factory()->create();
+    $deletedId = $deleted->id;
+
+    snapMeteringFor("user:{$active->id}");
+    snapMeteringFor('guest:unclaimed');
+    snapMeteringFor("user:{$deletedId}");
+    snapMeteringFor('guest:claimed', owner: "user:{$deletedId}");
+    snapMeteringFor('user:9002');
+
+    $botId = DB::table('telegraph_bots')->insertGetId(['token' => 'test-token', 'name' => 'Acara', 'created_at' => now(), 'updated_at' => now()]);
+
+    foreach (['111' => $active, '222' => $deleted] as $chatId => $owner) {
+        DB::table('telegraph_chats')->insert(['chat_id' => $chatId, 'name' => 'Chat', 'telegraph_bot_id' => $botId, 'created_at' => now()->subDays(40), 'updated_at' => now()->subDays(40)]);
+        DB::table('user_chat_platform_links')->insert(['user_id' => $owner->id, 'platform' => 'telegram', 'platform_user_id' => $chatId, 'is_active' => true, 'linked_at' => now(), 'created_at' => now(), 'updated_at' => now()]);
+    }
+
+    DB::table('telegraph_chats')->insert(['chat_id' => '333', 'name' => 'New chat', 'telegraph_bot_id' => $botId, 'created_at' => now(), 'updated_at' => now()]);
+
+    $deleted->delete();
+    DeletedUser::query()->create(['user_id' => $deletedId, 'email' => $deleted->email, 'deleted_at' => now()->subDays(31)]);
+
+    $this->artisan(PurgeDeletedUserDataCommand::class)->assertSuccessful();
+
+    $remaining = ["user:{$active->id}", 'guest:unclaimed'];
+
+    expect(DB::table('snap_photo_accounts')->pluck('subject')->all())->toEqualCanonicalizing($remaining)
+        ->and(DB::table('snap_photo_periods')->pluck('subject')->all())->toEqualCanonicalizing($remaining)
+        ->and(DB::table('snap_photo_requests')->pluck('subject')->all())->toEqualCanonicalizing($remaining)
+        ->and(DB::table('telegraph_chats')->pluck('chat_id')->all())->toEqualCanonicalizing(['111', '333']);
 });
