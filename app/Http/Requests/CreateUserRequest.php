@@ -34,6 +34,7 @@ final class CreateUserRequest extends FormRequest
                 Password::defaults(),
             ],
             'accepted_disclaimer' => ['required', 'accepted'],
+            'improve_food_recognition' => ['nullable', 'boolean'],
         ];
     }
 }

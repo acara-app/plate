@@ -69,6 +69,7 @@ return [
         'or' => 'Or',
         'terms_acceptance' => 'By signing up, I confirm that I am at least 18 years old and accept the',
         'disclaimer_acceptance' => "I'm 18+ and I understand Acara provides wellness guidance, not medical advice.",
+        'improve_food_recognition' => 'Optional: help improve food recognition. Acara\'s team may look at my meals, edits and meal photos to make it better. They stay within Acara, and I can change this anytime in Settings.',
         'disclaimer_terms_prefix' => 'By creating an account, you agree to our',
         'terms_of_service' => 'Terms of Service',
         'and' => 'and',

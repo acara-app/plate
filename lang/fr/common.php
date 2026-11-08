@@ -150,6 +150,22 @@ return [
         'dismiss' => 'Masquer cet avis',
     ],
 
+    'privacy_settings' => [
+        'title' => 'Confidentialité',
+        'description' => 'Choisissez comment Acara peut utiliser vos données',
+        'improve_food_recognition' => 'Aider à améliorer la reconnaissance des aliments',
+        'improve_food_recognition_description' => 'Permettez à l\'équipe d\'Acara de consulter vos repas, vos corrections et vos photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Ils restent chez Acara et ne sont jamais partagés. Si vous désactivez cette option, nous cessons de les utiliser à cette fin.',
+        'policy_link' => 'Politique de confidentialité',
+        'save' => 'Enregistrer',
+        'saved' => 'Enregistré. Vous pouvez modifier ce choix à tout moment dans Paramètres → Confidentialité.',
+    ],
+
+    'food_recognition_consent' => [
+        'text' => 'Merci d\'avoir corrigé ce repas ! Notre équipe peut-elle utiliser ce type de corrections, avec vos repas et leurs photos, pour améliorer la reconnaissance des aliments d\'Acara ? Ils restent chez Acara.',
+        'yes' => 'Oui, avec plaisir',
+        'no' => 'Non merci',
+    ],
+
     'biometrics_review_banner' => [
         'text' => 'Petite vérification : confirmez votre taille et votre poids pour que vos objectifs caloriques soient justes.',
         'action' => 'Vérifier',
@@ -926,6 +942,7 @@ return [
             'appearance' => 'Apparence',
             'household' => 'Foyer',
             'integrations' => 'Intégrations',
+            'privacy' => 'Confidentialité',
         ],
     ],
     'household' => [

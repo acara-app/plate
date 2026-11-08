@@ -43,6 +43,7 @@ final readonly class ListHealthEntryController
             'loggedDates' => fn (): array => $this->getUserLoggedDates->handle($this->currentUser, $weekStart, $weekStart->addDays(6)),
             'goals' => fn (): ?DailyNutritionGoalsData => $this->calculateDailyNutritionGoals->handle($this->currentUser->profile),
             'wellness' => fn (): DailyWellnessData => $this->getDailyWellness->handle($this->currentUser, $day),
+            'askToImproveFoodRecognition' => $this->currentUser->shouldBeAskedToImproveFoodRecognition(...),
             ...DiabetesLayout::props($this->currentUser),
         ]);
     }

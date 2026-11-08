@@ -9,6 +9,7 @@ import { edit as editPassword } from '@/routes/password';
 import { edit as editPasskeys } from '@/routes/passkeys';
 import { show } from '@/routes/two-factor';
 import { edit as editNotifications } from '@/routes/user-notifications';
+import { edit as editPrivacy } from '@/routes/user-privacy';
 import { edit } from '@/routes/user-profile';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
@@ -19,6 +20,7 @@ import {
     Lock,
     Palette,
     Puzzle,
+    Shield,
     ShieldCheck,
     User,
 } from 'lucide-react';
@@ -67,6 +69,11 @@ const getSidebarNavItems = (
         title: t('settings_layout.nav.notifications'),
         href: editNotifications(),
         icon: Bell,
+    },
+    {
+        title: t('settings_layout.nav.privacy'),
+        href: editPrivacy(),
+        icon: Shield,
     },
     {
         title: t('settings_layout.nav.appearance'),
