@@ -149,6 +149,22 @@ return [
         'dismiss' => 'Dismiss privacy update',
     ],
 
+    'privacy_settings' => [
+        'title' => 'Privacy',
+        'description' => 'Choose how Acara may use your data',
+        'improve_food_recognition' => 'Help improve food recognition',
+        'improve_food_recognition_description' => 'Let Acara\'s team look at your meals, your edits and your meal photos to test and improve how our AI recognizes food. They stay within Acara and are never shared. If you turn this off, we stop using them for this.',
+        'policy_link' => 'Privacy Policy',
+        'save' => 'Save',
+        'saved' => 'Saved. You can change this anytime in Settings → Privacy.',
+    ],
+
+    'food_recognition_consent' => [
+        'text' => 'Thanks for fixing that meal! Can our team use fixes like this, along with your meals and meal photos, to improve how Acara recognizes food? They stay within Acara.',
+        'yes' => 'Yes, happy to help',
+        'no' => 'No thanks',
+    ],
+
     'biometrics_review_banner' => [
         'text' => 'Quick check: please confirm your height and weight so your calorie targets are right.',
         'action' => 'Review',
@@ -925,6 +941,7 @@ return [
             'appearance' => 'Appearance',
             'household' => 'Household',
             'integrations' => 'Integrations',
+            'privacy' => 'Privacy',
         ],
     ],
     'household' => [

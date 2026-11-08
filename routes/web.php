@@ -177,6 +177,9 @@ Route::middleware('auth')->group(function (): void {
     Route::get('settings/notifications', [Web\UserNotificationsController::class, 'edit'])->name('user-notifications.edit');
     Route::patch('settings/notifications', [Web\UserNotificationsController::class, 'update'])->name('user-notifications.update');
 
+    Route::get('settings/privacy', [Web\UserPrivacyController::class, 'edit'])->name('user-privacy.edit');
+    Route::patch('settings/privacy', [Web\UserPrivacyController::class, 'update'])->name('user-privacy.update');
+
     Route::get('settings/billing', [Web\BillingHistoryController::class, 'index'])->name('billing.index');
 
     Route::get('settings/password', [Web\UserPasswordController::class, 'edit'])->name('password.edit');

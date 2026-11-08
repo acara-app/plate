@@ -172,6 +172,21 @@ export default function Register({
                                 />
                             </div>
 
+                            <div className="flex items-start gap-2">
+                                <Checkbox
+                                    id="improve_food_recognition"
+                                    name="improve_food_recognition"
+                                    value="1"
+                                    className="mt-0.5"
+                                />
+                                <Label
+                                    htmlFor="improve_food_recognition"
+                                    className="text-xs leading-snug font-normal text-muted-foreground"
+                                >
+                                    {t('register.improve_food_recognition')}
+                                </Label>
+                            </div>
+
                             <Button
                                 type="submit"
                                 variant={snapIntent ? 'default' : 'outline'}

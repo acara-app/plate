@@ -1,3 +1,4 @@
+import { FoodRecognitionConsentCard } from '@/components/food-recognition-consent-card';
 import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import { Button } from '@/components/ui/button';
@@ -42,6 +43,7 @@ interface Props {
     loggedDates: string[];
     goals: DailyNutritionGoals | null;
     wellness: DailyWellness;
+    askToImproveFoodRecognition: boolean;
     glucoseReadingTypes: ReadingType[];
     insulinTypes: ReadingType[];
     glucoseUnit: string;
@@ -58,6 +60,7 @@ export default function HealthEntriesIndex({
     loggedDates,
     goals,
     wellness,
+    askToImproveFoodRecognition,
     glucoseReadingTypes,
     insulinTypes,
     glucoseUnit,
@@ -122,6 +125,7 @@ export default function HealthEntriesIndex({
                         </Link>
                     </Button>
                 </header>
+                {askToImproveFoodRecognition && <FoodRecognitionConsentCard />}
                 <WeekStrip
                     date={date}
                     today={today}
