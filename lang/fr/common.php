@@ -150,6 +150,14 @@ return [
         'dismiss' => 'Masquer cet avis',
     ],
 
+    'health_data_consent_prompt' => [
+        'title' => 'Confirmez comment nous utilisons vos informations de santé',
+        'policy_updated' => 'Nous avons aussi mis à jour notre politique de confidentialité.',
+        'policy_link' => 'La consulter',
+        'agree' => 'J\'accepte',
+        'later' => 'Plus tard',
+    ],
+
     'privacy_settings' => [
         'title' => 'Confidentialité',
         'description' => 'Choisissez comment Acara peut utiliser vos données',
