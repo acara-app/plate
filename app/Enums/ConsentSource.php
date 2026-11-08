@@ -9,4 +9,5 @@ enum ConsentSource: string
     case SignUp = 'sign_up';
     case MealCorrection = 'meal_correction';
     case Settings = 'settings';
+    case Dashboard = 'dashboard';
 }

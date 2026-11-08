@@ -13,8 +13,11 @@ final readonly class DashboardController
 {
     public function show(#[CurrentUser] User $user): Response
     {
+        $needsHealthDataConsent = $user->needsHealthDataConsent();
+
         return Inertia::render('dashboard', [
-            'showPrivacyUpdate' => $user->needsPrivacyPolicyNotice(),
+            'showHealthDataConsent' => $needsHealthDataConsent,
+            'showPrivacyUpdate' => ! $needsHealthDataConsent && $user->needsPrivacyPolicyNotice(),
         ]);
     }
 }
