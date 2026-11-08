@@ -64,6 +64,13 @@
                     We use cookies and similar technologies to enhance your experience, analyze usage, and improve our
                     Services. You can manage cookie preferences through your browser settings.
                 </p>
+                <p>
+                    <strong>e. AI Meal Estimates and Your Edits:</strong>
+                    When you save a meal from a photo scan, we keep the AI's original estimate with that meal: the
+                    foods it recognized, their portions, calories and macronutrients, how confident it was, and which
+                    version of our analysis produced it. If you later change the meal's foods or amounts, we also note
+                    what you changed. This record never includes your photo, your notes, or your meal name.
+                </p>
 
                 <h2>2. How We Use Your Information</h2>
                 <p>We use your data to provide and improve the Services, including:</p>
@@ -73,6 +80,9 @@
                     <li>Filtering meal plans to accommodate dietary restrictions (e.g., allergies, vegan diets).</li>
                     <li>Managing your account and communicating with you (e.g., service updates).</li>
                     <li>Analyzing anonymized data to enhance the Services and develop new features.</li>
+                    <li>Measuring and improving the accuracy of our meal estimates. For this we only look at
+                        aggregated statistics, such as how often estimates for a food get corrected, and only for
+                        groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
                 </ul>
                 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
                     your consent. See Section 5 for the specific data flows involved in AI-assisted features.</p>
@@ -85,7 +95,8 @@
                     <li><strong>Explicit Consent (Article 9):</strong> For special-category data (health conditions, medications, biometrics, reproductive and other health-related fields), we rely on your explicit consent, obtained when you submit that information in the questionnaire or onboarding. You may withdraw this consent at any time (see Section 8).</li>
                     <li><strong>Contract:</strong> Processing is necessary to deliver the Services (e.g., generating
                         meal plans).</li>
-                    <li><strong>Legitimate Interests:</strong> We use anonymized data to improve the Services, ensuring
+                    <li><strong>Legitimate Interests:</strong> We use anonymized data, and aggregated accuracy
+                        statistics from saved AI meal estimates (see Section 2), to improve the Services, ensuring
                         minimal impact on your privacy.</li>
                 </ul>
 
@@ -132,6 +143,7 @@
                     <li>We do not submit your data to any training-eligible product surface under our control. We access providers through their standard API endpoints, not their consumer applications or feedback-labeling interfaces.</li>
                     <li>Beyond what we send, how a provider retains, processes, or uses your submissions is governed by that provider's own API data-use policy — not by additional controls operated by Acara Plate. We do not currently operate zero-retention routing, BAA-eligible endpoints, or region-pinned processing, and we do not independently verify provider-side retention settings. If you require those guarantees, please consult each provider's terms directly before using AI-assisted features.</li>
                     <li>We do not share your data with AI providers for advertising, profiling across services, or any purpose other than generating your requested response.</li>
+                    <li>We do not use your meal photos, meals, or edits to train AI models, and we do not share them with other organizations for research or evaluation, unless you give us separate permission.</li>
                     <li>We do not inject your freeform personal notes (such as "Additional Goals" or "Household Context") into AI prompts by default.</li>
                     <li>We do not permit web search by the AI when your active request involves your personal or medical data — in that mode, the AI cannot issue web queries on your behalf.</li>
                 </ul>
@@ -179,6 +191,12 @@
                     can see them later. Before storing, we resize each photo and remove its location and other photo
                     metadata. Only you can view your meal photos. A photo is deleted when you delete that meal or your
                     account, or after one day if you don't save the meal.
+                </p>
+                <p>
+                    <strong>AI meal estimates:</strong>
+                    The AI's original estimate and your edits are kept with the meal they belong to. They are deleted
+                    when you delete that meal or your account, and automatically 12 months after the meal was saved.
+                    The meal itself stays in your food log.
                 </p>
 
                 <h2>8. Your Rights (GDPR and Applicable Laws)</h2>
