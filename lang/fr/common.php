@@ -150,6 +150,12 @@ return [
         'dismiss' => 'Masquer cet avis',
     ],
 
+    'privacy_policy_page' => [
+        'title' => 'Politique de confidentialité | Comment nous protégeons vos données de santé',
+        'meta_description' => 'Votre vie privée est essentielle. Lisez la politique de confidentialité d\'Acara Plate pour savoir comment nous recueillons, utilisons et protégeons vos données biométriques, vos problèmes de santé et vos données alimentaires.',
+        'back' => 'Retour',
+    ],
+
     'health_data_consent_prompt' => [
         'title' => 'Confirmez comment nous utilisons vos informations de santé',
         'policy_updated' => 'Nous avons aussi mis à jour notre politique de confidentialité.',
