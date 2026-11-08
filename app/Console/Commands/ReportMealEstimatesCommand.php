@@ -63,7 +63,7 @@ final class ReportMealEstimatesCommand extends Command
                 $row['meals'],
                 "{$row['corrected']} ({$this->percent($row['corrected'], $row['meals'])})",
                 $this->kcalChange($row['medianKcalChange'], $row['medianKcalChangePercent']),
-                $row['medianCarbsChange'] === null ? '—' : sprintf('%+.1f g', $row['medianCarbsChange']),
+                $row['medianCarbsChange'] === null ? '—' : sprintf('%+.0f g', $row['medianCarbsChange']),
             ], $report->models),
         );
     }

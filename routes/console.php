@@ -23,7 +23,7 @@ Schedule::command(PurgeDeletedUserDataCommand::class)->daily();
 
 Schedule::command(AggregateHealthDailyCommand::class)->dailyAt('02:00');
 
-Schedule::command(AggregateDailyMealEstimatesCommand::class)->dailyAt('02:30');
+Schedule::command(AggregateDailyMealEstimatesCommand::class)->dailyAt('02:30')->withoutOverlapping();
 
 Schedule::call(function (): void {
     SnapPhotoRequest::query()->whereNotNull('result')->where('created_at', '<', now('UTC')->subDay())->update(['result' => null]);

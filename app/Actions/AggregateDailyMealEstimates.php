@@ -16,22 +16,22 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class AggregateDailyMealEstimates
 {
-    public function handle(CarbonImmutable $day): void
+    public function handle(): void
     {
-        $from = $day->utc()->startOfDay();
-        $date = $from->toDateString();
+        $from = CarbonImmutable::now('UTC')->subMonths(MealEstimate::RETENTION_MONTHS)->addDay()->startOfDay();
         $stats = [];
         $foods = [];
 
         $estimates = MealEstimate::query()
             ->where('created_at', '>=', $from)
-            ->where('created_at', '<', $from->addDay())
+            ->where('created_at', '<', CarbonImmutable::today('UTC'))
             ->lazyById();
 
         foreach ($estimates as $estimate) {
+            $date = $estimate->created_at->toDateString();
             $model = $estimate->model_version ?? 'unknown';
-            $key = "{$model}|{$estimate->source->value}";
-            $stats[$key] ??= ['model_version' => $model, 'source' => $estimate->source->value, 'meals' => 0, 'corrected' => 0, 'kcal_changes' => [], 'kcal_change_percents' => [], 'carbs_changes' => []];
+            $key = "{$date}|{$model}|{$estimate->source->value}";
+            $stats[$key] ??= ['date' => $date, 'model_version' => $model, 'source' => $estimate->source->value, 'meals' => 0, 'corrected' => 0, 'kcal_changes' => [], 'kcal_change_percents' => [], 'carbs_changes' => []];
             $stats[$key]['meals']++;
 
             $correction = $estimate->validation_status === EstimateValidationStatus::UserCorrected ? $estimate->corrected_value : null;
@@ -60,35 +60,22 @@ final readonly class AggregateDailyMealEstimates
             }
 
             foreach ($this->foodChanges($estimate, $correction) as $pair => [$aiFood, $correctedFood]) {
-                $foods[$pair] ??= ['ai_food' => $aiFood, 'corrected_food' => $correctedFood, 'meals' => 0];
-                $foods[$pair]['meals']++;
+                $foods["{$date}|{$pair}"] ??= ['date' => $date, 'ai_food' => $aiFood, 'corrected_food' => $correctedFood, 'meals' => 0];
+                $foods["{$date}|{$pair}"]['meals']++;
             }
         }
 
-        $now = now();
+        DB::transaction(function () use ($from, $stats, $foods): void {
+            MealEstimateDailyStat::query()->where('date', '>=', $from->toDateString())->delete();
+            MealEstimateDailyFoodChange::query()->where('date', '>=', $from->toDateString())->delete();
 
-        DB::transaction(function () use ($date, $stats, $foods, $now): void {
-            MealEstimateDailyStat::query()->where('date', $date)->delete();
-            MealEstimateDailyFoodChange::query()->where('date', $date)->delete();
-
-            MealEstimateDailyStat::query()->insert(array_map(fn (array $row): array => [
+            $this->insert(MealEstimateDailyStat::class, array_map(fn (array $row): array => [
                 ...$row,
-                'date' => $date,
                 'kcal_changes' => $this->json($row['kcal_changes']),
                 'kcal_change_percents' => $this->json($row['kcal_change_percents']),
                 'carbs_changes' => $this->json($row['carbs_changes']),
-                'created_at' => $now,
-                'updated_at' => $now,
             ], array_values($stats)));
-
-            foreach (array_chunk(array_values($foods), 500) as $rows) {
-                MealEstimateDailyFoodChange::query()->insert(array_map(fn (array $row): array => [
-                    ...$row,
-                    'date' => $date,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ], $rows));
-            }
+            $this->insert(MealEstimateDailyFoodChange::class, array_values($foods));
         });
     }
 
@@ -135,15 +122,27 @@ final readonly class AggregateDailyMealEstimates
         $changes = [];
 
         for ($index = 0; $index < max(count($unmatched), count($remaining)); $index++) {
-            $aiFood = $unmatched[$index] ?? '';
-            $correctedFood = $remaining[$index] ?? '';
+            $pair = [$unmatched[$index] ?? null, $remaining[$index] ?? null];
 
-            if ($aiFood !== '' || $correctedFood !== '') {
-                $changes["{$aiFood}|{$correctedFood}"] = [$aiFood === '' ? null : $aiFood, $correctedFood === '' ? null : $correctedFood];
+            if (! in_array('', $pair, true)) {
+                $changes[implode('|', $pair)] = $pair;
             }
         }
 
         return $changes;
+    }
+
+    /**
+     * @param  class-string<MealEstimateDailyStat|MealEstimateDailyFoodChange>  $model
+     * @param  list<array<string, mixed>>  $rows
+     */
+    private function insert(string $model, array $rows): void
+    {
+        $now = now();
+
+        foreach (array_chunk($rows, 500) as $chunk) {
+            $model::query()->insert(array_map(fn (array $row): array => [...$row, 'created_at' => $now, 'updated_at' => $now], $chunk));
+        }
     }
 
     /**

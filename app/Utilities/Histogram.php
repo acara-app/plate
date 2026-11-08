@@ -37,19 +37,33 @@ final class Histogram
      */
     public static function median(array $counts): ?float
     {
-        ksort($counts);
-        $values = [];
+        $total = array_sum($counts);
 
-        foreach ($counts as $bucket => $count) {
-            array_push($values, ...array_fill(0, $count, $bucket));
-        }
-
-        if ($values === []) {
+        if ($total === 0) {
             return null;
         }
 
-        $middle = intdiv(count($values), 2);
+        ksort($counts);
 
-        return count($values) % 2 === 1 ? (float) $values[$middle] : ($values[$middle - 1] + $values[$middle]) / 2;
+        return (self::valueAt($counts, intdiv($total - 1, 2)) + self::valueAt($counts, intdiv($total, 2))) / 2;
+    }
+
+    /**
+     * @param  array<int, int>  $counts
+     */
+    private static function valueAt(array $counts, int $position): int
+    {
+        $value = 0;
+
+        foreach ($counts as $bucket => $count) {
+            $value = $bucket;
+            $position -= $count;
+
+            if ($position < 0) {
+                break;
+            }
+        }
+
+        return $value;
     }
 }
