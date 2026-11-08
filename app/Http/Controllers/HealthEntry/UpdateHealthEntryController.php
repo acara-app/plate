@@ -13,6 +13,7 @@ use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Gate;
+use Inertia\Inertia;
 
 final readonly class UpdateHealthEntryController
 {
@@ -40,6 +41,8 @@ final readonly class UpdateHealthEntryController
             ],
         );
 
-        return back()->with('success', 'Health entry updated successfully.');
+        Inertia::flash('toast', ['type' => 'success', 'message' => __('common.saved')]);
+
+        return back();
     }
 }

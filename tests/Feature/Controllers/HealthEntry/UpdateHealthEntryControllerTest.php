@@ -97,11 +97,11 @@ it('prevents empty vitals log submission when updating', function (): void {
 /**
  * @return array{0: HealthSyncSample, 1: string, 2: MealPhoto}
  */
-function mealWithGlucoseReading(User $user): array
+function mealWithGlucoseReading(User $user, ?string $mealName = null): array
 {
     $groupId = (string) Str::uuid();
     $glucose = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $user->id, 'group_id' => $groupId, 'value' => 120, 'notes' => 'Bread']);
-    $metadata = ['snap_to_track' => [
+    $metadata = [...$mealName === null ? [] : ['meal_name' => $mealName], 'snap_to_track' => [
         'source' => 'web_snap_to_track',
         'confidence' => 82,
         'items' => [['name' => 'Bread', 'portion' => '2 slices', 'calories' => 160, 'protein' => 6, 'carbs' => 30, 'fat' => 2, 'provenance' => 'model']],
@@ -140,6 +140,28 @@ it('saves edited ingredients and meal type without losing the reading, photo or 
         ->and($members->pluck('notes')->unique()->all())->toBe(['Rye bread'])
         ->and($photo->fresh())->not->toBeNull();
 });
+
+it('renames a meal, or goes back to its ingredient names when the name is cleared', function (?string $mealName): void {
+    $user = User::factory()->create();
+    [$glucose, $groupId] = mealWithGlucoseReading($user, mealName: 'Bread plate');
+
+    $this->actingAs($user)->put(route('health-entries.update', $glucose), [
+        'log_type' => 'food',
+        'meal_name' => $mealName,
+        'notes' => null,
+        'measured_at' => now()->toIso8601String(),
+        'items' => [['name' => 'Bread', 'portion' => '2 slices', 'calories' => 160, 'protein' => 6, 'carbs' => 30, 'fat' => 2, 'provenance' => 'model']],
+    ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect()
+        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => __('common.saved')]);
+
+    $food = HealthSyncSample::query()->where('group_id', $groupId)->whereNot('type_identifier', 'bloodGlucose')->get();
+
+    expect($food)->toHaveCount(4)
+        ->and($food->map(fn (HealthSyncSample $sample): mixed => $sample->metadata['meal_name'] ?? null)->unique()->values()->all())->toBe([$mealName])
+        ->and($food->first()->metadata['snap_to_track']['items'][0]['name'])->toBe('Bread');
+})->with(['renamed' => ['Sunday toast'], 'cleared' => [null]]);
 
 it('saves an edited reading without losing the meal and photo it was logged with', function (): void {
     $user = User::factory()->create();

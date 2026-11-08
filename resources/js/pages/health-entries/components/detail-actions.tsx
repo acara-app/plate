@@ -42,7 +42,7 @@ export default function DetailActions({
                         {t(
                             saving
                                 ? 'health_entries.detail.saving'
-                                : 'health_entries.detail.done',
+                                : 'health_entries.detail.save',
                         )}
                     </Button>
                 ) : (

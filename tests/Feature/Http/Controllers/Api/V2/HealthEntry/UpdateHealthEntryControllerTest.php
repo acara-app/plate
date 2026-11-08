@@ -16,11 +16,11 @@ covers(UpdateHealthEntryController::class);
 /**
  * @return array{0: HealthSyncSample, 1: string, 2: MealPhoto}
  */
-function apiLogbookMealWithReading(User $user): array
+function apiLogbookMealWithReading(User $user, ?string $mealName = null): array
 {
     $groupId = (string) Str::uuid();
     $glucose = HealthSyncSample::factory()->bloodGlucose()->fromWeb()->create(['user_id' => $user->id, 'group_id' => $groupId, 'value' => 120, 'notes' => 'Bread']);
-    $metadata = ['meal_type' => 'lunch', 'snap_to_track' => [
+    $metadata = ['meal_type' => 'lunch', ...$mealName === null ? [] : ['meal_name' => $mealName], 'snap_to_track' => [
         'source' => 'mobile_snap_to_track',
         'confidence' => 82,
         'items' => [['name' => 'Bread', 'portion' => '2 slices', 'calories' => 160, 'protein' => 6, 'carbs' => 30, 'fat' => 2, 'fiber' => 3, 'provenance' => 'model']],
@@ -133,6 +133,24 @@ it('keeps the ingredient breakdown when unchanged totals are saved without items
 
     expect(HealthSyncSample::query()->where('group_id', $groupId)->where('type_identifier', 'fiber')->count())->toBe(1);
 })->with(['fiber left out' => [false], 'fiber unchanged' => [true]]);
+
+it('keeps the meal name when an edit from the app does not send one', function (array $food): void {
+    [$glucose] = apiLogbookMealWithReading($this->user, mealName: 'Sunday toast');
+    Sanctum::actingAs($this->user, ['chat:converse']);
+
+    $this->putJson(route('api.v2.health-entries.update', $glucose), [
+        'log_type' => 'food',
+        'meal_type' => 'lunch',
+        'measured_at' => now()->toIso8601String(),
+        'notes' => null,
+        ...$food,
+    ])
+        ->assertOk()
+        ->assertJsonPath('entry.meal_name', 'Sunday toast');
+})->with([
+    'ingredients edited' => [['items' => [['name' => 'Rye bread', 'portion' => '2 slices', 'calories' => 170, 'protein' => 7, 'carbs' => 31, 'fat' => 2, 'provenance' => 'user']]]],
+    'unchanged totals saved without items' => [['calories' => 160, 'protein_grams' => 6, 'carbs_grams' => 30, 'fat_grams' => 2, 'fiber_grams' => 3]],
+]);
 
 it('clears fiber on a manually logged meal when it is sent empty', function (): void {
     $groupId = (string) Str::uuid();
