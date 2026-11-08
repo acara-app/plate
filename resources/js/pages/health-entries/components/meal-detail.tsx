@@ -61,6 +61,8 @@ type MealForm = {
 
 const MAX_ITEMS = 30;
 
+const DETAILS_FIELDS = ['meal_name', 'measured_at', 'notes'];
+
 export default function MealDetail({
     entry,
     backUrl,
@@ -210,7 +212,7 @@ export default function MealDetail({
         openSheet('value');
     };
 
-    const save = () => {
+    const save = (stayOnPage = false) => {
         form.transform((current) => {
             const notes = current.notes.trim();
             const mealName = current.meal_name.trim();
@@ -250,12 +252,28 @@ export default function MealDetail({
         form.put(UpdateHealthEntryController.url(entry.id), {
             preserveScroll: true,
             onSuccess: (page) => {
+                if (stayOnPage) {
+                    form.setDefaults();
+                    closeSheet();
+
+                    return;
+                }
+
                 leaveGuard.allowLeaving();
                 router.visit(
                     ListHealthEntryController({
                         query: { date: String(page.props.date) },
                     }),
                 );
+            },
+            onError: (saveErrors) => {
+                if (
+                    Object.keys(saveErrors).some(
+                        (key) => !DETAILS_FIELDS.includes(key),
+                    )
+                ) {
+                    closeSheet();
+                }
             },
         });
     };
@@ -646,7 +664,7 @@ export default function MealDetail({
             <DetailActions
                 onEdit={() => openSheet('details')}
                 doneUrl={backUrl}
-                onDone={form.isDirty ? save : undefined}
+                onDone={form.isDirty ? () => save() : undefined}
                 saving={form.processing}
                 message={
                     generalErrors.length > 0 || hasItemErrors ? (
@@ -736,6 +754,7 @@ export default function MealDetail({
                     }}
                     automaticName={automaticTitle}
                     errors={errors}
+                    saving={form.processing}
                     onApply={(details) => {
                         const mealName = details.meal_name.trim();
                         const isAutomatic =
@@ -746,8 +765,8 @@ export default function MealDetail({
                             ...details,
                             meal_name: isAutomatic ? '' : mealName,
                         }));
-                        form.clearErrors('measured_at', 'notes', 'meal_name');
-                        closeSheet();
+                        form.clearErrors('meal_name', 'measured_at', 'notes');
+                        save(true);
                     }}
                 />
             </BottomSheet>

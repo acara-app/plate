@@ -12,11 +12,13 @@ export default function DetailsForm({
     details,
     automaticName,
     errors,
+    saving,
     onApply,
 }: {
     details: Details;
     automaticName: string;
     errors: Record<string, string>;
+    saving: boolean;
     onApply: (details: Details) => void;
 }) {
     const { t } = useTranslation('common');
@@ -77,8 +79,16 @@ export default function DetailsForm({
                 />
                 <InputError message={errors.notes} />
             </div>
-            <Button type="submit" className="h-12 rounded-2xl text-base">
-                {t('health_entries.detail.apply')}
+            <Button
+                type="submit"
+                className="h-12 rounded-2xl text-base"
+                disabled={saving}
+            >
+                {t(
+                    saving
+                        ? 'health_entries.detail.saving'
+                        : 'health_entries.detail.apply',
+                )}
             </Button>
         </form>
     );
