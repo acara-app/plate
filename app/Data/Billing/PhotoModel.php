@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Data\Billing;
 
-use App\Data\Ai\AgentModelData;
 use Spatie\LaravelData\Data;
 
 final class PhotoModel extends Data
@@ -17,8 +16,9 @@ final class PhotoModel extends Data
 
     public static function standard(): self
     {
-        $model = AgentModelData::current();
-
-        return new self($model->provider, $model->model);
+        return new self(
+            config()->string('ai.photo_analysis.provider'),
+            config()->string('ai.photo_analysis.model'),
+        );
     }
 }

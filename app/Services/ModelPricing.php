@@ -11,6 +11,12 @@ final class ModelPricing
         'gpt-6-sol' => [
             '2000-01-01' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.2],
         ],
+        'gpt-6.1-sol' => [
+            '2000-01-01' => ['input' => 2.0, 'output' => 10.0, 'reasoning' => 10.0, 'cache_read' => 0.10],
+        ],
+        'gpt-6.1-terra' => [
+            '2000-01-01' => ['input' => 1.0, 'output' => 5.0, 'reasoning' => 5.0, 'cache_read' => 0.05],
+        ],
         'gpt-6-luna' => [
             '2000-01-01' => ['input' => 0.10, 'output' => 0.50, 'reasoning' => 0.50, 'cache_read' => 0.01],
         ],

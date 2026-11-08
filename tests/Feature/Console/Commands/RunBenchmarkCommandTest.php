@@ -110,7 +110,7 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2, '--force' => true])
-        ->expectsOutputToContain('gpt-6-sol/p7')
+        ->expectsOutputToContain('gemini-3.8-flash/p7')
         ->expectsOutputToContain('Raw model')
         ->expectsOutputToContain('1 / 2 / 0')
         ->expectsOutputToContain('1.00 / 1.00 (1 meals)')
@@ -119,7 +119,8 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
 
     $run = BenchmarkRun::query()->sole();
 
-    expect($run->analyzer_version)->toBe('gpt-6-sol/p7')
+    expect($run->analyzer_version)->toBe('gemini-3.8-flash/p7')
+        ->and($run->toHarnessReport()->provider)->toBe('gemini')
         ->and($run->smoke)->toBeFalse()
         ->and($run->repeats)->toBe(2)
         ->and($run->meal_count)->toBe(1)
@@ -161,7 +162,7 @@ it('aborts without spending when the cost confirmation is declined', function ()
     seedGoldenPlate();
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
-    $this->artisan('benchmark:run', ['--repeats' => 2])
+    $this->artisan('benchmark:run', ['--repeats' => 2, '--provider' => 'openai', '--model' => 'gpt-6-sol'])
         ->expectsConfirmation('Run 2 analyses (~$0.03)?', 'no')
         ->assertSuccessful();
 

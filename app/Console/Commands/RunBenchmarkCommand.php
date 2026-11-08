@@ -22,7 +22,7 @@ use Illuminate\Console\Command;
 use function Laravel\Prompts\confirm;
 
 #[Description('Run the golden-plate validation benchmark through the production photo analyzer.')]
-#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the app default provider)} {--model= : Vision model (defaults to the photo analyzer model)} {--max-tokens=35000 : Output token ceiling}')]
+#[Signature('benchmark:run {--smoke : Analyze only the smoke subset (first 12 meals by code)} {--repeats=5 : Analyses per meal per path} {--force : Skip the cost confirmation} {--provider= : AI provider (defaults to the photo analyzer provider)} {--model= : Vision model (defaults to the photo analyzer model)} {--max-tokens=35000 : Output token ceiling}')]
 final class RunBenchmarkCommand extends Command
 {
     private const int SMOKE_LIMIT = 12;
@@ -36,9 +36,10 @@ final class RunBenchmarkCommand extends Command
 
     public function handle(): int
     {
+        $photoModel = PhotoModel::standard();
         $model = new PhotoModel(
-            provider: $this->option('provider') ?: config()->string('ai.default'),
-            model: $this->option('model') ?: FoodPhotoAnalyzerAgent::pinnedModel(),
+            provider: $this->option('provider') ?: $photoModel->provider,
+            model: $this->option('model') ?: $photoModel->model,
             maxTokens: max(1, (int) $this->option('max-tokens')),
         );
 
