@@ -32,7 +32,7 @@ import { cn } from '@/lib/utils';
 import type { HealthEntry, LogTypeValue } from '@/types/diabetes';
 import type { MealType } from '@/types/meal-plan';
 import { router, useForm } from '@inertiajs/react';
-import { ChevronRight, Pencil, Plus, Sparkles } from 'lucide-react';
+import { Pencil, Plus, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DetailActions from './detail-actions';
@@ -54,11 +54,14 @@ type MealForm = {
     log_type: 'food';
     measured_at: string;
     notes: string;
+    meal_name: string;
     meal_type: MealType;
     items: EditableItem[];
 } & Nutrition;
 
 const MAX_ITEMS = 30;
+
+const DETAILS_FIELDS = ['meal_name', 'measured_at', 'notes'];
 
 export default function MealDetail({
     entry,
@@ -77,10 +80,12 @@ export default function MealDetail({
     const isItemized = (analysis?.items.length ?? 0) > 0;
     const savedMeasuredAt = formatLocalDatetime(new Date(entry.measured_at));
     const savedNotes = userNotes(entry) ?? '';
+    const savedMealName = entry.meal_name ?? '';
     const form = useForm<MealForm>({
         log_type: 'food',
         measured_at: savedMeasuredAt,
         notes: savedNotes,
+        meal_name: savedMealName,
         meal_type:
             entry.meal_type ?? mealTypeForTime(new Date(entry.measured_at)),
         items: (analysis?.items ?? []).map((item, index) => ({
@@ -104,13 +109,18 @@ export default function MealDetail({
     const leaveGuard = useUnsavedChanges(form.isDirty);
 
     useEffect(() => {
-        form.setDefaults({ measured_at: savedMeasuredAt, notes: savedNotes });
+        form.setDefaults({
+            measured_at: savedMeasuredAt,
+            notes: savedNotes,
+            meal_name: savedMealName,
+        });
         form.setData((current) => ({
             ...current,
             measured_at: savedMeasuredAt,
             notes: savedNotes,
+            meal_name: savedMealName,
         }));
-    }, [savedMeasuredAt, savedNotes]);
+    }, [savedMeasuredAt, savedNotes, savedMealName]);
 
     const { data } = form;
     const errors = form.errors as Record<string, string>;
@@ -130,7 +140,8 @@ export default function MealDetail({
     const mealType = getMealTypeConfig(data.meal_type);
     const readingGroups = getReadingGroups(entry, glucoseUnit, t);
     const source = entry.source ? SOURCE_META[entry.source] : undefined;
-    const title = mealTitle(items, data.notes, t);
+    const automaticTitle = mealTitle(items, data.notes, t);
+    const title = data.meal_name.trim() || automaticTitle;
     const itemErrors = (index: number): Record<string, string> => {
         const prefix = `items.${index}.`;
 
@@ -201,12 +212,14 @@ export default function MealDetail({
         openSheet('value');
     };
 
-    const save = () => {
+    const save = (stayOnPage = false) => {
         form.transform((current) => {
             const notes = current.notes.trim();
+            const mealName = current.meal_name.trim();
             const base = {
                 log_type: current.log_type,
                 meal_type: current.meal_type,
+                meal_name: mealName === '' ? null : mealName,
                 measured_at: localDatetimeToIso(current.measured_at),
                 notes: notes === '' ? null : notes,
             };
@@ -239,12 +252,28 @@ export default function MealDetail({
         form.put(UpdateHealthEntryController.url(entry.id), {
             preserveScroll: true,
             onSuccess: (page) => {
+                if (stayOnPage) {
+                    form.setDefaults();
+                    closeSheet();
+
+                    return;
+                }
+
                 leaveGuard.allowLeaving();
                 router.visit(
                     ListHealthEntryController({
                         query: { date: String(page.props.date) },
                     }),
                 );
+            },
+            onError: (saveErrors) => {
+                if (
+                    Object.keys(saveErrors).some(
+                        (key) => !DETAILS_FIELDS.includes(key),
+                    )
+                ) {
+                    closeSheet();
+                }
             },
         });
     };
@@ -411,12 +440,20 @@ export default function MealDetail({
                     aria-labelledby="ingredients-heading"
                     className="flex flex-col gap-3"
                 >
-                    <h2
-                        id="ingredients-heading"
-                        className="text-xl font-semibold tracking-tight"
-                    >
-                        {t('health_entries.detail.ingredients')}
-                    </h2>
+                    <div className="flex items-baseline justify-between gap-3">
+                        <h2
+                            id="ingredients-heading"
+                            className="text-xl font-semibold tracking-tight"
+                        >
+                            {t('health_entries.detail.ingredients')}
+                        </h2>
+                        <p
+                            id="ingredients-hint"
+                            className="text-sm text-muted-foreground"
+                        >
+                            {t('health_entries.detail.ingredients_hint')}
+                        </p>
+                    </div>
                     <ul className="divide-y overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-border/60">
                         {items.map((item, index) => {
                             const messages = Object.values(itemErrors(index));
@@ -428,8 +465,8 @@ export default function MealDetail({
                                         onClick={() => openIngredient(index)}
                                         aria-describedby={
                                             messages.length > 0
-                                                ? `ingredient-error-${index}`
-                                                : undefined
+                                                ? `ingredients-hint ingredient-error-${index}`
+                                                : 'ingredients-hint'
                                         }
                                         className={cn(
                                             'flex min-h-16 w-full items-center gap-3 px-5 py-3 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:bg-muted/60',
@@ -458,8 +495,8 @@ export default function MealDetail({
                                                 )}
                                             </span>
                                         </span>
-                                        <ChevronRight
-                                            className="size-5 shrink-0 text-muted-foreground"
+                                        <Pencil
+                                            className="size-4 shrink-0 text-muted-foreground"
                                             aria-hidden="true"
                                         />
                                     </button>
@@ -627,7 +664,7 @@ export default function MealDetail({
             <DetailActions
                 onEdit={() => openSheet('details')}
                 doneUrl={backUrl}
-                onDone={form.isDirty ? save : undefined}
+                onDone={form.isDirty ? () => save() : undefined}
                 saving={form.processing}
                 message={
                     generalErrors.length > 0 || hasItemErrors ? (
@@ -711,14 +748,25 @@ export default function MealDetail({
                 <DetailsForm
                     key={sheetKey}
                     details={{
+                        meal_name: title,
                         measured_at: data.measured_at,
                         notes: data.notes,
                     }}
+                    automaticName={automaticTitle}
                     errors={errors}
+                    saving={form.processing}
                     onApply={(details) => {
-                        form.setData((current) => ({ ...current, ...details }));
-                        form.clearErrors('measured_at', 'notes');
-                        closeSheet();
+                        const mealName = details.meal_name.trim();
+                        const isAutomatic =
+                            mealName === mealTitle(items, details.notes, t);
+
+                        form.setData((current) => ({
+                            ...current,
+                            ...details,
+                            meal_name: isAutomatic ? '' : mealName,
+                        }));
+                        form.clearErrors('meal_name', 'measured_at', 'notes');
+                        save(true);
                     }}
                 />
             </BottomSheet>

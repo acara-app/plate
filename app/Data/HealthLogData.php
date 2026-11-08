@@ -51,6 +51,8 @@ final class HealthLogData extends Data
         public ?MealType $mealType = null,
         public ?float $fiberGrams = null,
         public bool $fiberGramsProvided = false,
+        public ?string $mealName = null,
+        public bool $mealNameProvided = false,
     ) {}
 
     /**
@@ -84,6 +86,8 @@ final class HealthLogData extends Data
             mealType: MealType::tryFrom(self::toNullableString($data['meal_type'] ?? null) ?? ''),
             fiberGrams: self::toFloat($data['fiber_grams'] ?? null),
             fiberGramsProvided: array_key_exists('fiber_grams', $data),
+            mealName: self::toNullableString($data['meal_name'] ?? null),
+            mealNameProvided: array_key_exists('meal_name', $data),
         );
     }
 
@@ -380,6 +384,10 @@ final class HealthLogData extends Data
 
         if ($this->mealType instanceof MealType) {
             $metadata['meal_type'] = $this->mealType->value;
+        }
+
+        if ($this->mealName !== null) {
+            $metadata['meal_name'] = $this->mealName;
         }
 
         if ($this->foodItems !== null) {

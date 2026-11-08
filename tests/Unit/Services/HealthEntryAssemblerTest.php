@@ -200,17 +200,18 @@ it('labels an unlabelled meal by the local time it was eaten', function (string 
     'snack until 03:59' => ['19:59:00', 'snack'],
 ]);
 
-it('keeps a chosen meal type and gives readings none', function (): void {
+it('keeps a chosen meal type and name and gives readings none', function (): void {
     $user = User::factory()->create();
     $meal = HealthSyncSample::factory()->carbohydrates()->for($user)->create([
         'measured_at' => '2026-10-18 01:00:00',
-        'metadata' => ['meal_type' => 'snack'],
+        'metadata' => ['meal_type' => 'snack', 'meal_name' => 'Pho'],
     ]);
     $reading = HealthSyncSample::factory()->bloodGlucose()->for($user)->create(['measured_at' => '2026-10-18 01:00:00']);
 
     $entries = (new HealthEntryAssembler)->assemble(collect([$meal, $reading]));
 
-    expect($entries->pluck('meal_type', 'id')->all())->toBe([$meal->id => 'snack', $reading->id => null]);
+    expect($entries->pluck('meal_type', 'id')->all())->toBe([$meal->id => 'snack', $reading->id => null])
+        ->and($entries->pluck('meal_name', 'id')->all())->toBe([$meal->id => 'Pho', $reading->id => null]);
 });
 
 it('reports glucose in the unit the reader asked for', function (GlucoseUnit $unit, float $expected): void {
