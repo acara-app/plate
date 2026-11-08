@@ -35,13 +35,14 @@ it('records the permission at sign-up only when the box is ticked', function (bo
         'email' => 'test@example.com',
         'password' => 'password1234',
         'accepted_disclaimer' => '1',
+        'health_data_consent' => '1',
         ...$ticked ? ['improve_food_recognition' => '1'] : [],
     ])->assertRedirectToRoute('dashboard');
 
     $user = User::query()->where('email', 'test@example.com')->sole();
 
     expect($user->consentDecision(ConsentPurpose::ImproveFoodRecognition))->toBe($ticked ? true : null)
-        ->and($user->consents()->get()->map(fn (Consent $consent): array => [$consent->source, $consent->version])->all())
+        ->and($user->consents()->where('purpose', ConsentPurpose::ImproveFoodRecognition)->get()->map(fn (Consent $consent): array => [$consent->source, $consent->version])->all())
         ->toBe($ticked ? [[ConsentSource::SignUp, ConsentPurpose::ImproveFoodRecognition->version()]] : []);
 })->with(['ticked' => [true], 'left unticked' => [false]]);
 

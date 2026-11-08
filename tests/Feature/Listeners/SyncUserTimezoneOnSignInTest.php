@@ -15,6 +15,7 @@ it('saves the browser timezone of a visitor who signs up', function (): void {
             'email' => 'test@example.com',
             'password' => 'password1234',
             'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
         ]);
 
     expect(User::query()->where('email', 'test@example.com')->sole()->timezone)->toBe('Asia/Ulaanbaatar');

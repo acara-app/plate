@@ -26,7 +26,7 @@ it('brings the chosen plan and billing interval back after sign-up', function ()
     $product = SubscriptionProduct::factory()->create(['price' => 9, 'stripe_price_id' => 'price_monthly', 'yearly_stripe_lookup_key' => 'lookup_yearly']);
 
     $this->get(route('checkout.start', ['product' => $product, 'interval' => 'yearly']))->assertRedirect(route('register'));
-    $this->post(route('register.store'), ['name' => 'Yearly Buyer', 'email' => 'yearly-buyer@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1'])
+    $this->post(route('register.store'), ['name' => 'Yearly Buyer', 'email' => 'yearly-buyer@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1', 'health_data_consent' => '1'])
         ->assertRedirect(route('checkout.subscription'));
 
     $this->get(route('checkout.subscription'))

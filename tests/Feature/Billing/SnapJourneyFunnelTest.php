@@ -120,7 +120,7 @@ it('follows a guest from a selected photo to a payment confirmed after they leav
     Livewire::test('pages::snap-to-track-result');
     Livewire::test('pages::snap-to-track-result')->call('upgrade', 'result')->assertRedirect(route('checkout.start', $starter));
 
-    $this->post(route('register.store'), ['name' => 'Snap Guest', 'email' => 'snap-guest@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1']);
+    $this->post(route('register.store'), ['name' => 'Snap Guest', 'email' => 'snap-guest@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1', 'health_data_consent' => '1']);
     Auth::user()->markEmailAsVerified();
     $metadata = fakeSnapJourneyCheckout();
     $this->post(route('checkout.subscription.store'), ['product_id' => $starter->id, 'billing_interval' => 'monthly'])
