@@ -29,9 +29,15 @@ final class PurgeDeletedUserDataCommand extends Command
                 });
             });
 
+        $leftovers = $this->purgeLeftovers();
+
         $this->info($count === 0
             ? 'No user data to purge.'
             : sprintf('Purged data for %d deleted user(s).', $count));
+
+        if ($leftovers > 0) {
+            $this->info(sprintf('Removed %d token(s) and notification(s) left by deleted accounts.', $leftovers));
+        }
 
         return self::SUCCESS;
     }
@@ -79,12 +85,12 @@ final class PurgeDeletedUserDataCommand extends Command
                 ->delete();
 
             DB::table('notifications')
-                ->where('notifiable_type', User::class)
+                ->whereIn('notifiable_type', $this->userMorphTypes())
                 ->where('notifiable_id', $deletedUser->user_id)
                 ->delete();
 
             DB::table('personal_access_tokens')
-                ->where('tokenable_type', User::class)
+                ->whereIn('tokenable_type', $this->userMorphTypes())
                 ->where('tokenable_id', $deletedUser->user_id)
                 ->delete();
 
@@ -94,5 +100,30 @@ final class PurgeDeletedUserDataCommand extends Command
 
             $deletedUser->delete();
         });
+    }
+
+    private function purgeLeftovers(): int
+    {
+        $existingUsers = DB::table('users')->select('id');
+        $pendingDeletions = DB::table('deleted_users')->select('user_id');
+
+        return DB::table('personal_access_tokens')
+            ->whereIn('tokenable_type', $this->userMorphTypes())
+            ->whereNotIn('tokenable_id', $existingUsers)
+            ->whereNotIn('tokenable_id', $pendingDeletions)
+            ->delete()
+            + DB::table('notifications')
+                ->whereIn('notifiable_type', $this->userMorphTypes())
+                ->whereNotIn('notifiable_id', $existingUsers)
+                ->whereNotIn('notifiable_id', $pendingDeletions)
+                ->delete();
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function userMorphTypes(): array
+    {
+        return array_values(array_unique([User::class, new User()->getMorphClass()]));
     }
 }

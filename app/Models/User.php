@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Actions\DeleteUser;
 use App\Data\UserSettingsData;
 use App\Enums\ChatPlatform;
 use App\Enums\ConsentPurpose;
@@ -308,6 +309,11 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
     public function wantsGlucoseMealInsights(): bool
     {
         return UserSettingsData::from($this->settings ?? [])->glucoseMealInsightsEnabled;
+    }
+
+    protected function pruning(): void
+    {
+        resolve(DeleteUser::class)->handle($this, notify: false);
     }
 
     protected function getIsVerifiedAttribute(?bool $isVerified): bool

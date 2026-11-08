@@ -29,7 +29,13 @@ const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     },
 ];
 
-export default function Edit({ status }: { status?: string }) {
+export default function Edit({
+    status,
+    hasPassword,
+}: {
+    status?: string;
+    hasPassword: boolean;
+}) {
     const { currentUser, locale, availableLanguages } = useSharedProps();
     const { t } = useTranslation('common');
 
@@ -174,7 +180,7 @@ export default function Edit({ status }: { status?: string }) {
                     </Form>
                 </div>
 
-                <DeleteUser />
+                <DeleteUser hasPassword={hasPassword} />
             </SettingsLayout>
         </AppLayout>
     );
