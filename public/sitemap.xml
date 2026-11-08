@@ -139,6 +139,7 @@
         <loc>https://plate.acara.app/privacy-policy</loc>
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
         <lastmod>2026-11-08</lastmod>
         <changefreq>monthly</changefreq>
@@ -148,6 +149,17 @@
         <loc>https://plate.acara.app/fr/privacy-policy</loc>
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
+        <lastmod>2026-11-08</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://plate.acara.app/mn/privacy-policy</loc>
+        <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/privacy-policy" />
+        <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
         <lastmod>2026-11-08</lastmod>
         <changefreq>monthly</changefreq>
@@ -157,6 +169,7 @@
         <loc>https://plate.acara.app/terms-of-service</loc>
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/terms-of-service" />
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/terms-of-service" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/terms-of-service" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/terms-of-service" />
         <lastmod>2026-11-08</lastmod>
         <changefreq>monthly</changefreq>
@@ -166,6 +179,17 @@
         <loc>https://plate.acara.app/fr/terms-of-service</loc>
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/terms-of-service" />
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/terms-of-service" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/terms-of-service" />
+        <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/terms-of-service" />
+        <lastmod>2026-11-08</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://plate.acara.app/mn/terms-of-service</loc>
+        <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/terms-of-service" />
+        <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/terms-of-service" />
+        <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/terms-of-service" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/terms-of-service" />
         <lastmod>2026-11-08</lastmod>
         <changefreq>monthly</changefreq>

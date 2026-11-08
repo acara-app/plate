@@ -151,6 +151,7 @@ return [
 
     'legal_pages' => [
         'back' => 'Back',
+        'read_in' => 'Read in English',
         'privacy_policy' => [
             'title' => 'Privacy Policy | How We Protect Your Health Data',
             'meta_description' => 'Your privacy is paramount. Read the Acara Plate Privacy Policy to understand how we collect, use, and protect your biometrics, health conditions, and dietary data.',
