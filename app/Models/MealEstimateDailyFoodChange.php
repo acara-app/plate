@@ -6,9 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\MealEstimateDailyFoodChangeFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 
 /**
@@ -25,17 +23,7 @@ final class MealEstimateDailyFoodChange extends Model
     /** @use HasFactory<MealEstimateDailyFoodChangeFactory> */
     use HasFactory;
 
-    use MassPrunable;
-
     protected $guarded = [];
-
-    /**
-     * @return Builder<self>
-     */
-    public function prunable(): Builder
-    {
-        return self::query()->where('date', '<', now()->subMonths(MealEstimate::RETENTION_MONTHS)->toDateString());
-    }
 
     /**
      * @return array<string, string>

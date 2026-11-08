@@ -69,13 +69,9 @@ it('keeps daily counts past 12 months as history while forgetting their food nam
     $expired = now()->subMonths(MealEstimate::RETENTION_MONTHS)->subDay()->toDateString();
     MealEstimateDailyStat::factory()->create(['date' => $expired]);
     MealEstimateDailyFoodChange::factory()->create(['date' => $expired]);
-    $recent = MealEstimateDailyFoodChange::factory()->create();
-
-    $this->artisan('model:prune', ['--model' => [MealEstimateDailyFoodChange::class]])->assertSuccessful();
-
-    expect(MealEstimateDailyFoodChange::query()->pluck('id')->all())->toBe([$recent->id]);
 
     $this->artisan('meal-estimates:aggregate-daily')->assertSuccessful();
 
-    expect(MealEstimateDailyStat::query()->pluck('date')->all())->toBe([$expired]);
+    expect(MealEstimateDailyStat::query()->pluck('date')->all())->toBe([$expired])
+        ->and(MealEstimateDailyFoodChange::query()->exists())->toBeFalse();
 });

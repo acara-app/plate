@@ -67,14 +67,9 @@ final readonly class AggregateDailyMealEstimates
 
         DB::transaction(function () use ($from, $stats, $foods): void {
             MealEstimateDailyStat::query()->where('date', '>=', $from->toDateString())->delete();
-            MealEstimateDailyFoodChange::query()->where('date', '>=', $from->toDateString())->delete();
+            MealEstimateDailyFoodChange::query()->delete();
 
-            $this->insert(MealEstimateDailyStat::class, array_map(fn (array $row): array => [
-                ...$row,
-                'kcal_changes' => $this->json($row['kcal_changes']),
-                'kcal_change_percents' => $this->json($row['kcal_change_percents']),
-                'carbs_changes' => $this->json($row['carbs_changes']),
-            ], array_values($stats)));
+            $this->insert(MealEstimateDailyStat::class, array_values($stats));
             $this->insert(MealEstimateDailyFoodChange::class, array_values($foods));
         });
     }
@@ -118,12 +113,9 @@ final readonly class AggregateDailyMealEstimates
             unset($remaining[$match]);
         }
 
-        $remaining = array_values($remaining);
         $changes = [];
 
-        for ($index = 0; $index < max(count($unmatched), count($remaining)); $index++) {
-            $pair = [$unmatched[$index] ?? null, $remaining[$index] ?? null];
-
+        foreach (array_map(null, $unmatched, array_values($remaining)) as $pair) {
             if (! in_array('', $pair, true)) {
                 $changes[implode('|', $pair)] = $pair;
             }
@@ -138,18 +130,8 @@ final readonly class AggregateDailyMealEstimates
      */
     private function insert(string $model, array $rows): void
     {
-        $now = now();
-
         foreach (array_chunk($rows, 500) as $chunk) {
-            $model::query()->insert(array_map(fn (array $row): array => [...$row, 'created_at' => $now, 'updated_at' => $now], $chunk));
+            $model::query()->fillAndInsert($chunk);
         }
-    }
-
-    /**
-     * @param  array<int, int>  $counts
-     */
-    private function json(array $counts): string
-    {
-        return json_encode($counts, JSON_FORCE_OBJECT | JSON_THROW_ON_ERROR);
     }
 }
