@@ -1081,6 +1081,7 @@ return [
             'completed_other' => 'Completed {{count}} steps',
             'failed' => '{{failed}} of {{total}} steps failed',
             'stopped' => 'Stopped after {{done}} of {{total}} steps',
+            'declined' => '{{declined}} of {{total}} steps not saved',
             'awaiting' => 'Waiting for your approval',
             'status' => [
                 'running' => 'In progress',

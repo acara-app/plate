@@ -1067,6 +1067,7 @@ return [
             'completed_other' => '{{count}} алхам хийлээ',
             'failed' => '{{total}} алхмаас {{failed}} нь амжилтгүй боллоо',
             'stopped' => '{{done}}/{{total}} алхам хийгээд зогссон',
+            'declined' => '{{total}} алхмаас {{declined}} нь хадгалагдаагүй',
             'awaiting' => 'Таны зөвшөөрлийг хүлээж байна',
             'status' => [
                 'running' => 'Хийгдэж байна',

@@ -1,7 +1,13 @@
 import type { ApprovalCardData, ApprovalStatus } from '@/types/chat';
 import type { UIMessage } from '@ai-sdk/react';
 
-const STATUSES: ApprovalStatus[] = ['pending', 'approved', 'rejected'];
+const STATUSES: Record<ApprovalStatus, true> = {
+    pending: true,
+    submitted: true,
+    approved: true,
+    rejected: true,
+    abandoned: true,
+};
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null;
@@ -11,7 +17,8 @@ export function isApprovalCardData(value: unknown): value is ApprovalCardData {
     return (
         isRecord(value) &&
         typeof value.toolCallId === 'string' &&
-        STATUSES.includes(value.status as ApprovalStatus)
+        typeof value.status === 'string' &&
+        Object.hasOwn(STATUSES, value.status)
     );
 }
 
