@@ -183,6 +183,23 @@ it('logs plain water to the day’s water instead of as food', function (): void
         ->and([$wellness->waterMl, $wellness->waterSyncedMl])->toBe([200, 0]);
 });
 
+it('asks the model for the water amount instead of asking the user to approve', function (?int $waterMl): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+    Context::add('chat.channel', 'web');
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request(['log_type' => 'water', 'water_ml' => $waterMl, 'notes' => '2 glasses of water']);
+
+    expect($tool->shouldRequestApproval($request))->toBeNull()
+        ->and(json_decode($tool->handle($request), true))->toMatchArray(['requires_clarification' => true, 'field' => 'water_ml'])
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->exists())->toBeFalse();
+})->with([
+    'no amount' => [null],
+    'nothing drunk' => [0],
+    'more than five litres' => [5001],
+]);
+
 it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {
     $user = User::factory()->create();
     Auth::login($user);

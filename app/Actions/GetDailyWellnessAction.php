@@ -50,9 +50,9 @@ final readonly class GetDailyWellnessAction
         $sleepQuality = $checkIns->get(DailyCheckInMetric::SleepQuality->value);
         $stressLevel = $checkIns->get(DailyCheckInMetric::StressLevel->value);
         $water = $this->samplesOn($user, $start, RecordWaterIntakeAction::WATER_TYPE);
-        $isLogged = static fn (HealthSyncSample $sample): bool => in_array($sample->entry_source, RecordWaterIntakeAction::LOGGED_SOURCES, true);
-        $waterSyncedMl = (int) round($this->deduplicatedTotal($water->reject($isLogged), RecordWaterIntakeAction::WATER_TYPE));
-        $waterLoggedMl = (int) round($water->filter($isLogged)->sum(static fn (HealthSyncSample $sample): float => $sample->value));
+        $isSynced = static fn (HealthSyncSample $sample): bool => $sample->isMobileSynced();
+        $waterSyncedMl = (int) round($this->deduplicatedTotal($water->filter($isSynced), RecordWaterIntakeAction::WATER_TYPE));
+        $waterLoggedMl = (int) round($water->reject($isSynced)->sum(static fn (HealthSyncSample $sample): float => $sample->value));
 
         return new DailyWellnessData(
             steps: $this->steps($user, $start),

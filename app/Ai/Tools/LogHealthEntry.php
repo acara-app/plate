@@ -6,6 +6,7 @@ namespace App\Ai\Tools;
 
 use App\Actions\AggregateHealthDailySamplesAction;
 use App\Actions\RecordHealthSampleAction;
+use App\Actions\RecordWaterIntakeAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\HealthLogData;
 use App\Enums\DataSensitivity;
@@ -95,6 +96,15 @@ final class LogHealthEntry implements Approvable, Tool
             ]);
         }
 
+        if ($this->requiresWaterAmount($healthData)) {
+            return (string) json_encode([
+                'error' => 'I need how much water the user drank to log this.',
+                'requires_clarification' => true,
+                'field' => 'water_ml',
+                'message' => sprintf('Water entries need water_ml between 1 and %d ml. Estimate it from what the user said (a glass ≈ 250 ml), ask the user only if it is unclear, then call log_health_entry again.', RecordWaterIntakeAction::MAX_AMOUNT_ML),
+            ]);
+        }
+
         try {
             $sample = $this->recordHealthSampleAction->handle($healthData, $user, HealthEntrySource::Chat);
         } catch (InvalidArgumentException $invalidArgumentException) {
@@ -145,7 +155,7 @@ final class LogHealthEntry implements Approvable, Tool
             'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
             'water_ml' => $schema->integer()->required()->nullable()
-                ->description('Plain water the user drank, in millilitres, for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.'),
+                ->description('Plain water the user drank, in millilitres (1–5000), for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.'),
             'insulin_units' => $schema->number()->required()->nullable()
                 ->description('Insulin dose in units.'),
             'insulin_type' => $schema->string()->required()->nullable()
@@ -186,7 +196,8 @@ final class LogHealthEntry implements Approvable, Tool
 
             if ($this->requiresGlucoseUnitClarification($healthData)
                 || ($user instanceof User && $this->requiresWeightUnitClarification($healthData, $user))
-                || $this->requiresFoodEstimate($healthData)) {
+                || $this->requiresFoodEstimate($healthData)
+                || $this->requiresWaterAmount($healthData)) {
                 return false;
             }
 
@@ -248,5 +259,11 @@ final class LogHealthEntry implements Approvable, Tool
             && $healthData->carbsGrams === null
             && $healthData->proteinGrams === null
             && $healthData->fatGrams === null;
+    }
+
+    private function requiresWaterAmount(HealthLogData $healthData): bool
+    {
+        return $healthData->logType === HealthEntryType::Water
+            && ($healthData->waterMl === null || $healthData->waterMl < 1 || $healthData->waterMl > RecordWaterIntakeAction::MAX_AMOUNT_ML);
     }
 }
