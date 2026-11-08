@@ -149,6 +149,14 @@ return [
         'dismiss' => 'Dismiss privacy update',
     ],
 
+    'health_data_consent_prompt' => [
+        'title' => 'Please confirm how we use your health information',
+        'policy_updated' => 'We\'ve also updated our Privacy Policy.',
+        'policy_link' => 'Take a look',
+        'agree' => 'I agree',
+        'later' => 'Not now',
+    ],
+
     'privacy_settings' => [
         'title' => 'Privacy',
         'description' => 'Choose how Acara may use your data',

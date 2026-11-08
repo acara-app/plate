@@ -97,7 +97,7 @@
                 <ul>
                     <li><strong>Consent:</strong> You provide consent by submitting the questionnaire or creating an
                         account.</li>
-                    <li><strong>Explicit Consent (Article 9):</strong> For special-category data (health conditions, medications, biometrics, reproductive and other health-related fields), we rely on your explicit consent, obtained when you submit that information in the questionnaire or onboarding. You may withdraw this consent at any time (see Section 8).</li>
+                    <li><strong>Explicit Consent (Article 9):</strong> For special-category data (health conditions, medications, biometrics, meals, glucose readings and other health-related information), we rely on your explicit consent, which you give with a separate checkbox when you sign up. We keep a record of when you gave it. You may withdraw this consent at any time (see Section 8); because the Services rely on this information, withdrawing it means closing your account.</li>
                     <li><strong>Contract:</strong> Processing is necessary to deliver the Services (e.g., generating
                         meal plans).</li>
                     <li><strong>Legitimate Interests:</strong> We use anonymized data, and aggregated accuracy

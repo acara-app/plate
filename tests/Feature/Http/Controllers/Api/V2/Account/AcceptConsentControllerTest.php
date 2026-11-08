@@ -21,7 +21,7 @@ it('requires authentication', function (): void {
     $this->postJson(route('api.v2.account.consent'), [])->assertUnauthorized();
 });
 
-it('records consent timestamps and version', function (): void {
+it('records consent timestamps with the versions currently in force', function (): void {
     $user = User::factory()->withoutDisclaimer()->create();
 
     $this->withHeaders(consentBearer($user))
@@ -35,8 +35,8 @@ it('records consent timestamps and version', function (): void {
     expect($user->terms_accepted_at)->not->toBeNull()
         ->and($user->privacy_accepted_at)->not->toBeNull()
         ->and($user->accepted_disclaimer_at)->not->toBeNull()
-        ->and($user->consent_version)->toBe('2026-01')
-        ->and($user->privacy_version)->toBe('2026-02');
+        ->and($user->consent_version)->toBe(config('plate.terms_version'))
+        ->and($user->privacy_version)->toBe(config('plate.privacy_policy_version'));
 });
 
 it('requires the medical disclaimer to be accepted', function (): void {
