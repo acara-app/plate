@@ -29,7 +29,9 @@ it('returns instructions with food analysis guidance', function (): void {
         ->toContain('protein')
         ->toContain('carbs')
         ->toContain('fat')
-        ->toContain('portion');
+        ->toContain('portion')
+        ->toContain('not a standard serving size')
+        ->toContain('include the cooking oil, butter, sauce, or dressing');
 });
 
 it('omits language directive when language is not set', function (): void {
