@@ -83,6 +83,11 @@
                     <li>Measuring and improving the accuracy of our meal estimates. For this we only look at
                         aggregated statistics, such as how often estimates for a food get corrected, and only for
                         groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
+                    <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), our team may
+                        look at your individual meals, your edits, and your meal photos to test and improve how our AI
+                        recognizes food. They stay within Acara and are never shared with other organizations, and we check
+                        photos for faces and other personal details before using them. You can turn this off anytime in
+                        Settings → Privacy, and from then on we stop using them for this.</li>
                 </ul>
                 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
                     your consent. See Section 5 for the specific data flows involved in AI-assisted features.</p>
@@ -197,6 +202,11 @@
                     The AI's original estimate and your edits are kept with the meal they belong to. They are deleted
                     when you delete that meal or your account, and automatically 12 months after the meal was saved.
                     The meal itself stays in your food log.
+                </p>
+                <p>
+                    <strong>Your privacy choices:</strong>
+                    We keep a record of each choice you make about Help improve food recognition (what you chose and
+                    when) for as long as you have an account, so we can show that we respected it.
                 </p>
 
                 <h2>8. Your Rights (GDPR and Applicable Laws)</h2>

@@ -6,6 +6,8 @@ namespace App\Models;
 
 use App\Data\UserSettingsData;
 use App\Enums\ChatPlatform;
+use App\Enums\ConsentPurpose;
+use App\Enums\EstimateValidationStatus;
 use App\Enums\GlucoseUnit;
 use Carbon\CarbonInterface;
 use Database\Factories\UserFactory;
@@ -274,6 +276,28 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
         return $this->privacy_version !== $version
             && $this->created_at->toDateString() <= $version;
+    }
+
+    /**
+     * @return HasMany<Consent, $this>
+     */
+    public function consents(): HasMany
+    {
+        return $this->hasMany(Consent::class);
+    }
+
+    public function consentDecision(ConsentPurpose $purpose): ?bool
+    {
+        return $this->consents()->where('purpose', $purpose)->latest('id')->first()?->granted;
+    }
+
+    public function shouldBeAskedToImproveFoodRecognition(): bool
+    {
+        return $this->consentDecision(ConsentPurpose::ImproveFoodRecognition) === null
+            && MealEstimate::query()
+                ->where('user_id', $this->id)
+                ->where('validation_status', EstimateValidationStatus::UserCorrected)
+                ->exists();
     }
 
     public function needsBiometricsReview(): bool
