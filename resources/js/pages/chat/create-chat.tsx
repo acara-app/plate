@@ -26,7 +26,7 @@ import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import type { AiAllowance } from '@/types';
 import type { ChatPageProps, ChatStatus, UIMessage } from '@/types/chat';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
 import {
     ArrowDown,
@@ -56,6 +56,8 @@ const COLUMN = 'mx-auto w-full max-w-[43rem] px-4 sm:px-6';
 const PINNED_TO_BOTTOM_THRESHOLD = 96;
 
 const DEFAULT_RETENTION_HOURS = 48;
+
+const RETENTION_PROPS = ['isPinned', 'isKept'];
 
 const HEADER_BUTTON =
     'inline-flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:outline-none data-[state=open]:bg-muted data-[state=open]:text-foreground';
@@ -123,30 +125,25 @@ function useStatusAnnouncement(
     return announcement;
 }
 
-function HeaderAction({
+function HeaderLink({
     label,
     icon: Icon,
-    onClick,
+    href,
 }: {
     label: string;
     icon: LucideIcon;
-    onClick: () => void;
+    href: string;
 }) {
     return (
         <Tooltip>
             <TooltipTrigger asChild>
-                <button
-                    type="button"
-                    onClick={onClick}
-                    aria-label={label}
-                    className={HEADER_BUTTON}
-                >
+                <Link href={href} aria-label={label} className={HEADER_BUTTON}>
                     <Icon
                         className="size-[18px]"
                         strokeWidth={1.75}
                         aria-hidden="true"
                     />
-                </button>
+                </Link>
             </TooltipTrigger>
             <TooltipContent>{label}</TooltipContent>
         </Tooltip>
@@ -163,8 +160,8 @@ export default function CreateChat() {
         initialPrompt,
         autoSendInitialPrompt = true,
         initialStreaming,
-        isPinned,
-        isKept,
+        isPinned = false,
+        isKept = false,
         temporaryRetentionHours = DEFAULT_RETENTION_HOURS,
         aiAllowance,
     } = page.props;
@@ -174,8 +171,7 @@ export default function CreateChat() {
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
-    const [pinned, setPinned] = useState<boolean>(isPinned ?? false);
-    const [kept, setKept] = useState<boolean>(isKept ?? false);
+    const [newChatUrl] = useState(() => chat.create(generateUUID()).url);
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
@@ -212,38 +208,34 @@ export default function CreateChat() {
     }, []);
 
     const togglePin = useCallback(() => {
-        const next = !pinned;
-        setPinned(next);
-
-        const action = next ? chat.pin : chat.unpin;
+        const action = isPinned ? chat.unpin : chat.pin;
 
         router.patch(
             action(conversationId).url,
             {},
             {
+                optimistic: () => ({ isPinned: !isPinned }),
+                only: RETENTION_PROPS,
                 preserveScroll: true,
                 preserveState: true,
-                onError: () => setPinned(!next),
             },
         );
-    }, [pinned, conversationId]);
+    }, [isPinned, conversationId]);
 
     const toggleKeep = useCallback(() => {
-        const next = !kept;
-        setKept(next);
-
-        const action = next ? chat.keep : chat.unkeep;
+        const action = isKept ? chat.unkeep : chat.keep;
 
         router.patch(
             action(conversationId).url,
             {},
             {
+                optimistic: () => ({ isKept: !isKept }),
+                only: RETENTION_PROPS,
                 preserveScroll: true,
                 preserveState: true,
-                onError: () => setKept(!next),
             },
         );
-    }, [kept, conversationId]);
+    }, [isKept, conversationId]);
 
     const {
         messages,
@@ -407,7 +399,7 @@ export default function CreateChat() {
         lastScrollTopRef.current = scrollTop;
     }, []);
 
-    const isKeptForGood = kept || pinned;
+    const isKeptForGood = isKept || isPinned;
 
     return (
         <AppShell variant="sidebar">
@@ -435,23 +427,15 @@ export default function CreateChat() {
                             <SidebarTrigger className="size-9 md:hidden" />
                         </div>
                         <div className="flex items-center gap-0.5">
-                            <HeaderAction
+                            <HeaderLink
                                 label={t('conversations.new_chat')}
                                 icon={SquarePen}
-                                onClick={() =>
-                                    router.visit(
-                                        chat.create(generateUUID()).url,
-                                    )
-                                }
+                                href={newChatUrl}
                             />
-                            <HeaderAction
+                            <HeaderLink
                                 label={t('sidebar.nav.snap_to_track')}
                                 icon={ScanLine}
-                                onClick={() =>
-                                    router.visit(
-                                        ShowSnapToTrackController().url,
-                                    )
-                                }
+                                href={ShowSnapToTrackController().url}
                             />
                             <DropdownMenu>
                                 <Tooltip>
@@ -500,12 +484,12 @@ export default function CreateChat() {
                                         <Bookmark
                                             className={cn(
                                                 'size-4',
-                                                kept &&
+                                                isKept &&
                                                     'fill-current text-primary',
                                             )}
                                         />
                                         {t(
-                                            kept
+                                            isKept
                                                 ? 'conversations.unkeep'
                                                 : 'conversations.keep',
                                         )}
@@ -514,12 +498,12 @@ export default function CreateChat() {
                                         <Pin
                                             className={cn(
                                                 'size-4',
-                                                pinned &&
+                                                isPinned &&
                                                     'fill-current text-primary',
                                             )}
                                         />
                                         {t(
-                                            pinned
+                                            isPinned
                                                 ? 'conversations.unpin'
                                                 : 'conversations.pin',
                                         )}
