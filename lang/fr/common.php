@@ -144,6 +144,12 @@ return [
         'dismiss' => 'Ignorer',
     ],
 
+    'privacy_update_notice' => [
+        'text' => 'Nous avons mis à jour notre politique de confidentialité.',
+        'link' => 'La consulter',
+        'dismiss' => 'Masquer cet avis',
+    ],
+
     'biometrics_review_banner' => [
         'text' => 'Petite vérification : confirmez votre taille et votre poids pour que vos objectifs caloriques soient justes.',
         'action' => 'Vérifier',

@@ -143,6 +143,12 @@ return [
         'dismiss' => 'Dismiss',
     ],
 
+    'privacy_update_notice' => [
+        'text' => 'We\'ve updated our Privacy Policy.',
+        'link' => 'Take a look',
+        'dismiss' => 'Dismiss privacy update',
+    ],
+
     'biometrics_review_banner' => [
         'text' => 'Quick check: please confirm your height and weight so your calorie targets are right.',
         'action' => 'Review',

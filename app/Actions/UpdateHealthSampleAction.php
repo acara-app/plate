@@ -11,6 +11,7 @@ use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Enums\MealType;
 use App\Models\HealthSyncSample;
+use App\Models\MealEstimate;
 use App\Models\MealPhoto;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Collection;
@@ -19,6 +20,8 @@ use Illuminate\Support\Str;
 
 final readonly class UpdateHealthSampleAction
 {
+    public function __construct(private RecordMealCorrection $recordMealCorrection) {}
+
     public function handle(HealthSyncSample $sample, HealthLogData $data, HealthEntrySource $editedFrom): HealthSyncSample
     {
         return DB::transaction(function () use ($sample, $data, $editedFrom): HealthSyncSample {
@@ -42,6 +45,7 @@ final readonly class UpdateHealthSampleAction
 
             if ($groupId !== null && $newGroupId === null) {
                 MealPhoto::deleteForGroup($sample->user_id, $groupId);
+                MealEstimate::deleteForGroup($sample->user_id, $groupId);
             }
 
             foreach ($kept as $member) {
@@ -79,6 +83,10 @@ final readonly class UpdateHealthSampleAction
                     'notes' => $data->notes,
                     'group_id' => $newGroupId,
                 ]);
+            }
+
+            if ($data->logType === HealthEntryType::Food && $newGroupId !== null) {
+                $this->recordMealCorrection->handle($sample->user_id, $newGroupId);
             }
 
             return $sample->refresh();
