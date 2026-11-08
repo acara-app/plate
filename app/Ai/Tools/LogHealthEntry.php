@@ -51,7 +51,7 @@ final class LogHealthEntry implements Approvable, Tool
 
     public function description(): string
     {
-        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it. When logging food, always estimate calories and macronutrients (carbs, protein, fat) from the description — never log a food entry with no nutrition values.';
+        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, water intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it. When logging food, always estimate calories and macronutrients (carbs, protein, fat) from the description — never log a food entry with no nutrition values. Log plain water as a water entry with water_ml, never as food.';
     }
 
     public function handle(Request $request): string
@@ -144,6 +144,8 @@ final class LogHealthEntry implements Approvable, Tool
                 ->description('Total calories. For food entries, always provide your best estimate (e.g. two pancakes ≈ 175 kcal) even when the user does not state it.'),
             'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
+            'water_ml' => $schema->integer()->required()->nullable()
+                ->description('Plain water the user drank, in millilitres, for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.'),
             'insulin_units' => $schema->number()->required()->nullable()
                 ->description('Insulin dose in units.'),
             'insulin_type' => $schema->string()->required()->nullable()

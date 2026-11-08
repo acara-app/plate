@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\GetDailyWellnessAction;
 use App\Ai\Tools\LogHealthEntry;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
@@ -9,6 +10,7 @@ use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Approval;
@@ -160,6 +162,25 @@ it('logs an exercise entry', function (): void {
     expect($sample->value)->toBe(30.0)
         ->and($sample->entry_source)->toBe(HealthEntrySource::Chat)
         ->and($sample->metadata['exercise_type'])->toBe('walking');
+});
+
+it('logs plain water to the day’s water instead of as food', function (): void {
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    Auth::login($user);
+
+    $result = json_decode(resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'water',
+        'water_ml' => 200,
+        'calories' => 0,
+        'notes' => '200 ml plain water',
+    ])), true);
+
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->sole();
+    $wellness = resolve(GetDailyWellnessAction::class)->handle($user, CarbonImmutable::now('Asia/Ulaanbaatar'));
+
+    expect($result)->toHaveKey('success', true)
+        ->and([$sample->type_identifier, $sample->value, $sample->unit, $sample->entry_source])->toBe(['water', 200.0, 'mL', HealthEntrySource::Chat])
+        ->and([$wellness->waterMl, $wellness->waterSyncedMl])->toBe([200, 0]);
 });
 
 it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {

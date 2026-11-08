@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Actions\RecordWaterIntakeAction;
 use App\Enums\GlucoseReadingType;
 use App\Enums\GlucoseUnit;
 use App\Enums\HealthEntryType;
@@ -53,6 +54,7 @@ final class HealthLogData extends Data
         public bool $fiberGramsProvided = false,
         public ?string $mealName = null,
         public bool $mealNameProvided = false,
+        public ?int $waterMl = null,
     ) {}
 
     /**
@@ -88,6 +90,7 @@ final class HealthLogData extends Data
             fiberGramsProvided: array_key_exists('fiber_grams', $data),
             mealName: self::toNullableString($data['meal_name'] ?? null),
             mealNameProvided: array_key_exists('meal_name', $data),
+            waterMl: self::toInt($data['water_ml'] ?? null),
         );
     }
 
@@ -100,6 +103,7 @@ final class HealthLogData extends Data
             HealthEntryType::Meds => $this->formatMedsLog(),
             HealthEntryType::Vitals => $this->formatVitalsLog(),
             HealthEntryType::Exercise => $this->formatExerciseLog(),
+            HealthEntryType::Water => sprintf('Water %d ml', $this->waterMl ?? 0),
         };
     }
 
@@ -115,6 +119,7 @@ final class HealthLogData extends Data
             HealthEntryType::Meds => $this->toMedsRecordArray(),
             HealthEntryType::Vitals => $this->toVitalsRecordArray(),
             HealthEntryType::Exercise => $this->toExerciseRecordArray(),
+            HealthEntryType::Water => ['water_ml' => $this->waterMl],
         };
     }
 
@@ -130,6 +135,7 @@ final class HealthLogData extends Data
             HealthEntryType::Meds => $this->toMedsSamples(),
             HealthEntryType::Vitals => $this->toVitalsSamples(),
             HealthEntryType::Exercise => $this->toExerciseSamples(),
+            HealthEntryType::Water => $this->toWaterSamples(),
         };
     }
 
@@ -499,6 +505,24 @@ final class HealthLogData extends Data
                 'metadata' => array_filter([
                     'exercise_type' => $this->exerciseType,
                 ]),
+            ],
+        ];
+    }
+
+    /**
+     * @return array<int, array{type_identifier: string, value: float|int, unit: string, metadata?: array<string, mixed>}>
+     */
+    private function toWaterSamples(): array
+    {
+        if ($this->waterMl === null || $this->waterMl <= 0) {
+            return [];
+        }
+
+        return [
+            [
+                'type_identifier' => RecordWaterIntakeAction::WATER_TYPE,
+                'value' => $this->waterMl,
+                'unit' => RecordWaterIntakeAction::WATER_UNIT,
             ],
         ];
     }

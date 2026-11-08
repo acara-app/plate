@@ -14,7 +14,10 @@ final readonly class RecordWaterIntakeAction
 {
     public const string WATER_TYPE = 'water';
 
-    private const string WATER_UNIT = 'mL';
+    public const string WATER_UNIT = 'mL';
+
+    /** @var list<HealthEntrySource> */
+    public const array LOGGED_SOURCES = [HealthEntrySource::Web, HealthEntrySource::Chat];
 
     public function __construct(private ForgetEmptyDailyTotalsAction $forgetEmptyDailyTotals) {}
 
@@ -30,7 +33,7 @@ final readonly class RecordWaterIntakeAction
 
             $logged = $user->healthSyncSamples()
                 ->where('type_identifier', self::WATER_TYPE)
-                ->forEntrySource(HealthEntrySource::Web)
+                ->whereIn('entry_source', self::LOGGED_SOURCES)
                 ->measuredWithinDay($start)
                 ->get();
 

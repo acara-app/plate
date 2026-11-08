@@ -57,12 +57,13 @@ it('shows an empty day before anything is synced or logged', function (): void {
     ]);
 });
 
-it('adds the water logged on the web to the local day’s water synced from Apple Health', function (): void {
+it('adds the water logged on the web or in chat to the local day’s water synced from Apple Health', function (): void {
     foreach ([
         [HealthEntrySource::MobileSync, 300, '2026-10-19 02:00:00'],
         [HealthEntrySource::MobileSync, 200.4, '2026-10-19 09:00:00'],
         [HealthEntrySource::MobileSync, 900, '2026-10-18 15:00:00'],
         [HealthEntrySource::Web, 750, '2026-10-18 16:00:00'],
+        [HealthEntrySource::Chat, 200, '2026-10-19 01:00:00'],
         [HealthEntrySource::Web, 1000, '2026-10-19 16:00:00'],
     ] as [$source, $millilitres, $measuredAt]) {
         HealthSyncSample::factory()->create([
@@ -77,7 +78,7 @@ it('adds the water logged on the web to the local day’s water synced from Appl
 
     $wellness = resolve(GetDailyWellnessAction::class)->handle($this->user, $this->day);
 
-    expect([$wellness->waterMl, $wellness->waterSyncedMl, $wellness->waterGoalMl])->toBe([1250, 500, 2000]);
+    expect([$wellness->waterMl, $wellness->waterSyncedMl, $wellness->waterGoalMl])->toBe([1450, 500, 2000]);
 });
 
 it('totals the local day’s steps without counting Apple Watch and iPhone twice', function (): void {

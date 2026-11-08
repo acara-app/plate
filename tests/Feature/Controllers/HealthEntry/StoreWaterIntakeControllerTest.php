@@ -99,6 +99,22 @@ it('replaces the day’s amount when another cup is tapped and clears it when ev
     expect(storedWater($this->user))->toBe([]);
 });
 
+it('sets the day’s amount over water logged in chat instead of adding to it', function (): void {
+    HealthSyncSample::factory()->fromChat()->create([
+        'user_id' => $this->user->id,
+        'type_identifier' => 'water',
+        'value' => 200,
+        'unit' => 'mL',
+        'measured_at' => '2026-10-18 16:30:00',
+    ]);
+
+    $this->actingAs($this->user)
+        ->post(route('health-entries.water.store'), ['date' => '2026-10-19', 'amount_ml' => 250])
+        ->assertSessionHasNoErrors();
+
+    expect(storedWater($this->user))->toBe([[250.0, 'mL', '2026-10-18 16:00:00', HealthEntrySource::Web]]);
+});
+
 it('counts logged water in the day’s totals next to water synced from Apple Health', function (): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
     syncWater($user, 300);
