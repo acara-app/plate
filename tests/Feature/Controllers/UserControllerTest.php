@@ -198,6 +198,22 @@ it('cannot delete account with active subscription', function (): void {
     expect($user->fresh())->not->toBeNull();
 });
 
+it('lets an account without a password confirm deletion with its email', function (): void {
+    Storage::fake('s3');
+    $user = User::factory()->create(['password' => null, 'email' => 'jane@example.com']);
+
+    $this->actingAs($user)
+        ->fromRoute('user-profile.edit')
+        ->delete(route('user.destroy'), ['email' => 'someone@example.com'])
+        ->assertSessionHasErrors('email');
+
+    expect($user->fresh())->not->toBeNull();
+
+    $this->delete(route('user.destroy'), ['email' => ' Jane@Example.com '])->assertRedirectToRoute('home');
+
+    expect($user->fresh())->toBeNull();
+});
+
 it('requires password to delete account', function (): void {
     $user = User::factory()->create();
 
