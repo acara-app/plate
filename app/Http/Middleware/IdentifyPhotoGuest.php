@@ -22,7 +22,7 @@ final readonly class IdentifyPhotoGuest
             $id = $request->cookie('photo_guest');
             if (! is_string($id) || ! Str::isUuid($id)) {
                 $id = (string) Str::uuid();
-                Cookie::queue(cookie('photo_guest', $id, 525600, secure: $request->isSecure(), httpOnly: true, sameSite: 'lax'));
+                Cookie::queue(cookie('photo_guest', $id, config()->integer('snap.guest_cookie_days') * 24 * 60, secure: $request->isSecure(), httpOnly: true, sameSite: 'lax'));
             }
 
             $request->attributes->set('photo_guest_id', $id);
