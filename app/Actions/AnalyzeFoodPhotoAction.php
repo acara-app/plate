@@ -10,7 +10,6 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
-use App\Utilities\Base64Image;
 use Illuminate\Support\Facades\Log;
 
 final readonly class AnalyzeFoodPhotoAction
@@ -40,10 +39,10 @@ final readonly class AnalyzeFoodPhotoAction
             $agent->withLanguage($language, $languageCode);
         }
 
-        $resized = $this->resizedForModel($imageBase64);
+        $jpeg = $this->jpegForModel($imageBase64);
 
-        if ($resized !== null) {
-            $imageBase64 = base64_encode($resized);
+        if ($jpeg !== null) {
+            $imageBase64 = base64_encode($jpeg);
             $mimeType = 'image/jpeg';
         }
 
@@ -58,14 +57,14 @@ final readonly class AnalyzeFoodPhotoAction
         }
     }
 
-    private function resizedForModel(string $imageBase64): ?string
+    private function jpegForModel(string $imageBase64): ?string
     {
-        $image = Base64Image::decode($imageBase64);
+        $bytes = base64_decode($imageBase64, true);
 
-        if (! $image instanceof Base64Image || max($image->width, $image->height) <= self::MODEL_MAX_SIDE) {
+        if ($bytes === false || $bytes === '') {
             return null;
         }
 
-        return $this->resizePhoto->handle($image->bytes, self::MODEL_MAX_SIDE);
+        return $this->resizePhoto->handle($bytes, self::MODEL_MAX_SIDE);
     }
 }

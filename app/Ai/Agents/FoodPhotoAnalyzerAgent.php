@@ -32,7 +32,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     use Promptable;
     use ReasonsWithMediumEffort;
 
-    public const string PROMPT_VERSION = '6';
+    public const string PROMPT_VERSION = '7';
 
     public ?User $user = null;
 

@@ -133,7 +133,7 @@ it('validates photo max size', function (): void {
         ->assertHasErrors(['photo']);
 });
 
-it('previews and analyzes JPG, PNG and WebP photos', function (string $fileName, string $mimeType): void {
+it('previews JPG, PNG and WebP photos and sends them to the AI as JPEG', function (string $fileName): void {
     fakeTurnstileForSnapToTrack();
     FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
     Queue::fake([ProcessPhotoAnalysis::class]);
@@ -148,11 +148,11 @@ it('previews and analyzes JPG, PNG and WebP photos', function (string $fileName,
 
     finishQueuedSnapAnalysis($component)->assertRedirect(route('snap-to-track.result'));
 
-    FoodPhotoAnalyzerAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->attachments->sole()->mimeType() === $mimeType);
+    FoodPhotoAnalyzerAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->attachments->sole()->mimeType() === 'image/jpeg');
 })->with([
-    'JPG' => ['meal.jpg', 'image/jpeg'],
-    'PNG' => ['meal.png', 'image/png'],
-    'WebP' => ['meal.webp', 'image/webp'],
+    'JPG' => 'meal.jpg',
+    'PNG' => 'meal.png',
+    'WebP' => 'meal.webp',
 ]);
 
 it('shrinks large photos to 1024 pixels before analysis and keeps them upright', function (UploadedFile $photo, array $size): void {

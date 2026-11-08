@@ -49,7 +49,7 @@ final readonly class ResizePhoto
         $limit = ini_parse_quantity(ini_get('memory_limit'));
 
         return $width * $height <= self::MAX_PIXELS
-            && ($limit <= 0 || memory_get_usage(true) + $width * $height * self::BYTES_PER_PIXEL < $limit);
+            && ($limit <= 0 || memory_get_usage() + $width * $height * self::BYTES_PER_PIXEL < $limit);
     }
 
     private function upright(GdImage $image, string $imageBytes): GdImage
