@@ -149,10 +149,16 @@ return [
         'dismiss' => 'Dismiss privacy update',
     ],
 
-    'privacy_policy_page' => [
-        'title' => 'Privacy Policy | How We Protect Your Health Data',
-        'meta_description' => 'Your privacy is paramount. Read the Acara Plate Privacy Policy to understand how we collect, use, and protect your biometrics, health conditions, and dietary data.',
+    'legal_pages' => [
         'back' => 'Back',
+        'privacy_policy' => [
+            'title' => 'Privacy Policy | How We Protect Your Health Data',
+            'meta_description' => 'Your privacy is paramount. Read the Acara Plate Privacy Policy to understand how we collect, use, and protect your biometrics, health conditions, and dietary data.',
+        ],
+        'terms_of_service' => [
+            'title' => 'Terms of Service | Acara Plate Usage Agreement',
+            'meta_description' => 'Review the Terms of Service for Acara Plate. Learn about your rights, eligibility, user data responsibilities, and our medical disclaimer regarding AI-generated plans.',
+        ],
     ],
 
     'health_data_consent_prompt' => [
