@@ -151,7 +151,10 @@ it('renames a meal, or goes back to its ingredient names when the name is cleare
         'notes' => null,
         'measured_at' => now()->toIso8601String(),
         'items' => [['name' => 'Bread', 'portion' => '2 slices', 'calories' => 160, 'protein' => 6, 'carbs' => 30, 'fat' => 2, 'provenance' => 'model']],
-    ])->assertSessionHasNoErrors()->assertRedirect();
+    ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect()
+        ->assertInertiaFlash('toast', ['type' => 'success', 'message' => __('common.saved')]);
 
     $food = HealthSyncSample::query()->where('group_id', $groupId)->whereNot('type_identifier', 'bloodGlucose')->get();
 
