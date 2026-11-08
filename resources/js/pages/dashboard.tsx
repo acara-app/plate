@@ -1,4 +1,5 @@
 import { OnboardingBanner } from '@/components/onboarding-banner';
+import { PrivacyUpdateNotice } from '@/components/privacy-update-notice';
 import { SnapToTrackLauncher } from '@/components/snap-to-track/snap-to-track-launcher';
 import useSharedProps from '@/hooks/use-shared-props';
 import AppLayout from '@/layouts/app-layout';
@@ -28,7 +29,11 @@ type ChatMessagePart = {
 
 type ChatMessage = { role: string; parts: ChatMessagePart[] };
 
-export default function Dashboard() {
+export default function Dashboard({
+    showPrivacyUpdate,
+}: {
+    showPrivacyUpdate: boolean;
+}) {
     const { t } = useTranslation('common');
     const breadcrumbs = getBreadcrumbs(t);
     const { currentUser, needsBiometricsReview } = useSharedProps();
@@ -61,6 +66,8 @@ export default function Dashboard() {
             <Head title={t('dashboard')} />
             <main className="flex min-h-[calc(100svh-8rem)] flex-1 flex-col overflow-x-hidden bg-background">
                 <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+                    {showPrivacyUpdate && <PrivacyUpdateNotice />}
+
                     {!currentUser?.is_onboarded && !needsBiometricsReview && (
                         <OnboardingBanner />
                     )}

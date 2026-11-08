@@ -18,6 +18,7 @@ final readonly class LogReviewedMealAction
     public function __construct(
         private RecordHealthSampleAction $recordHealthSample,
         private DispatchAggregateUserUtcDatesAction $dispatchAggregateUserUtcDates,
+        private RecordMealEstimate $recordMealEstimate,
     ) {}
 
     public function handle(
@@ -47,6 +48,8 @@ final readonly class LogReviewedMealAction
                 ->where('analysis_draft_id', $draft->id)
                 ->where('user_id', $user->id)
                 ->update(['health_group_id' => (string) $recorded->group_id]);
+
+            $this->recordMealEstimate->handle($draft, $user->id, (string) $recorded->group_id);
 
             return $recorded;
         });

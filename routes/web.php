@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function (): void {
 
 Route::middleware(['auth', 'verified', EnsureDisclaimerAccepted::class])->group(function (): void {
     Route::get('dashboard', [Web\DashboardController::class, 'show'])->name('dashboard');
+    Route::post('privacy-policy/acknowledgement', Web\AcknowledgePrivacyPolicyController::class)->name('privacy-policy.acknowledge');
 
     Route::get('/chat', [Web\ChatController::class, 'index'])->name('chat.index');
 
