@@ -53,7 +53,7 @@
             "name": "Is my data private?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Absolutely. We're open source and privacy-focused. Your health data belongs to you — it's never sold to advertisers or third parties. You can export your data anytime."
+                "text": "Absolutely. We're open source and privacy-focused. Your health data belongs to you — it's never sold to advertisers or third parties. You can ask us for a copy of your data anytime."
             }
         },
         {
@@ -526,7 +526,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Absolutely. We're open source and privacy-focused. Your health data belongs to you — it's never sold to advertisers or third parties. You can export your data anytime.
+                            Absolutely. We're open source and privacy-focused. Your health data belongs to you — it's never sold to advertisers or third parties. You can ask us for a copy of your data anytime.
                         </p>
                     </details>
 

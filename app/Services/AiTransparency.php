@@ -6,7 +6,7 @@ namespace App\Services;
 
 final class AiTransparency
 {
-    public const string LAST_REVIEWED = '2026-06-12';
+    public const string LAST_REVIEWED = '2026-11-08';
 
     /**
      * @return list<array{q: string, a: string}>
@@ -28,7 +28,7 @@ final class AiTransparency
             ],
             [
                 'q' => 'Is my food photo kept private?',
-                'a' => 'Yes. Your photo is only used to estimate the nutrition in your meal, and we never use it to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, you can also keep meal photos in your private food history.',
+                'a' => 'Yes. Your photo is used to estimate the nutrition in your meal and is never used to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, the photo is kept privately with the meal you save and deleted when you delete the meal. Our team only looks at saved photos if you turn on Help improve food recognition.',
             ],
             [
                 'q' => 'How do I use Snap to Track?',
@@ -129,9 +129,9 @@ final class AiTransparency
     public static function photoHandling(): array
     {
         return [
-            'On the public Snap to Track tool, your photo is stored only as a temporary upload while the analysis runs and is deleted as soon as the result or error is returned.',
-            'The photo is processed by Google as an AI sub-processor to generate the analysis. It is not shared with anyone else and is never used to train AI models.',
-            'Signed-in users can choose to save meals with photos to their personal history; on the public tool, no image is ever saved.',
+            'On the public Snap to Track tool, your photo is kept as an encrypted copy only while the analysis runs. It is deleted as soon as your result is ready, and if a scan fails you can retry it for up to an hour before the copy is deleted.',
+            'The photo is processed by Google as an AI sub-processor to generate the analysis. It is not shared with any other organization and is never used to train AI models.',
+            'When you are signed in, the photo is kept privately with the meal you save, resized and with its location data removed, and is deleted when you delete the meal or your account. Our team only looks at saved photos if you turn on Help improve food recognition.',
         ];
     }
 

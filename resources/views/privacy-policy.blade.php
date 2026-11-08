@@ -194,7 +194,7 @@
                     <strong>Meal photos:</strong>
                     Photos you scan with Snap to Track while signed in are stored privately with your food log so you
                     can see them later. Before storing, we resize each photo and remove its location and other photo
-                    metadata. Only you can view your meal photos. A photo is deleted when you delete that meal or your
+                    metadata. Only you can view your meal photos, unless you turn on Help improve food recognition (see Section 2). A photo is deleted when you delete that meal or your
                     account, or after one day if you don't save the meal.
                 </p>
                 <p>

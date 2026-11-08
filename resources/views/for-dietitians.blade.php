@@ -55,7 +55,7 @@
             "name": "Can I export client data?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Yes. CSV export for all client logs, meal plans, and trends. No lock-in."
+                "text": "Each client can ask us for a copy of their data anytime, and because Acara Plate is open source, you can also self-host it and keep every record on your own servers. No lock-in."
             }
         },
         {
@@ -328,7 +328,7 @@
                         </div>
                         <div>
                             <h3 class="text-base font-bold text-slate-900">Open Source</h3>
-                            <p class="mt-2 text-sm text-slate-600">Transparent, community-driven development. No vendor lock-in. CSV exports for all data. You own your practice's information.</p>
+                            <p class="mt-2 text-sm text-slate-600">Transparent, community-driven development. No vendor lock-in: self-host it and you own your practice's information.</p>
                         </div>
                     </div>
 
@@ -415,7 +415,7 @@
                             </div>
                             <div class="flex items-start gap-3">
                                 <span class="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">5</span>
-                                <p class="text-slate-600">Export reports for outcomes tracking</p>
+                                <p class="text-slate-600">Review progress together at follow-up visits</p>
                             </div>
                         </div>
 
@@ -579,7 +579,7 @@
                             </svg>
                         </summary>
                         <p class="mt-4 text-slate-600">
-                            Yes. CSV export for all client logs, meal plans, and trends. No lock-in.
+                            Each client can ask us for a copy of their data anytime, and because Acara Plate is open source, you can also self-host it and keep every record on your own servers. No lock-in.
                         </p>
                     </details>
 
