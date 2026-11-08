@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Storage;
 
 final readonly class DeleteUser
 {
-    public function handle(User $user): void
+    public function handle(User $user, bool $notify = true): void
     {
         Storage::disk('s3')->deleteDirectory(MealPhoto::directoryFor($user));
 
@@ -27,6 +27,10 @@ final readonly class DeleteUser
 
             $user->delete();
         });
+
+        if (! $notify) {
+            return;
+        }
 
         Notification::route('mail', [$user->email => $user->name])
             ->notify(new AccountDeletedNotification($user->name));

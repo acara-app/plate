@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 covers(PurgeDeletedUserDataCommand::class);
 
-it('purges orphaned data for users deleted over 30 days ago', function (): void {
+it('purges orphaned data for users deleted over 30 days ago', function (string $userType): void {
     $user = User::factory()->create();
     $userId = $user->id;
     $userEmail = $user->email;
@@ -31,7 +31,7 @@ it('purges orphaned data for users deleted over 30 days ago', function (): void 
     DB::table('notifications')->insert([
         'id' => fake()->uuid(),
         'type' => 'App\Notifications\Test',
-        'notifiable_type' => User::class,
+        'notifiable_type' => $userType,
         'notifiable_id' => $userId,
         'data' => json_encode(['test' => true]),
         'created_at' => now(),
@@ -39,7 +39,7 @@ it('purges orphaned data for users deleted over 30 days ago', function (): void 
     ]);
 
     DB::table('personal_access_tokens')->insert([
-        'tokenable_type' => User::class,
+        'tokenable_type' => $userType,
         'tokenable_id' => $userId,
         'name' => 'test-token',
         'token' => hash('sha256', 'test'),
@@ -68,11 +68,11 @@ it('purges orphaned data for users deleted over 30 days ago', function (): void 
     $this->assertDatabaseMissing('agent_conversations', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseMissing('agent_conversation_messages', ['participant_type' => 'user', 'participant_id' => $userId]);
     $this->assertDatabaseMissing('sessions', ['user_id' => $userId]);
-    $this->assertDatabaseMissing('notifications', ['notifiable_id' => $userId, 'notifiable_type' => User::class]);
-    $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $userId, 'tokenable_type' => User::class]);
+    $this->assertDatabaseMissing('notifications', ['notifiable_id' => $userId, 'notifiable_type' => $userType]);
+    $this->assertDatabaseMissing('personal_access_tokens', ['tokenable_id' => $userId, 'tokenable_type' => $userType]);
     $this->assertDatabaseMissing('password_reset_tokens', ['email' => $userEmail]);
     $this->assertDatabaseMissing('deleted_users', ['user_id' => $userId]);
-});
+})->with(['short morph alias' => ['user'], 'full class name' => [User::class]]);
 
 it('does not purge data for users deleted less than 30 days ago', function (): void {
     $user = User::factory()->create();
@@ -161,4 +161,36 @@ it('purges subscription records', function (): void {
 
     $this->assertDatabaseMissing('subscriptions', ['user_id' => $userId]);
     $this->assertDatabaseMissing('subscription_items', ['subscription_id' => $subscriptionId]);
+});
+
+it('removes tokens and notifications left by accounts that no longer exist', function (): void {
+    $active = User::factory()->create();
+    DeletedUser::query()->create(['user_id' => 9001, 'email' => 'pending@example.com', 'deleted_at' => now()->subDays(5)]);
+
+    foreach ([$active->id, 9001, 9002] as $userId) {
+        DB::table('personal_access_tokens')->insert([
+            'tokenable_type' => 'user',
+            'tokenable_id' => $userId,
+            'name' => 'test-token',
+            'token' => hash('sha256', "token-{$userId}"),
+            'abilities' => json_encode(['*']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('notifications')->insert([
+            'id' => fake()->uuid(),
+            'type' => 'App\Notifications\Test',
+            'notifiable_type' => 'user',
+            'notifiable_id' => $userId,
+            'data' => json_encode(['test' => true]),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    $this->artisan(PurgeDeletedUserDataCommand::class)->assertSuccessful();
+
+    expect(DB::table('personal_access_tokens')->pluck('tokenable_id')->all())->toEqualCanonicalizing([$active->id, 9001])
+        ->and(DB::table('notifications')->pluck('notifiable_id')->all())->toEqualCanonicalizing([$active->id, 9001]);
 });
