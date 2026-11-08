@@ -85,6 +85,15 @@ function finishDirectUploadForSnapToTrack(Testable $component, UploadedFile $pho
     return $path;
 }
 
+function rotatedJpegForSnapToTrack(int $width, int $height): UploadedFile
+{
+    $jpeg = UploadedFile::fake()->image('meal.jpg', $width, $height)->getContent();
+    $tiffOrientationSix = "MM\x00\x2A\x00\x00\x00\x08\x00\x01\x01\x12\x00\x03\x00\x00\x00\x01\x00\x06\x00\x00\x00\x00\x00\x00";
+    $exifSegment = "\xFF\xE1".pack('n', mb_strlen($tiffOrientationSix, '8bit') + 8)."Exif\x00\x00".$tiffOrientationSix;
+
+    return UploadedFile::fake()->createWithContent('meal.jpg', mb_substr($jpeg, 0, 2, '8bit').$exifSegment.mb_substr($jpeg, 2, null, '8bit'));
+}
+
 beforeEach(function (): void {
     RateLimiter::clear('snap-to-track:127.0.0.1');
     RateLimiter::clear('snap-to-track-upload:127.0.0.1');
@@ -145,6 +154,45 @@ it('previews and analyzes JPG, PNG and WebP photos', function (string $fileName,
     'PNG' => ['meal.png', 'image/png'],
     'WebP' => ['meal.webp', 'image/webp'],
 ]);
+
+it('shrinks large photos to 1024 pixels before analysis and keeps them upright', function (UploadedFile $photo, array $size): void {
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+    Queue::fake([ProcessPhotoAnalysis::class]);
+
+    $component = Livewire::test('pages::snap-to-track')
+        ->set('photo', $photo)
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze');
+
+    finishQueuedSnapAnalysis($component)->assertRedirect(route('snap-to-track.result'));
+
+    FoodPhotoAnalyzerAgent::assertPrompted(function (AgentPrompt $prompt) use ($size): bool {
+        $attachment = $prompt->attachments->sole();
+
+        return $attachment->mimeType() === 'image/jpeg'
+            && array_slice((array) getimagesizefromstring($attachment->content()), 0, 2) === $size;
+    });
+})->with([
+    'landscape photo' => [fn (): UploadedFile => UploadedFile::fake()->image('meal.jpg', 2000, 1500), [1024, 768]],
+    'photo the camera marked as rotated' => [fn (): UploadedFile => rotatedJpegForSnapToTrack(2000, 1500), [768, 1024]],
+]);
+
+it('analyzes a photo it cannot redraw exactly as uploaded', function (): void {
+    $truncatedPng = mb_substr(UploadedFile::fake()->image('meal.png', 2000, 1500)->getContent(), 0, 33, '8bit');
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+    Queue::fake([ProcessPhotoAnalysis::class]);
+
+    $component = Livewire::test('pages::snap-to-track')
+        ->set('photo', UploadedFile::fake()->createWithContent('meal.png', $truncatedPng))
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze');
+
+    finishQueuedSnapAnalysis($component)->assertRedirect(route('snap-to-track.result'));
+
+    FoodPhotoAnalyzerAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->attachments->sole()->content() === $truncatedPng);
+});
 
 it('asks for a JPG or PNG when an uploaded photo format cannot be analyzed', function (string $fileName, string $mimeType): void {
     $component = Livewire::test('pages::snap-to-track');

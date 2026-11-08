@@ -10,11 +10,17 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
+use App\Utilities\Base64Image;
 use Illuminate\Support\Facades\Log;
 
 final readonly class AnalyzeFoodPhotoAction
 {
-    public function __construct(private FoodPhotoAnalyzerAgent $agent) {}
+    private const int MODEL_MAX_SIDE = 1024;
+
+    public function __construct(
+        private FoodPhotoAnalyzerAgent $agent,
+        private ResizePhoto $resizePhoto,
+    ) {}
 
     public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null, ?PhotoAnalysisContext $context = null): FoodAnalysisData
     {
@@ -34,6 +40,13 @@ final readonly class AnalyzeFoodPhotoAction
             $agent->withLanguage($language, $languageCode);
         }
 
+        $resized = $this->resizedForModel($imageBase64);
+
+        if ($resized !== null) {
+            $imageBase64 = base64_encode($resized);
+            $mimeType = 'image/jpeg';
+        }
+
         $startedAt = microtime(true);
         try {
             return $agent->analyze($imageBase64, $mimeType);
@@ -43,5 +56,16 @@ final readonly class AnalyzeFoodPhotoAction
                 'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
             ]);
         }
+    }
+
+    private function resizedForModel(string $imageBase64): ?string
+    {
+        $image = Base64Image::decode($imageBase64);
+
+        if (! $image instanceof Base64Image || max($image->width, $image->height) <= self::MODEL_MAX_SIDE) {
+            return null;
+        }
+
+        return $this->resizePhoto->handle($image->bytes, self::MODEL_MAX_SIDE);
     }
 }

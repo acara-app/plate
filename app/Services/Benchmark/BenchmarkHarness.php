@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Benchmark;
 
+use App\Actions\AnalyzeFoodPhotoAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\Benchmark\HarnessReport;
 use App\Data\Benchmark\MealEvaluation;
@@ -29,7 +30,7 @@ use Throwable;
 final readonly class BenchmarkHarness
 {
     public function __construct(
-        private FoodPhotoAnalyzerAgent $agent,
+        private AnalyzeFoodPhotoAction $analyzer,
         private ItemMatcher $itemMatcher,
         private MetricsCalculator $calculator,
     ) {}
@@ -131,7 +132,7 @@ final readonly class BenchmarkHarness
 
     private function analyze(string $imageBase64, string $mimeType, PhotoModel $model): FoodAnalysisData
     {
-        return $this->agent->usingModel($model)->analyze($imageBase64, $mimeType);
+        return $this->analyzer->analyzeUsingModel($imageBase64, $mimeType, $model);
     }
 
     /** @param list<float> $values */

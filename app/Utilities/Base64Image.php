@@ -19,6 +19,8 @@ final readonly class Base64Image
     private function __construct(
         public string $bytes,
         public string $mimeType,
+        public int $width,
+        public int $height,
     ) {}
 
     public static function decode(string $value): ?self
@@ -47,7 +49,7 @@ final readonly class Base64Image
             return null;
         }
 
-        return new self($bytes, $mimeType);
+        return new self($bytes, $mimeType, $info[0], $info[1]);
     }
 
     public function base64(): string
