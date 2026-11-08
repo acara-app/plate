@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\DeleteHealthSampleAction;
 use App\Actions\DeleteUser;
 use App\Actions\LogReviewedMealAction;
+use App\Actions\ResizePhoto;
 use App\Actions\StoreMealPhotoAction;
 use App\Actions\UpdateHealthSampleAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
@@ -28,6 +29,7 @@ use Inertia\Testing\AssertableInertia;
 
 covers(
     StoreMealPhotoAction::class,
+    ResizePhoto::class,
     MealPhoto::class,
     ShowMealPhotoController::class,
     AnalyzeSnapToTrackPhotoController::class,

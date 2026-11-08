@@ -14,7 +14,12 @@ use Illuminate\Support\Facades\Log;
 
 final readonly class AnalyzeFoodPhotoAction
 {
-    public function __construct(private FoodPhotoAnalyzerAgent $agent) {}
+    private const int MODEL_MAX_SIDE = 1024;
+
+    public function __construct(
+        private FoodPhotoAnalyzerAgent $agent,
+        private ResizePhoto $resizePhoto,
+    ) {}
 
     public function handle(string $imageBase64, string $mimeType, ?string $language = null, ?string $languageCode = null, ?PhotoAnalysisContext $context = null): FoodAnalysisData
     {
@@ -34,6 +39,13 @@ final readonly class AnalyzeFoodPhotoAction
             $agent->withLanguage($language, $languageCode);
         }
 
+        $jpeg = $this->jpegForModel($imageBase64);
+
+        if ($jpeg !== null) {
+            $imageBase64 = base64_encode($jpeg);
+            $mimeType = 'image/jpeg';
+        }
+
         $startedAt = microtime(true);
         try {
             return $agent->analyze($imageBase64, $mimeType);
@@ -43,5 +55,16 @@ final readonly class AnalyzeFoodPhotoAction
                 'duration_ms' => (int) round((microtime(true) - $startedAt) * 1000),
             ]);
         }
+    }
+
+    private function jpegForModel(string $imageBase64): ?string
+    {
+        $bytes = base64_decode($imageBase64, true);
+
+        if ($bytes === false || $bytes === '') {
+            return null;
+        }
+
+        return $this->resizePhoto->handle($bytes, self::MODEL_MAX_SIDE);
     }
 }
