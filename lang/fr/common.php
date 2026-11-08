@@ -150,10 +150,16 @@ return [
         'dismiss' => 'Masquer cet avis',
     ],
 
-    'privacy_policy_page' => [
-        'title' => 'Politique de confidentialité | Comment nous protégeons vos données de santé',
-        'meta_description' => 'Votre vie privée est essentielle. Lisez la politique de confidentialité d\'Acara Plate pour savoir comment nous recueillons, utilisons et protégeons vos données biométriques, vos problèmes de santé et vos données alimentaires.',
+    'legal_pages' => [
         'back' => 'Retour',
+        'privacy_policy' => [
+            'title' => 'Politique de confidentialité | Comment nous protégeons vos données de santé',
+            'meta_description' => 'Votre vie privée est essentielle. Lisez la politique de confidentialité d\'Acara Plate pour savoir comment nous recueillons, utilisons et protégeons vos données biométriques, vos problèmes de santé et vos données alimentaires.',
+        ],
+        'terms_of_service' => [
+            'title' => 'Conditions d\'utilisation | Entente d\'utilisation d\'Acara Plate',
+            'meta_description' => 'Consultez les conditions d\'utilisation d\'Acara Plate pour connaître vos droits, les conditions d\'admissibilité, vos responsabilités à l\'égard de vos données et notre avis médical sur les plans générés par l\'IA.',
+        ],
     ],
 
     'health_data_consent_prompt' => [
