@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\AcknowledgePrivacyPolicy;
+use App\Enums\ConsentPurpose;
 use App\Http\Controllers\AcknowledgePrivacyPolicyController;
 use App\Http\Controllers\DashboardController;
+use App\Models\Consent;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia;
 
@@ -17,6 +19,7 @@ covers(
 
 it('asks people who joined before the privacy update to acknowledge it once', function (): void {
     $user = User::factory()->create(['created_at' => '2026-10-01 09:00:00', 'privacy_version' => '1.0']);
+    Consent::factory()->for($user)->create(['purpose' => ConsentPurpose::ProcessHealthData]);
 
     $this->actingAs($user)
         ->get(route('dashboard'))
