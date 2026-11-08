@@ -10,7 +10,10 @@ use Inertia\Inertia;
 
 Route::get('/', Web\HomeController::class)->name('home');
 Route::get('.well-known/passkey-endpoints', Web\PasskeyEndpointsController::class)->name('well-known.passkeys');
-Route::view('/privacy-policy', 'privacy-policy')->name('privacy');
+Route::get('/privacy-policy', Web\ShowPrivacyPolicyController::class)->name('privacy');
+Route::get('/{locale}/privacy-policy', Web\ShowPrivacyPolicyController::class)
+    ->whereIn('locale', Web\ShowPrivacyPolicyController::TRANSLATIONS)
+    ->name('privacy.locale');
 Route::view('/terms-of-service', 'terms-of-service')->name('terms');
 Route::view('/about', 'about')->name('about');
 Route::view('/support', 'support')->name('support');
