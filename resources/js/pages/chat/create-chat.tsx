@@ -5,12 +5,13 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { AiAllowanceNotice } from '@/components/billing/ai-allowance';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
-import { Button } from '@/components/ui/button';
-import { ButtonGroup } from '@/components/ui/button-group';
+import { extractApprovalPayload } from '@/components/chat/approval-part';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { SidebarTrigger } from '@/components/ui/sidebar';
@@ -24,15 +25,18 @@ import useSharedProps from '@/hooks/use-shared-props';
 import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import type { AiAllowance } from '@/types';
-import type { ChatPageProps, UIMessage } from '@/types/chat';
-import { Head, router, usePage } from '@inertiajs/react';
+import type { ChatPageProps, ChatStatus, UIMessage } from '@/types/chat';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
 import {
+    ArrowDown,
     Bookmark,
+    Clock,
     MoreHorizontal,
     Pin,
     ScanLine,
     SquarePen,
+    type LucideIcon,
 } from 'lucide-react';
 import {
     useCallback,
@@ -45,8 +49,18 @@ import {
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import ChatInput from './chat-input';
+import ChatMessages, { ChatErrorNotice } from './chat-messages';
 
-import ChatMessages, { ChatErrorBanner } from './chat-messages';
+const COLUMN = 'mx-auto w-full max-w-[43rem] px-4 sm:px-6';
+
+const PINNED_TO_BOTTOM_THRESHOLD = 96;
+
+const DEFAULT_RETENTION_HOURS = 48;
+
+const RETENTION_PROPS = ['isPinned', 'isKept'];
+
+const HEADER_BUTTON =
+    'inline-flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:outline-none data-[state=open]:bg-muted data-[state=open]:text-foreground';
 
 function clearInitialPromptQuery() {
     const url = new URL(window.location.href);
@@ -65,6 +79,77 @@ function clearInitialPromptQuery() {
     });
 }
 
+function hasPendingApproval(messages: UIMessage[]): boolean {
+    const lastMessage = messages.at(-1);
+
+    if (lastMessage?.role !== 'assistant') {
+        return false;
+    }
+
+    return (lastMessage.parts ?? []).some(
+        (part) => extractApprovalPayload(part)?.status === 'pending',
+    );
+}
+
+function useStatusAnnouncement(
+    status: ChatStatus,
+    messages: UIMessage[],
+): string {
+    const { t } = useTranslation('common');
+    const [announcement, setAnnouncement] = useState('');
+    const previousStatusRef = useRef(status);
+    const messagesRef = useRef(messages);
+    messagesRef.current = messages;
+
+    useEffect(() => {
+        const previous = previousStatusRef.current;
+        previousStatusRef.current = status;
+
+        if (status === previous) {
+            return;
+        }
+
+        if (status === 'submitted') {
+            setAnnouncement(t('chat.announce.working'));
+        } else if (status === 'error') {
+            setAnnouncement(t('chat.announce.failed'));
+        } else if (status === 'ready' && previous === 'streaming') {
+            setAnnouncement(
+                hasPendingApproval(messagesRef.current)
+                    ? t('chat.announce.approval')
+                    : t('chat.announce.replied'),
+            );
+        }
+    }, [status, t]);
+
+    return announcement;
+}
+
+function HeaderLink({
+    label,
+    icon: Icon,
+    href,
+}: {
+    label: string;
+    icon: LucideIcon;
+    href: string;
+}) {
+    return (
+        <Tooltip>
+            <TooltipTrigger asChild>
+                <Link href={href} aria-label={label} className={HEADER_BUTTON}>
+                    <Icon
+                        className="size-[18px]"
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                    />
+                </Link>
+            </TooltipTrigger>
+            <TooltipContent>{label}</TooltipContent>
+        </Tooltip>
+    );
+}
+
 export default function CreateChat() {
     const page = usePage<
         ChatPageProps & { aiAllowance?: AiAllowance | null }
@@ -75,8 +160,9 @@ export default function CreateChat() {
         initialPrompt,
         autoSendInitialPrompt = true,
         initialStreaming,
-        isPinned,
-        isKept,
+        isPinned = false,
+        isKept = false,
+        temporaryRetentionHours = DEFAULT_RETENTION_HOURS,
         aiAllowance,
     } = page.props;
     const { currentUser } = useSharedProps();
@@ -85,8 +171,7 @@ export default function CreateChat() {
     const [conversationId, setConversationId] = useState<string>(
         initialConversationId,
     );
-    const [pinned, setPinned] = useState<boolean>(isPinned ?? false);
-    const [kept, setKept] = useState<boolean>(isKept ?? false);
+    const [newChatUrl] = useState(() => chat.create(generateUUID()).url);
     const [dismissedWarningAt, setDismissedWarningAt] = useState<string | null>(
         null,
     );
@@ -95,12 +180,18 @@ export default function CreateChat() {
             ? aiAllowance
             : null;
 
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const pinnedToBottomRef = useRef(true);
+    const lastScrollTopRef = useRef(0);
     const lastMessageRef = useRef<{
         text: string;
         files?: FileUIPart[];
     } | null>(null);
     const autoStartedPromptRef = useRef<string | null>(null);
+
+    const [isMobileNavVisible, setIsMobileNavVisible] = useState(true);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const [isAwayFromLatest, setIsAwayFromLatest] = useState(false);
 
     const initialMessages = useMemo(
         () => (messageHistories ?? []) as UIMessage[],
@@ -117,38 +208,34 @@ export default function CreateChat() {
     }, []);
 
     const togglePin = useCallback(() => {
-        const next = !pinned;
-        setPinned(next);
-
-        const action = next ? chat.pin : chat.unpin;
+        const action = isPinned ? chat.unpin : chat.pin;
 
         router.patch(
             action(conversationId).url,
             {},
             {
+                optimistic: () => ({ isPinned: !isPinned }),
+                only: RETENTION_PROPS,
                 preserveScroll: true,
                 preserveState: true,
-                onError: () => setPinned(!next),
             },
         );
-    }, [pinned, conversationId]);
+    }, [isPinned, conversationId]);
 
     const toggleKeep = useCallback(() => {
-        const next = !kept;
-        setKept(next);
-
-        const action = next ? chat.keep : chat.unkeep;
+        const action = isKept ? chat.unkeep : chat.keep;
 
         router.patch(
             action(conversationId).url,
             {},
             {
+                optimistic: () => ({ isKept: !isKept }),
+                only: RETENTION_PROPS,
                 preserveScroll: true,
                 preserveState: true,
-                onError: () => setKept(!next),
             },
         );
-    }, [kept, conversationId]);
+    }, [isKept, conversationId]);
 
     const {
         messages,
@@ -180,11 +267,53 @@ export default function CreateChat() {
         }
     }, [status]);
 
-    useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    const showWorkingIndicator =
+        (isSubmitting || isResuming) && messages.length > 0;
+
+    const [stoppedMessageIds, setStoppedMessageIds] = useState<
+        ReadonlySet<string>
+    >(() => new Set());
+
+    const handleStop = useCallback(() => {
+        const lastMessage = messages.at(-1);
+
+        if (lastMessage) {
+            setStoppedMessageIds((previous) =>
+                new Set(previous).add(lastMessage.id),
+            );
         }
-    }, [messages]);
+
+        stop();
+    }, [messages, stop]);
+
+    const announcement = useStatusAnnouncement(status, messages);
+
+    const scrollToLatest = useCallback((behavior: ScrollBehavior) => {
+        const container = scrollRef.current;
+
+        if (!container) {
+            return;
+        }
+
+        container.scrollTo({ top: container.scrollHeight, behavior });
+    }, []);
+
+    useEffect(() => {
+        if (messages.at(-1)?.role === 'user') {
+            pinnedToBottomRef.current = true;
+            setIsAwayFromLatest(false);
+        }
+
+        if (pinnedToBottomRef.current) {
+            scrollToLatest('instant');
+        }
+    }, [
+        messages,
+        showWorkingIndicator,
+        error,
+        usageLimitTrigger,
+        scrollToLatest,
+    ]);
 
     useEffect(() => {
         if (error?.message === 'conversation_expired') {
@@ -250,15 +379,13 @@ export default function CreateChat() {
         }
     }, [error, clearError]);
 
-    const showWorkingIndicator =
-        (isSubmitting || isResuming) && messages.length > 0;
-
-    const [isMobileNavVisible, setIsMobileNavVisible] = useState(true);
-    const lastScrollTopRef = useRef(0);
-
     const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
-        const scrollTop = Math.max(0, event.currentTarget.scrollTop);
+        const container = event.currentTarget;
+        const scrollTop = Math.max(0, container.scrollTop);
         const lastScrollTop = lastScrollTopRef.current;
+        const distanceFromBottom =
+            container.scrollHeight - scrollTop - container.clientHeight;
+        const pinnedToBottom = distanceFromBottom < PINNED_TO_BOTTOM_THRESHOLD;
 
         if (scrollTop <= 16 || scrollTop < lastScrollTop - 4) {
             setIsMobileNavVisible(true);
@@ -266,8 +393,13 @@ export default function CreateChat() {
             setIsMobileNavVisible(false);
         }
 
+        pinnedToBottomRef.current = pinnedToBottom;
+        setIsAwayFromLatest(!pinnedToBottom);
+        setIsScrolled(scrollTop > 8);
         lastScrollTopRef.current = scrollTop;
     }, []);
+
+    const isKeptForGood = isKept || isPinned;
 
     return (
         <AppShell variant="sidebar">
@@ -280,92 +412,84 @@ export default function CreateChat() {
                 <BiometricsReviewBanner className="mx-4 mt-4" />
                 <Head title="Chat" />
                 <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
-                    <div
+                    <header
                         className={cn(
-                            'absolute top-3 left-3 z-20 transition-all duration-300 ease-out md:hidden',
+                            'absolute inset-x-0 top-0 z-20 flex h-14 items-center justify-between gap-2 border-b bg-background px-2 transition-[translate,opacity,border-color] duration-300 ease-out sm:px-3',
+                            isScrolled
+                                ? 'border-border/70'
+                                : 'border-transparent',
                             isMobileNavVisible
                                 ? 'translate-y-0 opacity-100'
-                                : 'pointer-events-none -translate-y-2 opacity-0',
+                                : 'pointer-events-none -translate-y-full opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
                         )}
                     >
-                        <SidebarTrigger className="rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60" />
-                    </div>
-                    <div
-                        className={cn(
-                            'absolute top-3 right-3 z-20 transition-all duration-300 ease-out',
-                            isMobileNavVisible
-                                ? 'translate-y-0 opacity-100'
-                                : 'pointer-events-none -translate-y-2 opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
-                        )}
-                    >
-                        <ButtonGroup className="rounded-full border border-border/40 bg-background/80 shadow-md backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() =>
-                                            router.visit(
-                                                chat.create(generateUUID()).url,
-                                            )
-                                        }
-                                        aria-label={t('conversations.new_chat')}
-                                        className="size-10 text-muted-foreground"
-                                    >
-                                        <SquarePen className="size-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {t('conversations.new_chat')}
-                                </TooltipContent>
-                            </Tooltip>
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() =>
-                                            router.visit(
-                                                ShowSnapToTrackController().url,
-                                            )
-                                        }
-                                        aria-label={t(
-                                            'sidebar.nav.snap_to_track',
-                                        )}
-                                        className="size-10 text-muted-foreground"
-                                    >
-                                        <ScanLine className="size-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    {t('sidebar.nav.snap_to_track')}
-                                </TooltipContent>
-                            </Tooltip>
+                        <div className="flex items-center">
+                            <SidebarTrigger className="size-9 md:hidden" />
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                            <HeaderLink
+                                label={t('conversations.new_chat')}
+                                icon={SquarePen}
+                                href={newChatUrl}
+                            />
+                            <HeaderLink
+                                label={t('sidebar.nav.snap_to_track')}
+                                icon={ScanLine}
+                                href={ShowSnapToTrackController().url}
+                            />
                             <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        aria-label={t('conversations.actions')}
-                                        className="size-10 text-muted-foreground data-[state=open]:bg-accent"
-                                    >
-                                        <MoreHorizontal className="size-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <DropdownMenuTrigger
+                                            aria-label={t(
+                                                'conversations.actions',
+                                            )}
+                                            className={HEADER_BUTTON}
+                                        >
+                                            <MoreHorizontal
+                                                className="size-[18px]"
+                                                strokeWidth={1.75}
+                                                aria-hidden="true"
+                                            />
+                                        </DropdownMenuTrigger>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        {t('conversations.actions')}
+                                    </TooltipContent>
+                                </Tooltip>
                                 <DropdownMenuContent
                                     align="end"
-                                    className="w-44"
+                                    className="w-64"
                                 >
+                                    <DropdownMenuLabel className="flex items-start gap-2 text-xs leading-5 font-normal text-muted-foreground">
+                                        {isKeptForGood ? (
+                                            <Bookmark
+                                                className="mt-0.5 size-3.5 shrink-0"
+                                                aria-hidden="true"
+                                            />
+                                        ) : (
+                                            <Clock
+                                                className="mt-0.5 size-3.5 shrink-0"
+                                                aria-hidden="true"
+                                            />
+                                        )}
+                                        {isKeptForGood
+                                            ? t('chat.retention.kept')
+                                            : t('chat.retention.temporary', {
+                                                  hours: temporaryRetentionHours,
+                                              })}
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem onSelect={toggleKeep}>
                                         <Bookmark
                                             className={cn(
                                                 'size-4',
-                                                kept &&
+                                                isKept &&
                                                     'fill-current text-primary',
                                             )}
                                         />
                                         {t(
-                                            kept
+                                            isKept
                                                 ? 'conversations.unkeep'
                                                 : 'conversations.keep',
                                         )}
@@ -374,34 +498,45 @@ export default function CreateChat() {
                                         <Pin
                                             className={cn(
                                                 'size-4',
-                                                pinned &&
+                                                isPinned &&
                                                     'fill-current text-primary',
                                             )}
                                         />
                                         {t(
-                                            pinned
+                                            isPinned
                                                 ? 'conversations.unpin'
                                                 : 'conversations.pin',
                                         )}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                        </ButtonGroup>
-                    </div>
+                        </div>
+                    </header>
+
                     <div
-                        className="min-h-0 flex-1 overflow-y-auto scroll-smooth"
+                        ref={scrollRef}
                         onScroll={handleScroll}
+                        className="@container min-h-0 flex-1 overflow-y-auto overscroll-contain"
                     >
-                        <div className="mx-auto w-full max-w-3xl px-4 pt-16 pb-6 md:py-6">
+                        <div
+                            className={cn(
+                                COLUMN,
+                                'flex min-h-full flex-col pt-20 pb-12',
+                            )}
+                        >
+                            <h1 className="sr-only">{t('chat.page_title')}</h1>
                             <ChatMessages
                                 messages={messages}
                                 status={status}
+                                retentionHours={temporaryRetentionHours}
+                                stoppedMessageIds={stoppedMessageIds}
                                 isSubmitting={showWorkingIndicator}
                                 onApprovalDecision={submitApprovalDecisions}
                             />
                             {!usageLimitTrigger && (
-                                <ChatErrorBanner
+                                <ChatErrorNotice
                                     error={error}
+                                    status={status}
                                     onRetry={
                                         lastMessageRef.current
                                             ? handleRetry
@@ -410,7 +545,7 @@ export default function CreateChat() {
                                 />
                             )}
                             {usageLimitTrigger && (
-                                <div className="mt-4">
+                                <div className="mt-6">
                                     <AiAllowanceNotice
                                         allowance={usageLimitTrigger}
                                         onDismiss={() => {
@@ -420,41 +555,65 @@ export default function CreateChat() {
                                     />
                                 </div>
                             )}
-                            <div ref={messagesEndRef} />
                         </div>
                     </div>
 
-                    <div className="mx-auto flex w-full max-w-3xl shrink-0 flex-col bg-background/80 backdrop-blur-md transition-colors duration-200 supports-[backdrop-filter]:bg-background/60">
-                        {visibleAllowance && !usageLimitTrigger && (
-                            <div className="px-4 pt-2 empty:hidden">
-                                <AiAllowanceNotice
-                                    allowance={visibleAllowance}
-                                    onDismiss={() =>
-                                        setDismissedWarningAt(
-                                            visibleAllowance.resets_at,
-                                        )
-                                    }
-                                />
-                            </div>
-                        )}
-                        <ChatInput
-                            className="w-full"
-                            onSubmit={handleSubmit}
-                            onStop={stop}
-                            onInputChange={handleInputChange}
-                            disabled={isStreaming || isSubmitting}
-                            initialMessage={
-                                shouldAutoStartInitialPrompt
-                                    ? null
-                                    : initialPrompt
-                            }
-                            isLoading={isStreaming || isSubmitting}
+                    <div className="relative shrink-0 bg-background">
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-linear-to-t from-background to-transparent"
                         />
-                        <p className="px-2 pb-2 text-center text-xs text-muted-foreground sm:px-4 sm:pb-4 sm:text-sm">
-                            ⚠️ For informational purposes only. Not a substitute
-                            for professional medical or nutritional advice.
-                        </p>
+                        <div
+                            className={cn(
+                                COLUMN,
+                                'relative pb-[max(0.25rem,env(safe-area-inset-bottom))]',
+                            )}
+                        >
+                            {isAwayFromLatest && messages.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => scrollToLatest('smooth')}
+                                    aria-label={t('chat.scroll_to_latest')}
+                                    className="absolute -top-12 left-1/2 inline-flex size-9 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none motion-safe:animate-in motion-safe:fade-in dark:focus-visible:ring-emerald-400"
+                                >
+                                    <ArrowDown
+                                        className="size-4"
+                                        aria-hidden="true"
+                                    />
+                                </button>
+                            )}
+                            {visibleAllowance && !usageLimitTrigger && (
+                                <div className="pb-2 empty:hidden">
+                                    <AiAllowanceNotice
+                                        allowance={visibleAllowance}
+                                        onDismiss={() =>
+                                            setDismissedWarningAt(
+                                                visibleAllowance.resets_at,
+                                            )
+                                        }
+                                    />
+                                </div>
+                            )}
+                            <ChatInput
+                                onSubmit={handleSubmit}
+                                onStop={handleStop}
+                                onInputChange={handleInputChange}
+                                initialMessage={
+                                    shouldAutoStartInitialPrompt
+                                        ? null
+                                        : initialPrompt
+                                }
+                                isLoading={isStreaming || isSubmitting}
+                            />
+                            <p className="px-2 py-2.5 text-center text-xs leading-5 text-muted-foreground">
+                                {t('dashboard_ai.disclaimer')}
+                            </p>
+                        </div>
                     </div>
+
+                    <p role="status" aria-live="polite" className="sr-only">
+                        {announcement}
+                    </p>
                 </section>
             </AppContent>
         </AppShell>
