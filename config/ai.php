@@ -22,6 +22,11 @@ return [
     'default_for_embeddings' => 'openai',
     'default_for_reranking' => 'cohere',
 
+    'photo_analysis' => [
+        'provider' => 'gemini',
+        'model' => 'gemini-3.8-flash',
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Caching
@@ -104,7 +109,7 @@ return [
             'url' => env('OPENAI_URL', 'https://api.openai.com/v1'),
             'models' => [
                 'text' => [
-                    'default' => 'gpt-6-sol',
+                    'default' => 'gpt-6.1-terra',
                     'cheapest' => 'gpt-6-luna',
                     'smartest' => 'gpt-6-astra',
                 ],
