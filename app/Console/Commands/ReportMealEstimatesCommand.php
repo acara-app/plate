@@ -13,17 +13,16 @@ use Illuminate\Console\Command;
 
 #[Description('Report how often people correct AI meal estimates, by model, and which foods they rename, add or remove')]
 #[Signature('meal-estimates:report
-        {--days=30 : Report meals saved in the last N days}')]
+        {--days=30 : Report meals saved in the last N UTC days}
+        {--to= : Last UTC day to include (Y-m-d), defaults to yesterday}')]
 final class ReportMealEstimatesCommand extends Command
 {
     public function handle(BuildMealEstimateReport $buildReport): int
     {
-        $to = CarbonImmutable::now();
-        $report = $buildReport->handle($to->subDays(max(1, (int) $this->option('days'))), $to);
+        $to = is_string($this->option('to')) ? CarbonImmutable::parse($this->option('to'), 'UTC')->startOfDay() : CarbonImmutable::yesterday('UTC');
+        $report = $buildReport->handle($to->subDays(max(1, (int) $this->option('days')) - 1), $to);
 
-        $from = CarbonImmutable::parse($report->from)->format('Y-m-d H:i');
-        $until = CarbonImmutable::parse($report->to)->format('Y-m-d H:i');
-        $this->info("Meal estimate accuracy · meals saved {$from} → {$until} UTC");
+        $this->info("Meal estimate accuracy · meals saved {$report->from} → {$report->to} (UTC days)");
 
         if ($report->meals < $report->minimumMeals) {
             $this->line("Not enough meals yet: fewer than {$report->minimumMeals} in this period.");

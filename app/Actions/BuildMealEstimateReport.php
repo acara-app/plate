@@ -5,10 +5,9 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\MealEstimateReportData;
-use App\Data\ReviewedMealData;
-use App\Enums\EstimateValidationStatus;
-use App\Models\MealEstimate;
-use App\Utilities\FoodName;
+use App\Models\MealEstimateDailyFoodChange;
+use App\Models\MealEstimateDailyStat;
+use App\Utilities\Histogram;
 use Carbon\CarbonImmutable;
 
 final readonly class BuildMealEstimateReport
@@ -19,138 +18,37 @@ final readonly class BuildMealEstimateReport
 
     public function handle(CarbonImmutable $from, CarbonImmutable $to): MealEstimateReportData
     {
+        $days = [$from->toDateString(), $to->toDateString()];
         $groups = [];
-        $renamed = [];
-        $changed = [];
-        $meals = 0;
-        $corrected = 0;
 
-        foreach (MealEstimate::query()->whereBetween('created_at', [$from, $to])->lazyById() as $estimate) {
-            $model = $estimate->model_version ?? 'unknown';
-            $key = "{$model}|{$estimate->source->value}";
-            $groups[$key] ??= ['model' => $model, 'source' => $estimate->source->value, 'meals' => 0, 'corrected' => 0, 'kcal' => [], 'kcalPercent' => [], 'carbs' => []];
-            $groups[$key]['meals']++;
-            $meals++;
-
-            $correction = $estimate->validation_status === EstimateValidationStatus::UserCorrected ? $estimate->corrected_value : null;
-
-            if ($correction === null) {
-                continue;
-            }
-
-            $groups[$key]['corrected']++;
-            $corrected++;
-
-            $predicted = $estimate->predictedMeal()['totals'];
-            $predictedKcal = (float) ($predicted['calories'] ?? 0);
-            $correctedKcal = $this->totalOf($correction, 'calories');
-            $correctedCarbs = $this->totalOf($correction, 'carbs');
-
-            if ($correctedKcal !== null) {
-                $groups[$key]['kcal'][] = $correctedKcal - $predictedKcal;
-
-                if ($predictedKcal > 0) {
-                    $groups[$key]['kcalPercent'][] = ($correctedKcal - $predictedKcal) / $predictedKcal * 100;
-                }
-            }
-
-            if ($correctedCarbs !== null) {
-                $groups[$key]['carbs'][] = $correctedCarbs - ($predicted['carbs'] ?? 0.0);
-            }
-
-            $foods = $this->foodChanges($estimate, $correction);
-
-            foreach (array_unique(array_map(fn (array $pair): string => implode('|', $pair), $foods['renamed'])) as $pair) {
-                [$aiFood, $correctedTo] = explode('|', $pair, 2);
-                $renamed[$pair] ??= ['aiFood' => $aiFood, 'correctedTo' => $correctedTo, 'meals' => 0];
-                $renamed[$pair]['meals']++;
-            }
-
-            foreach (['added' => $foods['added'], 'removed' => $foods['removed']] as $change => $names) {
-                foreach (array_unique($names) as $name) {
-                    $changed["{$change}|{$name}"] ??= ['change' => $change, 'food' => $name, 'meals' => 0];
-                    $changed["{$change}|{$name}"]['meals']++;
-                }
-            }
+        foreach (MealEstimateDailyStat::query()->whereBetween('date', $days)->get() as $day) {
+            $key = "{$day->model_version}|{$day->source->value}";
+            $groups[$key] ??= ['model' => $day->model_version, 'source' => $day->source->value, 'meals' => 0, 'corrected' => 0, 'kcal' => [], 'kcalPercent' => [], 'carbs' => []];
+            $groups[$key]['meals'] += $day->meals;
+            $groups[$key]['corrected'] += $day->corrected;
+            $groups[$key]['kcal'] = Histogram::merge($groups[$key]['kcal'], $day->kcal_changes);
+            $groups[$key]['kcalPercent'] = Histogram::merge($groups[$key]['kcalPercent'], $day->kcal_change_percents);
+            $groups[$key]['carbs'] = Histogram::merge($groups[$key]['carbs'], $day->carbs_changes);
         }
 
         $shown = array_filter($groups, fn (array $group): bool => $group['meals'] >= self::MIN_MEALS);
+        $foods = $this->foodRows($days);
 
         return new MealEstimateReportData(
-            from: $from->toIso8601String(),
-            to: $to->toIso8601String(),
+            from: $days[0],
+            to: $days[1],
             minimumMeals: self::MIN_MEALS,
-            meals: $meals,
-            corrected: $corrected,
+            meals: array_sum(array_column($groups, 'meals')),
+            corrected: array_sum(array_column($groups, 'corrected')),
             hiddenModelGroups: count($groups) - count($shown),
             models: $this->modelRows($shown),
-            renamedFoods: array_map(
-                fn (string $key): array => $renamed[$key],
-                $this->topKeys(array_map(fn (array $row): int => $row['meals'], $renamed)),
-            ),
-            changedFoods: array_map(
-                fn (string $key): array => $changed[$key],
-                $this->topKeys(array_map(fn (array $row): int => $row['meals'], $changed)),
-            ),
+            renamedFoods: $foods['renamed'],
+            changedFoods: $foods['changed'],
         );
     }
 
     /**
-     * @param  array<array-key, mixed>  $correction
-     */
-    private function totalOf(array $correction, string $nutrient): ?float
-    {
-        $totals = is_array($correction['totals'] ?? null) ? $correction['totals'] : [];
-
-        return is_numeric($totals[$nutrient] ?? null) ? (float) $totals[$nutrient] : null;
-    }
-
-    /**
-     * @param  array<array-key, mixed>  $correction
-     * @return array{renamed: list<array{0: string, 1: string}>, added: list<string>, removed: list<string>}
-     */
-    private function foodChanges(MealEstimate $estimate, array $correction): array
-    {
-        if (! is_array($correction['items'] ?? null)) {
-            return ['renamed' => [], 'added' => [], 'removed' => []];
-        }
-
-        $remaining = array_map(
-            fn (array $item): string => FoodName::normalize(is_string($item['name'] ?? null) ? $item['name'] : ''),
-            ReviewedMealData::normalizeItems($correction['items']),
-        );
-        $unmatched = [];
-
-        foreach (ReviewedMealData::normalizeItems($estimate->original_prediction['items'] ?? null) as $item) {
-            $name = is_string($item['name'] ?? null) ? $item['name'] : '';
-            $match = array_search(FoodName::normalize($name), $remaining, true);
-
-            if ($match === false) {
-                $unmatched[] = FoodName::normalize(is_string($item['match_name'] ?? null) ? $item['match_name'] : $name);
-
-                continue;
-            }
-
-            unset($remaining[$match]);
-        }
-
-        $remaining = array_values($remaining);
-        $pairs = min(count($unmatched), count($remaining));
-        $renamed = [];
-
-        for ($index = 0; $index < $pairs; $index++) {
-            $renamed[] = [$unmatched[$index], $remaining[$index]];
-        }
-
-        return [
-            'renamed' => array_values(array_filter($renamed, fn (array $pair): bool => $pair[0] !== '' && $pair[1] !== '')),
-            'added' => array_values(array_filter(array_slice($remaining, $pairs), fn (string $name): bool => $name !== '')),
-            'removed' => array_values(array_filter(array_slice($unmatched, $pairs), fn (string $name): bool => $name !== '')),
-        ];
-    }
-
-    /**
-     * @param  array<string, array{model: string, source: string, meals: int, corrected: int, kcal: list<float>, kcalPercent: list<float>, carbs: list<float>}>  $groups
+     * @param  array<string, array{model: string, source: string, meals: int, corrected: int, kcal: array<int, int>, kcalPercent: array<int, int>, carbs: array<int, int>}>  $groups
      * @return list<array{model: string, source: string, meals: int, corrected: int, medianKcalChange: float|null, medianKcalChangePercent: float|null, medianCarbsChange: float|null}>
      */
     private function modelRows(array $groups): array
@@ -160,9 +58,9 @@ final readonly class BuildMealEstimateReport
             'source' => $group['source'],
             'meals' => $group['meals'],
             'corrected' => $group['corrected'],
-            'medianKcalChange' => $this->median($group['kcal']),
-            'medianKcalChangePercent' => $this->median($group['kcalPercent']),
-            'medianCarbsChange' => $this->median($group['carbs']),
+            'medianKcalChange' => Histogram::median($group['kcal']),
+            'medianKcalChangePercent' => Histogram::median($group['kcalPercent']),
+            'medianCarbsChange' => Histogram::median($group['carbs']),
         ], array_values($groups));
 
         usort($rows, fn (array $a, array $b): int => [$b['meals'], $a['model'], $a['source']] <=> [$a['meals'], $b['model'], $b['source']]);
@@ -171,30 +69,42 @@ final readonly class BuildMealEstimateReport
     }
 
     /**
-     * @param  array<string, int>  $meals
-     * @return list<string>
+     * @param  array{0: string, 1: string}  $days
+     * @return array{renamed: list<array{aiFood: string, correctedTo: string, meals: int}>, changed: list<array{change: string, food: string, meals: int}>}
      */
-    private function topKeys(array $meals): array
+    private function foodRows(array $days): array
     {
-        $shown = array_filter($meals, fn (int $count): bool => $count >= self::MIN_MEALS);
+        $renamed = [];
+        $changed = [];
 
-        arsort($shown);
+        $foods = MealEstimateDailyFoodChange::query()
+            ->select(['ai_food', 'corrected_food'])
+            ->selectRaw('sum(meals) as meals')
+            ->whereBetween('date', $days)
+            ->groupBy('ai_food', 'corrected_food')
+            ->havingRaw('sum(meals) >= ?', [self::MIN_MEALS])
+            ->orderByRaw('sum(meals) desc')
+            ->orderBy('ai_food')
+            ->orderBy('corrected_food')
+            ->get();
 
-        return array_slice(array_map(strval(...), array_keys($shown)), 0, self::MAX_FOOD_ROWS);
-    }
+        foreach ($foods as $food) {
+            if ($food->ai_food !== null && $food->corrected_food !== null) {
+                $renamed[] = ['aiFood' => $food->ai_food, 'correctedTo' => $food->corrected_food, 'meals' => $food->meals];
 
-    /**
-     * @param  list<float>  $values
-     */
-    private function median(array $values): ?float
-    {
-        if ($values === []) {
-            return null;
+                continue;
+            }
+
+            $changed[] = [
+                'change' => $food->ai_food === null ? 'added' : 'removed',
+                'food' => $food->ai_food ?? (string) $food->corrected_food,
+                'meals' => $food->meals,
+            ];
         }
 
-        sort($values);
-        $middle = intdiv(count($values), 2);
-
-        return count($values) % 2 === 1 ? $values[$middle] : ($values[$middle - 1] + $values[$middle]) / 2;
+        return [
+            'renamed' => array_slice($renamed, 0, self::MAX_FOOD_ROWS),
+            'changed' => array_slice($changed, 0, self::MAX_FOOD_ROWS),
+        ];
     }
 }

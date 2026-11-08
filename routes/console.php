@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Console\Commands\AggregateDailyMealEstimatesCommand;
 use App\Console\Commands\AggregateHealthDailyCommand;
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
 use App\Console\Commands\PurgeDeletedUserDataCommand;
@@ -21,6 +22,8 @@ Schedule::command(ProcessGlucoseNotificationsCommand::class)->dailyAt('08:00');
 Schedule::command(PurgeDeletedUserDataCommand::class)->daily();
 
 Schedule::command(AggregateHealthDailyCommand::class)->dailyAt('02:00');
+
+Schedule::command(AggregateDailyMealEstimatesCommand::class)->dailyAt('02:30');
 
 Schedule::call(function (): void {
     SnapPhotoRequest::query()->whereNotNull('result')->where('created_at', '<', now('UTC')->subDay())->update(['result' => null]);
