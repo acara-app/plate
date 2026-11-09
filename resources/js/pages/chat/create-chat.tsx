@@ -406,7 +406,7 @@ export default function CreateChat() {
             <AppSidebar />
             <AppContent
                 variant="sidebar"
-                className="h-svh overflow-hidden overflow-x-hidden"
+                className="h-dvh overflow-hidden overflow-x-hidden md:peer-data-[variant=inset]:h-[calc(100dvh-(--spacing(4)))]"
             >
                 <LifecycleBanner className="mx-4 mt-4" />
                 <BiometricsReviewBanner className="mx-4 mt-4" />
@@ -566,7 +566,7 @@ export default function CreateChat() {
                         <div
                             className={cn(
                                 COLUMN,
-                                'relative pb-[max(0.25rem,env(safe-area-inset-bottom))]',
+                                'relative pb-[max(1rem,env(safe-area-inset-bottom))]',
                             )}
                         >
                             {isAwayFromLatest && messages.length > 0 && (
@@ -605,9 +605,6 @@ export default function CreateChat() {
                                 }
                                 isLoading={isStreaming || isSubmitting}
                             />
-                            <p className="px-2 py-2.5 text-center text-xs leading-5 text-muted-foreground">
-                                {t('dashboard_ai.disclaimer')}
-                            </p>
                         </div>
                     </div>
 
