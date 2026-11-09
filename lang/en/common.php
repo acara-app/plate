@@ -686,6 +686,9 @@ return [
             'title' => 'Take a meal photo',
             'live_view' => 'Live camera preview',
             'hint' => 'Keep the whole meal in frame.',
+            'tip' => "Show all of your meal in the frame — hidden items can't be counted.",
+            'flash_on' => 'Turn on flash',
+            'flash_off' => 'Turn off flash',
             'close' => 'Close camera',
             'capture' => 'Capture photo',
             'loading' => 'Allow camera access to photograph your meal…',
@@ -696,6 +699,7 @@ return [
             'unsupported' => 'Your browser cannot open the camera here. Choose a photo instead.',
             'capture_failed' => 'We could not take the photo. Try again or choose a photo.',
             'retry' => 'Try camera again',
+            'use_phone_camera' => 'Use phone camera',
         ],
     ],
     'sidebar' => [

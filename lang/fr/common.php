@@ -687,6 +687,9 @@ return [
             'title' => 'Photographier votre repas',
             'live_view' => 'Aperçu de la caméra',
             'hint' => 'Cadrez l’ensemble du repas.',
+            'tip' => 'Montrez tout votre repas dans le cadre — ce qui est caché ne peut pas être compté.',
+            'flash_on' => 'Allumer le flash',
+            'flash_off' => 'Éteindre le flash',
             'close' => 'Fermer la caméra',
             'capture' => 'Capturer la photo',
             'loading' => 'Autorisez la caméra pour photographier votre repas…',
@@ -697,6 +700,7 @@ return [
             'unsupported' => 'Votre navigateur ne peut pas ouvrir la caméra ici. Choisissez une photo.',
             'capture_failed' => 'La photo n’a pas pu être prise. Réessayez ou choisissez une photo.',
             'retry' => 'Réessayer la caméra',
+            'use_phone_camera' => 'Utiliser l’appareil photo du téléphone',
         ],
     ],
     'sidebar' => [
