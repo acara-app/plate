@@ -26,6 +26,7 @@ import {
     Paperclip,
     RefreshCw,
     RotateCcw,
+    TriangleAlert,
 } from 'lucide-react';
 import { memo, type ReactNode, useId, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -390,6 +391,13 @@ function EmptyState({ retentionHours }: { retentionHours: number }) {
                     aria-hidden="true"
                 />
                 {t('chat.empty.retention', { hours: retentionHours })}
+            </p>
+            <p className="mt-2.5 flex max-w-[34rem] items-start gap-2 text-[13px] leading-5 text-muted-foreground">
+                <TriangleAlert
+                    className="mt-0.5 size-3.5 shrink-0"
+                    aria-hidden="true"
+                />
+                {t('dashboard_ai.disclaimer')}
             </p>
         </div>
     );
