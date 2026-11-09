@@ -20,7 +20,8 @@ it('serves each translation at its own URL, linked both ways with the English pa
         ->assertOk()
         ->assertSee('<html lang="en"', false)
         ->assertSee($englishDate)
-        ->assertSee("hreflang=\"{$locale}\" href=\"".route("{$route}.locale", ['locale' => $locale]).'"', false);
+        ->assertSee("hreflang=\"{$locale}\" href=\"".route("{$route}.locale", ['locale' => $locale]).'"', false)
+        ->assertSeeInOrder([$englishDate, "hreflang=\"{$locale}\" lang=\"{$locale}\""], false);
 
     $translation = $this->get(route("{$route}.locale", ['locale' => $locale]))
         ->assertOk()
