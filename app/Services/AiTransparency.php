@@ -28,7 +28,7 @@ final class AiTransparency
             ],
             [
                 'q' => 'Is my food photo kept private?',
-                'a' => 'Yes. Your photo is used to estimate the nutrition in your meal and is never used to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, the photo is kept privately with the meal you save and deleted when you delete the meal. Our team only looks at saved photos if you turn on Help improve food recognition.',
+                'a' => 'Yes. Your photo is used to estimate the nutrition in your meal and is never used to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready, unless you choose to keep your photo to help improve food recognition. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, the photo is kept privately with the meal you save and deleted when you delete the meal. Our team only looks at saved photos if you turn on Help improve food recognition.',
             ],
             [
                 'q' => 'How do I use Snap to Track?',
@@ -129,7 +129,7 @@ final class AiTransparency
     public static function photoHandling(): array
     {
         return [
-            'On the public Snap to Track tool, your photo is kept as an encrypted copy only while the analysis runs. It is deleted as soon as your result is ready, and if a scan fails you can retry it for up to an hour before the copy is deleted.',
+            'On the public Snap to Track tool, your photo is kept as an encrypted copy only while the analysis runs. It is deleted as soon as your result is ready, unless you choose to keep it to help improve food recognition, and if a scan fails you can retry it for up to an hour before the copy is deleted.',
             'The photo is processed by Google as an AI sub-processor to generate the analysis. It is not shared with any other organization unless you turn on Help improve food recognition (see below), and is never used to train AI models.',
             'When you are signed in, the photo is kept privately with the meal you save, resized and with its location data removed, and is deleted when you delete the meal or your account. Our team only looks at saved photos if you turn on Help improve food recognition; those photos are also processed by OpenAI, another AI sub-processor, for that purpose. If you turn it on, a copy of a photo we can use is kept for up to 24 months, even after you delete the meal.',
         ];

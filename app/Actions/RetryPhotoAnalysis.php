@@ -35,7 +35,7 @@ final readonly class RetryPhotoAnalysis
                 abort_unless($previous->canRetry() && $previous->image_base64 !== null, 410, 'This photo has expired or cannot be retried.');
                 $requestId = (string) Str::uuid();
                 $context = new PhotoAnalysisContext($user, $previous->guest_id, $requestId, $previous->source, $previous->fingerprint);
-                $retry = $this->start->handle($requestId, $previous->image_base64, $previous->mime_type, $context);
+                $retry = $this->start->handle($requestId, $previous->image_base64, $previous->mime_type, $context, $previous->keep_photo);
                 $retryId = $retry->id;
                 $retry->update(['expires_at' => $previous->expires_at, 'deadline_at' => min($retry->deadline_at, $previous->expires_at)]);
                 $previous->update(['retry_request_id' => $requestId, 'image_base64' => null]);

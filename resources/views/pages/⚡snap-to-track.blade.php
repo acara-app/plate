@@ -40,6 +40,8 @@ class extends Component
 
     public ?string $turnstileToken = null;
 
+    public bool $keepPhoto = false;
+
     public bool $loading = false;
 
     public ?string $error = null;
@@ -207,7 +209,7 @@ class extends Component
             $analysis = $start->handle($this->analysisRequestId, $base64, $image->mimeType, new PhotoAnalysisContext(
                 auth()->user(), $this->analysisGuestId(), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
-            ));
+            ), keepPhoto: auth()->guest() && $this->keepPhoto);
             $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id);
             $this->showAnalysis($analysis);
         } catch (ValidationException $e) {
@@ -999,6 +1001,23 @@ class extends Component
                                 @enderror
                             </div>
                         @endif
+
+                        @guest
+                            <div class="mt-6 border-t border-[#D9CFBC] pt-6">
+                                <label class="flex cursor-pointer items-start gap-3 text-sm leading-relaxed text-[#3D3833]">
+                                    <input
+                                        type="checkbox"
+                                        wire:model="keepPhoto"
+                                        class="mt-1 size-4 shrink-0 cursor-pointer accent-[#1A1814]"
+                                        @disabled($loading)
+                                    >
+                                    <span>
+                                        Keep my photo to help improve food recognition (optional).
+                                        <a href="{{ route('privacy') }}" target="_blank" rel="noopener" class="underline underline-offset-2 hover:text-[#1A1814]">Privacy Policy</a>
+                                    </span>
+                                </label>
+                            </div>
+                        @endguest
 
                         <div class="mt-6 border-t border-[#D9CFBC] pt-6">
                             <button

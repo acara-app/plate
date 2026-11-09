@@ -15,6 +15,7 @@ use App\Enums\PhotoAnalysisStatus;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
+use App\Models\MealPhotoSample;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -25,7 +26,11 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia;
+use Laravel\Ai\Classification;
 use Laravel\Ai\Prompts\AgentPrompt;
+use Laravel\Ai\Responses\Data\BooleanAnswer;
+use Laravel\Ai\Responses\Data\ChoiceAnswer;
+use Laravel\Ai\Responses\Data\ScoreAnswer;
 use Livewire\Features\SupportFileUploads\FileUploadConfiguration;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Features\SupportTesting\Testable;
@@ -285,6 +290,32 @@ it('clears the photo and reloads verification for the next upload', function ():
 
     expect(file_exists($photo->getRealPath()))->toBeFalse();
 });
+
+it('keeps a guest photo only when they tick the box and it passes the check', function (bool $keep, float $face, int $kept): void {
+    Storage::fake('s3');
+    fakeTurnstileForSnapToTrack();
+    FoodPhotoAnalyzerAgent::fake([saveMealAnalysisFixture()]);
+    Classification::fake([[
+        'subject' => new ChoiceAnswer('food', ['food' => 0.97, 'other' => 0.03]),
+        'face' => new BooleanAnswer($face),
+        'personal_details' => new BooleanAnswer(0.01),
+        'image_quality' => new ScoreAnswer(2.8, [0.0, 0.0, 0.2, 0.8], []),
+    ]]);
+    Queue::fake([ProcessPhotoAnalysis::class]);
+
+    finishQueuedSnapAnalysis(Livewire::test('pages::snap-to-track')
+        ->set('photo', UploadedFile::fake()->image('food.jpg'))
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->set('keepPhoto', $keep)
+        ->call('analyze'));
+
+    expect(MealPhotoSample::query()->whereNull('user_id')->count())->toBe($kept)
+        ->and(Storage::disk('s3')->allFiles(MealPhotoSample::PUBLIC_DIRECTORY))->toHaveCount($kept);
+})->with([
+    'ticked, clear meal' => [true, 0.01, 1],
+    'not ticked' => [false, 0.01, 0],
+    'ticked, shows a face' => [true, 0.9, 0],
+]);
 
 it('sends a guest to the result page with their analysis kept in a guest draft', function (): void {
     Storage::fake('s3');

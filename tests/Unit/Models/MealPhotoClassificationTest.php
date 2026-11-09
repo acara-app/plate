@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Ai\Classifiers\MealPhotoClassifier;
 use App\Models\MealPhotoClassification;
 
-covers(MealPhotoClassification::class);
+covers(MealPhotoClassification::class, MealPhotoClassifier::class);
 
 it('passes only clear photos of food without a face', function (array $answers, bool $passes): void {
     $classification = MealPhotoClassification::factory()->make(['meal_photo_id' => 1]);

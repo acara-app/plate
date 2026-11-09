@@ -20,7 +20,7 @@ final readonly class ClassifyMealPhoto
             return null;
         }
 
-        $response = $this->classifier->classify($photo);
+        $response = $this->classifier->classify($photo->path);
 
         return MealPhotoClassification::query()->updateOrCreate(['meal_photo_id' => $photo->id], [
             'version' => MealPhotoClassifier::VERSION,
