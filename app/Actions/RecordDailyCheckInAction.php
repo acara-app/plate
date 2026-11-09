@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 final readonly class RecordDailyCheckInAction
 {
+    public const int MAX_SLEEP_HOURS = 24;
+
     public function __construct(private ForgetEmptyDailyTotalsAction $forgetEmptyDailyTotals) {}
 
     /**

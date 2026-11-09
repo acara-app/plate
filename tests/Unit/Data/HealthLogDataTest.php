@@ -253,6 +253,16 @@ it('formats and exports a water log', function (): void {
         ->and($data->toSampleArrays())->toBe([['type_identifier' => 'water', 'value' => 200, 'unit' => 'mL']]);
 });
 
+it('formats and exports a check-in, which is not saved as plain samples', function (): void {
+    $data = HealthLogData::fromParsedArray(['log_type' => 'check_in', 'sleep_hours' => '7.5', 'sleep_quality' => 3, 'stress_level' => '1']);
+
+    expect($data->formatForDisplay())->toBe('Check-in - slept 7.5 h, sleep quality good, stress calm')
+        ->and($data->toRecordArray())->toBe(['sleep_hours' => 7.5, 'sleep_quality' => 3, 'stress_level' => 1])
+        ->and(function () use ($data): void {
+            $data->toSampleArrays();
+        })->toThrow(LogicException::class);
+});
+
 test('fromParsedArray converts valid data correctly', function (): void {
     $data = HealthLogData::fromParsedArray([
         'is_health_data' => true,

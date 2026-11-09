@@ -15,6 +15,7 @@ enum HealthEntryType: string
     case Vitals = 'vitals';
     case Exercise = 'exercise';
     case Water = 'water';
+    case CheckIn = 'check_in';
 
     /** @return list<string> */
     public function sampleTypeValues(): array
@@ -27,6 +28,7 @@ enum HealthEntryType: string
             self::Vitals => [HealthSyncType::Weight->value, HealthSyncType::BloodPressureSystolic->value, HealthSyncType::BloodPressureDiastolic->value, HealthSyncType::A1c->value],
             self::Exercise => [HealthSyncType::ExerciseMinutes->value, HealthSyncType::Workouts->value],
             self::Water => [RecordWaterIntakeAction::WATER_TYPE],
+            self::CheckIn => DailyCheckInMetric::values(),
         };
     }
 }
