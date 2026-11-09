@@ -10,4 +10,7 @@ enum MealPhotoQuestion: string
     case Face = 'face';
     case PersonalDetails = 'personal_details';
     case ImageQuality = 'image_quality';
+    case FoodType = 'food_type';
+    case Cuisine = 'cuisine';
+    case DishType = 'dish_type';
 }

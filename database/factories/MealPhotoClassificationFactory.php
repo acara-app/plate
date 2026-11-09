@@ -37,6 +37,9 @@ final class MealPhotoClassificationFactory extends Factory
                     'probabilities' => [0.01, 0.04, 0.3, 0.65],
                     'confidence' => 0.58,
                 ],
+                'food_type' => ['choice' => 'mixed_meal', 'probabilities' => ['mixed_meal' => 0.82, 'protein' => 0.1, 'grains' => 0.08], 'confidence' => 0.7],
+                'cuisine' => ['choice' => 'chinese', 'probabilities' => ['chinese' => 0.88, 'japanese' => 0.07, 'korean' => 0.05], 'confidence' => 0.79],
+                'dish_type' => ['choice' => 'whole', 'probabilities' => ['whole' => 0.9, 'mixed' => 0.1], 'confidence' => 0.8],
             ],
         ];
     }

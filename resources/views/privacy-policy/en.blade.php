@@ -72,7 +72,7 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
         look at your individual meals, your edits, and your meal photos to test and improve how our AI
         recognizes food. They stay within Acara and are never shared with other organizations for their own
         use. Before we use a photo, an AI service provider (see Section 5) checks it for faces and other
-        personal details. You can turn this off anytime in Settings → Privacy, and from then on we stop using
+        personal details and notes what kind of food it shows. You can turn this off anytime in Settings → Privacy, and from then on we stop using
         them for this and delete the results of those photo checks.</li>
 </ul>
 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
@@ -106,7 +106,7 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
 <p>
     <strong>a. Providers we currently use:</strong>
 <ul>
-    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, and checking the meal photos you let us use to improve food recognition for faces and other personal details (see Section 2).</li>
+    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, and checking the meal photos you let us use to improve food recognition for faces and other personal details and for what kind of food they show (see Section 2).</li>
     <li><strong>Google</strong> — meal photo analysis and Acara Cloud's long-term memory features, via Gemini and any successor or specialized Google-hosted models served through the same Google API surface.</li>
 </ul>
 We disclose <strong>processors</strong>, not individual models. Swapping to a different model offered by the same processor (e.g., a newer Gemini release, or a specialized medical model hosted by Google) does not change which company receives your data and does not require a separate notice. We will update this list only when a new <strong>processor</strong> (a different company or a self-hosted deployment) is introduced for your data.

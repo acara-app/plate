@@ -49,7 +49,10 @@ it('checks the photo of a meal saved by someone who opted in', function (): void
 
     $this->actingAs($this->user)->post(route('snap-to-track.analyze'), ['photo' => UploadedFile::fake()->image('meal.jpg')]);
 
-    expect(MealPhotoClassification::query()->sole()->meal_photo_id)->toBe(MealPhoto::query()->sole()->id)
+    $classification = MealPhotoClassification::query()->sole();
+
+    expect($classification->meal_photo_id)->toBe(MealPhoto::query()->sole()->id)
+        ->and($classification->answers)->toHaveKeys(['food_type', 'cuisine', 'dish_type'])
         ->and(AiUsage::query()->where('agent', MealPhotoClassifier::class)->sole()->user_id)->toBeNull();
 });
 

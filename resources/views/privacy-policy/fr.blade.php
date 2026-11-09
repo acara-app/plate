@@ -77,7 +77,7 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
         photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Ces données restent chez
         Acara et ne sont jamais communiquées à d'autres organisations pour leur propre usage. Avant que nous utilisions
         une photo, un fournisseur de services d'IA (voir la section 5) vérifie si elle montre des visages ou d'autres
-        renseignements personnels. Vous pouvez désactiver cette option à tout moment dans Paramètres → Confidentialité;
+        renseignements personnels et indique le type d'aliments qu'elle montre. Vous pouvez désactiver cette option à tout moment dans Paramètres → Confidentialité;
         nous cessons alors de les utiliser à cette fin et supprimons les résultats de ces vérifications.</li>
 </ul>
 <p>Vos données ne seront pas utilisées à d'autres fins que celles décrites dans la présente politique sans votre
@@ -112,7 +112,7 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
 <p>
     <strong>a. Fournisseurs que nous utilisons actuellement :</strong>
 <ul>
-    <li><strong>OpenAI</strong> — clavardage (l'agent conversationnel Altani), génération de plans de repas et suggestions de repas au jour le jour, aperçus sur la glycémie, résumés de conversation, transcription audio, plongements de texte et vérification des photos de repas que vous nous permettez d'utiliser pour améliorer la reconnaissance des aliments, afin d'y repérer les visages et autres renseignements personnels (voir la section 2).</li>
+    <li><strong>OpenAI</strong> — clavardage (l'agent conversationnel Altani), génération de plans de repas et suggestions de repas au jour le jour, aperçus sur la glycémie, résumés de conversation, transcription audio, plongements de texte et vérification des photos de repas que vous nous permettez d'utiliser pour améliorer la reconnaissance des aliments, afin d'y repérer les visages et autres renseignements personnels et d'en déterminer le type d'aliments (voir la section 2).</li>
     <li><strong>Google</strong> — analyse des photos de repas et fonctionnalités de mémoire à long terme d'Acara Cloud, au moyen de Gemini et de tout modèle successeur ou spécialisé hébergé par Google et offert par la même interface de programmation (API) de Google.</li>
 </ul>
 Nous indiquons les <strong>sous-traitants</strong>, et non les modèles individuels. Passer à un autre modèle offert par le même sous-traitant (p. ex., une version plus récente de Gemini ou un modèle médical spécialisé hébergé par Google) ne change pas l'entreprise qui reçoit vos données et ne nécessite pas d'avis distinct. Nous mettrons cette liste à jour uniquement lorsqu'un nouveau <strong>sous-traitant</strong> (une autre entreprise ou un déploiement autohébergé) sera ajouté pour vos données.

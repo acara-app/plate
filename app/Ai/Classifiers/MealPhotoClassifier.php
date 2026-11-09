@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Classifiers;
 
+use App\Enums\Benchmark\DishType;
 use App\Enums\MealPhotoQuestion;
 use App\Models\MealPhoto;
 use Illuminate\Support\Facades\Context;
@@ -75,6 +76,36 @@ final readonly class MealPhotoClassifier
                 'Poorly: the food is blurry, dark, partly hidden, or cropped.',
                 'Well: the food is clear and almost fully in frame.',
                 'Very well: sharp, well lit, with the whole meal in frame.',
+            ]),
+            MealPhotoQuestion::FoodType => new Choice('What kind of food or drink is mainly shown?', [
+                'fruit' => 'Fruit, fresh or cut.',
+                'vegetables' => 'Vegetables or a salad.',
+                'grains' => 'Rice, noodles, pasta, bread, or cereal.',
+                'protein' => 'Meat, fish, eggs, tofu, or beans.',
+                'dairy' => 'Milk, yogurt, or cheese.',
+                'snack' => 'A snack such as chips, nuts, crackers, or a bar.',
+                'dessert' => 'A dessert or sweets such as cake, ice cream, or candy.',
+                'drink' => 'A drink such as coffee, tea, juice, or a smoothie.',
+                'mixed_meal' => 'A meal combining several of these, such as rice with meat and vegetables.',
+            ]),
+            MealPhotoQuestion::Cuisine => new Choice('Which cuisine does this food come from?', [
+                'chinese' => 'Chinese.',
+                'japanese' => 'Japanese.',
+                'korean' => 'Korean.',
+                'mongolian' => 'Mongolian, such as buuz, khuushuur, or tsuivan.',
+                'southeast_asian' => 'Southeast Asian, such as Thai, Vietnamese, or Filipino.',
+                'south_asian' => 'South Asian, such as Indian or Pakistani.',
+                'middle_eastern' => 'Middle Eastern or North African.',
+                'mediterranean' => 'Mediterranean, such as Italian, Greek, or Spanish.',
+                'european' => 'Other European, such as French, German, or British.',
+                'north_american' => 'North American, such as burgers, barbecue, or diner food.',
+                'latin_american' => 'Latin American, such as Mexican or Brazilian.',
+                'african' => 'Sub-Saharan African.',
+                'none' => 'No particular cuisine, such as plain fruit, a packaged snack, or a simple drink.',
+            ]),
+            MealPhotoQuestion::DishType => new Choice('Are the foods separate, or combined into one dish?', [
+                DishType::Whole->value => 'Separate foods you can see one by one, such as rice next to chicken.',
+                DishType::Mixed->value => 'Foods combined into one dish, such as soup, stew, curry, or a sandwich.',
             ]),
         };
     }
