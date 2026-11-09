@@ -24,7 +24,7 @@ export default function PhotoHero({
                 <button
                     type="button"
                     aria-label={t('health_entries.timeline.view_photo')}
-                    className="relative block aspect-[4/3] w-full overflow-hidden rounded-3xl bg-muted outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50"
+                    className="relative block aspect-square w-full overflow-hidden rounded-3xl bg-muted outline-none focus-visible:ring-[3px] focus-visible:ring-primary/50"
                 >
                     <MealPhotoImage
                         src={src}

@@ -106,16 +106,16 @@ export function MealPhotoPicker({
                     aria-haspopup="dialog"
                     disabled={disabled}
                     onClick={(event) => openCamera(event.currentTarget)}
-                    className="relative flex min-h-64 cursor-pointer touch-manipulation flex-col items-center justify-center gap-4 rounded-3xl bg-muted/50 px-8 py-12 text-center transition-colors outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 sm:min-h-80"
+                    className="relative flex aspect-square w-full max-w-sm cursor-pointer touch-manipulation flex-col items-center justify-center gap-4 self-center rounded-3xl bg-muted/50 px-8 text-center transition-colors outline-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
                 >
                     <span
-                        className="pointer-events-none absolute inset-5 text-primary/30"
+                        className="pointer-events-none absolute inset-4"
                         aria-hidden="true"
                     >
-                        <span className="absolute top-0 left-0 size-6 rounded-tl-xl border-t-2 border-l-2" />
-                        <span className="absolute top-0 right-0 size-6 rounded-tr-xl border-t-2 border-r-2" />
-                        <span className="absolute bottom-0 left-0 size-6 rounded-bl-xl border-b-2 border-l-2" />
-                        <span className="absolute right-0 bottom-0 size-6 rounded-br-xl border-r-2 border-b-2" />
+                        <span className="absolute top-0 left-0 size-10 rounded-tl-2xl border-t-4 border-l-4 border-primary" />
+                        <span className="absolute top-0 right-0 size-10 rounded-tr-2xl border-t-4 border-r-4 border-primary" />
+                        <span className="absolute bottom-0 left-0 size-10 rounded-bl-2xl border-b-4 border-l-4 border-primary" />
+                        <span className="absolute right-0 bottom-0 size-10 rounded-br-2xl border-r-4 border-b-4 border-primary" />
                     </span>
                     <Camera
                         className="size-10 text-primary/70"
