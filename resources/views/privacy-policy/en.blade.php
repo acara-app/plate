@@ -68,10 +68,10 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
     <li>Measuring and improving the accuracy of our meal estimates. For this we only look at
         aggregated statistics, such as how often estimates for a food get corrected, and only for
         groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
-    <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), our team may
-        look at your individual meals, your edits, and your meal photos to test and improve how our AI
-        recognizes food. We don't use photos that show faces or other personal details. You can turn this off
-        anytime in Settings → Privacy, and from then on we stop using them for this.</li>
+    <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), your individual
+        meals, your edits, and your meal photos may be reviewed to test and improve how our AI recognizes food.
+        Photos that show faces or other personal details are not used. You can turn this off anytime in
+        Settings → Privacy, and from then on they are no longer used for this.</li>
 </ul>
 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
     your consent. See Section 5 for the specific data flows involved in AI-assisted features.</p>
