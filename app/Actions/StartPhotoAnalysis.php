@@ -21,7 +21,7 @@ final readonly class StartPhotoAnalysis
 {
     public function __construct(private FailPhotoAnalysis $failures) {}
 
-    public function handle(string $requestId, string $base64, string $mimeType, PhotoAnalysisContext $context): PhotoAnalysisRequest
+    public function handle(string $requestId, string $base64, string $mimeType, PhotoAnalysisContext $context, bool $keepPhoto = false): PhotoAnalysisRequest
     {
         if (mb_strlen($base64, '8bit') > 4 * (int) ceil(10 * 1024 * 1024 / 3)) {
             throw ValidationException::withMessages(['photo' => 'Choose a photo up to 10MB to analyze.']);
@@ -41,7 +41,7 @@ final readonly class StartPhotoAnalysis
         $createdId = null;
 
         try {
-            return DB::transaction(function () use ($requestId, $base64, $mimeType, $context, &$createdId): PhotoAnalysisRequest {
+            return DB::transaction(function () use ($requestId, $base64, $mimeType, $context, $keepPhoto, &$createdId): PhotoAnalysisRequest {
                 $request = PhotoAnalysisRequest::query()->createOrFirst(['request_id' => $requestId], [
                     'user_id' => $context->user?->id,
                     'guest_hash' => $context->guestId === null ? null : hash('sha256', $context->guestId),
@@ -50,6 +50,7 @@ final readonly class StartPhotoAnalysis
                     'source' => $context->source,
                     'mime_type' => $mimeType,
                     'image_base64' => $base64,
+                    'keep_photo' => $keepPhoto && ! $context->user instanceof User,
                     'status' => PhotoAnalysisStatus::Queued,
                     'deadline_at' => now()->addMinutes(10),
                     'expires_at' => now()->addMinutes(PhotoAnalysisRequest::TTL_MINUTES),

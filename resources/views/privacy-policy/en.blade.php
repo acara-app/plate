@@ -70,6 +70,7 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
         groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
     <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), your individual
         meals, your edits, and your meal photos may be reviewed to test and improve how our AI recognizes food.
+        The same applies to a photo you choose to keep when using our photo analyzer without signing up.
         Photos that show faces or other personal details are not used. You can turn this off anytime in
         Settings → Privacy, and from then on they are no longer used for this.</li>
 </ul>
@@ -169,10 +170,13 @@ We disclose <strong>processors</strong>, not individual models. Swapping to a di
 </p>
 <p>
     <strong>Scan recovery:</strong>
-    The public photo analyzer temporarily keeps an encrypted copy of the uploaded photo so processing
+    The photo analyzer you can use without signing up temporarily keeps an encrypted copy of the uploaded photo so processing
     can continue after a connection interruption. The recovery copy is removed after a successful scan.
     Failed scans can be retried for up to one hour; expired recovery records are removed by scheduled
-    cleanup. These temporary recovery copies are separate from photos saved with a meal.
+    cleanup. These temporary recovery copies are separate from photos saved with a meal. If you use it without
+    signing up and choose to keep your photo, a copy is kept for up to 24 months to improve food recognition, unless
+    it shows a face or other personal details. Because it can't be traced back to you, it can't be found and deleted
+    on request.
 </p>
 <p>
     <strong>Meal photos:</strong>

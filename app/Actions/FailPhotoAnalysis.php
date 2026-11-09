@@ -13,14 +13,13 @@ use App\Models\PhotoAnalysisRequest;
 use App\Models\User;
 use App\Utilities\Base64Image;
 use Illuminate\Support\Facades\DB;
-use Throwable;
 
 final readonly class FailPhotoAnalysis
 {
     public function __construct(
         private ResolvesFailedPhotoAnalysis $resolver,
         private CreateAnalysisDraftAction $drafts,
-        private StoreMealPhotoAction $photos,
+        private KeepScannedPhoto $keepScannedPhoto,
     ) {}
 
     public function handle(PhotoAnalysisRequest $request, PhotoAnalysisFailure $failure, bool $onlyIfStale = false): bool
@@ -43,9 +42,9 @@ final readonly class FailPhotoAnalysis
                 $token = $this->drafts->handle($result, AnalysisDraftSource::PublicSnapToTrack, $context->user?->id);
                 $user = $context->user;
 
-                if ($user instanceof User) {
+                if ($user instanceof User || $current->keep_photo) {
                     $image = PhotoAnalysisRequest::query()->select(['id', 'image_base64'])->find($current->id)?->image_base64;
-                    DB::afterCommit(fn () => $this->keepMealPhoto($user, $image, $token));
+                    DB::afterCommit(fn () => $this->keepPhoto($current, $user, $image, $token));
                 }
 
                 $current->update(['status' => PhotoAnalysisStatus::Succeeded, 'draft_token' => $token, 'image_base64' => null, 'completed_at' => now()]);
@@ -73,18 +72,12 @@ final readonly class FailPhotoAnalysis
         return true;
     }
 
-    private function keepMealPhoto(User $user, ?string $base64, string $token): void
+    private function keepPhoto(PhotoAnalysisRequest $request, ?User $user, ?string $base64, string $token): void
     {
         $image = Base64Image::decode($base64 ?? '');
 
-        if (! $image instanceof Base64Image) {
-            return;
-        }
-
-        try {
-            $this->photos->handle($user, $image->bytes, $token);
-        } catch (Throwable $throwable) {
-            report($throwable);
+        if ($image instanceof Base64Image) {
+            $this->keepScannedPhoto->handle($request, $user, $image->bytes, $token);
         }
     }
 }

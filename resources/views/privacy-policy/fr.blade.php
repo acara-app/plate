@@ -74,7 +74,8 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
         pour des groupes d'au moins 10 repas. Personne n'examine vos repas individuels à cette fin.</li>
     <li>Si vous activez <strong>Aider à améliorer la reconnaissance des aliments</strong> (cette option reste désactivée
         tant que vous ne la choisissez pas), vos repas individuels, vos modifications et vos photos de repas peuvent être
-        examinés pour tester et améliorer la façon dont notre IA reconnaît les aliments. Les photos qui montrent des
+        examinés pour tester et améliorer la façon dont notre IA reconnaît les aliments. Il en va de même pour une photo
+        que vous choisissez de conserver lorsque vous utilisez notre analyseur de photos sans vous inscrire. Les photos qui montrent des
         visages ou d'autres renseignements personnels ne sont pas utilisées. Vous pouvez désactiver cette option à tout
         moment dans Paramètres → Confidentialité; ils ne sont alors plus utilisés à cette fin.</li>
 </ul>
@@ -175,11 +176,14 @@ Nous indiquons les <strong>sous-traitants</strong>, et non les modèles individu
 </p>
 <p>
     <strong>Récupération des numérisations :</strong>
-    L'analyseur de photos public conserve temporairement une copie chiffrée de la photo téléversée afin que le traitement
+    L'analyseur de photos utilisable sans inscription conserve temporairement une copie chiffrée de la photo téléversée afin que le traitement
     puisse reprendre après une interruption de connexion. Cette copie de récupération est supprimée après une numérisation
     réussie. Une numérisation qui échoue peut être relancée pendant une heure au plus; les enregistrements de récupération
     expirés sont supprimés par un nettoyage planifié. Ces copies de récupération temporaires sont distinctes des photos
-    enregistrées avec un repas.
+    enregistrées avec un repas. Si vous l'utilisez sans vous inscrire et choisissez de conserver votre photo, une
+    copie est conservée pendant au plus 24 mois pour améliorer la reconnaissance des aliments, sauf si elle montre un
+    visage ou d'autres renseignements personnels. Comme elle ne peut pas être reliée à vous, elle ne peut pas être
+    retrouvée ni supprimée sur demande.
 </p>
 <p>
     <strong>Photos de repas :</strong>

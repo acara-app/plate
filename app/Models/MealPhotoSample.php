@@ -15,12 +15,12 @@ use Illuminate\Support\Facades\Storage;
 
 /**
  * @property-read int $id
- * @property int $user_id
+ * @property int|null $user_id
  * @property int|null $meal_photo_id
  * @property string $path
  * @property string $version
  * @property array<string, array<string, mixed>> $answers
- * @property-read User $user
+ * @property-read User|null $user
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
@@ -32,6 +32,8 @@ final class MealPhotoSample extends Model
     use Prunable;
 
     public const string DIRECTORY = 'meal-photo-samples';
+
+    public const string PUBLIC_DIRECTORY = self::DIRECTORY.'/public';
 
     public const int RETENTION_MONTHS = 24;
 

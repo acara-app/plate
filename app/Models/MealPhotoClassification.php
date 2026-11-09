@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Ai\Classifiers\MealPhotoClassifier;
-use App\Enums\MealPhotoQuestion;
 use Carbon\CarbonInterface;
 use Database\Factories\MealPhotoClassificationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -28,14 +26,6 @@ final class MealPhotoClassification extends Model
     /** @use HasFactory<MealPhotoClassificationFactory> */
     use HasFactory;
 
-    public const float MIN_FOOD_PROBABILITY = 0.8;
-
-    public const float MAX_FACE_PROBABILITY = 0.1;
-
-    public const float MAX_PERSONAL_DETAILS_PROBABILITY = 0.1;
-
-    public const int MIN_IMAGE_QUALITY_LEVEL = 2;
-
     protected $guarded = [];
 
     public static function deleteForUser(int $userId): void
@@ -53,14 +43,6 @@ final class MealPhotoClassification extends Model
         return $this->belongsTo(MealPhoto::class);
     }
 
-    public function passesScreening(): bool
-    {
-        return ($this->probability(MealPhotoQuestion::Subject, MealPhotoClassifier::FOOD) ?? 0.0) >= self::MIN_FOOD_PROBABILITY
-            && ($this->probability(MealPhotoQuestion::Face) ?? 1.0) < self::MAX_FACE_PROBABILITY
-            && ($this->probability(MealPhotoQuestion::PersonalDetails) ?? 1.0) < self::MAX_PERSONAL_DETAILS_PROBABILITY
-            && ($this->imageQualityLevel() ?? 0) >= self::MIN_IMAGE_QUALITY_LEVEL;
-    }
-
     /**
      * @return array<string, string>
      */
@@ -70,25 +52,5 @@ final class MealPhotoClassification extends Model
             'meal_photo_id' => 'integer',
             'answers' => 'array',
         ];
-    }
-
-    private function probability(MealPhotoQuestion $question, ?string $option = null): ?float
-    {
-        $probability = data_get($this->answers, $option === null
-            ? "{$question->value}.probability"
-            : "{$question->value}.probabilities.{$option}");
-
-        return is_numeric($probability) ? (float) $probability : null;
-    }
-
-    private function imageQualityLevel(): ?int
-    {
-        $probabilities = data_get($this->answers, MealPhotoQuestion::ImageQuality->value.'.probabilities');
-
-        if (! is_array($probabilities) || $probabilities === []) {
-            return null;
-        }
-
-        return (int) array_search(max($probabilities), $probabilities, true);
     }
 }
