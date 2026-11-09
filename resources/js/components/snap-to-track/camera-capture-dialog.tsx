@@ -7,13 +7,31 @@ import {
     DialogDescription,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { CameraOff, ImagePlus, LoaderCircle, RotateCcw, X } from 'lucide-react';
+import {
+    canOpenMealCamera,
+    canUseTorch,
+    captureFramedPhoto,
+    mealCameraError,
+    openMealCamera,
+    setTorch,
+    stopMealCamera,
+    type MealCameraError,
+} from '@/lib/meal-camera';
+import { cn } from '@/lib/utils';
+import {
+    CameraOff,
+    ImagePlus,
+    Lightbulb,
+    LoaderCircle,
+    RotateCcw,
+    X,
+    Zap,
+    ZapOff,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type CameraStatus = 'loading' | 'ready' | 'paused' | 'error';
-type CameraError =
-    'permission_denied' | 'unavailable' | 'unsupported' | 'capture_failed';
 
 interface CameraCaptureDialogProps {
     open: boolean;
@@ -23,9 +41,8 @@ interface CameraCaptureDialogProps {
     onCloseAutoFocus: () => void;
 }
 
-function stopStream(stream: MediaStream | null): void {
-    stream?.getTracks().forEach((track) => track.stop());
-}
+const ROUND_CONTROL =
+    'rounded-full bg-white/10 text-white hover:bg-white/20 hover:text-white focus-visible:ring-white/50';
 
 function CameraView({
     open,
@@ -36,9 +53,11 @@ function CameraView({
     const videoRef = useRef<HTMLVideoElement>(null);
     const streamRef = useRef<MediaStream | null>(null);
     const [status, setStatus] = useState<CameraStatus>('loading');
-    const [error, setError] = useState<CameraError | null>(null);
+    const [error, setError] = useState<MealCameraError | null>(null);
     const [attempt, setAttempt] = useState(0);
     const [capturing, setCapturing] = useState(false);
+    const [torchAvailable, setTorchAvailable] = useState(false);
+    const [torchOn, setTorchOn] = useState(false);
 
     useEffect(() => {
         if (!open) {
@@ -51,8 +70,10 @@ function CameraView({
 
         function releaseCamera(): void {
             request += 1;
-            stopStream(streamRef.current);
+            stopMealCamera(streamRef.current);
             streamRef.current = null;
+            setTorchAvailable(false);
+            setTorchOn(false);
             if (video) {
                 video.srcObject = null;
             }
@@ -65,21 +86,14 @@ function CameraView({
             setError(null);
             setCapturing(false);
 
-            if (!navigator.mediaDevices?.getUserMedia) {
+            if (!canOpenMealCamera()) {
                 setError('unsupported');
                 setStatus('error');
                 return;
             }
 
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    audio: false,
-                    video: {
-                        facingMode: { ideal: 'environment' },
-                        width: { ideal: 1920 },
-                        height: { ideal: 1440 },
-                    },
-                });
+                const stream = await openMealCamera();
 
                 if (
                     disposed ||
@@ -87,7 +101,7 @@ function CameraView({
                     document.hidden ||
                     !video
                 ) {
-                    stopStream(stream);
+                    stopMealCamera(stream);
                     return;
                 }
 
@@ -107,20 +121,17 @@ function CameraView({
                     );
                 });
                 await video.play();
+
+                if (!disposed && streamRef.current === stream) {
+                    setTorchAvailable(canUseTorch(stream.getVideoTracks()[0]));
+                }
             } catch (exception) {
                 if (disposed || currentRequest !== request) {
                     return;
                 }
 
                 releaseCamera();
-                setError(
-                    exception instanceof DOMException &&
-                        ['NotAllowedError', 'SecurityError'].includes(
-                            exception.name,
-                        )
-                        ? 'permission_denied'
-                        : 'unavailable',
-                );
+                setError(mealCameraError(exception));
                 setStatus('error');
             }
         }
@@ -159,122 +170,110 @@ function CameraView({
         };
     }, [open, attempt]);
 
-    function capturePhoto(): void {
+    async function toggleTorch(): Promise<void> {
+        const track = streamRef.current?.getVideoTracks()[0];
+        if (!track) {
+            return;
+        }
+
+        const next = !torchOn;
+        try {
+            await setTorch(track, next);
+            setTorchOn(next);
+        } catch {
+            setTorchAvailable(false);
+            setTorchOn(false);
+        }
+    }
+
+    async function capturePhoto(): Promise<void> {
         const video = videoRef.current;
         const stream = streamRef.current;
-        if (
-            status !== 'ready' ||
-            capturing ||
-            !video ||
-            !stream ||
-            !video.videoWidth ||
-            !video.videoHeight ||
-            !video.clientWidth ||
-            !video.clientHeight
-        ) {
+        if (status !== 'ready' || capturing || !video || !stream) {
             return;
         }
 
         setCapturing(true);
-        const landscape = video.clientWidth > video.clientHeight;
-        const ratioWidth = landscape ? 4 : 3;
-        const ratioHeight = landscape ? 3 : 4;
-        const sourceWidth = Math.min(
-            video.videoWidth,
-            (video.videoHeight * ratioWidth) / ratioHeight,
-        );
-        const sourceHeight = (sourceWidth * ratioHeight) / ratioWidth;
-        const outputUnit = Math.floor(
-            Math.min(
-                video.videoWidth / ratioWidth,
-                video.videoHeight / ratioHeight,
-            ),
-        );
-        const canvas = document.createElement('canvas');
-        canvas.width = outputUnit * ratioWidth;
-        canvas.height = outputUnit * ratioHeight;
-
-        function captureFailed(): void {
+        try {
+            const photo = await captureFramedPhoto(video);
+            if (streamRef.current === stream) {
+                onCapture(photo);
+            }
+        } catch {
             if (streamRef.current !== stream) {
                 return;
             }
-            stopStream(stream);
+            stopMealCamera(stream);
             streamRef.current = null;
+            setTorchAvailable(false);
+            setTorchOn(false);
             setCapturing(false);
             setError('capture_failed');
             setStatus('error');
-        }
-
-        try {
-            const context = canvas.getContext('2d');
-            if (!context) {
-                captureFailed();
-                return;
-            }
-            context.drawImage(
-                video,
-                (video.videoWidth - sourceWidth) / 2,
-                (video.videoHeight - sourceHeight) / 2,
-                sourceWidth,
-                sourceHeight,
-                0,
-                0,
-                canvas.width,
-                canvas.height,
-            );
-            canvas.toBlob(
-                (blob) => {
-                    if (streamRef.current !== stream) {
-                        return;
-                    }
-                    if (!blob) {
-                        captureFailed();
-                        return;
-                    }
-                    onCapture(
-                        new File([blob], `meal-${Date.now()}.jpg`, {
-                            type: 'image/jpeg',
-                        }),
-                    );
-                },
-                'image/jpeg',
-                0.9,
-            );
-        } catch {
-            captureFailed();
         }
     }
 
     return (
         <div
             data-camera-view
-            className="grid min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)_auto] bg-background text-foreground"
+            className="grid min-h-0 flex-1 grid-rows-[auto_auto_minmax(0,1fr)_auto] bg-black text-white [@media(orientation:landscape)_and_(max-height:32rem)]:grid-cols-[minmax(0,1fr)_auto] [@media(orientation:landscape)_and_(max-height:32rem)]:grid-rows-[auto_minmax(0,1fr)]"
         >
             <div
                 data-camera-header
-                className="flex items-center gap-4 pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-4 pl-[max(1.25rem,env(safe-area-inset-left))]"
+                className="row-start-1 flex items-center justify-between gap-4 pt-[max(1.25rem,env(safe-area-inset-top))] pr-[max(1.25rem,env(safe-area-inset-right))] pb-4 pl-[max(1.25rem,env(safe-area-inset-left))] [@media(max-height:32rem)]:pt-[max(0.75rem,env(safe-area-inset-top))] [@media(max-height:32rem)]:pb-3 [@media(orientation:landscape)_and_(max-height:32rem)]:col-span-full"
             >
                 <DialogClose asChild>
                     <Button
                         type="button"
-                        variant="secondary"
+                        variant="ghost"
                         size="icon-touch"
-                        className="shrink-0 rounded-full"
+                        className={ROUND_CONTROL}
                         aria-label={t('snap_to_track.camera.close')}
                     >
                         <X />
                     </Button>
                 </DialogClose>
-                <DialogTitle>{t('snap_to_track.camera.title')}</DialogTitle>
+                <DialogTitle className="sr-only">
+                    {t('snap_to_track.camera.title')}
+                </DialogTitle>
+                {torchAvailable && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-touch"
+                        className={cn(
+                            ROUND_CONTROL,
+                            torchOn &&
+                                'bg-white text-black hover:bg-white/90 hover:text-black',
+                        )}
+                        aria-label={t(
+                            `snap_to_track.camera.${torchOn ? 'flash_off' : 'flash_on'}`,
+                        )}
+                        onClick={() => void toggleTorch()}
+                    >
+                        {torchOn ? <Zap /> : <ZapOff />}
+                    </Button>
+                )}
             </div>
+
+            <p
+                data-camera-tip
+                className="row-start-2 mr-[max(1rem,env(safe-area-inset-right))] mb-4 ml-[max(1rem,env(safe-area-inset-left))] flex items-start gap-3 rounded-2xl bg-white/10 px-4 py-3 text-sm leading-snug text-white/90 [@media(max-height:32rem)]:hidden"
+            >
+                <Lightbulb
+                    className="size-5 shrink-0 text-amber-300"
+                    aria-hidden="true"
+                />
+                <span>{t('snap_to_track.camera.tip')}</span>
+            </p>
 
             <div
                 data-camera-stage
-                className="relative mr-[max(1rem,env(safe-area-inset-right))] ml-[max(1rem,env(safe-area-inset-left))] flex min-h-0 min-w-0 items-center justify-center"
+                className="@container-size relative row-start-3 mr-[max(1rem,env(safe-area-inset-right))] ml-[max(1rem,env(safe-area-inset-left))] flex min-h-0 min-w-0 items-center justify-center [@media(orientation:landscape)_and_(max-height:32rem)]:col-start-1 [@media(orientation:landscape)_and_(max-height:32rem)]:row-start-2 [@media(orientation:landscape)_and_(max-height:32rem)]:mb-[max(0.75rem,env(safe-area-inset-bottom))]"
             >
                 <div
                     data-camera-frame
-                    className="relative shrink-0 overflow-hidden rounded-lg bg-black"
+                    className="relative aspect-square w-[min(100cqw,100cqh)] shrink-0 overflow-hidden rounded-3xl bg-neutral-900"
                 >
                     <video
                         ref={videoRef}
@@ -297,12 +296,12 @@ function CameraView({
                         <div
                             aria-hidden="true"
                             data-camera-guide
-                            className="pointer-events-none absolute inset-0"
+                            className="pointer-events-none absolute inset-3"
                         >
-                            <span className="absolute top-0 left-0 size-10 rounded-tl-lg border-t-2 border-l-2 border-foreground" />
-                            <span className="absolute top-0 right-0 size-10 rounded-tr-lg border-t-2 border-r-2 border-foreground" />
-                            <span className="absolute bottom-0 left-0 size-10 rounded-bl-lg border-b-2 border-l-2 border-foreground" />
-                            <span className="absolute right-0 bottom-0 size-10 rounded-br-lg border-r-2 border-b-2 border-foreground" />
+                            <span className="absolute top-0 left-0 size-10 rounded-tl-2xl border-t-4 border-l-4 border-primary" />
+                            <span className="absolute top-0 right-0 size-10 rounded-tr-2xl border-t-4 border-r-4 border-primary" />
+                            <span className="absolute bottom-0 left-0 size-10 rounded-bl-2xl border-b-4 border-l-4 border-primary" />
+                            <span className="absolute right-0 bottom-0 size-10 rounded-br-2xl border-r-4 border-b-4 border-primary" />
                         </div>
                     )}
                 </div>
@@ -356,44 +355,38 @@ function CameraView({
 
             <div
                 data-camera-controls
-                className="flex min-h-0 flex-col gap-4 overflow-y-auto pt-4 pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))]"
+                className="row-start-4 flex min-h-0 flex-col justify-center pt-6 pr-[max(1.5rem,env(safe-area-inset-right))] pb-[max(1.5rem,env(safe-area-inset-bottom))] pl-[max(1.5rem,env(safe-area-inset-left))] [@media(max-height:32rem)]:pt-4 [@media(max-height:32rem)]:pb-[max(1rem,env(safe-area-inset-bottom))] [@media(orientation:landscape)_and_(max-height:32rem)]:col-start-2 [@media(orientation:landscape)_and_(max-height:32rem)]:row-start-2 [@media(orientation:landscape)_and_(max-height:32rem)]:pt-0 [@media(orientation:landscape)_and_(max-height:32rem)]:pl-0"
             >
-                <p
-                    data-camera-hint
-                    className="text-center text-sm text-foreground/80"
-                >
-                    {t('snap_to_track.camera.hint')}
-                </p>
                 <div
                     data-camera-buttons
-                    className="grid grid-cols-3 items-center justify-items-center gap-4"
+                    className="grid grid-cols-3 items-center justify-items-center gap-4 [@media(orientation:landscape)_and_(max-height:32rem)]:flex [@media(orientation:landscape)_and_(max-height:32rem)]:flex-col"
                 >
-                    <span
-                        data-camera-spacer
-                        className="size-14 shrink-0"
-                        aria-hidden="true"
-                    />
                     <Button
                         type="button"
                         variant="ghost"
-                        size="icon"
-                        className="size-24 shrink-0 touch-manipulation rounded-full border-4 border-foreground"
-                        disabled={status !== 'ready' || capturing}
-                        aria-label={t('snap_to_track.camera.capture')}
-                        onClick={capturePhoto}
-                    >
-                        <span className="size-18 rounded-full bg-foreground" />
-                    </Button>
-                    <Button
-                        type="button"
-                        variant="secondary"
                         size="icon-touch"
-                        className="rounded-full"
+                        className={ROUND_CONTROL}
                         aria-label={t('snap_to_track.index.choose_photo')}
                         onClick={onChoosePhoto}
                     >
                         <ImagePlus />
                     </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-20 shrink-0 touch-manipulation rounded-full border-4 border-white p-1 transition-transform hover:bg-transparent focus-visible:ring-white/50 active:scale-95 motion-reduce:transition-none"
+                        disabled={status !== 'ready' || capturing}
+                        aria-label={t('snap_to_track.camera.capture')}
+                        onClick={() => void capturePhoto()}
+                    >
+                        <span className="size-full rounded-full bg-primary" />
+                    </Button>
+                    <span
+                        data-camera-spacer
+                        className="size-14 shrink-0 [@media(orientation:landscape)_and_(max-height:32rem)]:hidden"
+                        aria-hidden="true"
+                    />
                 </div>
             </div>
         </div>
@@ -417,10 +410,10 @@ export function CameraCaptureDialog({
                     event.preventDefault();
                     onCloseAutoFocus();
                 }}
-                className="camera-capture dark flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:max-w-none lg:h-[48rem] lg:max-h-[90dvh] lg:max-w-lg lg:rounded-3xl lg:landscape:max-w-3xl"
+                className="camera-capture dark flex h-dvh w-full max-w-none flex-col gap-0 overflow-hidden rounded-none border-0 bg-black p-0 sm:max-w-none lg:h-[48rem] lg:max-h-[90dvh] lg:max-w-lg lg:rounded-3xl"
             >
                 <DialogDescription className="sr-only">
-                    {t('snap_to_track.camera.hint')}
+                    {t('snap_to_track.camera.tip')}
                 </DialogDescription>
                 <CameraView
                     open={open}
