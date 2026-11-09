@@ -7,8 +7,7 @@ namespace App\Jobs;
 use App\Actions\AnalyzeFoodPhotoAction;
 use App\Actions\CreateAnalysisDraftAction;
 use App\Actions\FailPhotoAnalysis;
-use App\Actions\StoreMealPhotoAction;
-use App\Actions\StorePublicMealPhotoSample;
+use App\Actions\KeepScannedPhoto;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
@@ -40,7 +39,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
 
     public function __construct(public int $analysisRequestId) {}
 
-    public function handle(ManagesPhotoAnalyses $photoAnalyses, AnalyzeFoodPhotoAction $analyzer, CreateAnalysisDraftAction $drafts, StoreMealPhotoAction $photos, FailPhotoAnalysis $failures, StorePublicMealPhotoSample $publicSamples): void
+    public function handle(ManagesPhotoAnalyses $photoAnalyses, AnalyzeFoodPhotoAction $analyzer, CreateAnalysisDraftAction $drafts, KeepScannedPhoto $keepPhoto, FailPhotoAnalysis $failures): void
     {
         $request = PhotoAnalysisRequest::query()->metadata()->find($this->analysisRequestId);
 
@@ -107,20 +106,8 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
                 return $token;
             });
 
-            if ($token !== null && $context->user !== null) {
-                try {
-                    $photos->handle($context->user, $image->bytes, $token);
-                } catch (Throwable $exception) {
-                    report($exception);
-                }
-            }
-
-            if ($token !== null && $context->user === null && $request->keep_photo) {
-                try {
-                    $publicSamples->handle($image->bytes);
-                } catch (Throwable $exception) {
-                    report($exception);
-                }
+            if ($token !== null) {
+                $keepPhoto->handle($request, $context->user, $image->bytes, $token);
             }
         } catch (PhotoAnalysisNotProcessingException) {
             $failures->handle($request, $request->hasProcessingBudget() ? PhotoAnalysisFailure::Timeout : PhotoAnalysisFailure::Expired);

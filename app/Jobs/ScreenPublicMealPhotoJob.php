@@ -11,7 +11,6 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Ai\Responses\Data\Answer;
 
 #[Backoff(30, 120)]
 #[Tries(3)]
@@ -23,9 +22,7 @@ final class ScreenPublicMealPhotoJob implements ShouldQueue
 
     public function handle(MealPhotoClassifier $classifier): void
     {
-        $answers = $classifier->classify($this->path)->collect()
-            ->map(fn (Answer $answer): array => $answer->toArray())
-            ->all();
+        $answers = MealPhotoClassifier::answers($classifier->classify($this->path));
 
         if (! MealPhotoClassifier::passes($answers)) {
             Storage::disk('s3')->delete($this->path);

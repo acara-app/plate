@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Ai\Classifiers\MealPhotoClassifier;
 use Carbon\CarbonInterface;
 use Database\Factories\MealPhotoClassificationFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -42,11 +41,6 @@ final class MealPhotoClassification extends Model
     public function mealPhoto(): BelongsTo
     {
         return $this->belongsTo(MealPhoto::class);
-    }
-
-    public function passesScreening(): bool
-    {
-        return MealPhotoClassifier::passes($this->answers);
     }
 
     /**

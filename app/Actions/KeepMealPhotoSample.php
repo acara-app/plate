@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Ai\Classifiers\MealPhotoClassifier;
 use App\Models\MealPhoto;
 use App\Models\MealPhotoClassification;
 use App\Models\MealPhotoSample;
@@ -14,7 +15,7 @@ final readonly class KeepMealPhotoSample
 {
     public function handle(MealPhoto $photo, MealPhotoClassification $classification): ?MealPhotoSample
     {
-        if (! $classification->passesScreening()) {
+        if (! MealPhotoClassifier::passes($classification->answers)) {
             return null;
         }
 

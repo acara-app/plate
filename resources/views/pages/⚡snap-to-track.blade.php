@@ -209,7 +209,7 @@ class extends Component
             $analysis = $start->handle($this->analysisRequestId, $base64, $image->mimeType, new PhotoAnalysisContext(
                 auth()->user(), $this->analysisGuestId(), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
-            ), keepPhoto: auth()->guest() && $this->keepPhoto);
+            ), keepPhoto: $this->keepPhoto);
             $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id);
             $this->showAnalysis($analysis);
         } catch (ValidationException $e) {

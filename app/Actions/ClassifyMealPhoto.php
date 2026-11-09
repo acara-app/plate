@@ -8,7 +8,6 @@ use App\Ai\Classifiers\MealPhotoClassifier;
 use App\Enums\ConsentPurpose;
 use App\Models\MealPhoto;
 use App\Models\MealPhotoClassification;
-use Laravel\Ai\Responses\Data\Answer;
 
 final readonly class ClassifyMealPhoto
 {
@@ -26,7 +25,7 @@ final readonly class ClassifyMealPhoto
             'version' => MealPhotoClassifier::VERSION,
             'provider' => $response->meta->provider ?? 'unknown',
             'model' => $response->meta->model ?? 'unknown',
-            'answers' => $response->collect()->map(fn (Answer $answer): array => $answer->toArray())->all(),
+            'answers' => MealPhotoClassifier::answers($response),
         ]);
     }
 }

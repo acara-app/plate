@@ -14,6 +14,7 @@ use Laravel\Ai\Classification\Score;
 use Laravel\Ai\Contracts\Question;
 use Laravel\Ai\Files\Image;
 use Laravel\Ai\Responses\ClassificationResponse;
+use Laravel\Ai\Responses\Data\Answer;
 
 final readonly class MealPhotoClassifier
 {
@@ -21,13 +22,13 @@ final readonly class MealPhotoClassifier
 
     public const string FOOD = 'food';
 
-    public const float MIN_FOOD_PROBABILITY = 0.8;
+    private const float MIN_FOOD_PROBABILITY = 0.8;
 
-    public const float MAX_FACE_PROBABILITY = 0.1;
+    private const float MAX_FACE_PROBABILITY = 0.1;
 
-    public const float MAX_PERSONAL_DETAILS_PROBABILITY = 0.1;
+    private const float MAX_PERSONAL_DETAILS_PROBABILITY = 0.1;
 
-    public const int MIN_IMAGE_QUALITY_LEVEL = 2;
+    private const int MIN_IMAGE_QUALITY_LEVEL = 2;
 
     private const string STATE = 'A photo someone took to log a meal in a nutrition tracking app.';
 
@@ -42,6 +43,14 @@ final readonly class MealPhotoClassifier
             && (self::imageQualityLevel($answers) ?? 0) >= self::MIN_IMAGE_QUALITY_LEVEL;
     }
 
+    /**
+     * @return array<string, array<mixed>>
+     */
+    public static function answers(ClassificationResponse $response): array
+    {
+        return array_map(fn (Answer $answer): array => $answer->toArray(), $response->answers);
+    }
+
     public function classify(string $path): ClassificationResponse
     {
         $questions = [];
@@ -53,7 +62,7 @@ final readonly class MealPhotoClassifier
         Context::addHidden('ai_classifier', self::class);
 
         try {
-            return Classification::of(self::STATE, [Image::fromStorage($path, 's3')])
+            return Classification::of(self::STATE, [Image::fromStorage($path, 's3')->withMimeType('image/jpeg')])
                 ->questions($questions)
                 ->classify(
                     provider: config()->string('ai.photo_classification.provider'),
