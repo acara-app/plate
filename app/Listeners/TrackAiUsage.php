@@ -36,15 +36,9 @@ final readonly class TrackAiUsage
 
         $agentClass = $event->prompt->agent::class;
 
-        $usageArray = [
-            'prompt_tokens' => $usage->uncachedInputTokens(),
-            'completion_tokens' => $usage->outputTokens - ($usage->reasoningTokens ?? 0),
-            'cache_read_input_tokens' => $usage->cacheReadInputTokens ?? 0,
-            'cache_write_input_tokens' => $usage->cacheWriteInputTokens ?? 0,
-            'reasoning_tokens' => $usage->reasoningTokens ?? 0,
-        ];
-
-        $cost = new AiUsageService()->calculateCost($model, $usageArray);
+        $usageService = new AiUsageService;
+        $usageArray = $usageService->tokenCounts($usage);
+        $cost = $usageService->calculateCost($model, $usageArray);
 
         AiUsage::query()->firstOrCreate(['invocation_id' => $invocationId], [
             'usage_group' => Context::get('photo_usage_group'),

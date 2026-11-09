@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Enums\ConsentPurpose;
 use App\Enums\ConsentSource;
+use App\Models\MealPhotoClassification;
 use App\Models\User;
 
 final readonly class RecordConsent
@@ -22,5 +23,9 @@ final readonly class RecordConsent
             'granted' => $granted,
             'source' => $source,
         ]);
+
+        if (! $granted && $purpose === ConsentPurpose::ImproveFoodRecognition) {
+            MealPhotoClassification::deleteForUser($user->id);
+        }
     }
 }

@@ -6,6 +6,7 @@ use App\Ai\Agents\ConversationTitleGeneratorAgent;
 use App\Listeners\TrackAiUsage;
 use App\Models\AiUsage;
 use App\Models\User;
+use App\Services\AiUsageService;
 use Laravel\Ai\AiManager;
 use Laravel\Ai\Events\AgentPrompted;
 use Laravel\Ai\Prompts\AgentPrompt;
@@ -13,7 +14,7 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\Data\Meta;
 use Laravel\Ai\Responses\Data\TextUsage;
 
-covers(TrackAiUsage::class);
+covers(TrackAiUsage::class, AiUsageService::class);
 
 it('records cached and reasoning tokens apart from the base token counts so they are not billed twice', function (): void {
     $this->actingAs(User::factory()->create());
