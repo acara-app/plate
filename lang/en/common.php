@@ -174,14 +174,14 @@ return [
         'title' => 'Privacy',
         'description' => 'Choose how Acara may use your data',
         'improve_food_recognition' => 'Help improve food recognition',
-        'improve_food_recognition_description' => 'Let Acara\'s team look at your meals, your edits and your meal photos to test and improve how our AI recognizes food. We keep a copy of photos we can use for up to 24 months, even if you delete the meal. If you turn this off, we stop using them and delete those copies.',
+        'improve_food_recognition_description' => 'Let Acara\'s team look at your meals, your edits and your meal photos to test and improve how our AI recognizes food. If you turn this off, we stop using them for this.',
         'policy_link' => 'Privacy Policy',
         'save' => 'Save',
         'saved' => 'Saved. You can change this anytime in Settings → Privacy.',
     ],
 
     'food_recognition_consent' => [
-        'text' => 'Thanks for fixing that meal! Can our team use fixes like this, along with your meals and meal photos, to improve how Acara recognizes food? We keep a copy of photos we can use for up to 24 months, even if you delete the meal.',
+        'text' => 'Thanks for fixing that meal! Can our team use fixes like this, along with your meals and meal photos, to improve how Acara recognizes food?',
         'yes' => 'Yes, happy to help',
         'no' => 'No thanks',
     ],

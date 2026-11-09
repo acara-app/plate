@@ -175,14 +175,14 @@ return [
         'title' => 'Confidentialité',
         'description' => 'Choisissez comment Acara peut utiliser vos données',
         'improve_food_recognition' => 'Aider à améliorer la reconnaissance des aliments',
-        'improve_food_recognition_description' => 'Permettez à l\'équipe d\'Acara de consulter vos repas, vos corrections et vos photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Nous gardons une copie des photos que nous pouvons utiliser pendant au plus 24 mois, même si vous supprimez le repas. Si vous désactivez cette option, nous cessons de les utiliser et supprimons ces copies.',
+        'improve_food_recognition_description' => 'Permettez à l\'équipe d\'Acara de consulter vos repas, vos corrections et vos photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Si vous désactivez cette option, nous cessons de les utiliser à cette fin.',
         'policy_link' => 'Politique de confidentialité',
         'save' => 'Enregistrer',
         'saved' => 'Enregistré. Vous pouvez modifier ce choix à tout moment dans Paramètres → Confidentialité.',
     ],
 
     'food_recognition_consent' => [
-        'text' => 'Merci d\'avoir corrigé ce repas ! Notre équipe peut-elle utiliser ce type de corrections, avec vos repas et leurs photos, pour améliorer la reconnaissance des aliments d\'Acara ? Nous gardons une copie des photos utilisables pendant au plus 24 mois, même si vous supprimez le repas.',
+        'text' => 'Merci d\'avoir corrigé ce repas ! Notre équipe peut-elle utiliser ce type de corrections, avec vos repas et leurs photos, pour améliorer la reconnaissance des aliments d\'Acara ?',
         'yes' => 'Oui, avec plaisir',
         'no' => 'Non merci',
     ],
