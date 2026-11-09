@@ -9,6 +9,7 @@ use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Approval;
@@ -194,6 +195,55 @@ it('asks the model for the water amount instead of asking the user to approve', 
     'no amount' => [null],
     'nothing drunk' => [0],
     'more than five litres' => [5001],
+]);
+
+it('saves how the user slept and how stressed they feel to the day’s check-in', function (?string $measuredAt, string $dayStart): void {
+    $this->travelTo(CarbonImmutable::parse('2026-11-09 08:00:00', 'Asia/Ulaanbaatar'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    Auth::login($user);
+
+    $result = json_decode(resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'check_in',
+        'sleep_hours' => 6.5,
+        'sleep_quality' => 1,
+        'stress_level' => 3,
+        'measured_at' => $measuredAt,
+    ])), true);
+
+    $answers = HealthSyncSample::query()
+        ->where('user_id', $user->id)
+        ->orderBy('type_identifier')
+        ->get()
+        ->map(fn (HealthSyncSample $answer): array => [$answer->type_identifier, $answer->value, $answer->entry_source?->value, $answer->measured_at->utc()->toDateTimeString()])
+        ->all();
+
+    expect($result)->toHaveKey('success', true)
+        ->and($answers)->toBe([
+            ['selfReportedSleep', 6.5, 'web', $dayStart],
+            ['sleepQuality', 1.0, 'web', $dayStart],
+            ['stressLevel', 3.0, 'web', $dayStart],
+        ]);
+})->with([
+    'today' => [null, '2026-11-08 16:00:00'],
+    'an earlier day' => ['2026-11-07T21:00:00+08:00', '2026-11-06 16:00:00'],
+    'a day that has not started yet' => ['2026-11-10T09:00:00+08:00', '2026-11-08 16:00:00'],
+]);
+
+it('asks the model for a check-in answer instead of asking the user to approve', function (array $answers): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+    Context::add('chat.channel', 'web');
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request(['log_type' => 'check_in', ...$answers]);
+
+    expect($tool->shouldRequestApproval($request))->toBeNull()
+        ->and(json_decode($tool->handle($request), true))->toHaveKey('requires_clarification', true)
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->exists())->toBeFalse();
+})->with([
+    'no answers' => [[]],
+    'an unknown stress level' => [['stress_level' => 4]],
+    'more sleep than a day has' => [['sleep_hours' => 25, 'stress_level' => 2]],
 ]);
 
 it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Actions\RecordDailyCheckInAction;
 use App\Enums\SleepQuality;
 use App\Enums\StressLevel;
 use App\Http\Requests\Concerns\ResolvesSelectedDay;
@@ -19,7 +20,7 @@ final class StoreDailyCheckInRequest extends FormRequest
     {
         return [
             'date' => $this->selectedDayRules(),
-            'sleep_hours' => ['nullable', 'required_without_all:sleep_quality,stress_level', 'numeric', 'between:0,24'],
+            'sleep_hours' => ['nullable', 'required_without_all:sleep_quality,stress_level', 'numeric', 'between:0,'.RecordDailyCheckInAction::MAX_SLEEP_HOURS],
             'sleep_quality' => ['nullable', 'required_without_all:sleep_hours,stress_level', Rule::enum(SleepQuality::class)],
             'stress_level' => ['nullable', 'required_without_all:sleep_hours,sleep_quality', Rule::enum(StressLevel::class)],
         ];

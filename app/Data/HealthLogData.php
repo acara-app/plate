@@ -11,9 +11,12 @@ use App\Enums\HealthEntryType;
 use App\Enums\HealthSyncType;
 use App\Enums\InsulinType;
 use App\Enums\MealType;
+use App\Enums\SleepQuality;
+use App\Enums\StressLevel;
 use App\Enums\WeightUnit;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
+use LogicException;
 use Spatie\LaravelData\Data;
 
 final class HealthLogData extends Data
@@ -55,6 +58,9 @@ final class HealthLogData extends Data
         public ?string $mealName = null,
         public bool $mealNameProvided = false,
         public ?int $waterMl = null,
+        public ?float $sleepHours = null,
+        public ?SleepQuality $sleepQuality = null,
+        public ?StressLevel $stressLevel = null,
     ) {}
 
     /**
@@ -91,6 +97,9 @@ final class HealthLogData extends Data
             mealName: self::toNullableString($data['meal_name'] ?? null),
             mealNameProvided: array_key_exists('meal_name', $data),
             waterMl: self::toInt($data['water_ml'] ?? null),
+            sleepHours: self::toFloat($data['sleep_hours'] ?? null),
+            sleepQuality: SleepQuality::tryFrom(self::toInt($data['sleep_quality'] ?? null) ?? 0),
+            stressLevel: StressLevel::tryFrom(self::toInt($data['stress_level'] ?? null) ?? 0),
         );
     }
 
@@ -104,6 +113,7 @@ final class HealthLogData extends Data
             HealthEntryType::Vitals => $this->formatVitalsLog(),
             HealthEntryType::Exercise => $this->formatExerciseLog(),
             HealthEntryType::Water => sprintf('Water %d ml', $this->waterMl ?? 0),
+            HealthEntryType::CheckIn => $this->formatCheckInLog(),
         };
     }
 
@@ -120,6 +130,11 @@ final class HealthLogData extends Data
             HealthEntryType::Vitals => $this->toVitalsRecordArray(),
             HealthEntryType::Exercise => $this->toExerciseRecordArray(),
             HealthEntryType::Water => ['water_ml' => $this->waterMl],
+            HealthEntryType::CheckIn => [
+                'sleep_hours' => $this->sleepHours,
+                'sleep_quality' => $this->sleepQuality?->value,
+                'stress_level' => $this->stressLevel?->value,
+            ],
         };
     }
 
@@ -136,6 +151,7 @@ final class HealthLogData extends Data
             HealthEntryType::Vitals => $this->toVitalsSamples(),
             HealthEntryType::Exercise => $this->toExerciseSamples(),
             HealthEntryType::Water => $this->toWaterSamples(),
+            HealthEntryType::CheckIn => throw new LogicException('Daily check-ins are saved by RecordDailyCheckInAction.'),
         };
     }
 
@@ -224,6 +240,17 @@ final class HealthLogData extends Data
         }
 
         return 'Vitals';
+    }
+
+    private function formatCheckInLog(): string
+    {
+        $answers = array_filter([
+            $this->sleepHours === null ? null : "slept {$this->sleepHours} h",
+            $this->sleepQuality instanceof SleepQuality ? 'sleep quality '.mb_strtolower($this->sleepQuality->name) : null,
+            $this->stressLevel instanceof StressLevel ? 'stress '.mb_strtolower($this->stressLevel->name) : null,
+        ]);
+
+        return 'Check-in - '.implode(', ', $answers);
     }
 
     private function formatExerciseLog(): string

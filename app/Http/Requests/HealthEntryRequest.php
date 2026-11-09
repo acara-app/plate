@@ -37,7 +37,7 @@ final class HealthEntryRequest extends FormRequest
         $range = $user->glucoseUnit()->validationRange();
 
         return [
-            'log_type' => ['required', Rule::enum(HealthEntryType::class)->except([HealthEntryType::Water])],
+            'log_type' => ['required', Rule::enum(HealthEntryType::class)->except([HealthEntryType::Water, HealthEntryType::CheckIn])],
 
             'glucose_value' => [
                 $logType === HealthEntryType::Glucose->value ? 'required' : 'nullable',
