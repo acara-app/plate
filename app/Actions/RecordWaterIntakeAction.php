@@ -14,7 +14,9 @@ final readonly class RecordWaterIntakeAction
 {
     public const string WATER_TYPE = 'water';
 
-    private const string WATER_UNIT = 'mL';
+    public const string WATER_UNIT = 'mL';
+
+    public const int MAX_AMOUNT_ML = 5000;
 
     public function __construct(private ForgetEmptyDailyTotalsAction $forgetEmptyDailyTotals) {}
 
@@ -30,9 +32,9 @@ final readonly class RecordWaterIntakeAction
 
             $logged = $user->healthSyncSamples()
                 ->where('type_identifier', self::WATER_TYPE)
-                ->forEntrySource(HealthEntrySource::Web)
                 ->measuredWithinDay($start)
-                ->get();
+                ->get()
+                ->reject(static fn (HealthSyncSample $sample): bool => $sample->isMobileSynced());
 
             $affectedUtcDates = array_values(array_unique([
                 $start->utc()->toDateString(),

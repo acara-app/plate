@@ -30,6 +30,15 @@ it('filters by entry source scope', function (): void {
         ->and($mobileSamples)->toHaveCount(1);
 });
 
+it('knows which samples came from the Apple Health sync', function (?HealthEntrySource $source, bool $isMobileSynced): void {
+    expect(new HealthSyncSample(['entry_source' => $source])->isMobileSynced())->toBe($isMobileSynced);
+})->with([
+    'synced from Apple Health' => [HealthEntrySource::MobileSync, true],
+    'synced before sources were recorded' => [null, true],
+    'logged on the web' => [HealthEntrySource::Web, false],
+    'logged in chat' => [HealthEntrySource::Chat, false],
+]);
+
 it('belongs to a mobile sync device', function (): void {
     $user = User::factory()->create();
     $device = MobileSyncDevice::factory()->for($user)->paired()->create();
