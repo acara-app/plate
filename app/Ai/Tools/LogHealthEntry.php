@@ -155,7 +155,7 @@ final class LogHealthEntry implements Approvable, Tool
             'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
             'water_ml' => $schema->integer()->required()->nullable()
-                ->description('Plain water the user drank, in millilitres (1–5000), for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.'),
+                ->description(sprintf('Plain water the user drank, in millilitres (1–%d), for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.', RecordWaterIntakeAction::MAX_AMOUNT_ML)),
             'insulin_units' => $schema->number()->required()->nullable()
                 ->description('Insulin dose in units.'),
             'insulin_type' => $schema->string()->required()->nullable()

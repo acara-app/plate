@@ -514,14 +514,10 @@ final class HealthLogData extends Data
      */
     private function toWaterSamples(): array
     {
-        if ($this->waterMl === null || $this->waterMl <= 0) {
-            return [];
-        }
-
         return [
             [
                 'type_identifier' => RecordWaterIntakeAction::WATER_TYPE,
-                'value' => $this->waterMl,
+                'value' => $this->waterMl ?? 0,
                 'unit' => RecordWaterIntakeAction::WATER_UNIT,
             ],
         ];

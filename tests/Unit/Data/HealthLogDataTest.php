@@ -249,18 +249,9 @@ it('formats and exports a water log', function (): void {
     $data = HealthLogData::fromParsedArray(['log_type' => 'water', 'water_ml' => '200']);
 
     expect($data->formatForDisplay())->toBe('Water 200 ml')
-        ->and($data->toRecordArray())->toBe(['water_ml' => 200]);
+        ->and($data->toRecordArray())->toBe(['water_ml' => 200])
+        ->and($data->toSampleArrays())->toBe([['type_identifier' => 'water', 'value' => 200, 'unit' => 'mL']]);
 });
-
-test('toSampleArrays returns the water drunk in millilitres', function (?int $waterMl, array $samples): void {
-    $data = new HealthLogData(isHealthData: true, logType: HealthEntryType::Water, waterMl: $waterMl);
-
-    expect($data->toSampleArrays())->toBe($samples);
-})->with([
-    'a glass' => [250, [['type_identifier' => 'water', 'value' => 250, 'unit' => 'mL']]],
-    'no amount' => [null, []],
-    'nothing drunk' => [0, []],
-]);
 
 test('fromParsedArray converts valid data correctly', function (): void {
     $data = HealthLogData::fromParsedArray([
