@@ -30,6 +30,7 @@ final class PhotoAnalysisRequestFactory extends Factory
             'source' => 'public_snap_to_track',
             'mime_type' => 'image/png',
             'image_base64' => $image,
+            'keep_photo' => false,
             'status' => PhotoAnalysisStatus::Queued,
             'deadline_at' => now()->addMinutes(10),
             'expires_at' => now()->addMinutes(PhotoAnalysisRequest::TTL_MINUTES),

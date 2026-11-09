@@ -7,6 +7,7 @@ use App\Actions\DeleteUser;
 use App\Actions\LogReviewedMealAction;
 use App\Actions\ResizePhoto;
 use App\Actions\StoreMealPhotoAction;
+use App\Actions\StoreResizedPhoto;
 use App\Actions\UpdateHealthSampleAction;
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Contracts\Billing\ResolvesUserTier;
@@ -30,6 +31,7 @@ use Inertia\Testing\AssertableInertia;
 
 covers(
     StoreMealPhotoAction::class,
+    StoreResizedPhoto::class,
     ResizePhoto::class,
     MealPhoto::class,
     ShowMealPhotoController::class,

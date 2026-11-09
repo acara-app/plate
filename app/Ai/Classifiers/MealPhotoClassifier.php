@@ -6,7 +6,6 @@ namespace App\Ai\Classifiers;
 
 use App\Enums\Benchmark\DishType;
 use App\Enums\MealPhotoQuestion;
-use App\Models\MealPhoto;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Classification;
 use Laravel\Ai\Classification\Boolean;
@@ -15,6 +14,7 @@ use Laravel\Ai\Classification\Score;
 use Laravel\Ai\Contracts\Question;
 use Laravel\Ai\Files\Image;
 use Laravel\Ai\Responses\ClassificationResponse;
+use Laravel\Ai\Responses\Data\Answer;
 
 final readonly class MealPhotoClassifier
 {
@@ -22,9 +22,36 @@ final readonly class MealPhotoClassifier
 
     public const string FOOD = 'food';
 
+    private const float MIN_FOOD_PROBABILITY = 0.8;
+
+    private const float MAX_FACE_PROBABILITY = 0.1;
+
+    private const float MAX_PERSONAL_DETAILS_PROBABILITY = 0.1;
+
+    private const int MIN_IMAGE_QUALITY_LEVEL = 2;
+
     private const string STATE = 'A photo someone took to log a meal in a nutrition tracking app.';
 
-    public function classify(MealPhoto $photo): ClassificationResponse
+    /**
+     * @param  array<string, mixed>  $answers
+     */
+    public static function passes(array $answers): bool
+    {
+        return (self::probability($answers, MealPhotoQuestion::Subject, self::FOOD) ?? 0.0) >= self::MIN_FOOD_PROBABILITY
+            && (self::probability($answers, MealPhotoQuestion::Face) ?? 1.0) < self::MAX_FACE_PROBABILITY
+            && (self::probability($answers, MealPhotoQuestion::PersonalDetails) ?? 1.0) < self::MAX_PERSONAL_DETAILS_PROBABILITY
+            && (self::imageQualityLevel($answers) ?? 0) >= self::MIN_IMAGE_QUALITY_LEVEL;
+    }
+
+    /**
+     * @return array<string, array<mixed>>
+     */
+    public static function answers(ClassificationResponse $response): array
+    {
+        return array_map(fn (Answer $answer): array => $answer->toArray(), $response->answers);
+    }
+
+    public function classify(string $path): ClassificationResponse
     {
         $questions = [];
 
@@ -35,7 +62,7 @@ final readonly class MealPhotoClassifier
         Context::addHidden('ai_classifier', self::class);
 
         try {
-            return Classification::of(self::STATE, [Image::fromStorage($photo->path, 's3')])
+            return Classification::of(self::STATE, [Image::fromStorage($path, 's3')->withMimeType('image/jpeg')])
                 ->questions($questions)
                 ->classify(
                     provider: config()->string('ai.photo_classification.provider'),
@@ -44,6 +71,32 @@ final readonly class MealPhotoClassifier
         } finally {
             Context::forgetHidden('ai_classifier');
         }
+    }
+
+    /**
+     * @param  array<string, mixed>  $answers
+     */
+    private static function probability(array $answers, MealPhotoQuestion $question, ?string $option = null): ?float
+    {
+        $probability = data_get($answers, $option === null
+            ? "{$question->value}.probability"
+            : "{$question->value}.probabilities.{$option}");
+
+        return is_numeric($probability) ? (float) $probability : null;
+    }
+
+    /**
+     * @param  array<string, mixed>  $answers
+     */
+    private static function imageQualityLevel(array $answers): ?int
+    {
+        $probabilities = data_get($answers, MealPhotoQuestion::ImageQuality->value.'.probabilities');
+
+        if (! is_array($probabilities) || $probabilities === []) {
+            return null;
+        }
+
+        return (int) array_search(max($probabilities), $probabilities, true);
     }
 
     private function question(MealPhotoQuestion $question): Question
