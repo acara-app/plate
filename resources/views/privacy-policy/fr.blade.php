@@ -74,11 +74,9 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
         pour des groupes d'au moins 10 repas. Personne n'examine vos repas individuels à cette fin.</li>
     <li>Si vous activez <strong>Aider à améliorer la reconnaissance des aliments</strong> (cette option reste désactivée
         tant que vous ne la choisissez pas), notre équipe peut consulter vos repas individuels, vos modifications et vos
-        photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Ces données restent chez
-        Acara et ne sont jamais communiquées à d'autres organisations pour leur propre usage. Avant que nous utilisions
-        une photo, un fournisseur de services d'IA (voir la section 5) vérifie si elle montre des visages ou d'autres
-        renseignements personnels et indique le type d'aliments qu'elle montre. Vous pouvez désactiver cette option à tout moment dans Paramètres → Confidentialité;
-        nous cessons alors de les utiliser à cette fin et supprimons les résultats de ces vérifications.</li>
+        photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Nous n'utilisons pas les
+        photos qui montrent des visages ou d'autres renseignements personnels. Vous pouvez désactiver cette option à tout
+        moment dans Paramètres → Confidentialité; nous cessons alors de les utiliser à cette fin.</li>
 </ul>
 <p>Vos données ne seront pas utilisées à d'autres fins que celles décrites dans la présente politique sans votre
     consentement. Consultez la section 5 pour connaître les flux de données propres aux fonctionnalités assistées par
@@ -112,7 +110,7 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
 <p>
     <strong>a. Fournisseurs que nous utilisons actuellement :</strong>
 <ul>
-    <li><strong>OpenAI</strong> — clavardage (l'agent conversationnel Altani), génération de plans de repas et suggestions de repas au jour le jour, aperçus sur la glycémie, résumés de conversation, transcription audio, plongements de texte et vérification des photos de repas que vous nous permettez d'utiliser pour améliorer la reconnaissance des aliments, afin d'y repérer les visages et autres renseignements personnels et d'en déterminer le type d'aliments (voir la section 2).</li>
+    <li><strong>OpenAI</strong> — clavardage (l'agent conversationnel Altani), génération de plans de repas et suggestions de repas au jour le jour, aperçus sur la glycémie, résumés de conversation, transcription audio, plongements de texte et traitement des photos de repas que vous nous permettez d'utiliser pour améliorer la reconnaissance des aliments (voir la section 2).</li>
     <li><strong>Google</strong> — analyse des photos de repas et fonctionnalités de mémoire à long terme d'Acara Cloud, au moyen de Gemini et de tout modèle successeur ou spécialisé hébergé par Google et offert par la même interface de programmation (API) de Google.</li>
 </ul>
 Nous indiquons les <strong>sous-traitants</strong>, et non les modèles individuels. Passer à un autre modèle offert par le même sous-traitant (p. ex., une version plus récente de Gemini ou un modèle médical spécialisé hébergé par Google) ne change pas l'entreprise qui reçoit vos données et ne nécessite pas d'avis distinct. Nous mettrons cette liste à jour uniquement lorsqu'un nouveau <strong>sous-traitant</strong> (une autre entreprise ou un déploiement autohébergé) sera ajouté pour vos données.
@@ -139,7 +137,7 @@ Nous indiquons les <strong>sous-traitants</strong>, et non les modèles individu
 <ul>
     <li>Nous ne soumettons vos données à aucune interface de produit sous notre contrôle qui pourrait servir à l'entraînement. Nous accédons aux fournisseurs au moyen de leurs points de terminaison d'API standard, et non de leurs applications grand public ou de leurs interfaces d'annotation de rétroaction.</li>
     <li>Au-delà de ce que nous transmettons, la façon dont un fournisseur conserve, traite ou utilise vos données est régie par sa propre politique d'utilisation des données de l'API, et non par des contrôles supplémentaires exploités par Acara Plate. Nous n'exploitons pas actuellement de routage sans conservation, de points de terminaison admissibles à un BAA ni de traitement limité à une région, et nous ne vérifions pas de façon indépendante les paramètres de conservation des fournisseurs. Si vous avez besoin de ces garanties, veuillez consulter directement les conditions de chaque fournisseur avant d'utiliser les fonctionnalités assistées par l'IA.</li>
-    <li>Nous ne communiquons pas vos données aux fournisseurs d'IA à des fins de publicité, de profilage entre services ni à toute autre fin que la génération de la réponse que vous avez demandée et la vérification des photos décrite à la section 2.</li>
+    <li>Nous ne communiquons pas vos données aux fournisseurs d'IA à des fins de publicité, de profilage entre services ni à toute autre fin que la génération de la réponse que vous avez demandée ou l'amélioration de la reconnaissance des aliments avec votre permission (voir la section 2).</li>
     <li>Nous n'utilisons pas vos photos de repas, vos repas ni vos modifications pour entraîner des modèles d'IA, et nous ne les communiquons pas à d'autres organisations à des fins de recherche ou d'évaluation, sauf si vous nous en donnez l'autorisation distincte.</li>
     <li>Nous n'insérons pas par défaut vos notes personnelles en texte libre (comme « Objectifs supplémentaires » ou « Contexte du ménage ») dans les requêtes envoyées à l'IA.</li>
     <li>Nous ne permettons pas à l'IA d'effectuer des recherches sur le Web lorsque votre demande en cours porte sur vos renseignements personnels ou médicaux; dans ce mode, l'IA ne peut pas lancer de recherches sur le Web en votre nom.</li>

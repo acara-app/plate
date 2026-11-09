@@ -70,10 +70,8 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
         groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
     <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), our team may
         look at your individual meals, your edits, and your meal photos to test and improve how our AI
-        recognizes food. They stay within Acara and are never shared with other organizations for their own
-        use. Before we use a photo, an AI service provider (see Section 5) checks it for faces and other
-        personal details and notes what kind of food it shows. You can turn this off anytime in Settings → Privacy, and from then on we stop using
-        them for this and delete the results of those photo checks.</li>
+        recognizes food. We don't use photos that show faces or other personal details. You can turn this off
+        anytime in Settings → Privacy, and from then on we stop using them for this.</li>
 </ul>
 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
     your consent. See Section 5 for the specific data flows involved in AI-assisted features.</p>
@@ -106,7 +104,7 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
 <p>
     <strong>a. Providers we currently use:</strong>
 <ul>
-    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, and checking the meal photos you let us use to improve food recognition for faces and other personal details and for what kind of food they show (see Section 2).</li>
+    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, and processing the meal photos you let us use to improve food recognition (see Section 2).</li>
     <li><strong>Google</strong> — meal photo analysis and Acara Cloud's long-term memory features, via Gemini and any successor or specialized Google-hosted models served through the same Google API surface.</li>
 </ul>
 We disclose <strong>processors</strong>, not individual models. Swapping to a different model offered by the same processor (e.g., a newer Gemini release, or a specialized medical model hosted by Google) does not change which company receives your data and does not require a separate notice. We will update this list only when a new <strong>processor</strong> (a different company or a self-hosted deployment) is introduced for your data.
@@ -133,7 +131,7 @@ We disclose <strong>processors</strong>, not individual models. Swapping to a di
 <ul>
     <li>We do not submit your data to any training-eligible product surface under our control. We access providers through their standard API endpoints, not their consumer applications or feedback-labeling interfaces.</li>
     <li>Beyond what we send, how a provider retains, processes, or uses your submissions is governed by that provider's own API data-use policy — not by additional controls operated by Acara Plate. We do not currently operate zero-retention routing, BAA-eligible endpoints, or region-pinned processing, and we do not independently verify provider-side retention settings. If you require those guarantees, please consult each provider's terms directly before using AI-assisted features.</li>
-    <li>We do not share your data with AI providers for advertising, profiling across services, or any purpose other than generating your requested response and the photo check described in Section 2.</li>
+    <li>We do not share your data with AI providers for advertising, profiling across services, or any purpose other than generating your requested response or improving food recognition with your permission (see Section 2).</li>
     <li>We do not use your meal photos, meals, or edits to train AI models, and we do not share them with other organizations for research or evaluation, unless you give us separate permission.</li>
     <li>We do not inject your freeform personal notes (such as "Additional Goals" or "Household Context") into AI prompts by default.</li>
     <li>We do not permit web search by the AI when your active request involves your personal or medical data — in that mode, the AI cannot issue web queries on your behalf.</li>
