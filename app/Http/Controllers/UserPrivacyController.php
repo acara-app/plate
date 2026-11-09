@@ -20,7 +20,7 @@ final readonly class UserPrivacyController
     public function edit(#[CurrentUser] User $user): Response
     {
         return Inertia::render('user-privacy/edit', [
-            'improveFoodRecognition' => $user->consentDecision(ConsentPurpose::ImproveFoodRecognition) === true,
+            'improveFoodRecognition' => $user->hasConsentedTo(ConsentPurpose::ImproveFoodRecognition),
         ]);
     }
 

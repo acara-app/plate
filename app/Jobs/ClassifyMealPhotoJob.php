@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Jobs;
 
 use App\Actions\ClassifyMealPhoto;
+use App\Actions\KeepMealPhotoSample;
 use App\Models\MealPhoto;
+use App\Models\MealPhotoClassification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Backoff;
@@ -21,8 +23,12 @@ final class ClassifyMealPhotoJob implements ShouldQueue
 
     public function __construct(public readonly MealPhoto $photo) {}
 
-    public function handle(ClassifyMealPhoto $classifyMealPhoto): void
+    public function handle(ClassifyMealPhoto $classifyMealPhoto, KeepMealPhotoSample $keepMealPhotoSample): void
     {
-        $classifyMealPhoto->handle($this->photo);
+        $classification = $classifyMealPhoto->handle($this->photo);
+
+        if ($classification instanceof MealPhotoClassification) {
+            $keepMealPhotoSample->handle($this->photo, $classification);
+        }
     }
 }

@@ -75,8 +75,10 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
     <li>Si vous activez <strong>Aider à améliorer la reconnaissance des aliments</strong> (cette option reste désactivée
         tant que vous ne la choisissez pas), notre équipe peut consulter vos repas individuels, vos modifications et vos
         photos de repas pour tester et améliorer la façon dont notre IA reconnaît les aliments. Nous n'utilisons pas les
-        photos qui montrent des visages ou d'autres renseignements personnels. Vous pouvez désactiver cette option à tout
-        moment dans Paramètres → Confidentialité; nous cessons alors de les utiliser à cette fin.</li>
+        photos qui montrent des visages ou d'autres renseignements personnels, et nous gardons une copie des photos que
+        nous pouvons utiliser pendant au plus 24 mois, même si vous supprimez le repas. Vous pouvez désactiver cette
+        option à tout moment dans Paramètres → Confidentialité; nous cessons alors de les utiliser à cette fin et
+        supprimons ces copies.</li>
 </ul>
 <p>Vos données ne seront pas utilisées à d'autres fins que celles décrites dans la présente politique sans votre
     consentement. Consultez la section 5 pour connaître les flux de données propres aux fonctionnalités assistées par
@@ -188,7 +190,9 @@ Nous indiquons les <strong>sous-traitants</strong>, et non les modèles individu
     redimensionnons chaque photo et en retirons la localisation et les autres métadonnées. Vous êtes la seule personne à
     pouvoir voir vos photos de repas, sauf si vous activez Aider à améliorer la reconnaissance des aliments (voir la
     section 2). Une photo est supprimée lorsque vous supprimez ce repas ou votre compte, ou après une journée si vous
-    n'enregistrez pas le repas.
+    n'enregistrez pas le repas. Si vous activez Aider à améliorer la reconnaissance des aliments, une copie d'une photo
+    que nous pouvons utiliser est conservée pendant au plus 24 mois, même après la suppression du repas, et elle est
+    supprimée plus tôt si vous désactivez cette option ou supprimez votre compte.
 </p>
 <p>
     <strong>Estimations de repas par l'IA :</strong>

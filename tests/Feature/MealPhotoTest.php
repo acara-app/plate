@@ -20,6 +20,7 @@ use App\Http\Requests\SnapToTrack\StoreSnapToTrackPhotoRequest;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
 use App\Models\MealPhoto;
+use App\Models\MealPhotoSample;
 use App\Models\User;
 use App\Services\HealthEntryAssembler;
 use Illuminate\Http\UploadedFile;
@@ -183,13 +184,17 @@ it('removes the photo when an edit turns the meal into a single entry', function
     Storage::disk('s3')->assertMissing($photo->path);
 });
 
-it('deletes every meal photo with the account', function (): void {
+it('deletes every meal photo and kept copy with the account', function (): void {
     $photo = storedMealPhoto($this->user, (string) Str::uuid());
+    $copy = MealPhotoSample::factory()->for($this->user)->create();
+    Storage::disk('s3')->put($copy->path, 'jpeg-bytes');
 
     resolve(DeleteUser::class)->handle($this->user);
 
     Storage::disk('s3')->assertMissing($photo->path);
-    expect(MealPhoto::query()->count())->toBe(0);
+    Storage::disk('s3')->assertMissing($copy->path);
+    expect(MealPhoto::query()->count())->toBe(0)
+        ->and(MealPhotoSample::query()->count())->toBe(0);
 });
 
 it('prunes photos of meals that were never saved after a day', function (): void {

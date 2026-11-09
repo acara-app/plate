@@ -12,7 +12,8 @@ enum ConsentPurpose: string
     public function version(): string
     {
         return match ($this) {
-            self::ImproveFoodRecognition, self::ProcessHealthData => '2026-11-08',
+            self::ImproveFoodRecognition => '2026-11-09',
+            self::ProcessHealthData => '2026-11-08',
         };
     }
 }

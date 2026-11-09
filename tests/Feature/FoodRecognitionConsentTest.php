@@ -64,6 +64,20 @@ it('lets people turn the permission on and off in Settings, keeping each change'
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('improveFoodRecognition', false));
 });
 
+it('asks again people who agreed to the earlier wording', function (): void {
+    $user = User::factory()->create();
+    $user->consents()->create(['purpose' => ConsentPurpose::ImproveFoodRecognition, 'version' => '2026-11-08', 'granted' => true, 'source' => ConsentSource::Settings]);
+    MealEstimate::factory()->for($user)->create(['validation_status' => EstimateValidationStatus::UserCorrected]);
+
+    $this->actingAs($user)
+        ->get(route('health-entries.index'))
+        ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('askToImproveFoodRecognition', true));
+
+    $this->patch(route('user-privacy.update'), ['improve_food_recognition' => true, 'source' => 'meal_correction'])->assertRedirect();
+
+    expect($user->hasConsentedTo(ConsentPurpose::ImproveFoodRecognition))->toBeTrue();
+});
+
 it('asks once on the logbook after someone corrects a meal', function (): void {
     $user = User::factory()->create();
     MealEstimate::factory()->for($user)->create(['validation_status' => EstimateValidationStatus::UserCorrected]);

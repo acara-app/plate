@@ -70,8 +70,9 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
         groups of at least 10 meals. No one reviews your individual meals for this purpose.</li>
     <li>If you turn on <strong>Help improve food recognition</strong> (it is off unless you choose it), our team may
         look at your individual meals, your edits, and your meal photos to test and improve how our AI
-        recognizes food. We don't use photos that show faces or other personal details. You can turn this off
-        anytime in Settings → Privacy, and from then on we stop using them for this.</li>
+        recognizes food. We don't use photos that show faces or other personal details, and we keep a copy of
+        the photos we can use for up to 24 months, even if you delete the meal. You can turn this off anytime in
+        Settings → Privacy, and from then on we stop using them for this and delete those copies.</li>
 </ul>
 <p>Your data will not be used for purposes other than those described in this Privacy Policy without
     your consent. See Section 5 for the specific data flows involved in AI-assisted features.</p>
@@ -179,7 +180,9 @@ We disclose <strong>processors</strong>, not individual models. Swapping to a di
     Photos you scan with Snap to Track while signed in are stored privately with your food log so you
     can see them later. Before storing, we resize each photo and remove its location and other photo
     metadata. Only you can view your meal photos, unless you turn on Help improve food recognition (see Section 2). A photo is deleted when you delete that meal or your
-    account, or after one day if you don't save the meal.
+    account, or after one day if you don't save the meal. If you turn on Help improve food recognition, a copy of a
+    photo we can use is kept for up to 24 months, even after you delete the meal, and is deleted sooner if you turn
+    the setting off or delete your account.
 </p>
 <p>
     <strong>AI meal estimates:</strong>
