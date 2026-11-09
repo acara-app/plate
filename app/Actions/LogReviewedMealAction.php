@@ -19,6 +19,7 @@ final readonly class LogReviewedMealAction
         private RecordHealthSampleAction $recordHealthSample,
         private DispatchAggregateUserUtcDatesAction $dispatchAggregateUserUtcDates,
         private RecordMealEstimate $recordMealEstimate,
+        private QueueMealPhotoClassification $queueMealPhotoClassification,
     ) {}
 
     public function handle(
@@ -62,6 +63,8 @@ final readonly class LogReviewedMealAction
             $user,
             [$sample->measured_at->copy()->utc()->toDateString()],
         );
+
+        $this->queueMealPhotoClassification->handle($user, (string) $sample->group_id);
 
         return (string) $sample->group_id;
     }

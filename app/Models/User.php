@@ -292,6 +292,11 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->consents()->where('purpose', $purpose)->latest('id')->first()?->granted;
     }
 
+    public function hasConsentedTo(ConsentPurpose $purpose): bool
+    {
+        return $this->consentDecision($purpose) === true;
+    }
+
     public function needsHealthDataConsent(): bool
     {
         return $this->consentDecision(ConsentPurpose::ProcessHealthData) === null;

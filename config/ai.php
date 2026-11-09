@@ -21,10 +21,16 @@ return [
     'default_for_transcription' => 'openai',
     'default_for_embeddings' => 'openai',
     'default_for_reranking' => 'cohere',
+    'default_for_classification' => 'openai',
 
     'photo_analysis' => [
         'provider' => 'gemini',
         'model' => 'gemini-3.8-flash',
+    ],
+
+    'photo_classification' => [
+        'provider' => 'openai',
+        'model' => 'gpt-6-luna',
     ],
 
     /*

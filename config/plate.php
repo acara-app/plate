@@ -19,7 +19,7 @@ use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
 return [
-    'privacy_policy_version' => '2026-11-08',
+    'privacy_policy_version' => '2026-11-09',
 
     'terms_version' => '2026-11-08',
 

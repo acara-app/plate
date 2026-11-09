@@ -15,7 +15,10 @@ final readonly class StoreMealPhotoAction
 {
     private const int MAX_SIDE = 1280;
 
-    public function __construct(private ResizePhoto $resizePhoto) {}
+    public function __construct(
+        private ResizePhoto $resizePhoto,
+        private QueueMealPhotoClassification $queueMealPhotoClassification,
+    ) {}
 
     public function handle(User $user, string $imageBytes, string $draftToken, ?string $healthGroupId = null): MealPhoto
     {
@@ -30,11 +33,17 @@ final readonly class StoreMealPhotoAction
             'Could not store the meal photo.',
         );
 
-        return MealPhoto::query()->create([
+        $photo = MealPhoto::query()->create([
             'user_id' => $user->id,
             'analysis_draft_id' => AnalysisDraft::query()->where('token_hash', AnalysisDraft::hashToken($draftToken))->value('id'),
             'health_group_id' => $healthGroupId,
             'path' => $path,
         ]);
+
+        if ($healthGroupId !== null) {
+            $this->queueMealPhotoClassification->handle($user, $healthGroupId);
+        }
+
+        return $photo;
     }
 }

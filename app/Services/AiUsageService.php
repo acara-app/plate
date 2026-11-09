@@ -8,9 +8,24 @@ use App\Models\AiUsage;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Laravel\Ai\Responses\Data\TextUsage;
 
 final class AiUsageService
 {
+    /**
+     * @return array{prompt_tokens: int, completion_tokens: int, cache_read_input_tokens: int, cache_write_input_tokens: int, reasoning_tokens: int}
+     */
+    public function tokenCounts(TextUsage $usage): array
+    {
+        return [
+            'prompt_tokens' => $usage->uncachedInputTokens(),
+            'completion_tokens' => $usage->outputTokens - ($usage->reasoningTokens ?? 0),
+            'cache_read_input_tokens' => $usage->cacheReadInputTokens ?? 0,
+            'cache_write_input_tokens' => $usage->cacheWriteInputTokens ?? 0,
+            'reasoning_tokens' => $usage->reasoningTokens ?? 0,
+        ];
+    }
+
     /**
      * @param  array{prompt_tokens?: int, completion_tokens?: int, cache_read_input_tokens?: int, cache_write_input_tokens?: int, reasoning_tokens?: int}  $usage
      */
