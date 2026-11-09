@@ -11,6 +11,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Attributes\Backoff;
 use Illuminate\Queue\Attributes\Tries;
 use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 #[Backoff(30, 120)]
 #[Tries(3)]
@@ -30,15 +31,14 @@ final class ScreenPublicMealPhotoJob implements ShouldQueue
             return;
         }
 
-        MealPhotoSample::query()->create([
+        MealPhotoSample::query()->firstOrCreate(['path' => $this->path], [
             'user_id' => null,
-            'path' => $this->path,
             'version' => MealPhotoClassifier::VERSION,
             'answers' => $answers,
         ]);
     }
 
-    public function failed(): void
+    public function failed(?Throwable $exception): void
     {
         Storage::disk('s3')->delete($this->path);
     }
