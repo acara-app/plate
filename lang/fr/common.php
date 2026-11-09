@@ -700,6 +700,7 @@ return [
             'unsupported' => 'Votre navigateur ne peut pas ouvrir la caméra ici. Choisissez une photo.',
             'capture_failed' => 'La photo n’a pas pu être prise. Réessayez ou choisissez une photo.',
             'retry' => 'Réessayer la caméra',
+            'use_phone_camera' => 'Utiliser l’appareil photo du téléphone',
         ],
     ],
     'sidebar' => [

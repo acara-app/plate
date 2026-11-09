@@ -699,6 +699,7 @@ return [
             'unsupported' => 'Your browser cannot open the camera here. Choose a photo instead.',
             'capture_failed' => 'We could not take the photo. Try again or choose a photo.',
             'retry' => 'Try camera again',
+            'use_phone_camera' => 'Use phone camera',
         ],
     ],
     'sidebar' => [
