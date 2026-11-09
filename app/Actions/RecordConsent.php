@@ -7,13 +7,18 @@ namespace App\Actions;
 use App\Enums\ConsentPurpose;
 use App\Enums\ConsentSource;
 use App\Models\MealPhotoClassification;
+use App\Models\MealPhotoSample;
 use App\Models\User;
 
 final readonly class RecordConsent
 {
     public function handle(User $user, ConsentPurpose $purpose, bool $granted, ConsentSource $source): void
     {
-        if ($user->consentDecision($purpose) === $granted) {
+        $alreadyRecorded = $granted
+            ? $user->hasConsentedTo($purpose)
+            : $user->consentDecision($purpose) === false;
+
+        if ($alreadyRecorded) {
             return;
         }
 
@@ -26,6 +31,7 @@ final readonly class RecordConsent
 
         if (! $granted && $purpose === ConsentPurpose::ImproveFoodRecognition) {
             MealPhotoClassification::deleteForUser($user->id);
+            MealPhotoSample::deleteForUser($user);
         }
     }
 }
