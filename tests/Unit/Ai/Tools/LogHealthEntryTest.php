@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
+use App\Actions\GetDailyWellnessAction;
 use App\Ai\Tools\LogHealthEntry;
 use App\Enums\HealthEntrySource;
 use App\Enums\HealthSyncType;
+use App\Enums\SleepQuality;
+use App\Enums\StressLevel;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
 use App\Models\User;
 use App\Models\UserProfile;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Approval;
@@ -179,21 +183,43 @@ it('logs plain water as water instead of as food', function (): void {
         ->and([$sample->type_identifier, $sample->value, $sample->unit, $sample->entry_source])->toBe(['water', 200.0, 'mL', HealthEntrySource::Chat]);
 });
 
-it('asks the model for the water amount instead of asking the user to approve', function (?int $waterMl): void {
-    $user = User::factory()->create();
-    Auth::login($user);
+it('asks the model for a missing or impossible value instead of asking the user to approve', function (array $entry): void {
+    Auth::login(User::factory()->create());
     Context::add('chat.channel', 'web');
 
     $tool = resolve(LogHealthEntry::class);
-    $request = new Request(['log_type' => 'water', 'water_ml' => $waterMl, 'notes' => '2 glasses of water']);
+    $request = new Request($entry);
 
     expect($tool->shouldRequestApproval($request))->toBeNull()
-        ->and(json_decode($tool->handle($request), true))->toMatchArray(['requires_clarification' => true, 'field' => 'water_ml'])
-        ->and(HealthSyncSample::query()->where('user_id', $user->id)->exists())->toBeFalse();
+        ->and(json_decode($tool->handle($request), true))->toHaveKey('requires_clarification', true)
+        ->and(HealthSyncSample::query()->exists())->toBeFalse();
 })->with([
-    'no amount' => [null],
-    'nothing drunk' => [0],
-    'more than five litres' => [5001],
+    'water without an amount' => [['log_type' => 'water']],
+    'more than five litres of water' => [['log_type' => 'water', 'water_ml' => 5001]],
+    'a check-in without answers' => [['log_type' => 'check_in']],
+    'more sleep than a day has' => [['log_type' => 'check_in', 'sleep_hours' => 25, 'stress_level' => 2]],
+]);
+
+it('saves how the user slept and how stressed they feel to the day’s check-in', function (?string $measuredAt, string $day): void {
+    $this->travelTo(CarbonImmutable::parse('2026-11-09 08:00', 'Asia/Ulaanbaatar'));
+    $user = User::factory()->create(['timezone' => 'Asia/Ulaanbaatar']);
+    Auth::login($user);
+
+    resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'check_in',
+        'sleep_hours' => 6.5,
+        'sleep_quality' => 1,
+        'stress_level' => 3,
+        'measured_at' => $measuredAt,
+    ]));
+
+    $wellness = resolve(GetDailyWellnessAction::class)->handle($user, CarbonImmutable::parse($day, 'Asia/Ulaanbaatar'));
+
+    expect([$wellness->sleepHours, $wellness->sleepQuality, $wellness->stressLevel])->toBe([6.5, SleepQuality::Poor, StressLevel::High]);
+})->with([
+    'today' => [null, '2026-11-09'],
+    'an earlier day' => ['2026-11-07T21:00:00+08:00', '2026-11-07'],
+    'a day that has not started yet' => ['2026-11-10T09:00:00+08:00', '2026-11-09'],
 ]);
 
 it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {

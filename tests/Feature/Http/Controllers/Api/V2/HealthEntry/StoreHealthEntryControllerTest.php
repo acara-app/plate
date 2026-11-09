@@ -103,6 +103,7 @@ it('rejects entries it cannot save', function (array $payload, string $field): v
 })->with([
     'unknown log type' => [['log_type' => 'sleep'], 'log_type'],
     'water, which has its own endpoint' => [['log_type' => 'water', 'water_ml' => 250], 'log_type'],
+    'a check-in, which has its own endpoint' => [['log_type' => 'check_in', 'stress_level' => 2], 'log_type'],
     'glucose above the mmol/L range' => [['log_type' => 'glucose', 'glucose_value' => 40, 'glucose_reading_type' => 'fasting'], 'glucose_value'],
     'glucose without a reading type' => [['log_type' => 'glucose', 'glucose_value' => 6.1], 'glucose_reading_type'],
     'food without any nutrition' => [['log_type' => 'food'], 'carbs_grams'],
