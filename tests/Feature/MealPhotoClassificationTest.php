@@ -14,6 +14,7 @@ use App\Listeners\TrackClassificationUsage;
 use App\Models\AiUsage;
 use App\Models\MealPhoto;
 use App\Models\MealPhotoClassification;
+use App\Models\MealPhotoSample;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -26,6 +27,7 @@ covers(
     ClassifyMealPhotoJob::class,
     TrackClassificationUsage::class,
     MealPhotoClassification::class,
+    MealPhotoSample::class,
     RecordConsent::class,
 );
 
@@ -63,14 +65,18 @@ it('never sends the photos of people who have not opted in', function (): void {
     Classification::assertNothingClassified();
 });
 
-it('deletes the photo checks and sends nothing more after someone opts out', function (): void {
+it('deletes the photo checks and copies and sends nothing more after someone opts out', function (): void {
     resolve(RecordConsent::class)->handle($this->user, ConsentPurpose::ImproveFoodRecognition, true, ConsentSource::Settings);
     $photo = MealPhoto::factory()->for($this->user)->create();
     MealPhotoClassification::factory()->for($photo)->create();
+    $copy = MealPhotoSample::factory()->for($this->user)->create();
+    Storage::disk('s3')->put($copy->path, 'jpeg-bytes');
 
     $this->actingAs($this->user)->patch(route('user-privacy.update'), ['improve_food_recognition' => '0']);
     dispatch_sync(new ClassifyMealPhotoJob($photo));
 
-    expect(MealPhotoClassification::query()->count())->toBe(0);
+    expect(MealPhotoClassification::query()->count())->toBe(0)
+        ->and(MealPhotoSample::query()->count())->toBe(0);
+    Storage::disk('s3')->assertMissing($copy->path);
     Classification::assertNothingClassified();
 });

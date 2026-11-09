@@ -69,7 +69,7 @@ return [
         'or' => 'Ou',
         'terms_acceptance' => 'En m\'inscrivant, je confirme que j\'ai au moins 18 ans et j\'accepte les',
         'disclaimer_acceptance' => 'J\'ai au moins 18 ans et je comprends qu\'Acara fournit des conseils de bien-être, et non un avis médical.',
-        'improve_food_recognition' => 'Facultatif : aider à améliorer la reconnaissance des aliments. L\'équipe d\'Acara peut consulter mes repas, mes corrections et mes photos de repas pour l\'améliorer. Ils restent chez Acara, et je peux changer d\'avis à tout moment dans les Paramètres.',
+        'improve_food_recognition' => 'Facultatif : aider à améliorer la reconnaissance des aliments. Mes repas, mes corrections et mes photos de repas peuvent être examinés pour l\'améliorer. Je peux changer d\'avis à tout moment dans les Paramètres.',
         'health_data_consent' => 'J\'accepte qu\'Acara utilise les informations de santé que j\'ajoute, comme mes repas, ma glycémie et mes médicaments, pour personnaliser mes conseils.',
         'health_data_consent_required' => 'Veuillez accepter l\'utilisation de vos informations de santé pour continuer.',
         'continue_terms_prefix' => 'En continuant, vous acceptez nos',

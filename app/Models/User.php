@@ -287,14 +287,21 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $this->hasMany(Consent::class);
     }
 
+    public function latestConsent(ConsentPurpose $purpose): ?Consent
+    {
+        return $this->consents()->where('purpose', $purpose)->latest('id')->first();
+    }
+
     public function consentDecision(ConsentPurpose $purpose): ?bool
     {
-        return $this->consents()->where('purpose', $purpose)->latest('id')->first()?->granted;
+        return $this->latestConsent($purpose)?->granted;
     }
 
     public function hasConsentedTo(ConsentPurpose $purpose): bool
     {
-        return $this->consentDecision($purpose) === true;
+        $consent = $this->latestConsent($purpose);
+
+        return $consent?->granted === true && $consent->version === $purpose->version();
     }
 
     public function needsHealthDataConsent(): bool
@@ -304,7 +311,8 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     public function shouldBeAskedToImproveFoodRecognition(): bool
     {
-        return $this->consentDecision(ConsentPurpose::ImproveFoodRecognition) === null
+        return $this->consentDecision(ConsentPurpose::ImproveFoodRecognition) !== false
+            && ! $this->hasConsentedTo(ConsentPurpose::ImproveFoodRecognition)
             && MealEstimate::query()
                 ->where('user_id', $this->id)
                 ->where('validation_status', EstimateValidationStatus::UserCorrected)

@@ -6,6 +6,7 @@ namespace App\Actions;
 
 use App\Models\DeletedUser;
 use App\Models\MealPhoto;
+use App\Models\MealPhotoSample;
 use App\Models\User;
 use App\Notifications\AccountDeletedNotification;
 use Illuminate\Support\Facades\DB;
@@ -17,6 +18,7 @@ final readonly class DeleteUser
     public function handle(User $user, bool $notify = true): void
     {
         Storage::disk('s3')->deleteDirectory(MealPhoto::directoryFor($user));
+        Storage::disk('s3')->deleteDirectory(MealPhotoSample::directoryFor($user));
 
         DB::transaction(function () use ($user): void {
             DeletedUser::query()->create([
