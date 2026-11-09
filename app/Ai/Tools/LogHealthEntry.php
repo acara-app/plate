@@ -6,6 +6,7 @@ namespace App\Ai\Tools;
 
 use App\Actions\AggregateHealthDailySamplesAction;
 use App\Actions\RecordHealthSampleAction;
+use App\Actions\RecordWaterIntakeAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Data\HealthLogData;
 use App\Enums\DataSensitivity;
@@ -51,7 +52,7 @@ final class LogHealthEntry implements Approvable, Tool
 
     public function description(): string
     {
-        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it. When logging food, always estimate calories and macronutrients (carbs, protein, fat) from the description — never log a food entry with no nutrition values.';
+        return 'Log a health entry for the current user. Use this when the user reports a health measurement like food intake, water intake, glucose reading, weight, blood pressure, insulin dose, medication, or exercise. Extract the relevant data from the user message and call this tool to save it. When logging food, always estimate calories and macronutrients (carbs, protein, fat) from the description — never log a food entry with no nutrition values. Log plain water as a water entry with water_ml, never as food.';
     }
 
     public function handle(Request $request): string
@@ -92,6 +93,15 @@ final class LogHealthEntry implements Approvable, Tool
                 'requires_estimate' => true,
                 'field' => 'calories',
                 'message' => 'Food entries must include your best estimate of calories (and carbs, protein, and fat when relevant). Estimate from the food described — do not ask the user for exact numbers — then call log_health_entry again.',
+            ]);
+        }
+
+        if ($this->requiresWaterAmount($healthData)) {
+            return (string) json_encode([
+                'error' => 'I need how much water the user drank to log this.',
+                'requires_clarification' => true,
+                'field' => 'water_ml',
+                'message' => sprintf('Water entries need water_ml between 1 and %d ml. Estimate it from what the user said (a glass ≈ 250 ml), ask the user only if it is unclear, then call log_health_entry again.', RecordWaterIntakeAction::MAX_AMOUNT_ML),
             ]);
         }
 
@@ -144,6 +154,8 @@ final class LogHealthEntry implements Approvable, Tool
                 ->description('Total calories. For food entries, always provide your best estimate (e.g. two pancakes ≈ 175 kcal) even when the user does not state it.'),
             'notes' => $schema->string()->required()->nullable()
                 ->description('Food name or additional notes.'),
+            'water_ml' => $schema->integer()->required()->nullable()
+                ->description(sprintf('Plain water the user drank, in millilitres (1–%d), for water entries. Convert other units yourself: a glass or cup ≈ 250 ml, 1 fl oz ≈ 30 ml, 1 L = 1000 ml, and grams of water equal millilitres. Drinks with calories, like milk, juice, or soda, are food entries.', RecordWaterIntakeAction::MAX_AMOUNT_ML)),
             'insulin_units' => $schema->number()->required()->nullable()
                 ->description('Insulin dose in units.'),
             'insulin_type' => $schema->string()->required()->nullable()
@@ -184,7 +196,8 @@ final class LogHealthEntry implements Approvable, Tool
 
             if ($this->requiresGlucoseUnitClarification($healthData)
                 || ($user instanceof User && $this->requiresWeightUnitClarification($healthData, $user))
-                || $this->requiresFoodEstimate($healthData)) {
+                || $this->requiresFoodEstimate($healthData)
+                || $this->requiresWaterAmount($healthData)) {
                 return false;
             }
 
@@ -246,5 +259,11 @@ final class LogHealthEntry implements Approvable, Tool
             && $healthData->carbsGrams === null
             && $healthData->proteinGrams === null
             && $healthData->fatGrams === null;
+    }
+
+    private function requiresWaterAmount(HealthLogData $healthData): bool
+    {
+        return $healthData->logType === HealthEntryType::Water
+            && ($healthData->waterMl === null || $healthData->waterMl < 1 || $healthData->waterMl > RecordWaterIntakeAction::MAX_AMOUNT_ML);
     }
 }

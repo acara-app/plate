@@ -162,6 +162,40 @@ it('logs an exercise entry', function (): void {
         ->and($sample->metadata['exercise_type'])->toBe('walking');
 });
 
+it('logs plain water as water instead of as food', function (): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+
+    $result = json_decode(resolve(LogHealthEntry::class)->handle(new Request([
+        'log_type' => 'water',
+        'water_ml' => 200,
+        'calories' => 0,
+        'notes' => '200 ml plain water',
+    ])), true);
+
+    $sample = HealthSyncSample::query()->where('user_id', $user->id)->sole();
+
+    expect($result)->toHaveKey('success', true)
+        ->and([$sample->type_identifier, $sample->value, $sample->unit, $sample->entry_source])->toBe(['water', 200.0, 'mL', HealthEntrySource::Chat]);
+});
+
+it('asks the model for the water amount instead of asking the user to approve', function (?int $waterMl): void {
+    $user = User::factory()->create();
+    Auth::login($user);
+    Context::add('chat.channel', 'web');
+
+    $tool = resolve(LogHealthEntry::class);
+    $request = new Request(['log_type' => 'water', 'water_ml' => $waterMl, 'notes' => '2 glasses of water']);
+
+    expect($tool->shouldRequestApproval($request))->toBeNull()
+        ->and(json_decode($tool->handle($request), true))->toMatchArray(['requires_clarification' => true, 'field' => 'water_ml'])
+        ->and(HealthSyncSample::query()->where('user_id', $user->id)->exists())->toBeFalse();
+})->with([
+    'no amount' => [null],
+    'nothing drunk' => [0],
+    'more than five litres' => [5001],
+]);
+
 it('asks for a nutrition estimate when a food entry has no calories or macros', function (): void {
     $user = User::factory()->create();
     Auth::login($user);

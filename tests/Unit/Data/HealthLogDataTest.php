@@ -245,6 +245,14 @@ it('exports to exercise record array', function (): void {
     ]);
 });
 
+it('formats and exports a water log', function (): void {
+    $data = HealthLogData::fromParsedArray(['log_type' => 'water', 'water_ml' => '200']);
+
+    expect($data->formatForDisplay())->toBe('Water 200 ml')
+        ->and($data->toRecordArray())->toBe(['water_ml' => 200])
+        ->and($data->toSampleArrays())->toBe([['type_identifier' => 'water', 'value' => 200, 'unit' => 'mL']]);
+});
+
 test('fromParsedArray converts valid data correctly', function (): void {
     $data = HealthLogData::fromParsedArray([
         'is_health_data' => true,

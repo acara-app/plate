@@ -124,6 +124,11 @@ final class HealthSyncSample extends Model
         ];
     }
 
+    public function isMobileSynced(): bool
+    {
+        return $this->entry_source === null || $this->entry_source === HealthEntrySource::MobileSync;
+    }
+
     public function medicationName(): ?string
     {
         // @codeCoverageIgnoreStart
