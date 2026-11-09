@@ -117,6 +117,14 @@ it('shows upload area when no photo is selected', function (): void {
         ->assertSeeInOrder(['Tap to take photo or upload', 'JPG, PNG up to 10MB', 'Take photo', 'Choose photo']);
 });
 
+it('opens the meal scanner from the photo area with a phone camera fallback', function (): void {
+    Livewire::test('pages::snap-to-track')
+        ->assertSeeHtml('x-data="snapScanner"')
+        ->assertSeeHtml("x-on:click=\"\$dispatch('snap-scanner-open')\"")
+        ->assertSee("Show all of your meal in the frame — hidden items can't be counted.")
+        ->assertSeeHtml('capture="environment"');
+});
+
 it('validates photo is required', function (): void {
     fakeTurnstileForSnapToTrack();
 

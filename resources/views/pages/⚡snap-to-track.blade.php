@@ -605,7 +605,7 @@ class extends Component
                     </div>
 
                     <div class="grid gap-6 border-t border-[#D9CFBC] pt-6 sm:grid-cols-[13rem_1fr] sm:items-center">
-                        <div class="relative aspect-[16/10] overflow-hidden border border-[#D9CFBC] bg-[#F2EBDD] sm:aspect-square">
+                        <div class="relative aspect-square w-full max-w-60 justify-self-center overflow-hidden border border-[#D9CFBC] bg-[#F2EBDD] sm:max-w-none">
                             <img x-show="photo" x-bind:src="photo" alt="Your meal photo" class="size-full object-cover" style="display: none;">
                             <div x-show="! photo" class="flex size-full items-center justify-center text-[#6E665C]">
                                 <svg class="size-10" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
@@ -774,14 +774,15 @@ class extends Component
                         uploadFailed: false,
                         progress: 0,
                         fileName: '',
-                        pickPhoto(fromCamera) {
-                            const input = this.$refs.photoUpload;
-                            fromCamera ? input.setAttribute('capture', 'environment') : input.removeAttribute('capture');
-                            input.click();
+                        pickPhoto() {
+                            this.$refs.photoUpload.click();
                         },
-                        async sendPhoto(input) {
+                        sendPhoto(input) {
                             const picked = input.files[0];
                             input.value = '';
+                            this.sendFile(picked);
+                        },
+                        async sendFile(picked) {
                             if (! picked) {
                                 return;
                             }
@@ -803,8 +804,10 @@ class extends Component
                         },
                     }"
                     x-bind:aria-busy="uploading"
+                    x-on:snap-photo-picked="sendFile($event.detail.photo)"
                     class="border border-[#D9CFBC] bg-[#EBE2D0] p-6 sm:p-8"
                 >
+                    <x-snap-scanner />
                     <div class="flex items-center justify-between gap-4 pb-5">
                         <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">
                             @if ($photo)
@@ -854,7 +857,8 @@ class extends Component
                             <button
                                 type="button"
                                 aria-label="Take a food photo or upload an image"
-                                x-on:click="pickPhoto(false)"
+                                aria-haspopup="dialog"
+                                x-on:click="$dispatch('snap-scanner-open')"
                                 x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
                                 class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
                             >
@@ -919,7 +923,8 @@ class extends Component
                             <div class="mt-4 flex flex-col gap-3 sm:flex-row">
                                 <button
                                     type="button"
-                                    x-on:click="pickPhoto(true)"
+                                    aria-haspopup="dialog"
+                                    x-on:click="$dispatch('snap-scanner-open')"
                                     x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
                                     class="inline-flex h-12 w-full items-center justify-center gap-2 border border-[#1A1814] bg-[#1A1814] px-4 text-sm font-semibold text-[#F2EBDD] transition hover:bg-[#3D3833] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
                                 >
@@ -931,7 +936,7 @@ class extends Component
                                 </button>
                                 <button
                                     type="button"
-                                    x-on:click="pickPhoto(false)"
+                                    x-on:click="pickPhoto()"
                                     x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
                                     class="inline-flex h-12 w-full items-center justify-center gap-2 border border-[#1A1814] bg-transparent px-4 text-sm font-semibold text-[#1A1814] transition hover:bg-[#1A1814] hover:text-[#F2EBDD] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed disabled:opacity-60 sm:flex-1"
                                 >

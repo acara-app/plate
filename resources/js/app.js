@@ -10,6 +10,9 @@ import {
     recallSnapPhoto,
     tagSnapPhoto,
 } from './lib/snap-to-track-photo';
+import { snapScanner } from './lib/snap-scanner';
+
+Alpine.data('snapScanner', snapScanner);
 
 Alpine.magic('clipboard', () => {
     return (subject) => navigator.clipboard?.writeText(subject);
