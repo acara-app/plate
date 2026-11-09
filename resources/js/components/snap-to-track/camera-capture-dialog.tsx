@@ -8,14 +8,10 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import {
-    canOpenMealCamera,
-    canUseTorch,
-    captureFramedPhoto,
-    mealCameraError,
-    openMealCamera,
-    setTorch,
-    stopMealCamera,
-    type MealCameraError,
+    createMealCameraSession,
+    initialMealCameraState,
+    type MealCameraSession,
+    type MealCameraState,
 } from '@/lib/meal-camera';
 import { cn } from '@/lib/utils';
 import {
@@ -30,8 +26,6 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-
-type CameraStatus = 'loading' | 'ready' | 'paused' | 'error';
 
 interface CameraCaptureDialogProps {
     open: boolean;
@@ -51,165 +45,32 @@ function CameraView({
 }: Pick<CameraCaptureDialogProps, 'open' | 'onCapture' | 'onChoosePhoto'>) {
     const { t } = useTranslation('common');
     const videoRef = useRef<HTMLVideoElement>(null);
-    const streamRef = useRef<MediaStream | null>(null);
-    const [status, setStatus] = useState<CameraStatus>('loading');
-    const [error, setError] = useState<MealCameraError | null>(null);
-    const [attempt, setAttempt] = useState(0);
-    const [capturing, setCapturing] = useState(false);
-    const [torchAvailable, setTorchAvailable] = useState(false);
-    const [torchOn, setTorchOn] = useState(false);
+    const sessionRef = useRef<MealCameraSession | null>(null);
+    const [camera, setCamera] = useState<MealCameraState>(
+        initialMealCameraState,
+    );
+    const { status, error, capturing, torchAvailable, torchOn } = camera;
 
     useEffect(() => {
-        if (!open) {
+        const video = videoRef.current;
+        if (!open || !video) {
             return;
         }
 
-        let disposed = false;
-        let request = 0;
-        const video = videoRef.current;
-
-        function releaseCamera(): void {
-            request += 1;
-            stopMealCamera(streamRef.current);
-            streamRef.current = null;
-            setTorchAvailable(false);
-            setTorchOn(false);
-            if (video) {
-                video.srcObject = null;
-            }
-        }
-
-        async function startCamera(): Promise<void> {
-            releaseCamera();
-            const currentRequest = request;
-            setStatus('loading');
-            setError(null);
-            setCapturing(false);
-
-            if (!canOpenMealCamera()) {
-                setError('unsupported');
-                setStatus('error');
-                return;
-            }
-
-            try {
-                const stream = await openMealCamera();
-
-                if (
-                    disposed ||
-                    currentRequest !== request ||
-                    document.hidden ||
-                    !video
-                ) {
-                    stopMealCamera(stream);
-                    return;
-                }
-
-                streamRef.current = stream;
-                video.srcObject = stream;
-                stream.getVideoTracks().forEach((track) => {
-                    track.addEventListener(
-                        'ended',
-                        () => {
-                            if (!disposed && streamRef.current === stream) {
-                                releaseCamera();
-                                setError('unavailable');
-                                setStatus('error');
-                            }
-                        },
-                        { once: true },
-                    );
-                });
-                await video.play();
-
-                if (!disposed && streamRef.current === stream) {
-                    setTorchAvailable(canUseTorch(stream.getVideoTracks()[0]));
-                }
-            } catch (exception) {
-                if (disposed || currentRequest !== request) {
-                    return;
-                }
-
-                releaseCamera();
-                setError(mealCameraError(exception));
-                setStatus('error');
-            }
-        }
-
-        function pauseCamera(): void {
-            releaseCamera();
-            setStatus('paused');
-            setCapturing(false);
-        }
-
-        function handleVisibility(): void {
-            if (document.hidden) {
-                pauseCamera();
-            } else {
-                void startCamera();
-            }
-        }
-
-        function handlePageShow(event: PageTransitionEvent): void {
-            if (event.persisted && !document.hidden) {
-                void startCamera();
-            }
-        }
-
-        handleVisibility();
-        document.addEventListener('visibilitychange', handleVisibility);
-        window.addEventListener('pagehide', pauseCamera);
-        window.addEventListener('pageshow', handlePageShow);
+        const session = createMealCameraSession(video, setCamera);
+        sessionRef.current = session;
+        session.open();
 
         return () => {
-            disposed = true;
-            releaseCamera();
-            document.removeEventListener('visibilitychange', handleVisibility);
-            window.removeEventListener('pagehide', pauseCamera);
-            window.removeEventListener('pageshow', handlePageShow);
+            session.destroy();
+            sessionRef.current = null;
         };
-    }, [open, attempt]);
-
-    async function toggleTorch(): Promise<void> {
-        const track = streamRef.current?.getVideoTracks()[0];
-        if (!track) {
-            return;
-        }
-
-        const next = !torchOn;
-        try {
-            await setTorch(track, next);
-            setTorchOn(next);
-        } catch {
-            setTorchAvailable(false);
-            setTorchOn(false);
-        }
-    }
+    }, [open]);
 
     async function capturePhoto(): Promise<void> {
-        const video = videoRef.current;
-        const stream = streamRef.current;
-        if (status !== 'ready' || capturing || !video || !stream) {
-            return;
-        }
-
-        setCapturing(true);
-        try {
-            const photo = await captureFramedPhoto(video);
-            if (streamRef.current === stream) {
-                onCapture(photo);
-            }
-        } catch {
-            if (streamRef.current !== stream) {
-                return;
-            }
-            stopMealCamera(stream);
-            streamRef.current = null;
-            setTorchAvailable(false);
-            setTorchOn(false);
-            setCapturing(false);
-            setError('capture_failed');
-            setStatus('error');
+        const photo = await sessionRef.current?.capture();
+        if (photo) {
+            onCapture(photo);
         }
     }
 
@@ -249,7 +110,7 @@ function CameraView({
                         aria-label={t(
                             `snap_to_track.camera.${torchOn ? 'flash_off' : 'flash_on'}`,
                         )}
-                        onClick={() => void toggleTorch()}
+                        onClick={() => void sessionRef.current?.toggleTorch()}
                     >
                         {torchOn ? <Zap /> : <ZapOff />}
                     </Button>
@@ -282,15 +143,7 @@ function CameraView({
                         muted
                         aria-label={t('snap_to_track.camera.live_view')}
                         className="absolute inset-0 size-full object-cover object-center"
-                        onPlaying={() => {
-                            if (
-                                streamRef.current &&
-                                videoRef.current?.videoWidth &&
-                                videoRef.current?.videoHeight
-                            ) {
-                                setStatus('ready');
-                            }
-                        }}
+                        onPlaying={() => sessionRef.current?.playing()}
                     />
                     {status === 'ready' && (
                         <div
@@ -325,7 +178,7 @@ function CameraView({
                                         size="touch"
                                         className="mt-3 h-auto w-full whitespace-normal"
                                         onClick={() =>
-                                            setAttempt((value) => value + 1)
+                                            void sessionRef.current?.start()
                                         }
                                     >
                                         <RotateCcw data-icon="inline-start" />
