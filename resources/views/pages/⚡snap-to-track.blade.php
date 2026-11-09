@@ -783,7 +783,11 @@ class extends Component
                             this.sendFile(picked);
                         },
                         async sendFile(picked) {
-                            if (! picked) {
+                            if (! picked || this.uploading) {
+                                return;
+                            }
+                            if (this.$refs.photoUpload?.disabled) {
+                                this.uploadFailed = true;
                                 return;
                             }
                             this.fileName = picked.name;
@@ -858,7 +862,7 @@ class extends Component
                                 type="button"
                                 aria-label="Take a food photo or upload an image"
                                 aria-haspopup="dialog"
-                                x-on:click="$dispatch('snap-scanner-open')"
+                                x-on:click="uploadFailed ? pickPhoto() : $dispatch('snap-scanner-open')"
                                 x-bind:disabled="uploading || @js($loading || (App::environment(['production', 'testing']) && blank($turnstileToken)))"
                                 class="group flex min-h-44 w-full cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1A1814] disabled:cursor-not-allowed flex-col items-center justify-center border-2 border-dashed border-[#D9CFBC] bg-[#F2EBDD] p-8 text-center transition hover:border-[#1A1814] hover:bg-[#F2EBDD]/70"
                             >
