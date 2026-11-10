@@ -112,6 +112,16 @@ it('renders the snap to track page', function (): void {
         ->assertSee('Track calories & macros instantly with AI');
 });
 
+it('fills the whole phone screen while other tool pages keep their layout', function (): void {
+    $this->get(route('snap-to-track'))
+        ->assertOk()
+        ->assertSee('viewport-fit=cover', false);
+
+    $this->get(route('tools.index'))
+        ->assertOk()
+        ->assertDontSee('viewport-fit=cover', false);
+});
+
 it('shows upload area when no photo is selected', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSeeInOrder(['Tap to take photo or upload', 'JPG, PNG up to 10MB', 'Take photo', 'Choose photo']);
@@ -464,6 +474,7 @@ it('shows faq section', function (): void {
         ->assertSee('Frequently Asked Questions')
         ->assertSee('How does the AI food photo analyzer work?')
         ->assertSee('How accurate are calorie estimates from food photos?')
+        ->assertSee('Is there a free photo calorie counter app?')
         ->assertSee('Is my food photo kept private?');
 });
 

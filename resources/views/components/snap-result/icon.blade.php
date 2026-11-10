@@ -56,6 +56,50 @@
         @case('chevron-down')
             <path d="m6 9 6 6 6-6" />
             @break
+        @case('chevron-right')
+            <path d="m9 18 6-6-6-6" />
+            @break
+        @case('x')
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+            @break
+        @case('image-plus')
+            <path d="M16 5h6" />
+            <path d="M19 2v6" />
+            <path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5" />
+            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+            <circle cx="9" cy="9" r="2" />
+            @break
+        @case('triangle-alert')
+            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+            <path d="M12 9v4" />
+            <path d="M12 17h.01" />
+            @break
+        @case('rotate-ccw')
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+            @break
+        @case('loader')
+            <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            @break
+        @case('scan')
+            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+            @break
+        @case('arrow-down-to-dot')
+            <path d="M12 2v14" />
+            <path d="m19 9-7 7-7-7" />
+            <circle cx="12" cy="21" r="1" />
+            @break
+        @case('ruler')
+            <path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z" />
+            <path d="m14.5 12.5 2-2" />
+            <path d="m11.5 9.5 2-2" />
+            <path d="m8.5 6.5 2-2" />
+            <path d="m17.5 15.5 2-2" />
+            @break
         @case('camera')
             <path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
             <circle cx="12" cy="13" r="3" />
