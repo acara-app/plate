@@ -1154,6 +1154,10 @@ return [
                 'label' => 'Steady my glucose',
                 'prompt' => 'How can I keep my glucose steady after meals?',
             ],
+            'water' => [
+                'label' => 'Stay hydrated',
+                'prompt' => 'How much water should I drink today?',
+            ],
             'workout' => [
                 'label' => 'Plan a workout',
                 'prompt' => 'Can you suggest a workout for me today?',

@@ -21,6 +21,7 @@ import type { FileUIPart } from 'ai';
 import {
     ActivityIcon,
     CalendarHeartIcon,
+    Clock,
     MessageCircle,
     ScanLine,
     TriangleAlert,
@@ -105,6 +106,44 @@ function Door({
     );
 }
 
+function SnapDoor({ className }: { className?: string }) {
+    const { t } = useTranslation('common');
+
+    return (
+        <Link
+            href={ShowSnapToTrackController().url}
+            prefetch
+            data-test="dashboard-snap-to-track"
+            className={cn(
+                'flex w-full items-center gap-3.5 rounded-[1.75rem] bg-foreground p-3 pr-5 text-background transition-[scale,opacity] duration-150 ease-out hover:opacity-90 active:scale-[0.98]',
+                PRESSABLE,
+                className,
+            )}
+        >
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-background/10 text-emerald-400 dark:text-emerald-600">
+                <ScanLine
+                    className="size-[22px]"
+                    strokeWidth={2}
+                    aria-hidden="true"
+                />
+            </span>
+            <span className="min-w-0">
+                <span
+                    className={cn(
+                        'block text-[17px] leading-6 font-bold',
+                        DISPLAY_FONT,
+                    )}
+                >
+                    {t('snap_to_track.launcher.title')}
+                </span>
+                <span className="block text-sm leading-5 text-balance text-background/65">
+                    {t('snap_to_track.launcher.subtitle')}
+                </span>
+            </span>
+        </Link>
+    );
+}
+
 export default function Dashboard({
     showHealthDataConsent,
     showPrivacyUpdate,
@@ -163,125 +202,158 @@ export default function Dashboard({
                 </Head>
                 <section
                     className={cn(
-                        '@container relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain transition-colors duration-1000 motion-reduce:transition-none',
+                        '[container-type:size] relative min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain transition-colors duration-1000 motion-reduce:transition-none',
                         table.cloth,
                     )}
                 >
                     <div
                         className={cn(
-                            'mx-auto flex min-h-full w-full max-w-[72rem] flex-col px-4 pt-3 @min-[40rem]:px-8',
+                            'mx-auto flex min-h-full w-full max-w-[72rem] flex-col px-4 @min-[40rem]:px-8',
                             '@min-[54rem]:grid @min-[54rem]:grid-cols-[minmax(0,1fr)_auto] @min-[54rem]:grid-rows-[auto_1fr_1fr_auto_auto] @min-[54rem]:gap-x-12 @min-[54rem]:px-12 @min-[54rem]:pt-8 @min-[54rem]:pb-8',
                         )}
                     >
-                        <div
-                            className={cn(
-                                'flex flex-col',
-                                '@min-[54rem]:col-span-2',
-                            )}
-                        >
-                            <SidebarTrigger
-                                className={cn(
-                                    'size-12 rounded-full md:hidden',
-                                    PAPER,
-                                )}
-                            />
-                            <div className="flex flex-col gap-2.5 empty:hidden max-md:mt-3">
-                                <LifecycleBanner />
-                                <BiometricsReviewBanner />
-                                {showHealthDataConsent && (
-                                    <HealthDataConsentCard className={NOTICE} />
-                                )}
-                                {showPrivacyUpdate && (
-                                    <PrivacyUpdateNotice className={NOTICE} />
-                                )}
-                                {!currentUser?.is_onboarded &&
-                                    !needsBiometricsReview && (
-                                        <OnboardingBanner className={NOTICE} />
-                                    )}
-                            </div>
-                        </div>
-
-                        <header
-                            className={cn(
-                                'mt-5',
-                                '@min-[54rem]:col-start-1 @min-[54rem]:row-start-2 @min-[54rem]:mt-10 @min-[54rem]:self-end',
-                            )}
-                        >
-                            <h1
-                                className={cn(
-                                    'text-[2.125rem] leading-[1.04] font-extrabold tracking-[-0.02em] text-foreground @min-[40rem]:text-[2.75rem] @min-[68rem]:text-[3.75rem]',
-                                    '@min-[54rem]:text-[3.125rem]',
-                                    DISPLAY_FONT,
-                                )}
-                            >
-                                {firstName
-                                    ? t(`dashboard_ai.greeting.${dayPart}`, {
-                                          name: firstName,
-                                      })
-                                    : t(
-                                          `dashboard_ai.greeting_anonymous.${dayPart}`,
-                                      )}
-                            </h1>
-                            <p
-                                className={cn(
-                                    'mt-3 max-w-[32rem] text-[15px] leading-6 text-pretty text-muted-foreground',
-                                    '@min-[54rem]:mt-4 @min-[54rem]:text-[17px] @min-[54rem]:leading-7',
-                                )}
-                            >
-                                {t('dashboard_ai.description')}
-                            </p>
-                        </header>
-
-                        <div
-                            className={cn(
-                                'sticky bottom-0 z-10 order-last -mx-4 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] @min-[40rem]:-mx-8 @min-[40rem]:px-8',
-                                table.cloth,
-                                '@min-[54rem]:static @min-[54rem]:order-none @min-[54rem]:col-start-1 @min-[54rem]:row-start-3 @min-[54rem]:mx-0 @min-[54rem]:mt-7 @min-[54rem]:max-w-[34rem] @min-[54rem]:self-start @min-[54rem]:bg-transparent @min-[54rem]:p-0 @min-[54rem]:dark:bg-transparent',
-                            )}
-                        >
+                        <div className="flex min-h-[100cqh] flex-col pt-3 @min-[54rem]:contents [@container(min-height:56rem)]:min-h-0 [@container(min-height:56rem)]:grow">
                             <div
-                                aria-hidden="true"
                                 className={cn(
-                                    'pointer-events-none absolute inset-x-0 -top-6 h-6 bg-linear-to-t to-transparent',
-                                    table.fade,
-                                    '@min-[54rem]:hidden',
+                                    'flex flex-col',
+                                    '@min-[54rem]:col-span-2',
                                 )}
-                            />
-                            <ChatInput
-                                ref={composerRef}
-                                onSubmit={startChat}
-                                disabled={form.processing}
-                                placeholder={t('dashboard_ai.placeholder')}
-                                surfaceClassName="bg-white shadow-[0_1px_2px_rgb(0_0_0/0.05),0_16px_32px_-16px_rgb(0_0_0/0.22)] dark:bg-white/[0.08] dark:shadow-none"
-                            />
-                            {submitError && (
-                                <p className="px-4 pt-2 text-sm text-destructive">
-                                    {submitError}
-                                </p>
-                            )}
-                        </div>
+                            >
+                                <div className="flex items-center justify-between md:hidden">
+                                    <SidebarTrigger
+                                        className={cn(
+                                            'size-12 rounded-full',
+                                            PAPER,
+                                        )}
+                                    />
+                                    <Link
+                                        href={ShowSnapToTrackController().url}
+                                        prefetch
+                                        aria-label={t(
+                                            'sidebar.nav.snap_to_track',
+                                        )}
+                                        data-test="dashboard-scan-shortcut"
+                                        className={cn(
+                                            'flex size-12 shrink-0 items-center justify-center rounded-full text-foreground/80 transition-[scale,background-color,color] duration-150 ease-out hover:bg-white hover:text-foreground active:scale-95 motion-reduce:transition-none dark:hover:bg-white/10',
+                                            PAPER,
+                                            PRESSABLE,
+                                        )}
+                                    >
+                                        <ScanLine
+                                            className="size-6"
+                                            strokeWidth={1.75}
+                                            aria-hidden="true"
+                                        />
+                                    </Link>
+                                </div>
+                                <div className="flex flex-col gap-2.5 empty:hidden max-md:mt-3">
+                                    <LifecycleBanner />
+                                    <BiometricsReviewBanner />
+                                    {showHealthDataConsent && (
+                                        <HealthDataConsentCard
+                                            className={NOTICE}
+                                        />
+                                    )}
+                                    {showPrivacyUpdate && (
+                                        <PrivacyUpdateNotice
+                                            className={NOTICE}
+                                        />
+                                    )}
+                                    {!currentUser?.is_onboarded &&
+                                        !needsBiometricsReview && (
+                                            <OnboardingBanner
+                                                className={NOTICE}
+                                            />
+                                        )}
+                                </div>
+                            </div>
 
-                        <div
-                            className={cn(
-                                'my-auto pt-8 pb-1',
-                                '@min-[54rem]:col-start-2 @min-[54rem]:row-span-2 @min-[54rem]:row-start-2 @min-[54rem]:my-0 @min-[54rem]:self-center @min-[54rem]:pt-10 @min-[54rem]:pb-0',
-                            )}
-                        >
-                            <DayPlate
-                                now={now}
-                                dayPart={dayPart}
-                                locale={locale}
-                                onPick={draftQuestion}
-                                className="mx-auto w-[min(100%,19rem)] @min-[34rem]:w-[22rem] @min-[54rem]:w-[23rem] @min-[68rem]:w-[28rem]"
-                            />
+                            <header
+                                className={cn(
+                                    'mt-4',
+                                    '@min-[54rem]:col-start-1 @min-[54rem]:row-start-2 @min-[54rem]:mt-10 @min-[54rem]:self-end',
+                                )}
+                            >
+                                <h1
+                                    className={cn(
+                                        'text-[2.125rem] leading-[1.04] font-extrabold tracking-[-0.02em] text-foreground @min-[40rem]:text-[2.75rem] @min-[68rem]:text-[3.75rem]',
+                                        '@min-[54rem]:text-[3.125rem]',
+                                        DISPLAY_FONT,
+                                    )}
+                                >
+                                    {firstName
+                                        ? t(
+                                              `dashboard_ai.greeting.${dayPart}`,
+                                              {
+                                                  name: firstName,
+                                              },
+                                          )
+                                        : t(
+                                              `dashboard_ai.greeting_anonymous.${dayPart}`,
+                                          )}
+                                </h1>
+                                <p
+                                    className={cn(
+                                        'mt-3 max-w-[32rem] text-[15px] leading-6 text-pretty text-muted-foreground',
+                                        '@max-[54rem]:[@container(max-height:46rem)]:hidden',
+                                        '@min-[54rem]:mt-4 @min-[54rem]:text-[17px] @min-[54rem]:leading-7',
+                                    )}
+                                >
+                                    {t('dashboard_ai.description')}
+                                </p>
+                            </header>
+
+                            <div
+                                data-test="dashboard-composer"
+                                className={cn(
+                                    'sticky bottom-0 z-10 order-last -mx-4 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] @min-[40rem]:-mx-8 @min-[40rem]:px-8',
+                                    table.cloth,
+                                    '@min-[54rem]:static @min-[54rem]:order-none @min-[54rem]:col-start-1 @min-[54rem]:row-start-3 @min-[54rem]:mx-0 @min-[54rem]:mt-7 @min-[54rem]:max-w-[34rem] @min-[54rem]:self-start @min-[54rem]:bg-transparent @min-[54rem]:p-0 @min-[54rem]:dark:bg-transparent',
+                                )}
+                            >
+                                <div
+                                    aria-hidden="true"
+                                    className={cn(
+                                        'pointer-events-none absolute inset-x-0 -top-3 h-3 bg-linear-to-t to-transparent',
+                                        table.fade,
+                                        '@min-[54rem]:hidden',
+                                    )}
+                                />
+                                <ChatInput
+                                    ref={composerRef}
+                                    onSubmit={startChat}
+                                    disabled={form.processing}
+                                    placeholder={t('dashboard_ai.placeholder')}
+                                    surfaceClassName="bg-white shadow-[0_1px_2px_rgb(0_0_0/0.05),0_16px_32px_-16px_rgb(0_0_0/0.22)] dark:bg-white/[0.08] dark:shadow-none"
+                                />
+                                {submitError && (
+                                    <p className="px-4 pt-2 text-sm text-destructive">
+                                        {submitError}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div
+                                className={cn(
+                                    'mt-4 flex shrink-0 grow basis-[16.5rem] items-center justify-center @max-[54rem]:[container-type:size]',
+                                    '@min-[54rem]:col-start-2 @min-[54rem]:row-span-2 @min-[54rem]:row-start-2 @min-[54rem]:mt-0 @min-[54rem]:self-center @min-[54rem]:pt-10',
+                                )}
+                            >
+                                <DayPlate
+                                    now={now}
+                                    dayPart={dayPart}
+                                    locale={locale}
+                                    onPick={draftQuestion}
+                                    className="w-[min(100cqw,100cqh,19rem)] @min-[32rem]:w-[min(100cqh,22rem)] @min-[54rem]:w-[23rem] @min-[68rem]:w-[28rem]"
+                                />
+                            </div>
+
+                            <SnapDoor className="relative mt-4 mb-3 @min-[54rem]:hidden" />
                         </div>
 
                         <nav
                             aria-label={t('sidebar.group_label')}
-                            className={cn(
-                                'mt-9',
-                                '@min-[54rem]:col-span-2 @min-[54rem]:row-start-4 @min-[54rem]:mt-12',
-                            )}
+                            className="@min-[54rem]:col-span-2 @min-[54rem]:row-start-4 @min-[54rem]:mt-12"
                         >
                             <ul
                                 className={cn(
@@ -289,45 +361,8 @@ export default function Dashboard({
                                     '@min-[54rem]:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] @min-[54rem]:gap-3',
                                 )}
                             >
-                                <li
-                                    className={cn(
-                                        'col-span-3 flex',
-                                        '@min-[54rem]:col-span-1',
-                                    )}
-                                >
-                                    <Link
-                                        href={ShowSnapToTrackController().url}
-                                        prefetch
-                                        className={cn(
-                                            'flex w-full items-center gap-3.5 rounded-[1.75rem] bg-foreground p-3 pr-5 text-background transition-[scale,opacity] duration-150 ease-out hover:opacity-90 active:scale-[0.98]',
-                                            PRESSABLE,
-                                        )}
-                                    >
-                                        <span className="flex size-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-background/10 text-emerald-400 dark:text-emerald-600">
-                                            <ScanLine
-                                                className="size-[22px]"
-                                                strokeWidth={2}
-                                                aria-hidden="true"
-                                            />
-                                        </span>
-                                        <span className="min-w-0">
-                                            <span
-                                                className={cn(
-                                                    'block text-[17px] leading-6 font-bold',
-                                                    DISPLAY_FONT,
-                                                )}
-                                            >
-                                                {t(
-                                                    'snap_to_track.launcher.title',
-                                                )}
-                                            </span>
-                                            <span className="block text-sm leading-5 text-background/65">
-                                                {t(
-                                                    'snap_to_track.launcher.subtitle',
-                                                )}
-                                            </span>
-                                        </span>
-                                    </Link>
+                                <li className="hidden @min-[54rem]:flex">
+                                    <SnapDoor />
                                 </li>
                                 <Door
                                     href={ListHealthEntryController().url}
@@ -347,18 +382,27 @@ export default function Dashboard({
                             </ul>
                         </nav>
 
-                        <p
+                        <div
                             className={cn(
-                                'mt-5 flex items-start gap-2 pb-6 text-[13px] leading-5 text-muted-foreground',
+                                'mt-5 flex flex-col gap-2.5 pb-[max(1.5rem,env(safe-area-inset-bottom))] text-[13px] leading-5 text-muted-foreground',
                                 '@min-[54rem]:col-span-2 @min-[54rem]:row-start-5 @min-[54rem]:pb-0',
                             )}
                         >
-                            <TriangleAlert
-                                className="mt-0.5 size-3.5 shrink-0"
-                                aria-hidden="true"
-                            />
-                            {t('dashboard_ai.disclaimer')}
-                        </p>
+                            <p className="hidden items-start gap-2 @max-[54rem]:[@container(max-height:46rem)]:flex">
+                                <Clock
+                                    className="mt-0.5 size-3.5 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                {t('dashboard_ai.description')}
+                            </p>
+                            <p className="flex items-start gap-2">
+                                <TriangleAlert
+                                    className="mt-0.5 size-3.5 shrink-0"
+                                    aria-hidden="true"
+                                />
+                                {t('dashboard_ai.disclaimer')}
+                            </p>
+                        </div>
                     </div>
                 </section>
             </AppContent>
