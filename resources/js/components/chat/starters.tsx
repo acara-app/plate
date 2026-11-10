@@ -12,7 +12,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import type { DayPart } from './day-part';
 
-type StarterId =
+export type StarterId =
     | 'breakfast'
     | 'lunch'
     | 'dinner'
@@ -24,7 +24,7 @@ type StarterId =
 const MEAL_TINT =
     'bg-orange-100 text-orange-700 dark:bg-orange-400/15 dark:text-orange-300';
 
-const STARTERS: Record<StarterId, { Icon: LucideIcon; tint: string }> = {
+export const STARTERS: Record<StarterId, { Icon: LucideIcon; tint: string }> = {
     breakfast: { Icon: EggFried, tint: MEAL_TINT },
     lunch: { Icon: Salad, tint: MEAL_TINT },
     dinner: { Icon: Soup, tint: MEAL_TINT },

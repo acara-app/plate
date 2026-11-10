@@ -1,12 +1,13 @@
 import AcceptHealthDataConsentController from '@/actions/App/Http/Controllers/AcceptHealthDataConsentController';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { privacy } from '@/routes';
 import { router } from '@inertiajs/react';
 import { HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export function HealthDataConsentCard() {
+export function HealthDataConsentCard({ className }: { className?: string }) {
     const { t } = useTranslation('common');
     const [postponed, setPostponed] = useState(false);
 
@@ -31,7 +32,12 @@ export function HealthDataConsentCard() {
     }
 
     return (
-        <div className="flex flex-col gap-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
+        <div
+            className={cn(
+                'flex flex-col gap-3 rounded-md border border-primary/20 bg-primary/5 px-4 py-3 text-sm',
+                className,
+            )}
+        >
             <div className="flex items-start gap-2">
                 <HeartPulse className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <div className="space-y-1">
