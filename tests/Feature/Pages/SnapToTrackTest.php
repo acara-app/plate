@@ -115,11 +115,22 @@ it('renders the snap to track page', function (): void {
 it('fills the whole phone screen while other tool pages keep their layout', function (): void {
     $this->get(route('snap-to-track'))
         ->assertOk()
-        ->assertSee('viewport-fit=cover', false);
+        ->assertSee('viewport-fit=cover', false)
+        ->assertSee('api.js?render=explicit', false);
 
     $this->get(route('tools.index'))
         ->assertOk()
         ->assertDontSee('viewport-fit=cover', false);
+});
+
+it('lets visitors pick a photo before the security check finishes', function (): void {
+    $html = Livewire::test('pages::snap-to-track')
+        ->assertSet('turnstileToken', null)
+        ->html();
+
+    expect(Str::match('/<input[^>]*id="photo-upload"[^>]*>/', $html))
+        ->not->toBeEmpty()
+        ->not->toContain('disabled');
 });
 
 it('shows upload area when no photo is selected', function (): void {
