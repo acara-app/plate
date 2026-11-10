@@ -682,6 +682,23 @@ return [
             'saved_heading' => 'Repas enregistré !',
             'saved_description' => 'Votre repas vérifié fait maintenant partie de votre historique de santé.',
             'open_entry' => 'Ouvrir votre carnet',
+            'greeting' => [
+                'morning' => 'Au menu ce matin ?',
+                'midday' => 'Au menu ce midi ?',
+                'evening' => 'Au menu ce soir ?',
+                'night' => 'Un petit creux nocturne ?',
+            ],
+            'drop_hint' => 'Vous pouvez aussi déposer ou coller une photo ici.',
+            'drop_release' => 'Déposez votre photo pour l’ajouter',
+        ],
+        'analysis' => [
+            'sending' => 'Envoi de votre photo…',
+            'spotting' => 'Repérage de chaque aliment…',
+            'portions' => 'Estimation des portions…',
+            'macros' => 'Calcul des calories et des macros…',
+            'usual' => 'La plupart des repas prennent 5 à 15 secondes.',
+            'slow' => 'C’est un peu plus long que d’habitude. Encore quelques secondes.',
+            'keep_open' => 'L’analyse continue. Gardez cette page ouverte, votre repas sera enregistré.',
         ],
         'camera' => [
             'title' => 'Photographier votre repas',
