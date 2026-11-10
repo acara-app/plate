@@ -474,6 +474,7 @@ it('shows faq section', function (): void {
         ->assertSee('Frequently Asked Questions')
         ->assertSee('How does the AI food photo analyzer work?')
         ->assertSee('How accurate are calorie estimates from food photos?')
+        ->assertSee('Is there a free photo calorie counter app?')
         ->assertSee('Is my food photo kept private?');
 });
 

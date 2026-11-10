@@ -80,6 +80,7 @@ $faqPage = [
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Snap to Track - AI Food Photo Analyzer",
+    "alternateName": ["Photo Calorie Counter", "AI Food Analyzer", "Free Meal Scanner"],
     "description": "Free AI food photo analyzer. Upload a photo of any meal to instantly estimate calories, protein, carbs, and fat per ingredient using AI vision analysis informed by standard nutrition references. No signup required.",
     "url": "{{ $currentUrl }}",
     "applicationCategory": "HealthApplication",

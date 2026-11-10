@@ -28,8 +28,8 @@ use Livewire\WithFileUploads;
 use RyanChandler\LaravelCloudflareTurnstile\Rules\Turnstile;
 
 new
-#[Layout('layouts.mini-app', ['bodyClass' => 'bg-black', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'metaDescription' => 'Free AI food photo analyzer: snap a meal to instantly estimate calories, protein, carbs, and fat per ingredient. No signup required to try it.', 'metaKeywords' => 'food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner, AI calorie counter from photo, photo macro tracker'])]
-#[Title('AI Food Photo Analyzer | Free Calorie & Macro Counter')]
+#[Layout('layouts.mini-app', ['bodyClass' => 'bg-black', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'metaDescription' => 'Free photo calorie counter and AI food analyzer: snap a meal to estimate calories, protein, carbs, and fat per ingredient. No signup required to try it.', 'metaKeywords' => 'photo calorie counter, ai food analyzer, photo calorie counter app free, meal scanner free, food photo calorie counter, snap to track calories, AI food recognition, meal photo analyzer, instant macro breakdown, calorie tracking app, food image analysis, nutrition scanner, AI calorie counter from photo, photo macro tracker'])]
+#[Title('AI Food Analyzer | Free Photo Calorie Counter & Meal Scanner')]
 class extends Component
 {
     use WithFileUploads {
@@ -578,7 +578,7 @@ class extends Component
                     Snap to Track
                 </h1>
                 <p class="speakable-intro mt-3 text-[15px] leading-snug text-pretty text-white/70 sm:mt-5 sm:text-lg sm:leading-relaxed lg:max-w-md lg:text-xl">
-                    Track calories &amp; macros instantly with AI. One photo, 5–15 seconds, a per-ingredient breakdown — no signup required.
+                    Track calories &amp; macros instantly with AI. A&nbsp;free photo calorie counter for any meal — no signup required.
                 </p>
             </div>
 
@@ -1058,7 +1058,7 @@ class extends Component
                     <h2 id="what-heading" class="sr-only">What is Snap to Track?</h2>
                     <p class="max-w-4xl text-2xl leading-snug font-semibold tracking-tight text-pretty sm:text-4xl sm:leading-[1.2]">
                         <strong class="font-semibold">Snap to Track</strong> is a free AI food photo analyzer that estimates calories, protein, carbs, and fat for every ingredient in your meal.
-                        <span class="text-neutral-500">Upload one photo, get a per-item nutrition breakdown in about 5–15 seconds — no signup required.</span>
+                        <span class="text-neutral-500">Use it as a free meal scanner: upload one photo, get a per-item nutrition breakdown in about 5–15 seconds — no signup required.</span>
                     </p>
                 </section>
 
