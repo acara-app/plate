@@ -18,7 +18,6 @@ import { cn } from '@/lib/utils';
 import { type AiAllowance } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import type { FormComponentRef } from '@inertiajs/core';
-import { TriangleAlert } from 'lucide-react';
 import { useEffect, useRef, useState, type DragEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -176,7 +175,7 @@ export default function SnapToTrackIndex({
                     </header>
 
                     <div className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain">
-                        <div className="mx-auto grid min-h-[min(100%,48rem)] w-full max-w-[30rem] grid-cols-1 grid-rows-[auto_1fr_auto] gap-4 px-3 pt-[4.25rem] pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[56rem]:min-h-full @min-[56rem]:max-w-[62rem] @min-[56rem]:grid-cols-[minmax(0,1fr)_27rem] @min-[56rem]:grid-rows-[1fr_auto_auto_1fr] @min-[56rem]:gap-x-16 @min-[56rem]:gap-y-0 @min-[56rem]:px-10 @min-[56rem]:pt-[4.5rem] @min-[56rem]:pb-10">
+                        <div className="mx-auto grid min-h-[min(100%,48rem)] w-full max-w-[30rem] grid-cols-1 grid-rows-[auto_1fr] gap-4 px-3 pt-[4.25rem] pb-[max(0.75rem,env(safe-area-inset-bottom))] @min-[56rem]:min-h-full @min-[56rem]:max-w-[62rem] @min-[56rem]:grid-cols-[minmax(0,1fr)_27rem] @min-[56rem]:grid-rows-[1fr_auto_1fr] @min-[56rem]:gap-x-16 @min-[56rem]:gap-y-0 @min-[56rem]:px-10 @min-[56rem]:pt-[4.5rem] @min-[56rem]:pb-10">
                             <div className="px-1 @min-[56rem]:col-start-1 @min-[56rem]:row-start-2 @min-[56rem]:px-0">
                                 <h1 className="sr-only">
                                     {t('snap_to_track.title')}
@@ -211,7 +210,7 @@ export default function SnapToTrackIndex({
 
                             <div
                                 className={cn(
-                                    'flex min-h-0 flex-col gap-4 [animation-delay:140ms] @min-[56rem]:col-start-2 @min-[56rem]:row-span-4 @min-[56rem]:row-start-1',
+                                    'flex min-h-0 flex-col gap-4 [animation-delay:140ms] @min-[56rem]:col-start-2 @min-[56rem]:row-span-3 @min-[56rem]:row-start-1',
                                     ENTER,
                                 )}
                             >
@@ -283,19 +282,6 @@ export default function SnapToTrackIndex({
                                     </Form>
                                 )}
                             </div>
-
-                            <p
-                                className={cn(
-                                    'flex items-start justify-center gap-2 px-2 text-center text-xs leading-relaxed text-muted-foreground [animation-delay:200ms] @min-[56rem]:col-start-1 @min-[56rem]:row-start-3 @min-[56rem]:mt-8 @min-[56rem]:max-w-[26rem] @min-[56rem]:justify-start @min-[56rem]:px-0 @min-[56rem]:text-left @min-[56rem]:text-[13px] @min-[56rem]:leading-5',
-                                    ENTER,
-                                )}
-                            >
-                                <TriangleAlert
-                                    className="mt-0.5 hidden size-3.5 shrink-0 @min-[56rem]:block"
-                                    aria-hidden="true"
-                                />
-                                {t('snap_to_track.review.disclaimer')}
-                            </p>
                         </div>
                     </div>
                 </section>
