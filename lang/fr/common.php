@@ -1155,6 +1155,10 @@ return [
                 'label' => 'Stabiliser ma glycémie',
                 'prompt' => 'Comment garder une glycémie stable après les repas ?',
             ],
+            'water' => [
+                'label' => "Bien m'hydrater",
+                'prompt' => "Quelle quantité d'eau devrais-je boire aujourd'hui ?",
+            ],
             'workout' => [
                 'label' => 'Prévoir une séance',
                 'prompt' => "Peux-tu me proposer une séance de sport pour aujourd'hui ?",
