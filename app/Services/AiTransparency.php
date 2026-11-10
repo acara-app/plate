@@ -31,6 +31,10 @@ final class AiTransparency
                 'a' => 'Yes. Your photo is used to estimate the nutrition in your meal and is never used to train AI models. While the scan runs, we keep an encrypted copy so a dropped connection never means uploading again. That copy is deleted as soon as your result is ready, unless you choose to keep your photo to help improve food recognition. If a scan fails, you can retry it for up to an hour, then the copy is deleted automatically. Only your browser or your account can open the result. If you are signed in, the photo is kept privately with the meal you save and deleted when you delete the meal. Our team only looks at saved photos if you turn on Help improve food recognition.',
             ],
             [
+                'q' => 'Is there a free photo calorie counter app?',
+                'a' => 'Yes. Snap to Track is an AI food analyzer and photo calorie counter that runs in your phone\'s browser, so there is no app to download. It is free to try: your first scans need no signup and no card. Use it as a meal scanner for any plate, then create a free account when you want to save meals to your food log.',
+            ],
+            [
                 'q' => 'How do I use Snap to Track?',
                 'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.',
             ],

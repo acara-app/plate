@@ -4,7 +4,7 @@
         @include('layouts.components.head')
         {{ $jsonLd ?? '' }}
     </head>
-    <body class="overflow-x-hidden bg-gray-50 text-gray-900 antialiased dark:bg-gray-950 dark:text-gray-50">
+    <body class="overflow-x-hidden antialiased {{ $bodyClass ?? 'bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-50' }}">
         <livewire:flash-messages.show />
 
         <div class="flex min-h-[100dvh] flex-col">
