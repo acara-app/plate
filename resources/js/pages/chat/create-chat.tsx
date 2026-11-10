@@ -8,6 +8,7 @@ import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { extractApprovalPayload } from '@/components/chat/approval-part';
 import { currentDayPart, DAYLIGHT } from '@/components/chat/day-part';
 import { ChatStarters } from '@/components/chat/starters';
+import { GLASS } from '@/components/glass';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -60,9 +61,6 @@ const PINNED_TO_BOTTOM_THRESHOLD = 96;
 const DEFAULT_RETENTION_HOURS = 48;
 
 const RETENTION_PROPS = ['isPinned', 'isKept'];
-
-const GLASS =
-    'bg-background/75 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_10px_28px_-12px_rgb(0_0_0/0.22)] ring-1 ring-foreground/[0.06] backdrop-blur-xl dark:bg-neutral-800/75 dark:ring-white/10';
 
 const HEADER_BUTTON =
     'inline-flex size-10 cursor-pointer touch-manipulation items-center justify-center rounded-full text-foreground/70 transition-[scale,background-color,color] duration-150 ease-out select-none [-webkit-tap-highlight-color:transparent] hover:bg-foreground/[0.06] hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none active:scale-90 data-[state=open]:bg-foreground/[0.06] data-[state=open]:text-foreground dark:focus-visible:ring-emerald-400';

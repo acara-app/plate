@@ -692,6 +692,23 @@ return [
             'saved_heading' => 'Meal logged!',
             'saved_description' => 'Your reviewed meal is now part of your health history.',
             'open_entry' => 'Open your logbook',
+            'greeting' => [
+                'morning' => 'What’s for breakfast?',
+                'midday' => 'What’s for lunch?',
+                'evening' => 'What’s for dinner?',
+                'night' => 'Late-night snack?',
+            ],
+            'drop_hint' => 'You can also drop or paste a photo here.',
+            'drop_release' => 'Drop your photo to add it',
+        ],
+        'analysis' => [
+            'sending' => 'Sending your photo…',
+            'spotting' => 'Spotting each food…',
+            'portions' => 'Estimating portion sizes…',
+            'macros' => 'Calculating calories and macros…',
+            'usual' => 'Most meals take 5–15 seconds.',
+            'slow' => 'Taking a little longer than usual. Busy plates need a few extra seconds.',
+            'keep_open' => 'Still working on it. Keep this page open — your meal saves as soon as it’s ready.',
         ],
         'camera' => [
             'title' => 'Take a meal photo',

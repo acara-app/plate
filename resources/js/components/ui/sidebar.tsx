@@ -1,9 +1,9 @@
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { MenuIcon } from "lucide-react"
 import * as React from "react"
 import { useTranslation } from "react-i18next"
 
+import { SproutMenuGlyph } from "@/components/sidebar-glyphs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
@@ -263,6 +263,7 @@ function Sidebar({
 function SidebarTrigger({
   className,
   onClick,
+  children,
   ...props
 }: React.ComponentProps<typeof Button>) {
   const { toggleSidebar, state, isMobile, openMobile } = useSidebar()
@@ -277,7 +278,12 @@ function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("size-12 shrink-0 touch-manipulation md:size-7 max-md:[&>svg]:size-5", className)}
+      className={cn(
+        "group/glyph size-12 shrink-0 touch-manipulation rounded-full text-foreground/80 transition-[scale,background-color,color,box-shadow] duration-150 ease-out select-none [-webkit-tap-highlight-color:transparent] md:size-8",
+        "hover:bg-white hover:text-foreground hover:shadow-[0_1px_2px_rgb(0_0_0/0.06),0_4px_10px_-4px_rgb(0_0_0/0.18)] hover:ring-1 hover:ring-black/[0.05] dark:hover:bg-white/10 dark:hover:shadow-none dark:hover:ring-white/10",
+        "focus-visible:ring-2 focus-visible:ring-emerald-600 active:scale-95 motion-reduce:transition-none dark:focus-visible:ring-emerald-400",
+        className
+      )}
       onClick={(event) => {
         onClick?.(event)
         toggleSidebar()
@@ -288,7 +294,7 @@ function SidebarTrigger({
       title={isMobile ? undefined : `${label} (Ctrl+B)`}
       {...props}
     >
-      <MenuIcon />
+      {children ?? <SproutMenuGlyph />}
       <span className="sr-only">{label}</span>
     </Button>
   )
