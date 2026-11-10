@@ -3,7 +3,7 @@ import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrac
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Button } from '@/components/ui/button';
+import { TuckSidebarGlyph } from '@/components/sidebar-glyphs';
 import {
     Sidebar,
     SidebarContent,
@@ -12,6 +12,7 @@ import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
+    SidebarTrigger,
     useSidebar,
 } from '@/components/ui/sidebar';
 import { UpgradeButton } from '@/components/upgrade-button';
@@ -29,7 +30,6 @@ import {
     FileText,
     MessageCircle,
     MessageSquarePlus,
-    PanelLeftClose,
     Plug,
     ScanLine,
     ShieldCheck,
@@ -136,15 +136,9 @@ export function AppSidebar() {
                                         <AppLogo showText={false} />
                                     </Link>
                                 </SidebarMenuButton>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={toggleSidebar}
-                                    aria-label={t('sidebar.close')}
-                                    className="size-12 shrink-0 touch-manipulation md:size-7"
-                                >
-                                    <PanelLeftClose className="size-5 md:size-4" />
-                                </Button>
+                                <SidebarTrigger>
+                                    <TuckSidebarGlyph />
+                                </SidebarTrigger>
                             </div>
                         )}
                     </SidebarMenuItem>
