@@ -669,7 +669,6 @@ return [
                 'limit' => "You've reached your AI credit limit. Please adjust the numbers by hand for now.",
                 'typical_portion' => 'Estimated for a typical portion. Adjust the numbers if your amount was different.',
             ],
-            'disclaimer' => 'These values are AI estimates and are not suitable for medication or insulin-dosing decisions.',
         ],
         'unavailable' => [
             'expired' => 'Drafts expire 60 minutes after analysis to protect your privacy. Analyze another photo to pick up where you left off.',

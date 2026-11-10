@@ -670,7 +670,6 @@ return [
                 'limit' => 'Vous avez atteint votre limite de crédits IA. Ajustez les valeurs manuellement pour l’instant.',
                 'typical_portion' => 'Estimation pour une portion type. Ajustez les valeurs si votre quantité était différente.',
             ],
-            'disclaimer' => "Ces valeurs sont des estimations de l'IA et ne conviennent pas aux décisions de dosage de médicaments ou d'insuline.",
         ],
         'unavailable' => [
             'expired' => "Les brouillons expirent 60 minutes après l'analyse pour protéger votre vie privée. Analysez une autre photo pour reprendre.",
