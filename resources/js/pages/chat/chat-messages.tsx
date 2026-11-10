@@ -8,8 +8,6 @@ import {
     SourcesSection,
     type SourceLink,
 } from '@/components/chat/sources-section';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useInitials } from '@/hooks/use-initials';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import type {
@@ -53,32 +51,7 @@ interface ChatMessagesProps {
     stoppedMessageIds: ReadonlySet<string>;
     isSubmitting?: boolean;
     onApprovalDecision?: DecideApproval;
-}
-
-function SpeakerAvatar({ speaker }: { speaker: Speaker }) {
-    const { currentUser } = useSharedProps();
-    const getInitials = useInitials();
-
-    if (speaker === 'assistant') {
-        return (
-            <img
-                src={ACARA_AVATAR_URL}
-                alt=""
-                className="size-5 shrink-0 rounded-full bg-muted object-cover"
-            />
-        );
-    }
-
-    return (
-        <Avatar aria-hidden="true" className="size-5 shrink-0">
-            {currentUser?.avatar && (
-                <AvatarImage src={currentUser.avatar} alt="" />
-            )}
-            <AvatarFallback className="bg-muted text-[9px] font-semibold text-foreground/75">
-                {getInitials(currentUser?.name ?? '')}
-            </AvatarFallback>
-        </Avatar>
-    );
+    welcomeStarters?: ReactNode;
 }
 
 function Turn({
@@ -101,43 +74,56 @@ function Turn({
             className={cn(
                 'relative',
                 animate &&
-                    'duration-300 motion-safe:animate-in motion-safe:fade-in',
+                    'duration-300 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2',
                 className,
             )}
         >
-            <h2
-                id={labelId}
-                className={cn(
-                    'mb-1 flex h-7 items-center gap-2 text-[13px]',
-                    HANGING_LABEL,
-                    speaker === 'assistant'
-                        ? 'font-semibold text-foreground'
-                        : 'font-medium text-muted-foreground',
-                )}
-            >
-                <SpeakerAvatar speaker={speaker} />
-                {speaker === 'assistant' ? t('chat.assistant') : t('chat.you')}
-            </h2>
+            {speaker === 'assistant' ? (
+                <h2
+                    id={labelId}
+                    className={cn(
+                        'mb-1 flex h-7 items-center gap-2 text-[13px] font-semibold text-foreground',
+                        HANGING_LABEL,
+                    )}
+                >
+                    <img
+                        src={ACARA_AVATAR_URL}
+                        alt=""
+                        className="size-5 shrink-0 rounded-full bg-muted object-cover"
+                    />
+                    {t('chat.assistant')}
+                </h2>
+            ) : (
+                <h2 id={labelId} className="sr-only">
+                    {t('chat.you')}
+                </h2>
+            )}
             {children}
         </article>
     );
 }
 
-function Attachments({ files }: { files: FilePart[] }) {
+function Attachments({
+    files,
+    className,
+}: {
+    files: FilePart[];
+    className?: string;
+}) {
     const { t } = useTranslation('common');
 
     return (
-        <ul className="flex flex-wrap gap-2">
+        <ul className={cn('flex flex-wrap gap-2', className)}>
             {files.map((file, index) => (
                 <li key={`${file.url.slice(-24)}-${index}`}>
                     {file.mediaType?.startsWith('image/') ? (
                         <img
                             src={file.url}
                             alt={file.filename ?? t('chat.attachment.photo')}
-                            className="h-36 max-w-full rounded-lg border border-border object-cover sm:h-44"
+                            className="h-36 max-w-full rounded-2xl bg-muted object-cover sm:h-44"
                         />
                     ) : (
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[13px] text-muted-foreground">
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-muted/70 px-3 py-1.5 text-[13px] text-muted-foreground">
                             <Paperclip
                                 className="size-3.5 shrink-0"
                                 aria-hidden="true"
@@ -171,13 +157,15 @@ function UserMessage({
 
     return (
         <Turn speaker="user" animate className={className}>
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col items-end gap-2">
+                {files.length > 0 && (
+                    <Attachments files={files} className="justify-end" />
+                )}
                 {text && (
-                    <p className="text-base leading-7 font-medium [overflow-wrap:anywhere] whitespace-pre-wrap text-foreground">
+                    <p className="max-w-[85%] rounded-3xl bg-foreground/[0.06] px-4 py-2.5 text-base leading-6 [overflow-wrap:anywhere] whitespace-pre-wrap text-foreground dark:bg-white/10">
                         {text}
                     </p>
                 )}
-                {files.length > 0 && <Attachments files={files} />}
             </div>
         </Turn>
     );
@@ -365,34 +353,69 @@ function StoppedNote() {
     );
 }
 
-function EmptyState({ retentionHours }: { retentionHours: number }) {
+const WELCOME_ENTER =
+    'fill-mode-both duration-500 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3';
+
+const WELCOME_NOTE =
+    'flex max-w-[34rem] items-start gap-2 text-[13px] leading-5 text-muted-foreground';
+
+function EmptyState({
+    retentionHours,
+    starters,
+}: {
+    retentionHours: number;
+    starters?: ReactNode;
+}) {
     const { t } = useTranslation('common');
     const { currentUser } = useSharedProps();
     const firstName = currentUser?.name?.trim().split(/\s+/)[0];
 
     return (
-        <div className="flex flex-1 flex-col justify-center py-10 duration-500 motion-safe:animate-in motion-safe:fade-in">
+        <div className="flex flex-1 flex-col justify-center py-4">
             <img
                 src={ACARA_AVATAR_URL}
                 alt=""
-                className="size-12 rounded-full bg-muted object-cover"
+                className="size-16 rounded-full bg-muted object-cover shadow-[0_10px_30px_-10px_rgb(0_0_0/0.3)] ring-4 ring-background duration-700 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:spin-in-[-14deg] motion-safe:zoom-in-50 @min-[40rem]:size-20"
             />
-            <h2 className="mt-6 max-w-[30ch] text-2xl leading-tight font-semibold tracking-tight text-balance text-foreground sm:text-[1.75rem]">
+            <h2
+                className={cn(
+                    'mt-5 max-w-[17ch] text-[1.75rem] leading-[1.12] font-bold tracking-tight text-balance text-foreground [animation-delay:80ms] @min-[40rem]:mt-6 @min-[40rem]:max-w-[20ch] @min-[40rem]:text-[2.375rem] @min-[40rem]:leading-[1.08]',
+                    WELCOME_ENTER,
+                )}
+            >
                 {firstName
                     ? t('chat.empty.greeting', { name: firstName })
                     : t('chat.empty.greeting_anonymous')}
             </h2>
-            <p className="mt-3 max-w-[34rem] text-base leading-7 text-muted-foreground">
+            <p
+                className={cn(
+                    'mt-3 max-w-[34rem] text-[17px] leading-7 text-muted-foreground [animation-delay:150ms] @min-[40rem]:mt-4',
+                    WELCOME_ENTER,
+                )}
+            >
                 {t('chat.empty.body')}
             </p>
-            <p className="mt-8 flex max-w-[34rem] items-start gap-2 text-[13px] leading-5 text-muted-foreground">
+            {starters}
+            <p
+                className={cn(
+                    'mt-6 [animation-delay:220ms]',
+                    WELCOME_NOTE,
+                    WELCOME_ENTER,
+                )}
+            >
                 <Clock
                     className="mt-0.5 size-3.5 shrink-0"
                     aria-hidden="true"
                 />
                 {t('chat.empty.retention', { hours: retentionHours })}
             </p>
-            <p className="mt-2.5 flex max-w-[34rem] items-start gap-2 text-[13px] leading-5 text-muted-foreground">
+            <p
+                className={cn(
+                    'mt-2.5 [animation-delay:220ms]',
+                    WELCOME_NOTE,
+                    WELCOME_ENTER,
+                )}
+            >
                 <TriangleAlert
                     className="mt-0.5 size-3.5 shrink-0"
                     aria-hidden="true"
@@ -452,7 +475,7 @@ export function ChatErrorNotice({
                     <button
                         type="button"
                         onClick={onRetry}
-                        className="mt-3 inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-border bg-background px-3 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none dark:focus-visible:ring-emerald-400"
+                        className="mt-3 inline-flex h-10 cursor-pointer touch-manipulation items-center gap-1.5 rounded-full bg-muted px-4 text-sm font-medium text-foreground transition-[scale,background-color] duration-150 ease-out select-none [-webkit-tap-highlight-color:transparent] hover:bg-foreground/10 focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none active:scale-95 dark:focus-visible:ring-emerald-400"
                     >
                         <RotateCcw
                             className="size-3.5 shrink-0"
@@ -481,11 +504,17 @@ export default function ChatMessages({
     stoppedMessageIds,
     isSubmitting,
     onApprovalDecision,
+    welcomeStarters,
 }: ChatMessagesProps) {
     const { t } = useTranslation('common');
 
     if (messages.length === 0) {
-        return <EmptyState retentionHours={retentionHours} />;
+        return (
+            <EmptyState
+                retentionHours={retentionHours}
+                starters={welcomeStarters}
+            />
+        );
     }
 
     const lastIndex = messages.length - 1;

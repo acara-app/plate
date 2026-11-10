@@ -1105,6 +1105,37 @@ return [
             'body' => 'Je suis Acara, votre coach santé personnel. Posez vos questions sur les repas, la glycémie, le sport ou le sommeil, ou ajoutez une photo de votre assiette.',
             'retention' => "Les discussions s'effacent après {{hours}} heures sans activité. Pour en garder une, choisissez Conserver la discussion dans le menu.",
         ],
+        'starters' => [
+            'label' => 'Idées pour commencer',
+            'breakfast' => [
+                'label' => 'Prévoir le petit-déjeuner',
+                'prompt' => "Que puis-je prendre au petit-déjeuner aujourd'hui ?",
+            ],
+            'lunch' => [
+                'label' => 'Prévoir le déjeuner',
+                'prompt' => "Que puis-je manger au déjeuner aujourd'hui ?",
+            ],
+            'dinner' => [
+                'label' => 'Prévoir le dîner',
+                'prompt' => 'Que puis-je manger au dîner ce soir ?',
+            ],
+            'tomorrow' => [
+                'label' => 'Prévoir demain',
+                'prompt' => 'Que devrais-je manger demain ?',
+            ],
+            'glucose' => [
+                'label' => 'Stabiliser ma glycémie',
+                'prompt' => 'Comment garder une glycémie stable après les repas ?',
+            ],
+            'workout' => [
+                'label' => 'Prévoir une séance',
+                'prompt' => "Peux-tu me proposer une séance de sport pour aujourd'hui ?",
+            ],
+            'sleep' => [
+                'label' => 'Mieux dormir',
+                'prompt' => 'Comment mieux dormir cette nuit ?',
+            ],
+        ],
         'retention' => [
             'temporary' => "Cette discussion s'efface après {{hours}} heures sans activité.",
             'kept' => "Cette discussion est conservée jusqu'à ce que vous la supprimiez.",

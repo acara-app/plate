@@ -78,7 +78,7 @@ export function SourcesSection({ sources }: { sources: SourceLink[] }) {
                                 rel="noopener noreferrer"
                                 title={title}
                                 aria-label={`${title} (${host})`}
-                                className="group inline-flex max-w-56 items-center gap-1 rounded-md border border-border px-2 py-1 text-foreground/80 transition-colors hover:border-foreground/20 hover:bg-muted/60 hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none dark:focus-visible:ring-emerald-400"
+                                className="group inline-flex max-w-56 touch-manipulation items-center gap-1 rounded-full bg-muted/70 py-1.5 pr-2.5 pl-3 text-foreground/80 transition-[scale,background-color,color] duration-150 ease-out [-webkit-tap-highlight-color:transparent] hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none active:scale-[0.97] dark:focus-visible:ring-emerald-400"
                             >
                                 <span className="truncate">{host}</span>
                                 <ArrowUpRight

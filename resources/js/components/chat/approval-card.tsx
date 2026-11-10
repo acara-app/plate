@@ -30,6 +30,9 @@ const COPY_GROUPS = ['log_health_entry'];
 const FOCUS_RING =
     'focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
 
+const PRESSABLE =
+    'touch-manipulation select-none [-webkit-tap-highlight-color:transparent] transition-[scale,background-color] duration-150 ease-out active:scale-[0.97]';
+
 function summaryOf(approval: ApprovalCardData): string {
     if (approval.reason) {
         return approval.reason;
@@ -162,7 +165,7 @@ export function ApprovalCard({ approval, onDecide }: ApprovalCardProps) {
         <section
             aria-labelledby={titleId}
             aria-describedby={descriptionId}
-            className="rounded-xl border border-border bg-card p-4 duration-300 motion-safe:animate-in motion-safe:fade-in sm:p-5"
+            className="rounded-3xl bg-muted/60 p-5 duration-300 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 dark:bg-muted/50"
         >
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
                 <h3
@@ -217,7 +220,8 @@ export function ApprovalCard({ approval, onDecide }: ApprovalCardProps) {
                         disabled={processing}
                         onClick={() => void decide('approve')}
                         className={cn(
-                            'inline-flex h-10 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-lg bg-emerald-700 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400',
+                            'inline-flex h-11 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-full bg-emerald-700 px-5 text-[15px] font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400',
+                            PRESSABLE,
                             FOCUS_RING,
                         )}
                     >
@@ -228,7 +232,8 @@ export function ApprovalCard({ approval, onDecide }: ApprovalCardProps) {
                         disabled={processing}
                         onClick={() => void decide('reject')}
                         className={cn(
-                            'inline-flex h-10 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none',
+                            'inline-flex h-11 min-w-32 flex-1 cursor-pointer items-center justify-center rounded-full bg-background px-5 text-[15px] font-medium text-foreground shadow-[0_1px_2px_rgb(0_0_0/0.06)] hover:bg-background/70 disabled:cursor-not-allowed disabled:opacity-60 sm:flex-none dark:bg-foreground/10 dark:hover:bg-foreground/15',
+                            PRESSABLE,
                             FOCUS_RING,
                         )}
                     >

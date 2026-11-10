@@ -1104,6 +1104,37 @@ return [
             'body' => "I'm Acara, your private health coach. Ask about meals, glucose, workouts, or sleep, or add a photo of your plate.",
             'retention' => 'Chats clear after {{hours}} hours without activity. To hold on to one, choose Keep chat from the menu.',
         ],
+        'starters' => [
+            'label' => 'Ideas to get you started',
+            'breakfast' => [
+                'label' => 'Plan breakfast',
+                'prompt' => 'What should I have for breakfast today?',
+            ],
+            'lunch' => [
+                'label' => 'Plan lunch',
+                'prompt' => 'What should I have for lunch today?',
+            ],
+            'dinner' => [
+                'label' => 'Plan dinner',
+                'prompt' => 'What should I have for dinner tonight?',
+            ],
+            'tomorrow' => [
+                'label' => 'Plan tomorrow',
+                'prompt' => 'What should I eat tomorrow?',
+            ],
+            'glucose' => [
+                'label' => 'Steady my glucose',
+                'prompt' => 'How can I keep my glucose steady after meals?',
+            ],
+            'workout' => [
+                'label' => 'Plan a workout',
+                'prompt' => 'Can you suggest a workout for me today?',
+            ],
+            'sleep' => [
+                'label' => 'Sleep better',
+                'prompt' => 'How can I sleep better tonight?',
+            ],
+        ],
         'retention' => [
             'temporary' => 'This chat clears after {{hours}} hours without activity.',
             'kept' => 'This chat is kept until you delete it.',

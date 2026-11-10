@@ -6,6 +6,8 @@ import { AiAllowanceNotice } from '@/components/billing/ai-allowance';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { extractApprovalPayload } from '@/components/chat/approval-part';
+import { currentDayPart, DAYLIGHT } from '@/components/chat/day-part';
+import { ChatStarters } from '@/components/chat/starters';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -48,7 +50,7 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import ChatInput from './chat-input';
+import ChatInput, { type ChatInputHandle } from './chat-input';
 import ChatMessages, { ChatErrorNotice } from './chat-messages';
 
 const COLUMN = 'mx-auto w-full max-w-[43rem] px-4 sm:px-6';
@@ -59,8 +61,11 @@ const DEFAULT_RETENTION_HOURS = 48;
 
 const RETENTION_PROPS = ['isPinned', 'isKept'];
 
+const GLASS =
+    'bg-background/75 shadow-[0_1px_2px_rgb(0_0_0/0.05),0_10px_28px_-12px_rgb(0_0_0/0.22)] ring-1 ring-foreground/[0.06] backdrop-blur-xl dark:bg-neutral-800/75 dark:ring-white/10';
+
 const HEADER_BUTTON =
-    'inline-flex size-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:outline-none data-[state=open]:bg-muted data-[state=open]:text-foreground';
+    'inline-flex size-10 cursor-pointer touch-manipulation items-center justify-center rounded-full text-foreground/70 transition-[scale,background-color,color] duration-150 ease-out select-none [-webkit-tap-highlight-color:transparent] hover:bg-foreground/[0.06] hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none active:scale-90 data-[state=open]:bg-foreground/[0.06] data-[state=open]:text-foreground dark:focus-visible:ring-emerald-400';
 
 function clearInitialPromptQuery() {
     const url = new URL(window.location.href);
@@ -188,6 +193,8 @@ export default function CreateChat() {
         files?: FileUIPart[];
     } | null>(null);
     const autoStartedPromptRef = useRef<string | null>(null);
+    const composerRef = useRef<ChatInputHandle>(null);
+    const [dayPart] = useState(currentDayPart);
 
     const [isMobileNavVisible, setIsMobileNavVisible] = useState(true);
     const [isScrolled, setIsScrolled] = useState(false);
@@ -304,7 +311,7 @@ export default function CreateChat() {
             setIsAwayFromLatest(false);
         }
 
-        if (pinnedToBottomRef.current) {
+        if (pinnedToBottomRef.current && messages.length > 0) {
             scrollToLatest('instant');
         }
     }, [
@@ -370,14 +377,29 @@ export default function CreateChat() {
         }
     }, [sendMessage]);
 
-    const handleInputChange = useCallback(() => {
-        if (lastMessageRef.current) {
-            lastMessageRef.current = null;
-        }
-        if (error) {
-            clearError();
-        }
-    }, [error, clearError]);
+    const [composerHasOwnText, setComposerHasOwnText] = useState(
+        () => !shouldAutoStartInitialPrompt && normalizedInitialPrompt !== '',
+    );
+
+    const handleInputChange = useCallback(
+        (value: string) => {
+            setComposerHasOwnText(value.trim() !== '');
+
+            if (lastMessageRef.current) {
+                lastMessageRef.current = null;
+            }
+            if (error) {
+                clearError();
+            }
+        },
+        [error, clearError],
+    );
+
+    const handleStarterPick = useCallback((prompt: string) => {
+        composerRef.current?.setMessage(prompt);
+        composerRef.current?.focus();
+        setComposerHasOwnText(false);
+    }, []);
 
     const handleScroll = useCallback((event: UIEvent<HTMLDivElement>) => {
         const container = event.currentTarget;
@@ -400,6 +422,8 @@ export default function CreateChat() {
     }, []);
 
     const isKeptForGood = isKept || isPinned;
+    const isNewChat = messages.length === 0;
+    const showStarters = isNewChat && !shouldAutoStartInitialPrompt;
 
     return (
         <AppShell variant="sidebar">
@@ -411,22 +435,43 @@ export default function CreateChat() {
                 <LifecycleBanner className="mx-4 mt-4" />
                 <BiometricsReviewBanner className="mx-4 mt-4" />
                 <Head title="Chat" />
-                <section className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                <section className="@container relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                    <div
+                        aria-hidden="true"
+                        className={cn(
+                            'pointer-events-none absolute inset-x-0 top-0 h-[36rem] bg-radial-[at_28%_-8%] to-transparent to-70% transition-opacity duration-500 ease-out motion-reduce:transition-none',
+                            DAYLIGHT[dayPart],
+                            isNewChat ? 'opacity-100' : 'opacity-0',
+                        )}
+                    />
                     <header
                         className={cn(
-                            'absolute inset-x-0 top-0 z-20 flex h-14 items-center justify-between gap-2 border-b bg-background px-2 transition-[translate,opacity,border-color] duration-300 ease-out sm:px-3',
-                            isScrolled
-                                ? 'border-border/70'
-                                : 'border-transparent',
-                            isMobileNavVisible
-                                ? 'translate-y-0 opacity-100'
-                                : 'pointer-events-none -translate-y-full opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100',
+                            'pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-2 px-3 pt-3 transition-[translate,opacity] duration-300 ease-out focus-within:translate-y-0 focus-within:opacity-100 motion-reduce:transition-none',
+                            !isMobileNavVisible &&
+                                '-translate-y-full opacity-0 md:translate-y-0 md:opacity-100',
                         )}
                     >
-                        <div className="flex items-center">
-                            <SidebarTrigger className="size-9 md:hidden" />
+                        <div
+                            aria-hidden="true"
+                            className={cn(
+                                'absolute inset-x-0 top-0 h-24 bg-linear-to-b from-background via-background/85 to-transparent transition-opacity duration-300 motion-reduce:transition-none',
+                                isScrolled ? 'opacity-100' : 'opacity-0',
+                            )}
+                        />
+                        <div className="pointer-events-auto relative">
+                            <SidebarTrigger
+                                className={cn(
+                                    'size-12 rounded-full md:hidden',
+                                    GLASS,
+                                )}
+                            />
                         </div>
-                        <div className="flex items-center gap-0.5">
+                        <div
+                            className={cn(
+                                'pointer-events-auto relative flex items-center gap-0.5 rounded-full p-1',
+                                GLASS,
+                            )}
+                        >
                             <HeaderLink
                                 label={t('conversations.new_chat')}
                                 icon={SquarePen}
@@ -516,12 +561,13 @@ export default function CreateChat() {
                     <div
                         ref={scrollRef}
                         onScroll={handleScroll}
-                        className="@container min-h-0 flex-1 overflow-y-auto overscroll-contain"
+                        className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain"
                     >
                         <div
                             className={cn(
                                 COLUMN,
-                                'flex min-h-full flex-col pt-20 pb-12',
+                                'flex min-h-full flex-col pt-20',
+                                isNewChat ? 'pb-6 @min-[62rem]:pt-10' : 'pb-12',
                             )}
                         >
                             <h1 className="sr-only">{t('chat.page_title')}</h1>
@@ -532,6 +578,16 @@ export default function CreateChat() {
                                 stoppedMessageIds={stoppedMessageIds}
                                 isSubmitting={showWorkingIndicator}
                                 onApprovalDecision={submitApprovalDecisions}
+                                welcomeStarters={
+                                    showStarters && (
+                                        <ChatStarters
+                                            variant="grid"
+                                            dayPart={dayPart}
+                                            onPick={handleStarterPick}
+                                            className="mt-6 hidden @min-[40rem]:grid"
+                                        />
+                                    )
+                                }
                             />
                             {!usageLimitTrigger && (
                                 <ChatErrorNotice
@@ -574,7 +630,10 @@ export default function CreateChat() {
                                     type="button"
                                     onClick={() => scrollToLatest('smooth')}
                                     aria-label={t('chat.scroll_to_latest')}
-                                    className="absolute -top-12 left-1/2 inline-flex size-9 -translate-x-1/2 cursor-pointer items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-xs transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none motion-safe:animate-in motion-safe:fade-in dark:focus-visible:ring-emerald-400"
+                                    className={cn(
+                                        'absolute -top-14 left-1/2 inline-flex size-11 -translate-x-1/2 cursor-pointer touch-manipulation items-center justify-center rounded-full text-foreground/70 transition-[scale,color] duration-150 ease-out select-none [-webkit-tap-highlight-color:transparent] hover:text-foreground focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:outline-none active:scale-90 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75 dark:focus-visible:ring-emerald-400',
+                                        GLASS,
+                                    )}
                                 >
                                     <ArrowDown
                                         className="size-4"
@@ -594,7 +653,16 @@ export default function CreateChat() {
                                     />
                                 </div>
                             )}
+                            {showStarters && !composerHasOwnText && (
+                                <ChatStarters
+                                    variant="row"
+                                    dayPart={dayPart}
+                                    onPick={handleStarterPick}
+                                    className="-mx-4 scroll-px-4 px-4 @min-[28rem]:mx-0 @min-[28rem]:px-0 @min-[40rem]:hidden"
+                                />
+                            )}
                             <ChatInput
+                                ref={composerRef}
                                 onSubmit={handleSubmit}
                                 onStop={handleStop}
                                 onInputChange={handleInputChange}
