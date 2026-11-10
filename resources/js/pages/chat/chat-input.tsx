@@ -19,7 +19,7 @@ import { useTranslation } from 'react-i18next';
 interface Props {
     onSubmit: (message: string, files?: FileUIPart[]) => void;
     onStop?: () => void;
-    onInputChange?: () => void;
+    onInputChange?: (value: string) => void;
     className?: string;
     disabled?: boolean;
     initialMessage?: string | null;
@@ -36,6 +36,9 @@ const MAX_TEXTAREA_HEIGHT = 240;
 
 const FOCUS_RING =
     'focus-visible:ring-2 focus-visible:ring-emerald-600 dark:focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none';
+
+const PRESSABLE =
+    'touch-manipulation select-none [-webkit-tap-highlight-color:transparent] transition-[scale,background-color,color] duration-150 ease-out active:scale-90';
 
 function readFileAsDataURL(file: File): Promise<FileUIPart> {
     return new Promise((resolve, reject) => {
@@ -68,14 +71,15 @@ function PhotoPreview({
             <img
                 src={file.url}
                 alt={name}
-                className="size-16 rounded-lg border border-border object-cover"
+                className="size-16 rounded-2xl bg-muted object-cover"
             />
             <button
                 type="button"
                 onClick={onRemove}
                 aria-label={t('chat.composer.remove_photo', { name })}
                 className={cn(
-                    'absolute -top-1.5 -right-1.5 flex size-6 cursor-pointer items-center justify-center rounded-full bg-foreground text-background shadow-xs transition-transform hover:scale-105 active:scale-95',
+                    'absolute -top-1.5 -right-1.5 flex size-6 cursor-pointer items-center justify-center rounded-full bg-foreground text-background shadow-xs hover:scale-105',
+                    PRESSABLE,
                     FOCUS_RING,
                 )}
             >
@@ -197,7 +201,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
         >
             <div
                 className={cn(
-                    'rounded-2xl border border-border bg-background shadow-xs transition-[border-color,box-shadow] duration-150 focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/40 dark:bg-muted/30',
+                    'rounded-[1.75rem] bg-muted/70 p-1.5 transition-[background-color,box-shadow] duration-200 ease-out focus-within:bg-background focus-within:shadow-[0_1px_2px_rgb(0_0_0/0.04),0_14px_32px_-12px_rgb(0_0_0/0.18)] focus-within:ring-2 focus-within:ring-emerald-600/25 dark:bg-muted/60 dark:focus-within:bg-muted dark:focus-within:ring-emerald-400/30',
                     disabled && 'opacity-60',
                 )}
             >
@@ -206,7 +210,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         aria-label={t('chat.composer.attached', {
                             count: selectedFiles.length,
                         })}
-                        className="flex flex-wrap gap-3 px-3 pt-3"
+                        className="flex flex-wrap gap-3 px-2.5 pt-2.5 pb-2"
                     >
                         {selectedFiles.map((file) => (
                             <PhotoPreview
@@ -218,23 +222,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                     </ul>
                 )}
 
-                <textarea
-                    ref={textareaRef}
-                    value={message}
-                    onChange={(event) => {
-                        setMessage(event.target.value);
-                        onInputChange?.();
-                    }}
-                    onKeyDown={handleKeyDown}
-                    placeholder={placeholder ?? t('chat.placeholder')}
-                    disabled={disabled}
-                    aria-label={t('chat.composer.label')}
-                    aria-describedby={hintId}
-                    rows={1}
-                    className="block max-h-60 min-h-13 w-full resize-none bg-transparent px-4 pt-3.5 pb-1 text-base leading-6 text-foreground placeholder:text-muted-foreground/80 focus:outline-none disabled:cursor-not-allowed"
-                />
-
-                <div className="flex items-center justify-between gap-2 px-2 pb-2">
+                <div className="flex items-end gap-1">
                     <input
                         ref={fileInputRef}
                         type="file"
@@ -253,12 +241,13 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                 onClick={() => fileInputRef.current?.click()}
                                 aria-label={t('chat.composer.add_photo')}
                                 className={cn(
-                                    'inline-flex size-9 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                                    'inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground disabled:cursor-not-allowed disabled:opacity-50',
+                                    PRESSABLE,
                                     FOCUS_RING,
                                 )}
                             >
                                 <ImagePlus
-                                    className="size-[18px]"
+                                    className="size-5"
                                     strokeWidth={1.75}
                                     aria-hidden="true"
                                 />
@@ -269,13 +258,32 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                         </TooltipContent>
                     </Tooltip>
 
+                    <textarea
+                        ref={textareaRef}
+                        value={message}
+                        onChange={(event) => {
+                            setMessage(event.target.value);
+                            onInputChange?.(event.target.value);
+                        }}
+                        onKeyDown={handleKeyDown}
+                        placeholder={placeholder ?? t('chat.placeholder')}
+                        disabled={disabled}
+                        aria-label={t('chat.composer.label')}
+                        aria-describedby={hintId}
+                        enterKeyHint="send"
+                        rows={1}
+                        className="block max-h-60 min-h-11 min-w-0 flex-1 resize-none bg-transparent px-1 py-2.5 text-base leading-6 text-foreground placeholder:text-muted-foreground focus:outline-none disabled:cursor-not-allowed"
+                    />
+
                     {showStop ? (
                         <button
                             type="button"
                             onClick={onStop}
                             aria-label={t('chat.composer.stop')}
                             className={cn(
-                                'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full bg-foreground pr-3.5 pl-3 text-sm font-medium text-background transition-colors hover:bg-foreground/85',
+                                'inline-flex h-11 shrink-0 cursor-pointer items-center gap-1.5 rounded-full bg-foreground pr-4 pl-3.5 text-sm font-medium text-background hover:bg-foreground/85',
+                                PRESSABLE,
+                                'active:scale-95',
                                 FOCUS_RING,
                             )}
                         >
@@ -294,15 +302,16 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                                     disabled={!canSend}
                                     aria-label={t('chat.composer.send')}
                                     className={cn(
-                                        'inline-flex size-9 items-center justify-center rounded-full transition-colors',
+                                        'inline-flex size-11 shrink-0 items-center justify-center rounded-full',
+                                        PRESSABLE,
                                         FOCUS_RING,
                                         canSend
-                                            ? 'cursor-pointer bg-emerald-600 text-white hover:bg-emerald-700 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400'
-                                            : 'cursor-not-allowed bg-muted text-muted-foreground/70',
+                                            ? 'cursor-pointer bg-emerald-600 text-white shadow-[0_6px_16px_-6px_rgb(5_150_105/0.7)] hover:bg-emerald-700 dark:bg-emerald-500 dark:text-emerald-950 dark:hover:bg-emerald-400'
+                                            : 'cursor-not-allowed bg-foreground/[0.07] text-muted-foreground/70 active:scale-100',
                                     )}
                                 >
                                     <ArrowUp
-                                        className="size-[18px]"
+                                        className="size-5"
                                         strokeWidth={2.25}
                                         aria-hidden="true"
                                     />
