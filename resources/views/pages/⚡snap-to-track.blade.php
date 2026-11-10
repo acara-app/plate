@@ -510,7 +510,7 @@ class extends Component
 
 @push('turnstile')
     @if (App::environment(['production', 'testing']))
-        <x-turnstile.scripts />
+        <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
     @endif
 @endpush
 
@@ -518,15 +518,13 @@ class extends Component
     @php
         $photoAllowance = $this->photoAllowance;
         $limitGate = $this->limitReachedGate();
-        $needsVerification = App::environment(['production', 'testing']);
-        $uploadsLocked = $loading || ($needsVerification && blank($turnstileToken));
+        $verificationKey = App::environment(['production', 'testing']) ? config('services.turnstile.key') : null;
         $gutter = 'pr-[max(1.25rem,env(safe-area-inset-right))] pl-[max(1.25rem,env(safe-area-inset-left))] sm:pr-[max(2rem,env(safe-area-inset-right))] sm:pl-[max(2rem,env(safe-area-inset-left))]';
         $press = 'touch-manipulation select-none transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none';
         $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-white/70';
         $ringOnLight = 'outline-none focus-visible:ring-[3px] focus-visible:ring-neutral-900/40';
         $pill = 'inline-flex min-h-14 w-full items-center justify-center gap-2 rounded-full px-6 text-center text-base font-semibold '.$press.' '.$ring;
-        $frameBox = 'mx-auto aspect-square w-full max-w-[max(15rem,calc(100svh_-_19rem))] lg:max-w-none';
-        $frame = 'relative overflow-hidden rounded-[2rem] bg-neutral-900 '.$frameBox;
+        $frame = 'relative mx-auto aspect-square w-full max-w-[max(15rem,calc(100svh_-_19rem))] overflow-hidden rounded-[2rem] bg-neutral-900 lg:max-w-none';
         $corners = [
             'top-0 left-0 rounded-tl-2xl border-t-4 border-l-4',
             'top-0 right-0 rounded-tr-2xl border-t-4 border-r-4',
@@ -760,172 +758,133 @@ class extends Component
                 @unless ($loading || $photoAllowance->exhausted())
                     <form wire:submit="analyze" class="flex flex-col gap-5">
                         <div
-                            x-data="{
-                                uploading: false,
-                                uploadFailed: false,
-                                progress: 0,
-                                pickPhoto() {
-                                    this.$refs.photoUpload.click();
-                                },
-                                sendPhoto(input) {
-                                    const picked = input.files[0];
-                                    input.value = '';
-                                    this.sendFile(picked);
-                                },
-                                async sendFile(picked) {
-                                    if (! picked || this.uploading) {
-                                        return;
-                                    }
-                                    if (this.$refs.photoUpload?.disabled) {
-                                        this.uploadFailed = true;
-                                        return;
-                                    }
-                                    this.uploading = true;
-                                    this.uploadFailed = false;
-                                    this.progress = 0;
-                                    window.acaraTrack?.('snap_to_track_upload_selected', { source: 'public_snap_to_track' });
-                                    window.acaraKeepSnapPhoto?.(picked);
-                                    const photo = (await window.acaraPrepareSnapPhoto?.(picked)) ?? picked;
-                                    this.$wire.$upload(
-                                        'photo',
-                                        photo,
-                                        () => { this.uploading = false; this.progress = 0; },
-                                        () => { this.uploading = false; this.uploadFailed = true; this.progress = 0; },
-                                        (event) => { this.progress = event.detail.progress; },
-                                        () => { this.uploading = false; this.progress = 0; },
-                                    );
-                                },
-                            }"
-                            x-bind:aria-busy="uploading"
+                            x-data="snapUploader(@js($verificationKey))"
+                            x-bind:aria-busy="uploading || verifying"
                             x-on:snap-photo-picked="sendFile($event.detail.photo)"
                             class="flex flex-col gap-5"
                         >
                             <div>
                                 <x-snap-scanner />
 
-                                @if ($needsVerification)
-                                    <div wire:key="snap-verification" class="flex justify-center [&_.cf-turnstile>*]:mb-4">
-                                        <x-turnstile wire:model="turnstileToken" data-theme="dark" data-appearance="interaction-only" />
-                                    </div>
-                                @endif
+                                <div x-ref="verification" wire:ignore x-bind:class="verificationVisible && 'mb-4'" class="flex justify-center"></div>
 
                                 @if (! $photo)
-                                    <div class="relative">
-                                        <div class="flex flex-col gap-5 {{ $needsVerification && blank($turnstileToken) ? 'opacity-50' : '' }}">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                class="hidden"
-                                                id="photo-upload"
-                                                x-ref="photoUpload"
-                                                x-on:change="sendPhoto($event.target)"
-                                                @disabled($uploadsLocked)
+                                    <div class="flex flex-col gap-5">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            class="hidden"
+                                            id="photo-upload"
+                                            x-ref="photoUpload"
+                                            x-on:change="sendPhoto($event.target)"
+                                        >
+                                        <button
+                                            type="button"
+                                            aria-label="Take a food photo or upload an image"
+                                            aria-haspopup="dialog"
+                                            x-on:click="uploadFailed ? pickPhoto() : $dispatch('snap-scanner-open')"
+                                            x-bind:disabled="uploading || verifying"
+                                            class="{{ $frame }} group @container block cursor-pointer touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.985] disabled:cursor-not-allowed disabled:active:scale-100 motion-reduce:transition-none {{ $ring }}"
+                                        >
+                                            <span aria-hidden="true" class="absolute inset-[14%] rounded-full bg-linear-to-br from-white/[0.17] to-white/[0.03] shadow-[0_24px_48px_rgba(0,0,0,0.55)] transition duration-300 ease-out group-hover:from-white/[0.22] motion-reduce:transition-none @max-[18rem]:inset-[17%]"></span>
+                                            <span aria-hidden="true" class="absolute inset-[25%] rounded-full bg-linear-to-tl from-white/[0.1] to-black/25 inset-shadow-[0_2px_10px_rgba(0,0,0,0.45)] @max-[18rem]:inset-[27%]"></span>
+                                            <svg
+                                                x-show="uploading"
+                                                viewBox="0 0 100 100"
+                                                fill="none"
+                                                class="absolute top-[14%] left-[14%] size-[72%] -rotate-90 @max-[18rem]:top-[17%] @max-[18rem]:left-[17%] @max-[18rem]:size-[66%]"
+                                                style="display: none;"
+                                                aria-hidden="true"
                                             >
+                                                <circle
+                                                    cx="50"
+                                                    cy="50"
+                                                    r="49"
+                                                    stroke-width="2"
+                                                    stroke-linecap="round"
+                                                    pathLength="100"
+                                                    stroke-dasharray="100"
+                                                    x-bind:stroke-dashoffset="100 - progress"
+                                                    class="stroke-primary transition-[stroke-dashoffset] duration-200 motion-reduce:transition-none"
+                                                />
+                                            </svg>
+                                            <span aria-hidden="true" class="pointer-events-none absolute inset-4 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-110 motion-safe:duration-700">
+                                                @foreach ($corners as $corner)
+                                                    <span wire:key="frame-corner-{{ $loop->index }}" class="absolute size-10 border-primary {{ $corner }}"></span>
+                                                @endforeach
+                                            </span>
+
+                                            <span x-show="! uploading && ! verifying && ! uploadFailed" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+                                                <x-snap-result.icon name="camera" class="size-7" />
+                                                <span class="max-w-36 text-[15px] leading-tight font-semibold text-balance">Tap to take photo or upload</span>
+                                            </span>
+                                            <span x-show="! uploading && ! verifying && ! uploadFailed" class="absolute inset-x-0 bottom-5 text-center text-xs text-white/55">JPG, PNG up to 10MB</span>
+
+                                            <span x-show="verifying" style="display: none;" role="status" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
+                                                <x-snap-result.icon name="loader" class="size-7 motion-safe:animate-spin" />
+                                                <span class="max-w-36 text-[15px] leading-tight font-semibold text-balance">Getting your photo ready</span>
+                                            </span>
+                                            <span
+                                                x-show="verifying"
+                                                x-text="verificationVisible ? 'Tap the box above if asked.' : 'Finishing a quick security check…'"
+                                                style="display: none;"
+                                                class="absolute inset-x-0 bottom-5 text-center text-xs text-white/55"
+                                            >Finishing a quick security check…</span>
+
+                                            <span x-show="uploading" style="display: none;" class="absolute inset-0 flex flex-col items-center justify-center text-center">
+                                                <span x-text="progress + '%'" class="text-4xl font-bold tracking-tight tabular-nums">0%</span>
+                                                <span x-text="progress < 100 ? 'Uploading photo' : 'Preparing preview…'" class="mt-1 text-sm font-medium text-white/70">Uploading photo</span>
+                                                <span
+                                                    x-text="progress < 100 ? 'Uploading photo. Please wait.' : 'Upload complete. Preparing preview.'"
+                                                    class="sr-only"
+                                                    role="status"
+                                                    aria-live="polite"
+                                                ></span>
+                                                <span
+                                                    role="progressbar"
+                                                    aria-label="Photo upload progress"
+                                                    aria-valuemin="0"
+                                                    aria-valuemax="100"
+                                                    x-bind:aria-valuenow="progress"
+                                                    class="sr-only"
+                                                ></span>
+                                            </span>
+                                            <span x-show="uploading" style="display: none;" class="absolute inset-x-0 bottom-5 text-center text-xs text-white/55">Keep this tab open.</span>
+
+                                            <span x-show="uploadFailed" style="display: none;" role="alert" class="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center">
+                                                <x-snap-result.icon name="triangle-alert" class="size-7 text-amber-300" />
+                                                <span class="text-[15px] font-semibold">Upload didn’t finish</span>
+                                                <span class="max-w-40 text-sm leading-snug text-white/70">Tap here and choose the photo again to retry.</span>
+                                            </span>
+                                        </button>
+
+                                        <div class="grid grid-cols-3 justify-items-center">
                                             <button
                                                 type="button"
-                                                aria-label="Take a food photo or upload an image"
                                                 aria-haspopup="dialog"
-                                                x-on:click="uploadFailed ? pickPhoto() : $dispatch('snap-scanner-open')"
-                                                x-bind:disabled="uploading || @js($uploadsLocked)"
-                                                class="{{ $frame }} group @container block cursor-pointer touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.985] disabled:cursor-not-allowed disabled:active:scale-100 motion-reduce:transition-none {{ $ring }}"
+                                                x-on:click="$dispatch('snap-scanner-open')"
+                                                x-bind:disabled="uploading || verifying"
+                                                class="group/shutter col-start-2 row-start-1 flex touch-manipulation flex-col items-center gap-2 rounded-3xl select-none disabled:cursor-not-allowed disabled:opacity-60 {{ $ring }}"
                                             >
-                                                <span aria-hidden="true" class="absolute inset-[14%] rounded-full bg-linear-to-br from-white/[0.17] to-white/[0.03] shadow-[0_24px_48px_rgba(0,0,0,0.55)] transition duration-300 ease-out group-hover:from-white/[0.22] motion-reduce:transition-none @max-[18rem]:inset-[17%]"></span>
-                                                <span aria-hidden="true" class="absolute inset-[25%] rounded-full bg-linear-to-tl from-white/[0.1] to-black/25 inset-shadow-[0_2px_10px_rgba(0,0,0,0.45)] @max-[18rem]:inset-[27%]"></span>
-                                                <svg
-                                                    x-show="uploading"
-                                                    viewBox="0 0 100 100"
-                                                    fill="none"
-                                                    class="absolute top-[14%] left-[14%] size-[72%] -rotate-90 @max-[18rem]:top-[17%] @max-[18rem]:left-[17%] @max-[18rem]:size-[66%]"
-                                                    style="display: none;"
-                                                    aria-hidden="true"
-                                                >
-                                                    <circle
-                                                        cx="50"
-                                                        cy="50"
-                                                        r="49"
-                                                        stroke-width="2"
-                                                        stroke-linecap="round"
-                                                        pathLength="100"
-                                                        stroke-dasharray="100"
-                                                        x-bind:stroke-dashoffset="100 - progress"
-                                                        class="stroke-primary transition-[stroke-dashoffset] duration-200 motion-reduce:transition-none"
-                                                    />
-                                                </svg>
-                                                <span aria-hidden="true" class="pointer-events-none absolute inset-4 motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-110 motion-safe:duration-700">
-                                                    @foreach ($corners as $corner)
-                                                        <span wire:key="frame-corner-{{ $loop->index }}" class="absolute size-10 border-primary {{ $corner }}"></span>
-                                                    @endforeach
+                                                <span class="flex size-20 items-center justify-center rounded-full border-4 border-white p-1 transition duration-150 ease-out group-active/shutter:scale-95 group-disabled/shutter:scale-100 motion-reduce:transition-none">
+                                                    <span class="size-full rounded-full bg-primary"></span>
                                                 </span>
-
-                                                <span x-show="! uploading && ! uploadFailed" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-center">
-                                                    <x-snap-result.icon name="camera" class="size-7" />
-                                                    <span class="max-w-36 text-[15px] leading-tight font-semibold text-balance">Tap to take photo or upload</span>
-                                                </span>
-                                                <span x-show="! uploading && ! uploadFailed" class="absolute inset-x-0 bottom-5 text-center text-xs text-white/55">JPG, PNG up to 10MB</span>
-
-                                                <span x-show="uploading" style="display: none;" class="absolute inset-0 flex flex-col items-center justify-center text-center">
-                                                    <span x-text="progress + '%'" class="text-4xl font-bold tracking-tight tabular-nums">0%</span>
-                                                    <span x-text="progress < 100 ? 'Uploading photo' : 'Preparing preview…'" class="mt-1 text-sm font-medium text-white/70">Uploading photo</span>
-                                                    <span
-                                                        x-text="progress < 100 ? 'Uploading photo. Please wait.' : 'Upload complete. Preparing preview.'"
-                                                        class="sr-only"
-                                                        role="status"
-                                                        aria-live="polite"
-                                                    ></span>
-                                                    <span
-                                                        role="progressbar"
-                                                        aria-label="Photo upload progress"
-                                                        aria-valuemin="0"
-                                                        aria-valuemax="100"
-                                                        x-bind:aria-valuenow="progress"
-                                                        class="sr-only"
-                                                    ></span>
-                                                </span>
-                                                <span x-show="uploading" style="display: none;" class="absolute inset-x-0 bottom-5 text-center text-xs text-white/55">Keep this tab open.</span>
-
-                                                <span x-show="uploadFailed" style="display: none;" role="alert" class="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-center">
-                                                    <x-snap-result.icon name="triangle-alert" class="size-7 text-amber-300" />
-                                                    <span class="text-[15px] font-semibold">Upload didn’t finish</span>
-                                                    <span class="max-w-40 text-sm leading-snug text-white/70">Tap here and choose the photo again to retry.</span>
-                                                </span>
+                                                <span class="text-sm font-medium text-white/80">Take photo</span>
                                             </button>
-
-                                            <div class="grid grid-cols-3 justify-items-center">
-                                                <button
-                                                    type="button"
-                                                    aria-haspopup="dialog"
-                                                    x-on:click="$dispatch('snap-scanner-open')"
-                                                    x-bind:disabled="uploading || @js($uploadsLocked)"
-                                                    class="group/shutter col-start-2 row-start-1 flex touch-manipulation flex-col items-center gap-2 rounded-3xl select-none disabled:cursor-not-allowed disabled:opacity-60 {{ $ring }}"
-                                                >
-                                                    <span class="flex size-20 items-center justify-center rounded-full border-4 border-white p-1 transition duration-150 ease-out group-active/shutter:scale-95 group-disabled/shutter:scale-100 motion-reduce:transition-none">
-                                                        <span class="size-full rounded-full bg-primary"></span>
+                                            <button
+                                                type="button"
+                                                x-on:click="pickPhoto()"
+                                                x-bind:disabled="uploading || verifying"
+                                                class="group/library col-start-1 row-start-1 flex touch-manipulation flex-col items-center gap-2 rounded-3xl select-none disabled:cursor-not-allowed disabled:opacity-60 {{ $ring }}"
+                                            >
+                                                <span class="flex h-20 items-center">
+                                                    <span class="flex size-14 items-center justify-center rounded-full bg-white/10 transition duration-150 ease-out group-hover/library:bg-white/20 group-active/library:scale-95 group-disabled/library:scale-100 motion-reduce:transition-none">
+                                                        <x-snap-result.icon name="image-plus" class="size-6" />
                                                     </span>
-                                                    <span class="text-sm font-medium text-white/80">Take photo</span>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    x-on:click="pickPhoto()"
-                                                    x-bind:disabled="uploading || @js($uploadsLocked)"
-                                                    class="group/library col-start-1 row-start-1 flex touch-manipulation flex-col items-center gap-2 rounded-3xl select-none disabled:cursor-not-allowed disabled:opacity-60 {{ $ring }}"
-                                                >
-                                                    <span class="flex h-20 items-center">
-                                                        <span class="flex size-14 items-center justify-center rounded-full bg-white/10 transition duration-150 ease-out group-hover/library:bg-white/20 group-active/library:scale-95 group-disabled/library:scale-100 motion-reduce:transition-none">
-                                                            <x-snap-result.icon name="image-plus" class="size-6" />
-                                                        </span>
-                                                    </span>
-                                                    <span class="text-sm font-medium text-white/80">Choose photo</span>
-                                                </button>
-                                            </div>
+                                                </span>
+                                                <span class="text-sm font-medium text-white/80">Choose photo</span>
+                                            </button>
                                         </div>
-
-                                        @if ($needsVerification && blank($turnstileToken))
-                                            <div class="pointer-events-none absolute inset-x-0 top-0 {{ $frameBox }}">
-                                                <p class="absolute inset-x-16 top-5 text-center text-xs text-white/80 motion-safe:animate-in motion-safe:fade-in motion-safe:fill-mode-both motion-safe:delay-[2500ms] motion-safe:duration-500">
-                                                    Running a quick security check…
-                                                </p>
-                                            </div>
-                                        @endif
                                     </div>
                                 @else
                                     <div class="{{ $frame }}">
