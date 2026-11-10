@@ -11,7 +11,7 @@ const HOURS_IN_DAY = 24;
 const DAY_MS = HOURS_IN_DAY * 60 * 60 * 1000;
 
 const MOMENTS: { id: StarterId; hour: number }[] = [
-    { id: 'glucose', hour: 6.5 },
+    { id: 'water', hour: 6.5 },
     { id: 'breakfast', hour: 8.5 },
     { id: 'lunch', hour: 12.5 },
     { id: 'workout', hour: 16.5 },
@@ -186,7 +186,7 @@ export function DayPlate({
                 </span>
                 <time
                     dateTime={now.toISOString()}
-                    className="text-[3.9cqw] leading-none font-semibold text-muted-foreground tabular-nums"
+                    className="text-[max(0.6875rem,3.9cqw)] leading-none font-semibold text-muted-foreground tabular-nums"
                 >
                     {clock.format(now)}
                 </time>
@@ -209,7 +209,7 @@ export function DayPlate({
                         onFocus={() => setPreviewId(id)}
                         onBlur={() => setPreviewId(null)}
                         className={cn(
-                            'absolute flex size-[max(2.25rem,11.5cqw)] -translate-1/2 items-center justify-center rounded-full transition-[scale,background-color] duration-150 ease-out before:absolute before:-inset-1.5 before:rounded-full hover:scale-110 active:scale-90',
+                            'absolute flex size-[max(2rem,11.5cqw)] -translate-1/2 items-center justify-center rounded-full transition-[scale,background-color] duration-150 ease-out before:absolute before:-inset-1.5 before:rounded-full hover:scale-110 active:scale-90',
                             PRESSABLE,
                             tint,
                             isCurrent &&

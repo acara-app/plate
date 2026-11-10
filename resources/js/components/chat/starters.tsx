@@ -4,6 +4,7 @@ import {
     Droplet,
     Dumbbell,
     EggFried,
+    GlassWater,
     MoonStar,
     Salad,
     Soup,
@@ -18,6 +19,7 @@ export type StarterId =
     | 'dinner'
     | 'tomorrow'
     | 'glucose'
+    | 'water'
     | 'workout'
     | 'sleep';
 
@@ -32,6 +34,10 @@ export const STARTERS: Record<StarterId, { Icon: LucideIcon; tint: string }> = {
     glucose: {
         Icon: Droplet,
         tint: 'bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300',
+    },
+    water: {
+        Icon: GlassWater,
+        tint: 'bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300',
     },
     workout: {
         Icon: Dumbbell,

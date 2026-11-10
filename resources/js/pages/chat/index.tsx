@@ -131,19 +131,12 @@ export default function ConversationsIndex({
             <Head title={t('conversations.title')} />
             <AdminPageWrap variant="lg">
                 <div className="space-y-6">
-                    <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="space-y-2">
-                            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                                {t('conversations.title')}
-                            </h1>
-                            <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
-                                    <span className="size-1.5 rounded-full bg-emerald-500" />
-                                    {conversations.total} conversation
-                                    {conversations.total !== 1 ? 's' : ''}
-                                </span>
-                            </div>
-                        </div>
+                    <div className="flex items-center justify-between gap-6">
+                        <span className="inline-flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                            <span className="size-1.5 rounded-full bg-emerald-500" />
+                            {conversations.total} conversation
+                            {conversations.total !== 1 ? 's' : ''}
+                        </span>
                         <Tooltip>
                             <TooltipTrigger asChild>
                                 <Button
