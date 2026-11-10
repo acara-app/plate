@@ -1,11 +1,12 @@
 import AcknowledgePrivacyPolicyController from '@/actions/App/Http/Controllers/AcknowledgePrivacyPolicyController';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import { privacy } from '@/routes';
 import { router } from '@inertiajs/react';
 import { ShieldCheck, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
-export function PrivacyUpdateNotice() {
+export function PrivacyUpdateNotice({ className }: { className?: string }) {
     const { t } = useTranslation('common');
 
     function acknowledge(): void {
@@ -22,7 +23,12 @@ export function PrivacyUpdateNotice() {
     }
 
     return (
-        <div className="flex items-start justify-between gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm">
+        <div
+            className={cn(
+                'flex items-start justify-between gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm',
+                className,
+            )}
+        >
             <div className="flex items-start gap-2">
                 <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 <p className="text-muted-foreground">
