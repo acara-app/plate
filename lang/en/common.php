@@ -131,7 +131,18 @@ return [
     ],
 
     'dashboard_ai' => [
-        'breadcrumb' => 'Acara',
+        'greeting' => [
+            'morning' => 'Good morning, {{name}}',
+            'midday' => 'Good afternoon, {{name}}',
+            'evening' => 'Good evening, {{name}}',
+            'night' => 'Good evening, {{name}}',
+        ],
+        'greeting_anonymous' => [
+            'morning' => 'Good morning',
+            'midday' => 'Good afternoon',
+            'evening' => 'Good evening',
+            'night' => 'Good evening',
+        ],
         'description' => 'Your private health coach. Chats clear after 48 hours — hit Keep on any you want to hold onto.',
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',

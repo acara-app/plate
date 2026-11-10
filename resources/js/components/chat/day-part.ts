@@ -1,19 +1,18 @@
 export type DayPart = 'morning' | 'midday' | 'evening' | 'night';
 
+export const DAY_PART_STARTS: { part: DayPart; hour: number }[] = [
+    { part: 'morning', hour: 5 },
+    { part: 'midday', hour: 11 },
+    { part: 'evening', hour: 16 },
+    { part: 'night', hour: 21 },
+];
+
 export function dayPartAt(hour: number): DayPart {
-    if (hour >= 5 && hour < 11) {
-        return 'morning';
-    }
+    const current = DAY_PART_STARTS.filter((entry) => hour >= entry.hour).at(
+        -1,
+    );
 
-    if (hour >= 11 && hour < 16) {
-        return 'midday';
-    }
-
-    if (hour >= 16 && hour < 21) {
-        return 'evening';
-    }
-
-    return 'night';
+    return current?.part ?? 'night';
 }
 
 export function currentDayPart(): DayPart {

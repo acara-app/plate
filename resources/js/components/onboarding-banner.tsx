@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 import onboarding from '@/routes/onboarding';
 import { Link } from '@inertiajs/react';
 import { Sparkles, X } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-export function OnboardingBanner() {
+export function OnboardingBanner({ className }: { className?: string }) {
     const { t } = useTranslation('common');
     const [isDismissed, setIsDismissed] = useState(false);
 
@@ -14,7 +15,12 @@ export function OnboardingBanner() {
     }
 
     return (
-        <div className="flex items-center justify-between gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm">
+        <div
+            className={cn(
+                'flex items-center justify-between gap-3 rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-sm',
+                className,
+            )}
+        >
             <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 shrink-0 text-primary" />
                 <span className="text-muted-foreground">

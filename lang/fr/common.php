@@ -132,7 +132,18 @@ return [
     ],
 
     'dashboard_ai' => [
-        'breadcrumb' => 'Acara',
+        'greeting' => [
+            'morning' => 'Bonjour, {{name}}',
+            'midday' => 'Bonjour, {{name}}',
+            'evening' => 'Bonsoir, {{name}}',
+            'night' => 'Bonsoir, {{name}}',
+        ],
+        'greeting_anonymous' => [
+            'morning' => 'Bonjour',
+            'midday' => 'Bonjour',
+            'evening' => 'Bonsoir',
+            'night' => 'Bonsoir',
+        ],
         'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — appuyez sur Conserver pour garder celles que vous voulez.',
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',

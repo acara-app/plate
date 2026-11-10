@@ -21,6 +21,7 @@ interface Props {
     onStop?: () => void;
     onInputChange?: (value: string) => void;
     className?: string;
+    surfaceClassName?: string;
     disabled?: boolean;
     initialMessage?: string | null;
     isLoading?: boolean;
@@ -92,6 +93,7 @@ function PhotoPreview({
 const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
     {
         className,
+        surfaceClassName,
         onSubmit,
         onStop,
         onInputChange,
@@ -203,6 +205,7 @@ const ChatInput = forwardRef<ChatInputHandle, Props>(function ChatInput(
                 className={cn(
                     'rounded-[1.75rem] bg-muted/70 p-1.5 transition-[background-color,box-shadow] duration-200 ease-out focus-within:bg-background focus-within:shadow-[0_1px_2px_rgb(0_0_0/0.04),0_14px_32px_-12px_rgb(0_0_0/0.18)] focus-within:ring-2 focus-within:ring-emerald-600/25 dark:bg-muted/60 dark:focus-within:bg-muted dark:focus-within:ring-emerald-400/30',
                     disabled && 'opacity-60',
+                    surfaceClassName,
                 )}
             >
                 {selectedFiles.length > 0 && (
