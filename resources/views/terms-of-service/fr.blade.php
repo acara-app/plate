@@ -98,14 +98,45 @@
     Acara Plate est publié en tant que logiciel à code source ouvert. Vous pouvez héberger vous-même la plateforme sur votre propre infrastructure, ce qui vous donne un contrôle total sur vos données. Le code source est accessible à l'adresse <a href="https://github.com/acara-app/plate" target="_blank" rel="noopener">github.com/acara-app/plate</a>. Les contributions sont assujetties à la licence et aux lignes directrices de contribution du projet.
 </p>
 
-<h2>7. Résiliation</h2>
+<h2>7. Forfaits payants et annulation</h2>
+<p>
+    <strong>a. Facturation :</strong>
+    Les forfaits payants s'achètent et se gèrent sur le site Web d'Acara Plate, et les paiements sont traités par
+    Stripe. Un forfait se renouvelle automatiquement chaque mois ou chaque année, au prix indiqué au moment du
+    paiement, jusqu'à son annulation. Les abonnements achetés dans une boutique d'applications n'incluent jamais de
+    forfait Acara Plate, et la suppression d'une application n'annule pas votre forfait.
+</p>
+<p>
+    <strong>b. Annuler votre forfait :</strong>
+    Vous pouvez annuler votre forfait en tout temps dans les paramètres de facturation, en choisissant « Gérer
+    l'abonnement ». Vous pouvez aussi nous demander de l'annuler pour vous en écrivant à
+    <a href="mailto:support@acara.app">support@acara.app</a>.
+</p>
+<p>
+    <strong>c. Prise d'effet de l'annulation :</strong>
+    L'annulation met fin aux renouvellements. Sauf entente contraire, vous conservez les fonctionnalités de votre
+    forfait jusqu'à la fin de la période déjà payée. Votre compte passe ensuite au forfait gratuit, et vos données
+    sont conservées jusqu'à ce que vous supprimiez votre compte.
+</p>
+<p>
+    <strong>d. Courriel de confirmation :</strong>
+    Nous vous envoyons un courriel chaque fois que votre forfait est annulé, que vous l'ayez annulé vous-même ou
+    que nous l'ayons fait à votre demande. Si vous recevez ce courriel sans avoir demandé l'annulation,
+    communiquez avec nous sans tarder.
+</p>
+<p>
+    <strong>e. Suppression de votre compte :</strong>
+    Annulez votre forfait avant de supprimer votre compte.
+</p>
+
+<h2>8. Résiliation</h2>
 <p>
     Acara Plate peut résilier ou suspendre votre accès aux Services sans préavis, pour quelque raison que ce soit,
     notamment si vous enfreignez les présentes Conditions ou si vous fournissez des données inexactes qui pourraient
     compromettre la sécurité des recommandations.
 </p>
 
-<h2>8. Exclusion de garanties et limitation de responsabilité</h2>
+<h2>9. Exclusion de garanties et limitation de responsabilité</h2>
 <p>
     Les Services sont fournis « tels quels », sans garantie d'aucune sorte, expresse ou implicite, y compris toute garantie de qualité marchande, d'adaptation à un usage particulier ou d'absence de contrefaçon.
 </p>
@@ -113,19 +144,19 @@
     <strong>Exclusion de responsabilité :</strong> Dans toute la mesure permise par la loi, ni Acara Plate, ni les personnes qui l'ont créé ou qui y contribuent, ni les tiers qui lui concèdent des licences n'assument de responsabilité à l'égard de tout dommage direct, indirect, accessoire, spécial, consécutif ou punitif, de toute perte de profits ou de revenus, subie directement ou indirectement, ou de toute perte de données, d'utilisation, d'achalandage ou d'autres pertes immatérielles, découlant a) de votre accès aux Services ou de leur utilisation, ou de l'impossibilité d'y accéder ou de les utiliser; b) de toute conduite ou de tout contenu d'un tiers sur les Services; ou c) de l'accès non autorisé à vos transmissions ou à votre contenu, ou de leur utilisation ou modification non autorisée.
 </p>
 
-<h2>9. Droit applicable</h2>
+<h2>10. Droit applicable</h2>
 <p>
     Les présentes Conditions sont régies par les lois de la province de la Saskatchewan, au Canada, et, s'il y a lieu,
     par le RGPD dans le cas des personnes résidant dans l'UE, sans égard aux règles en matière de conflits de lois.
 </p>
 
-<h2>10. Modifications</h2>
+<h2>11. Modifications</h2>
 <p>
     Acara Plate peut modifier les présentes Conditions en tout temps. Les modifications importantes seront communiquées
     par l'intermédiaire des Services ou par courriel.
 </p>
 
-<h2>11. Nous joindre</h2>
+<h2>12. Nous joindre</h2>
 <p>
     Pour toute question sur les présentes Conditions, écrivez-nous à
     <a href="mailto:team@acara.app">team@acara.app</a> ou à

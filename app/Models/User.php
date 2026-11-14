@@ -255,9 +255,9 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
         return $subscription;
     }
 
-    public function subscriptionDisplayName(): ?string
+    public function subscriptionDisplayName(?Subscription $subscription = null): ?string
     {
-        $subscription = $this->activeSubscription();
+        $subscription ??= $this->activeSubscription();
 
         if (! $subscription instanceof Subscription) {
             return null;

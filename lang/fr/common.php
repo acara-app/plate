@@ -1113,6 +1113,17 @@ return [
         'thanks' => 'Merci,',
     ],
 
+    'subscription_cancelled_email' => [
+        'subject' => 'Votre forfait :plan a été annulé',
+        'greeting' => 'Bonjour :name,',
+        'scheduled' => "Votre forfait :plan a été annulé et ne vous sera plus facturé. Vous pouvez continuer à l'utiliser jusqu'au :date; votre compte passera ensuite au forfait gratuit.",
+        'ended' => 'Votre forfait :plan a été annulé le :date et ne vous sera plus facturé. Votre compte est maintenant au forfait gratuit.',
+        'data_kept' => 'Vos repas, votre journal et votre historique restent là où ils sont.',
+        'action' => 'Ouvrir les paramètres de facturation',
+        'unexpected' => "Vous n'avez pas demandé cette annulation? Écrivez-nous sans tarder : :url",
+        'salutation' => "Merci d'utiliser :app.",
+    ],
+
     'chat' => [
         'placeholder' => "Posez n'importe quelle question",
         'stop' => 'Arrêter',

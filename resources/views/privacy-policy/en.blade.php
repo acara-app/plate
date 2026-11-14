@@ -94,6 +94,7 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
 <p>We do not sell your personal data. We share it only with:</p>
 <ul>
     <li><strong>Service providers</strong> we engage to operate the Services, including hosting providers, email delivery, and <strong>AI service providers</strong> who process your data to generate responses, summaries, embeddings, and transcriptions (see Section 5 for the current list and the categories of data sent). All service providers are bound by data-processing agreements and confidentiality obligations.</li>
+    <li><strong>Stripe</strong>, our payment processor, if you buy a paid plan. You enter your card details directly with Stripe; we never see or store your full card number. We share your name and email address so Stripe can bill you and send receipts, and Stripe tells us whether your plan is active. Stripe keeps payment records for as long as financial and tax laws require.</li>
     <li>When required by law (e.g., to comply with legal obligations or protect user safety).</li>
     <li>In anonymized or aggregated form for analytics or research to improve the Services.</li>
 </ul>
