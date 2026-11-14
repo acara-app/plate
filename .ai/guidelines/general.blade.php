@@ -94,3 +94,15 @@ protected function popular(Builder $query): void
     $query->where('votes', '>', 100);
 }
 </code-snippet>
+
+## Agent skills
+
+### Issue tracker
+
+Track issues and specs in acara-app/acara-core.
+See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Use a single root glossary and architecture decision directory.
+See `docs/agents/domain.md`.
