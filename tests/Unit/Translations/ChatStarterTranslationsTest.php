@@ -2,11 +2,13 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Lang;
 
-it('offers every starter as a label and a question in every language', function (string $locale): void {
+it('labels every starter and translates the chat questions in every language', function (string $locale): void {
     $starters = Lang::get('common.chat.starters', [], $locale);
 
-    expect(array_keys($starters))->toBe(['label', 'breakfast', 'lunch', 'dinner', 'tomorrow', 'glucose', 'water', 'workout', 'sleep'])
-        ->and(array_filter($starters, is_array(...)))->each->toHaveKeys(['label', 'prompt']);
+    expect(array_keys($starters))->toBe(['label', 'breakfast', 'lunch', 'dinner', 'tomorrow', 'water', 'workout', 'sleep'])
+        ->and($starters['water'])->toHaveKey('label')
+        ->and(Arr::except($starters, ['label', 'water']))->each->toHaveKeys(['label', 'prompt']);
 })->with(['en', 'fr', 'mn']);

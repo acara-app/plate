@@ -43,11 +43,34 @@ it('keeps Snap to Track on the first screen of a phone, above the composer', fun
     'a compact Android phone' => [360, 672],
 ]);
 
-it('drafts a hydration question from the water moment on the plate', function (): void {
+it('logs water from a shortcut without sending a chat message', function (string $routeName, array $parameters, string $shortcut, int $width, int $height): void {
+    visit(route($routeName, $parameters, absolute: false))
+        ->resize($width, $height)
+        ->click($shortcut)
+        ->assertPathIs(route('health-entries.index', absolute: false))
+        ->assertVisible('[role="dialog"]')
+        ->click('[role="dialog"] [aria-label="250 ml"]')
+        ->assertAriaAttribute('[role="dialog"] [aria-label="250 ml"]', 'pressed', 'true')
+        ->assertNoJavaScriptErrors();
+
+    $this->assertDatabaseHas('health_sync_samples', [
+        'user_id' => auth()->id(),
+        'type_identifier' => 'water',
+        'value' => 250,
+        'unit' => 'mL',
+    ]);
+    $this->assertDatabaseEmpty('agent_conversation_messages');
+})->with([
+    'the dashboard water moment' => ['dashboard', [], '[data-test="day-plate-moment"][aria-label="Log water"]', 393, 662],
+    'the mobile chat starter' => ['chat.create', ['conversationId' => '00000000-0000-4000-8000-000000000001'], '[data-test="chat-starter"]:has-text("Log water"):visible', 393, 662],
+    'the desktop chat starter' => ['chat.create', ['conversationId' => '00000000-0000-4000-8000-000000000001'], '[data-test="chat-starter"]:has-text("Log water"):visible', 1440, 900],
+]);
+
+it('still drafts a meal question from the breakfast moment on the plate', function (): void {
     visit(route('dashboard', absolute: false))
         ->resize(393, 662)
-        ->click('[data-test="day-plate-moment"][aria-label="Stay hydrated"]')
-        ->assertValue('[data-test="dashboard-composer"] textarea', 'How much water should I drink today?')
+        ->click('[data-test="day-plate-moment"][aria-label="Plan breakfast"]')
+        ->assertValue('[data-test="dashboard-composer"] textarea', 'What should I have for breakfast today?')
         ->assertNoJavaScriptErrors();
 });
 

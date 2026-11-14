@@ -1,7 +1,8 @@
+import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntry/ListHealthEntryController';
 import { cn } from '@/lib/utils';
+import { router } from '@inertiajs/react';
 import {
     CalendarDays,
-    Droplet,
     Dumbbell,
     EggFried,
     GlassWater,
@@ -18,7 +19,6 @@ export type StarterId =
     | 'lunch'
     | 'dinner'
     | 'tomorrow'
-    | 'glucose'
     | 'water'
     | 'workout'
     | 'sleep';
@@ -31,10 +31,6 @@ export const STARTERS: Record<StarterId, { Icon: LucideIcon; tint: string }> = {
     lunch: { Icon: Salad, tint: MEAL_TINT },
     dinner: { Icon: Soup, tint: MEAL_TINT },
     tomorrow: { Icon: CalendarDays, tint: MEAL_TINT },
-    glucose: {
-        Icon: Droplet,
-        tint: 'bg-rose-100 text-rose-700 dark:bg-rose-400/15 dark:text-rose-300',
-    },
     water: {
         Icon: GlassWater,
         tint: 'bg-sky-100 text-sky-700 dark:bg-sky-400/15 dark:text-sky-300',
@@ -50,11 +46,27 @@ export const STARTERS: Record<StarterId, { Icon: LucideIcon; tint: string }> = {
 };
 
 const LINEUPS: Record<DayPart, StarterId[]> = {
-    morning: ['breakfast', 'glucose', 'workout', 'sleep'],
-    midday: ['lunch', 'glucose', 'workout', 'sleep'],
-    evening: ['dinner', 'glucose', 'workout', 'sleep'],
-    night: ['sleep', 'tomorrow', 'glucose', 'workout'],
+    morning: ['breakfast', 'water', 'workout', 'sleep'],
+    midday: ['lunch', 'water', 'workout', 'sleep'],
+    evening: ['dinner', 'water', 'workout', 'sleep'],
+    night: ['sleep', 'tomorrow', 'water', 'workout'],
 };
+
+export function useStarterPicker(onPick: (prompt: string) => void) {
+    const { t } = useTranslation('common');
+
+    return (id: StarterId) => {
+        if (id === 'water') {
+            router.visit(
+                ListHealthEntryController({ query: { log: 'water' } }),
+            );
+
+            return;
+        }
+
+        onPick(t(`chat.starters.${id}.prompt`));
+    };
+}
 
 const STAGGER = [
     '[animation-delay:260ms]',
@@ -93,6 +105,7 @@ export function ChatStarters({
     className?: string;
 }) {
     const { t } = useTranslation('common');
+    const pickStarter = useStarterPicker(onPick);
     const styles = VARIANTS[variant];
 
     return (
@@ -115,9 +128,7 @@ export function ChatStarters({
                         <button
                             type="button"
                             data-test="chat-starter"
-                            onClick={() =>
-                                onPick(t(`chat.starters.${id}.prompt`))
-                            }
+                            onClick={() => pickStarter(id)}
                             className={cn(PRESSABLE, styles.button)}
                         >
                             <span
