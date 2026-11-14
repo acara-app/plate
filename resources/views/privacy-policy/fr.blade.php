@@ -100,6 +100,7 @@ Ces données sont recueillies en lecture seule. Acara Health Sync n'écrit aucun
 <p>Nous ne vendons pas vos renseignements personnels. Nous les communiquons uniquement :</p>
 <ul>
     <li>Aux <strong>fournisseurs de services</strong> auxquels nous faisons appel pour exploiter les Services, notamment des fournisseurs d'hébergement et de livraison de courriels, ainsi que des <strong>fournisseurs de services d'IA</strong> qui traitent vos données pour générer des réponses, des résumés, des plongements (embeddings) et des transcriptions (voir la section 5 pour la liste actuelle et les catégories de données transmises). Tous les fournisseurs de services sont liés par des ententes de traitement des données et des obligations de confidentialité.</li>
+    <li>À <strong>Stripe</strong>, notre fournisseur de traitement des paiements, si vous achetez un forfait payant. Vous saisissez les renseignements de votre carte directement auprès de Stripe; nous ne voyons ni ne conservons jamais votre numéro de carte complet. Nous communiquons votre nom et votre adresse courriel à Stripe pour lui permettre de vous facturer et de vous envoyer des reçus, et Stripe nous indique si votre forfait est actif. Stripe conserve les dossiers de paiement aussi longtemps que l'exigent les lois financières et fiscales.</li>
     <li>Lorsque la loi l'exige (p. ex., pour respecter des obligations légales ou protéger la sécurité des utilisateurs).</li>
     <li>Sous forme anonymisée ou agrégée, à des fins d'analyse ou de recherche visant à améliorer les Services.</li>
 </ul>

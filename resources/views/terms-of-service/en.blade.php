@@ -89,14 +89,43 @@
     Acara Plate is released as open-source software. You may self-host the platform on your own infrastructure, giving you complete control over your data. The source code is available at <a href="https://github.com/acara-app/plate" target="_blank" rel="noopener">github.com/acara-app/plate</a>. Contributions are subject to the project's license and contribution guidelines.
 </p>
 
-<h2>7. Termination</h2>
+<h2>7. Paid Plans and Cancellation</h2>
+<p>
+    <strong>a. Billing:</strong>
+    Paid plans are bought and managed on the Acara Plate website, and payments are processed by Stripe. A plan
+    renews automatically each month or each year, at the price shown at checkout, until it is cancelled.
+    Subscriptions bought through an app store never include an Acara Plate plan, and deleting an app does not
+    cancel one.
+</p>
+<p>
+    <strong>b. Cancelling Your Plan:</strong>
+    You can cancel at any time from Billing settings by choosing “Manage subscription”. You can also ask us to
+    cancel it for you by writing to <a href="mailto:support@acara.app">support@acara.app</a>.
+</p>
+<p>
+    <strong>c. When Cancellation Takes Effect:</strong>
+    Cancelling stops future renewals. Unless we agree otherwise, you keep your plan’s features until the end of
+    the period you have already paid for. Your account then moves to the free plan, and your data stays until you
+    delete your account.
+</p>
+<p>
+    <strong>d. Confirmation Email:</strong>
+    We email you whenever your plan is cancelled, whether you cancelled it yourself or we did at your request. If
+    you receive this email and did not ask to cancel, contact us right away.
+</p>
+<p>
+    <strong>e. Deleting Your Account:</strong>
+    Cancel your plan before deleting your account.
+</p>
+
+<h2>8. Termination</h2>
 <p>
     Acara Plate may terminate or suspend your access to the Services without notice for any reason,
     including if you breach these Terms or provide inaccurate data that could affect recommendation
     safety.
 </p>
 
-<h2>8. Disclaimers and Limitations of Liability</h2>
+<h2>9. Disclaimers and Limitations of Liability</h2>
 <p>
     The Services are provided “as is” without warranties of any kind, whether express or implied, including merchantability, fitness for a particular purpose, or non-infringement.
 </p>
@@ -104,19 +133,19 @@
     <strong>No Liability:</strong> To the fullest extent permitted by law, Acara Plate, its authors, contributors, and licensors shall not be liable for any direct, indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly, or any loss of data, use, goodwill, or other intangible losses, resulting from (a) your access to or use of or inability to access or use the Services; (b) any conduct or content of any third party on the Services; or (c) unauthorized access, use, or alteration of your transmissions or content.
 </p>
 
-<h2>9. Governing Law</h2>
+<h2>10. Governing Law</h2>
 <p>
     These Terms are governed by the laws of the Province of Saskatchewan, Canada, and, where
     applicable, GDPR for EU users, without regard to conflict of law provisions.
 </p>
 
-<h2>10. Changes</h2>
+<h2>11. Changes</h2>
 <p>
     Acara Plate may update these Terms at any time. Significant changes will be communicated via the
     Services or email.
 </p>
 
-<h2>11. Contact Us</h2>
+<h2>12. Contact Us</h2>
 <p>
     For questions about these Terms, contact us at
     <a href="mailto:team@acara.app">team@acara.app</a> or
