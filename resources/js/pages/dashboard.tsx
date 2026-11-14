@@ -6,7 +6,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { dayPartAt, type DayPart } from '@/components/chat/day-part';
-import { DayPlate, DISPLAY_FONT } from '@/components/dashboard/day-plate';
+import { DISPLAY_FONT, IntakePlate } from '@/components/dashboard/intake-plate';
 import { HealthDataConsentCard } from '@/components/health-data-consent-card';
 import { OnboardingBanner } from '@/components/onboarding-banner';
 import { PrivacyUpdateNotice } from '@/components/privacy-update-notice';
@@ -16,6 +16,7 @@ import useSharedProps from '@/hooks/use-shared-props';
 import { cn, generateUUID } from '@/lib/utils';
 import chat from '@/routes/chat';
 import mealPlans from '@/routes/meal-plans';
+import type { DailyNutritionGoals, HealthEntry } from '@/types/diabetes';
 import { Head, Link, useForm } from '@inertiajs/react';
 import type { FileUIPart } from 'ai';
 import {
@@ -27,9 +28,8 @@ import {
     TriangleAlert,
     type LucideIcon,
 } from 'lucide-react';
-import { useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import ChatInput, { type ChatInputHandle } from './chat/chat-input';
+import ChatInput from './chat/chat-input';
 
 type ChatMessagePart = {
     type: string;
@@ -106,58 +106,23 @@ function Door({
     );
 }
 
-function SnapDoor({ className }: { className?: string }) {
-    const { t } = useTranslation('common');
-
-    return (
-        <Link
-            href={ShowSnapToTrackController().url}
-            prefetch
-            data-test="dashboard-snap-to-track"
-            className={cn(
-                'flex w-full items-center gap-3.5 rounded-[1.75rem] bg-foreground p-3 pr-5 text-background transition-[scale,opacity] duration-150 ease-out hover:opacity-90 active:scale-[0.98]',
-                PRESSABLE,
-                className,
-            )}
-        >
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-[1.15rem] bg-background/10 text-emerald-400 dark:text-emerald-600">
-                <ScanLine
-                    className="size-[22px]"
-                    strokeWidth={2}
-                    aria-hidden="true"
-                />
-            </span>
-            <span className="min-w-0">
-                <span
-                    className={cn(
-                        'block text-[17px] leading-6 font-bold',
-                        DISPLAY_FONT,
-                    )}
-                >
-                    {t('snap_to_track.launcher.title')}
-                </span>
-                <span className="block text-sm leading-5 text-balance text-background/65">
-                    {t('snap_to_track.launcher.subtitle')}
-                </span>
-            </span>
-        </Link>
-    );
-}
-
 export default function Dashboard({
     showHealthDataConsent,
     showPrivacyUpdate,
+    entries,
+    goals,
 }: {
     showHealthDataConsent: boolean;
     showPrivacyUpdate: boolean;
+    entries: HealthEntry[];
+    goals: DailyNutritionGoals | null;
 }) {
     const { t } = useTranslation('common');
-    const { currentUser, needsBiometricsReview, locale } = useSharedProps();
+    const { currentUser, needsBiometricsReview } = useSharedProps();
     const now = useNow(CLOCK_TICK_MS);
     const dayPart = dayPartAt(now.getHours());
     const table = TABLE[dayPart];
     const firstName = currentUser?.name?.trim().split(/\s+/)[0];
-    const composerRef = useRef<ChatInputHandle>(null);
 
     const form = useForm<{ messages: ChatMessage[] }>({ messages: [] });
 
@@ -181,11 +146,6 @@ export default function Dashboard({
         }));
         form.post(chat.store(conversationId).url);
     }
-
-    const draftQuestion = useCallback((prompt: string) => {
-        composerRef.current?.setMessage(prompt);
-        composerRef.current?.focus();
-    }, []);
 
     return (
         <AppShell variant="sidebar">
@@ -320,7 +280,6 @@ export default function Dashboard({
                                     )}
                                 />
                                 <ChatInput
-                                    ref={composerRef}
                                     onSubmit={startChat}
                                     disabled={form.processing}
                                     placeholder={t('dashboard_ai.placeholder')}
@@ -335,35 +294,24 @@ export default function Dashboard({
 
                             <div
                                 className={cn(
-                                    'mt-4 flex shrink-0 grow basis-[16.5rem] items-center justify-center @max-[54rem]:[container-type:size]',
-                                    '@min-[54rem]:col-start-2 @min-[54rem]:row-span-2 @min-[54rem]:row-start-2 @min-[54rem]:mt-0 @min-[54rem]:self-center @min-[54rem]:pt-10',
+                                    'mt-4 mb-11 flex shrink-0 grow basis-[16.5rem] items-center justify-center @max-[54rem]:[container-type:size]',
+                                    '@min-[54rem]:col-start-2 @min-[54rem]:row-span-2 @min-[54rem]:row-start-2 @min-[54rem]:mt-0 @min-[54rem]:mb-0 @min-[54rem]:self-center @min-[54rem]:pt-10',
                                 )}
                             >
-                                <DayPlate
+                                <IntakePlate
+                                    entries={entries}
+                                    goals={goals}
                                     now={now}
-                                    dayPart={dayPart}
-                                    locale={locale}
-                                    onPick={draftQuestion}
                                     className="w-[min(100cqw,100cqh,19rem)] @min-[32rem]:w-[min(100cqh,22rem)] @min-[54rem]:w-[23rem] @min-[68rem]:w-[28rem]"
                                 />
                             </div>
-
-                            <SnapDoor className="relative mt-4 mb-3 @min-[54rem]:hidden" />
                         </div>
 
                         <nav
                             aria-label={t('sidebar.group_label')}
                             className="@min-[54rem]:col-span-2 @min-[54rem]:row-start-4 @min-[54rem]:mt-12"
                         >
-                            <ul
-                                className={cn(
-                                    'grid grid-cols-3 gap-2.5',
-                                    '@min-[54rem]:grid-cols-[minmax(0,1.7fr)_repeat(3,minmax(0,1fr))] @min-[54rem]:gap-3',
-                                )}
-                            >
-                                <li className="hidden @min-[54rem]:flex">
-                                    <SnapDoor />
-                                </li>
+                            <ul className="grid grid-cols-3 gap-2.5 @min-[54rem]:gap-3">
                                 <Door
                                     href={ListHealthEntryController().url}
                                     label={t('sidebar.nav.health_entries')}

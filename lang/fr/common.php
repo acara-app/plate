@@ -147,6 +147,18 @@ return [
         'description' => 'Votre coach santé privé. Les discussions s\'effacent après 48 heures — appuyez sur Conserver pour garder celles que vous voulez.',
         'placeholder' => 'Demandez à Acara',
         'disclaimer' => 'À titre informatif uniquement. Ne remplace pas un avis médical ou nutritionnel professionnel.',
+        'plate' => [
+            'today' => 'Aujourd\'hui',
+            'kcal_left' => 'kcal restantes',
+            'kcal_over' => 'kcal en trop',
+            'kcal_today' => 'kcal aujourd\'hui',
+            'snap' => [
+                'breakfast' => 'Scanner le petit-déjeuner',
+                'lunch' => 'Scanner le déjeuner',
+                'dinner' => 'Scanner le dîner',
+                'snack' => 'Scanner l\'en-cas',
+            ],
+        ],
     ],
 
     'onboarding_banner' => [
@@ -496,7 +508,7 @@ return [
             'coming_soon' => 'Bientôt disponible',
         ],
         'detail' => [
-            'back' => 'Retour au carnet',
+            'back' => 'Retour aux apports du jour',
             'nutrition' => 'Nutrition',
             'items_count' => '{{count}} aliments',
             'items_count_one' => '{{count}} aliment',
@@ -637,7 +649,7 @@ return [
             'edit_description' => 'Corrigez cette entrée et enregistrez vos modifications.',
         ],
         'index_page' => [
-            'title' => 'Carnet de suivi',
+            'title' => 'Apports du jour',
             'ask_ai' => 'Demander à l’IA',
             'review_prompt' => 'Analyse mes données de santé du {{startDate}} au {{endDate}}, ces deux dates incluses. Quelles tendances observes-tu et que pourrais-je améliorer ?',
             'add_entry' => 'Ajouter une entrée',
@@ -743,7 +755,7 @@ return [
             'new_chat' => 'Nouvelle discussion',
             'chats' => 'Chats',
             'meal_plans' => 'Mon menu',
-            'health_entries' => 'Carnet de suivi',
+            'health_entries' => 'Apports du jour',
             'snap_to_track' => 'Snap to Track',
             'update_info' => 'Informations personnelles',
             'integrations' => 'Intégrations',
