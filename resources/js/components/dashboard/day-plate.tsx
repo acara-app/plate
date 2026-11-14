@@ -1,5 +1,9 @@
 import { DAY_PART_STARTS, type DayPart } from '@/components/chat/day-part';
-import { STARTERS, type StarterId } from '@/components/chat/starters';
+import {
+    STARTERS,
+    useStarterPicker,
+    type StarterId,
+} from '@/components/chat/starters';
 import { cn } from '@/lib/utils';
 import { Moon, Sun } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
@@ -77,6 +81,7 @@ export function DayPlate({
     className?: string;
 }) {
     const { t } = useTranslation('common');
+    const pickStarter = useStarterPicker(onPick);
     const [previewId, setPreviewId] = useState<StarterId | null>(null);
     const [hasRisen, setHasRisen] = useState(false);
     const [dayStart] = useState(() => new Date(now).setHours(0, 0, 0, 0));
@@ -165,7 +170,7 @@ export function DayPlate({
             <button
                 type="button"
                 data-test="day-plate-now"
-                onClick={() => onPick(t(`chat.starters.${currentId}.prompt`))}
+                onClick={() => pickStarter(currentId)}
                 className={cn(
                     'absolute inset-[20%] flex flex-col items-center justify-center gap-[1.75cqw] rounded-full bg-neutral-50 px-[4cqw] text-center inset-shadow-[0_3px_10px_rgb(0_0_0/0.07)] transition-[scale,background-color] duration-200 ease-out hover:bg-neutral-100/80 active:scale-[0.97] dark:bg-neutral-900/70 dark:inset-shadow-[0_3px_12px_rgb(0_0_0/0.5)] dark:hover:bg-neutral-900',
                     PRESSABLE,
@@ -203,7 +208,7 @@ export function DayPlate({
                         data-test="day-plate-moment"
                         aria-label={t(`chat.starters.${id}.label`)}
                         style={rimPoint(hour)}
-                        onClick={() => onPick(t(`chat.starters.${id}.prompt`))}
+                        onClick={() => pickStarter(id)}
                         onPointerEnter={() => setPreviewId(id)}
                         onPointerLeave={() => setPreviewId(null)}
                         onFocus={() => setPreviewId(id)}
