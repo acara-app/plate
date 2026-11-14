@@ -124,9 +124,7 @@ export default function SnapToTrackIndex({
 
             if (file && !formRef.current?.processing) {
                 event.preventDefault();
-                setPhoto(file);
-                setAnalysisRequestId(generateUUID());
-                formRef.current?.clearErrors('photo');
+                selectPhoto(file);
             }
         }
 

@@ -33,9 +33,7 @@ use Throwable;
 
 final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 {
-    private const int TRIAL_HOLD_MINUTES = 15;
-
-    private const int MEMBER_HOLD_MINUTES = 3;
+    private const int HOLD_MINUTES = 3;
 
     private const int RETRY_AFTER_SECONDS = 5;
 
@@ -101,7 +99,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
                 $allowance = $this->allowance($period);
                 throw_if($allowance->exhausted(), PhotoLimitExceeded::class, $allowance);
 
-                return $this->reserve($existing, $subject, $period->id, $context, $attempt, self::TRIAL_HOLD_MINUTES);
+                return $this->reserve($existing, $subject, $period->id, $context, $attempt);
             }, 3);
         } catch (PhotoLimitExceeded $photoLimitExceeded) {
             $this->record('limit:'.hash('sha256', ($context->user->id ?? $context->guestId).':'.$photoLimitExceeded->entitlement->resetsAt), 'snap_to_track_limit_hit', ['mode' => $photoLimitExceeded->entitlement->mode]);
@@ -159,7 +157,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
             resolve(EnforceAiUsageLimit::class)->handle($user);
 
-            return $this->reserve($existing, $subject, null, $context, $attempt, self::MEMBER_HOLD_MINUTES);
+            return $this->reserve($existing, $subject, null, $context, $attempt);
         }, 3);
 
         if ($reservation->status === 'succeeded') {
@@ -168,13 +166,13 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
         try {
             $result = $analyze(PhotoModel::standard());
-            $this->pendingReservation($reservation, $attempt)->update($result->items->count() === 0
-                ? ['status' => 'failed']
-                : ['status' => 'succeeded', 'result' => Crypt::encryptString($result->toJson())]);
+            $this->attemptReservation($reservation, $attempt)->update([
+                'status' => 'succeeded', 'result' => Crypt::encryptString($result->toJson()),
+            ]);
 
             return $result;
         } catch (Throwable $throwable) {
-            $this->pendingReservation($reservation, $attempt)->update(['status' => 'failed', 'result' => null]);
+            $this->attemptReservation($reservation, $attempt)->update(['status' => 'failed', 'result' => null]);
 
             throw $throwable;
         }
@@ -199,14 +197,14 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
         return null;
     }
 
-    private function reserve(?SnapPhotoRequest $existing, string $subject, ?int $periodId, PhotoAnalysisContext $context, string $attempt, int $holdMinutes): SnapPhotoRequest
+    private function reserve(?SnapPhotoRequest $existing, string $subject, ?int $periodId, PhotoAnalysisContext $context, string $attempt): SnapPhotoRequest
     {
         $reservation = $existing ?? new SnapPhotoRequest;
         $reservation->fill([
             'period_id' => $periodId, 'subject' => $subject, 'request_key' => $context->requestId,
             'fingerprint' => $context->fingerprint, 'guest_id' => $context->guestId,
             'status' => 'pending', 'source' => $context->source, 'result' => null,
-            'attempt' => $attempt, 'created_at' => now('UTC'), 'expires_at' => now('UTC')->addMinutes($holdMinutes),
+            'attempt' => $attempt, 'created_at' => now('UTC'), 'expires_at' => now('UTC')->addMinutes(self::HOLD_MINUTES),
         ])->save();
 
         return $reservation;
@@ -218,10 +216,15 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
     }
 
     /** @return Builder<SnapPhotoRequest> */
+    private function attemptReservation(SnapPhotoRequest $reservation, string $attempt): Builder
+    {
+        return SnapPhotoRequest::query()->whereKey($reservation->id)->where('attempt', $attempt)->where('status', 'pending');
+    }
+
+    /** @return Builder<SnapPhotoRequest> */
     private function pendingReservation(SnapPhotoRequest $reservation, string $attempt): Builder
     {
-        return SnapPhotoRequest::query()->whereKey($reservation->id)->where('attempt', $attempt)
-            ->where('status', 'pending')->where('expires_at', '>', now('UTC'));
+        return $this->attemptReservation($reservation, $attempt)->where('expires_at', '>', now('UTC'));
     }
 
     private function subject(?User $user, ?string $guestId): string
