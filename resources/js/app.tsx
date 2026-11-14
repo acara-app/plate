@@ -1,3 +1,4 @@
+import '@ui-sdk/core/web.css';
 import '../css/app.css';
 
 import { Toaster } from '@/components/ui/sonner';

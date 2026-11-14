@@ -2,6 +2,11 @@
 
 - Don't include any superfluous PHP Annotations, except ones that start with `@` for typing variables.
 
+# UI SDK Guidelines
+
+- Before using UI SDK, follow the `ui-sdk` skill if installed. You can also read the bundled skill at `node_modules/@ui-sdk/core/skills/ui-sdk/SKILL.md`.
+- Read `node_modules/@ui-sdk/react/docs/llms.txt` before using UI SDK. When building a new component, also search `node_modules/@ui-sdk/react/docs/core.md` by heading and read `node_modules/@ui-sdk/react/docs/rendering.md`.
+
 # Laravel Wayfinder Guidelines
 
 When you generate the routes, use `--with-form` so that `Wayfinder` can create form request classes for you, like so;
