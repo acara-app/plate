@@ -22,10 +22,10 @@ beforeEach(function (): void {
     $this->actingAs($user);
 });
 
-it('keeps Snap to Track on the first screen of a phone, above the composer', function (int $width, int $height): void {
+it('keeps the meal scan button on the first screen of a phone, above the composer', function (int $width, int $height): void {
     visit(route('dashboard', absolute: false))
         ->resize($width, $height)
-        ->assertSee('Snap to Track')
+        ->assertSee('Snap your')
         ->assertScript(<<<'JS'
             (() => {
                 const snap = [...document.querySelectorAll('[data-test="dashboard-snap-to-track"]')]
@@ -61,18 +61,9 @@ it('logs water from a shortcut without sending a chat message', function (string
     ]);
     $this->assertDatabaseEmpty('agent_conversation_messages');
 })->with([
-    'the dashboard water moment' => ['dashboard', [], '[data-test="day-plate-moment"][aria-label="Log water"]', 393, 662],
     'the mobile chat starter' => ['chat.create', ['conversationId' => '00000000-0000-4000-8000-000000000001'], '[data-test="chat-starter"]:has-text("Log water"):visible', 393, 662],
     'the desktop chat starter' => ['chat.create', ['conversationId' => '00000000-0000-4000-8000-000000000001'], '[data-test="chat-starter"]:has-text("Log water"):visible', 1440, 900],
 ]);
-
-it('still drafts a meal question from the breakfast moment on the plate', function (): void {
-    visit(route('dashboard', absolute: false))
-        ->resize(393, 662)
-        ->click('[data-test="day-plate-moment"][aria-label="Plan breakfast"]')
-        ->assertValue('[data-test="dashboard-composer"] textarea', 'What should I have for breakfast today?')
-        ->assertNoJavaScriptErrors();
-});
 
 it('offers a scan shortcut in the top right corner of a phone', function (): void {
     visit(route('dashboard', absolute: false))

@@ -146,6 +146,18 @@ return [
         'description' => 'Your private health coach. Chats clear after 48 hours — hit Keep on any you want to hold onto.',
         'placeholder' => 'Ask Acara',
         'disclaimer' => 'For informational purposes only. Not a substitute for professional medical or nutritional advice.',
+        'plate' => [
+            'today' => 'Today',
+            'kcal_left' => 'kcal left',
+            'kcal_over' => 'kcal over',
+            'kcal_today' => 'kcal today',
+            'snap' => [
+                'breakfast' => 'Snap your breakfast',
+                'lunch' => 'Snap your lunch',
+                'dinner' => 'Snap your dinner',
+                'snack' => 'Snap your snack',
+            ],
+        ],
     ],
 
     'onboarding_banner' => [
@@ -495,7 +507,7 @@ return [
             'coming_soon' => 'Coming soon',
         ],
         'detail' => [
-            'back' => 'Back to Logbook',
+            'back' => 'Back to Daily intake',
             'nutrition' => 'Nutrition',
             'items_count' => '{{count}} items',
             'items_count_one' => '{{count}} item',
@@ -636,7 +648,7 @@ return [
             'edit_description' => 'Make a correction and save your changes.',
         ],
         'index_page' => [
-            'title' => 'Logbook',
+            'title' => 'Daily intake',
             'ask_ai' => 'Ask AI',
             'review_prompt' => 'Review my health entries from {{startDate}} through {{endDate}}, inclusive. What trends do you notice, and what could I improve?',
             'add_entry' => 'Add entry',
@@ -742,7 +754,7 @@ return [
             'new_chat' => 'New Chat',
             'chats' => 'Chats',
             'meal_plans' => 'My Menu',
-            'health_entries' => 'Logbook',
+            'health_entries' => 'Daily intake',
             'snap_to_track' => 'Snap to Track',
             'update_info' => 'Personal Details',
             'integrations' => 'Integrations',
