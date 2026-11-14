@@ -1161,13 +1161,8 @@ return [
                 'label' => 'Prévoir demain',
                 'prompt' => 'Que devrais-je manger demain ?',
             ],
-            'glucose' => [
-                'label' => 'Stabiliser ma glycémie',
-                'prompt' => 'Comment garder une glycémie stable après les repas ?',
-            ],
             'water' => [
-                'label' => "Bien m'hydrater",
-                'prompt' => "Quelle quantité d'eau devrais-je boire aujourd'hui ?",
+                'label' => 'Noter l’eau bue',
             ],
             'workout' => [
                 'label' => 'Prévoir une séance',

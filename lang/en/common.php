@@ -1160,13 +1160,8 @@ return [
                 'label' => 'Plan tomorrow',
                 'prompt' => 'What should I eat tomorrow?',
             ],
-            'glucose' => [
-                'label' => 'Steady my glucose',
-                'prompt' => 'How can I keep my glucose steady after meals?',
-            ],
             'water' => [
-                'label' => 'Stay hydrated',
-                'prompt' => 'How much water should I drink today?',
+                'label' => 'Log water',
             ],
             'workout' => [
                 'label' => 'Plan a workout',

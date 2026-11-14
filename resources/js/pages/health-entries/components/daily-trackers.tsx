@@ -1,6 +1,7 @@
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import type { DailyWellness } from '@/types/diabetes';
+import { usePage } from '@inertiajs/react';
 import { GlassWater, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -21,8 +22,12 @@ export default function DailyTrackers({
     wellness: DailyWellness;
 }) {
     const { t, i18n } = useTranslation('common');
+    const { url } = usePage();
     const locale = i18n.resolvedLanguage;
-    const [sheet, setSheet] = useState({ key: 0, open: false });
+    const [sheet, setSheet] = useState(() => ({
+        key: 0,
+        open: new URLSearchParams(url.split('?')[1]).get('log') === 'water',
+    }));
     const water = formatAmount(wellness.water_ml, locale);
     const waterGoal = formatAmount(wellness.water_goal_ml, locale);
 
