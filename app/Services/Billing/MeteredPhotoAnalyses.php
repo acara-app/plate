@@ -168,17 +168,16 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
         try {
             $result = $analyze(PhotoModel::standard());
+            $this->pendingReservation($reservation, $attempt)->update($result->items->count() === 0
+                ? ['status' => 'failed']
+                : ['status' => 'succeeded', 'result' => Crypt::encryptString($result->toJson())]);
+
+            return $result;
         } catch (Throwable $throwable) {
             $this->pendingReservation($reservation, $attempt)->update(['status' => 'failed', 'result' => null]);
 
             throw $throwable;
         }
-
-        $this->pendingReservation($reservation, $attempt)->update($result->items->count() === 0
-            ? ['status' => 'failed']
-            : ['status' => 'succeeded', 'result' => Crypt::encryptString($result->toJson())]);
-
-        return $result;
     }
 
     private function replay(?SnapPhotoRequest $existing, PhotoAnalysisContext $context): ?SnapPhotoRequest

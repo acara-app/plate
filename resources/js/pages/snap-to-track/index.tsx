@@ -14,7 +14,7 @@ import {
 } from '@/components/photo-allowance';
 import { MealScanner } from '@/components/snap-to-track/meal-scanner';
 import { SidebarTrigger } from '@/components/ui/sidebar';
-import { cn } from '@/lib/utils';
+import { cn, generateUUID } from '@/lib/utils';
 import { type AiAllowance } from '@/types';
 import { Form, Head } from '@inertiajs/react';
 import type { FormComponentRef } from '@inertiajs/core';
@@ -23,7 +23,6 @@ import { useTranslation } from 'react-i18next';
 
 interface SnapToTrackIndexProps {
     photoAllowance?: PhotoAllowance;
-    analysisRequestId: string;
     aiAllowance: AiAllowance | null;
 }
 
@@ -50,10 +49,10 @@ function carriesFiles(event: DragEvent<HTMLElement>): boolean {
 export default function SnapToTrackIndex({
     aiAllowance,
     photoAllowance,
-    analysisRequestId,
 }: SnapToTrackIndexProps) {
     const { t } = useTranslation('common');
     const [photo, setPhoto] = useState<File | null>(null);
+    const [analysisRequestId, setAnalysisRequestId] = useState(generateUUID);
     const [dropping, setDropping] = useState(false);
     const [dayPart] = useState(currentDayPart);
     const formRef = useRef<FormComponentRef>(null);
@@ -67,6 +66,7 @@ export default function SnapToTrackIndex({
 
     function selectPhoto(file: File): void {
         setPhoto(file);
+        setAnalysisRequestId(generateUUID());
         formRef.current?.clearErrors('photo');
     }
 
@@ -125,6 +125,7 @@ export default function SnapToTrackIndex({
             if (file && !formRef.current?.processing) {
                 event.preventDefault();
                 setPhoto(file);
+                setAnalysisRequestId(generateUUID());
                 formRef.current?.clearErrors('photo');
             }
         }
