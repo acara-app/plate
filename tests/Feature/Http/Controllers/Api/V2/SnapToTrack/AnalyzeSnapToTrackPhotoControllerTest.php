@@ -7,10 +7,13 @@ use App\Http\Controllers\Api\V2\SnapToTrack\AnalyzeSnapToTrackPhotoController;
 use App\Models\AiUsage;
 use App\Models\AnalysisDraft;
 use App\Models\MealPhoto;
+use App\Models\SnapPhotoRequest;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Laravel\Cashier\Subscription;
 
 covers(AnalyzeSnapToTrackPhotoController::class);
 
@@ -208,6 +211,48 @@ it('keeps the photo privately so the logged meal shows it', function (): void {
     $this->get(route('api.v2.health-entries.photo', ['group' => $groupId]))
         ->assertOk()
         ->assertHeader('Content-Type', 'image/jpeg');
+});
+
+it('answers a retried scan with the first result instead of scanning the photo again', function (bool $paying): void {
+    sellPhotoPlans();
+    if ($paying) {
+        Subscription::factory()->for($this->user)->active()->withPrice('price_starter')->create();
+    }
+
+    fakeApiSnapAnalysis();
+    $photo = apiSnapPhotoDataUrl();
+    $this->withHeader('Authorization', 'Bearer '.$this->token)->withHeader('Idempotency-Key', (string) Str::uuid());
+
+    $first = $this->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => $photo])->assertOk();
+
+    $this->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => $photo])
+        ->assertOk()
+        ->assertJsonPath('analysis', $first->json('analysis'))
+        ->assertJsonPath('photoAllowance', $first->json('photoAllowance'));
+
+    FoodPhotoAnalyzerAgent::assertPromptedTimes(1);
+})->with(['free trial' => false, 'paying member' => true]);
+
+it('asks a retry to wait while the first scan of the photo is still running', function (): void {
+    sellPhotoPlans();
+    Subscription::factory()->for($this->user)->active()->withPrice('price_starter')->create();
+    FoodPhotoAnalyzerAgent::fake();
+    $photo = apiSnapPhotoBase64();
+    $key = (string) Str::uuid();
+    SnapPhotoRequest::factory()->create([
+        'period_id' => null, 'subject' => "user:{$this->user->id}", 'request_key' => $key,
+        'fingerprint' => hash('sha256', $photo), 'guest_id' => null, 'source' => 'mobile_snap_to_track',
+    ]);
+
+    $this->withHeader('Authorization', 'Bearer '.$this->token)
+        ->withHeader('Idempotency-Key', $key)
+        ->postJson(route('api.v2.snap-to-track.analyze'), ['photo' => $photo])
+        ->assertConflict()
+        ->assertHeader('Retry-After', '5')
+        ->assertJsonPath('error', 'This photo is still being analyzed.');
+
+    FoodPhotoAnalyzerAgent::assertNeverPrompted();
+    expect(AnalysisDraft::query()->count())->toBe(0);
 });
 
 it('still returns the analysis when the photo cannot be kept', function (): void {

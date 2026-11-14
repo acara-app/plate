@@ -78,6 +78,22 @@ it("stops a paying member's scan once their plan limit is reached", function ():
     ))->toThrow(UsageLimitExceededException::class);
 });
 
+it("replays a paying member's repeated scan without charging again or touching their free trial", function (): void {
+    $member = payingPhotoMember();
+    $access = resolve(ManagesPhotoAnalyses::class);
+    $scan = photoScanFor($member);
+
+    expect(fn (): FoodAnalysisData => $access->analyze($scan, fn (): FoodAnalysisData => throw new RuntimeException('The provider timed out.')))
+        ->toThrow(RuntimeException::class);
+
+    $first = $access->analyze($scan, fn (): FoodAnalysisData => mealAnalysisWithItems(2));
+    $replayed = $access->analyze($scan, fn (): FoodAnalysisData => throw new RuntimeException('The provider must not be called again.'));
+    $member->subscriptions()->delete();
+
+    expect($replayed->toArray())->toBe($first->toArray())
+        ->and($access->entitlement($member, null)->remaining)->toBe(2);
+});
+
 it('does not use up a free scan when no food is found in the photo', function (): void {
     $guest = (string) Str::uuid();
     $access = resolve(ManagesPhotoAnalyses::class);
