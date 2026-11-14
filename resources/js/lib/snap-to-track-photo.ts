@@ -39,11 +39,11 @@ function writePhoto(photo: StoredPhoto | null): boolean {
     }
 }
 
-async function drawScaled(
-    file: File,
-    maxEdge: number,
-): Promise<HTMLCanvasElement> {
-    const bitmap = await createImageBitmap(file);
+function decodePhoto(file: File): Promise<ImageBitmap> {
+    return createImageBitmap(file, { imageOrientation: 'from-image' });
+}
+
+function drawScaled(bitmap: ImageBitmap, maxEdge: number): HTMLCanvasElement {
     const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
     const canvas = document.createElement('canvas');
     canvas.width = Math.round(bitmap.width * scale);
@@ -56,15 +56,20 @@ async function drawScaled(
         context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     }
 
-    bitmap.close();
-
     return canvas;
 }
 
 async function downscale(file: File): Promise<string> {
-    const canvas = await drawScaled(file, MAX_EDGE);
+    const bitmap = await decodePhoto(file);
 
-    return canvas.toDataURL('image/jpeg', JPEG_QUALITY);
+    try {
+        return drawScaled(bitmap, MAX_EDGE).toDataURL(
+            'image/jpeg',
+            JPEG_QUALITY,
+        );
+    } finally {
+        bitmap.close();
+    }
 }
 
 function toJpegBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
@@ -74,20 +79,31 @@ function toJpegBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
 }
 
 export async function prepareSnapPhoto(file: File): Promise<File> {
-    if (UPLOADABLE_TYPES.includes(file.type)) {
-        return file;
-    }
-
     try {
-        const jpeg = await toJpegBlob(await drawScaled(file, UPLOAD_MAX_EDGE));
+        const bitmap = await decodePhoto(file);
 
-        if (jpeg === null) {
-            return file;
+        try {
+            if (
+                UPLOADABLE_TYPES.includes(file.type) &&
+                Math.max(bitmap.width, bitmap.height) <= UPLOAD_MAX_EDGE
+            ) {
+                return file;
+            }
+
+            const jpeg = await toJpegBlob(drawScaled(bitmap, UPLOAD_MAX_EDGE));
+
+            if (jpeg === null) {
+                return file;
+            }
+
+            return new File(
+                [jpeg],
+                `${file.name.replace(/\.[^.]*$/, '')}.jpg`,
+                { type: 'image/jpeg' },
+            );
+        } finally {
+            bitmap.close();
         }
-
-        return new File([jpeg], `${file.name.replace(/\.[^.]*$/, '')}.jpg`, {
-            type: 'image/jpeg',
-        });
     } catch {
         return file;
     }
