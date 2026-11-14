@@ -28,5 +28,6 @@ Schedule::command(AggregateDailyMealEstimatesCommand::class)->dailyAt('02:30')->
 Schedule::command(AggregateDailyGuestScansCommand::class)->dailyAt('02:45')->withoutOverlapping(60);
 
 Schedule::call(function (): void {
+    SnapPhotoRequest::query()->whereNull('period_id')->where('created_at', '<', now('UTC')->subDay())->delete();
     SnapPhotoRequest::query()->whereNotNull('result')->where('created_at', '<', now('UTC')->subDay())->update(['result' => null]);
 })->name('snap:prune-results')->hourly()->withoutOverlapping();

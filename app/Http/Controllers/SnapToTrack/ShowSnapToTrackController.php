@@ -8,7 +8,6 @@ use App\Actions\Billing\ResolveAiAllowance;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Data\Billing\PhotoAnalysisContext;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -32,7 +31,6 @@ final readonly class ShowSnapToTrackController
 
         return Inertia::render('snap-to-track/index', [
             'photoAllowance' => $allowance->toArray(),
-            'analysisRequestId' => (string) Str::uuid(),
             'aiAllowance' => $aiAllowance?->toArray(),
         ]);
     }

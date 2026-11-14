@@ -53,7 +53,7 @@ final readonly class AnalyzeSnapToTrackPhotoController
         } catch (UsageLimitExceededException $exception) {
             return $exception->render($request);
         } catch (HttpExceptionInterface $exception) {
-            return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode());
+            return response()->json(['error' => $exception->getMessage()], $exception->getStatusCode(), $exception->getHeaders());
         } catch (ValidationException $exception) {
             throw $exception;
         } catch (Throwable $throwable) {

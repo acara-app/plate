@@ -27,3 +27,17 @@ it('clears stored scan results hourly once they are a day old', function (): voi
         ->and(DB::table('snap_photo_requests')->where('id', $dayOld)->first(['status', 'result']))->toEqual((object) ['status' => 'succeeded', 'result' => null])
         ->and(DB::table('snap_photo_requests')->where('id', $recent)->value('result'))->toBe('encrypted-analysis');
 });
+
+it('forgets member scans once their result can no longer be replayed', function (): void {
+    $storeMemberScan = fn (string $requestKey, CarbonInterface $createdAt): int => DB::table('snap_photo_requests')->insertGetId([
+        'period_id' => null, 'subject' => 'user:1', 'request_key' => $requestKey, 'fingerprint' => 'photo',
+        'guest_id' => null, 'status' => 'succeeded', 'attempt' => (string) Str::uuid(), 'source' => 'mobile_snap_to_track',
+        'result' => 'encrypted-analysis', 'created_at' => $createdAt, 'expires_at' => $createdAt->addMinutes(3),
+    ]);
+    $storeMemberScan('day-old', now('UTC')->subDay()->subMinute());
+    $recent = $storeMemberScan('recent', now('UTC')->subHours(23));
+
+    collect(resolve(Schedule::class)->events())->sole(fn (Event $event): bool => $event->description === 'snap:prune-results')->run(app());
+
+    expect(DB::table('snap_photo_requests')->pluck('id')->all())->toBe([$recent]);
+});

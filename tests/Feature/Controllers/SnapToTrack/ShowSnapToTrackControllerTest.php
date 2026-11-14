@@ -21,8 +21,7 @@ it('renders the snap to track module', function (): void {
         ->get(route('snap-to-track.index'))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
-            ->component('snap-to-track/index')
-            ->has('analysisRequestId'));
+            ->component('snap-to-track/index'));
 });
 
 it('renders the scanner without a saved meal confirmation from an older session', function (): void {
