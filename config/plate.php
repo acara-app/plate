@@ -19,9 +19,9 @@ use App\Ai\Tools\UpdateUserProfileAttributes;
 use Laravel\Ai\Providers\Tools\WebSearch;
 
 return [
-    'privacy_policy_version' => '2026-11-09',
+    'privacy_policy_version' => '2026-11-14',
 
-    'terms_version' => '2026-11-08',
+    'terms_version' => '2026-11-14',
 
     'chat' => [
         'temporary_retention_hours' => (int) env('CHAT_TEMPORARY_RETENTION_HOURS', 48),

@@ -1112,6 +1112,17 @@ return [
         'thanks' => 'Thanks,',
     ],
 
+    'subscription_cancelled_email' => [
+        'subject' => 'Your :plan plan has been cancelled',
+        'greeting' => 'Hi :name,',
+        'scheduled' => "Your :plan plan has been cancelled, and you won't be charged again. You can keep using it until :date, then your account moves to the free plan.",
+        'ended' => "Your :plan plan was cancelled on :date, and you won't be charged again. Your account is now on the free plan.",
+        'data_kept' => 'Your meals, logs and history stay right where they are.',
+        'action' => 'Open Billing settings',
+        'unexpected' => "Didn't ask to cancel? Contact us right away: :url",
+        'salutation' => 'Thanks for using :app.',
+    ],
+
     'chat' => [
         'placeholder' => 'Ask anything',
         'stop' => 'Stop',
