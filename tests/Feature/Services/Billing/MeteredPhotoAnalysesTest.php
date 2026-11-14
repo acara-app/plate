@@ -10,11 +10,13 @@ use App\Exceptions\Billing\UsageLimitExceededException;
 use App\Models\AiUsage;
 use App\Models\SnapPhotoAccount;
 use App\Models\SnapPhotoPeriod;
+use App\Models\SnapPhotoRequest;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use App\Services\Billing\MeteredPhotoAnalyses;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 covers(MeteredPhotoAnalyses::class);
 
@@ -77,6 +79,45 @@ it("stops a paying member's scan once their plan limit is reached", function ():
         fn (): FoodAnalysisData => throw new RuntimeException('The provider must not be called.'),
     ))->toThrow(UsageLimitExceededException::class);
 });
+
+it("replays a paying member's finished scan, even a slow or empty one, without charging again or touching their free trial", function (int $items): void {
+    $member = payingPhotoMember();
+    $access = resolve(ManagesPhotoAnalyses::class);
+    $scan = photoScanFor($member);
+
+    expect(fn (): FoodAnalysisData => $access->analyze($scan, fn (): FoodAnalysisData => throw new RuntimeException('The provider timed out.')))
+        ->toThrow(RuntimeException::class);
+
+    $first = $access->analyze($scan, function () use ($items): FoodAnalysisData {
+        $this->travel(4)->minutes();
+
+        return mealAnalysisWithItems($items);
+    });
+    $replayed = $access->analyze($scan, fn (): FoodAnalysisData => throw new RuntimeException('The provider must not be called again.'));
+    $member->subscriptions()->delete();
+
+    expect($replayed->toArray())->toBe($first->toArray())
+        ->and($access->entitlement($member, null)->remaining)->toBe(2);
+})->with(['food found' => 2, 'no food found' => 0]);
+
+it('lets a photo whose scan died in flight be scanned again once the three-minute hold ends', function (bool $paying): void {
+    $this->freezeSecond();
+    $user = $paying ? payingPhotoMember() : User::factory()->create();
+    $access = resolve(ManagesPhotoAnalyses::class);
+    $scan = photoScanFor($user);
+    $access->analyze($scan, fn (): FoodAnalysisData => mealAnalysisWithItems(1));
+    SnapPhotoRequest::query()->sole()->update(['status' => 'pending', 'result' => null]);
+
+    $this->travel(179)->seconds();
+    expect(fn (): FoodAnalysisData => $access->analyze($scan, fn (): FoodAnalysisData => throw new RuntimeException('The provider must not be called.')))
+        ->toThrow(function (HttpException $exception): void {
+            expect($exception->getStatusCode())->toBe(409)
+                ->and($exception->getHeaders())->toBe(['Retry-After' => '5']);
+        });
+
+    $this->travel(1)->seconds();
+    expect($access->analyze($scan, fn (): FoodAnalysisData => mealAnalysisWithItems(2))->items)->toHaveCount(2);
+})->with(['free trial' => false, 'paying member' => true]);
 
 it('does not use up a free scan when no food is found in the photo', function (): void {
     $guest = (string) Str::uuid();

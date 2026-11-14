@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
- * @property int $period_id
+ * @property int|null $period_id
  * @property string $subject
  * @property string $request_key
  * @property string $fingerprint
