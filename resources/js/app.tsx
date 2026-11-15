@@ -1,4 +1,5 @@
-import '@ui-sdk/core/web.css';
+// Off until a UI SDK component is used: it restyles components that share its data-slot names.
+// import '@ui-sdk/core/web.css';
 import '../css/app.css';
 
 import { Toaster } from '@/components/ui/sonner';
