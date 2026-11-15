@@ -25,6 +25,7 @@ export interface MacroConfig {
     icon: string;
     text: string;
     ring: string;
+    bar: string;
 }
 
 export const CALORIES = {
@@ -44,6 +45,7 @@ export const MACROS: MacroConfig[] = [
         icon: 'text-rose-500 dark:text-rose-300',
         text: 'text-rose-600 dark:text-rose-300',
         ring: 'stroke-rose-500 dark:stroke-rose-400',
+        bar: 'bg-rose-400',
     },
     {
         key: 'carbs',
@@ -55,6 +57,7 @@ export const MACROS: MacroConfig[] = [
         icon: 'text-amber-500 dark:text-amber-300',
         text: 'text-amber-700 dark:text-amber-300',
         ring: 'stroke-amber-400 dark:stroke-amber-300',
+        bar: 'bg-amber-300 dark:bg-amber-400',
     },
     {
         key: 'fat',
@@ -66,6 +69,7 @@ export const MACROS: MacroConfig[] = [
         icon: 'text-orange-500 dark:text-orange-300',
         text: 'text-orange-700 dark:text-orange-300',
         ring: 'stroke-orange-400 dark:stroke-orange-300',
+        bar: 'bg-orange-500',
     },
     {
         key: 'fiber',
@@ -77,6 +81,7 @@ export const MACROS: MacroConfig[] = [
         icon: 'text-green-600 dark:text-green-300',
         text: 'text-green-700 dark:text-green-300',
         ring: 'stroke-green-500 dark:stroke-green-400',
+        bar: 'bg-green-500',
     },
 ];
 

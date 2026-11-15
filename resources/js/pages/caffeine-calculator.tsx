@@ -16,7 +16,7 @@ import {
 import { Head, useHttp, usePage } from '@inertiajs/react';
 import type { Spec } from '@json-render/core';
 import { ChevronRight, Coffee, Home, LoaderCircle, Plus } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const PAPER = 'bg-[#F2EBDD]';
@@ -225,7 +225,7 @@ export default function CaffeineCalculator() {
         }
     }
 
-    function onSubmit(event: FormEvent): void {
+    function onSubmit(event: SubmitEvent<HTMLFormElement>): void {
         event.preventDefault();
         if (form.processing) {
             return;

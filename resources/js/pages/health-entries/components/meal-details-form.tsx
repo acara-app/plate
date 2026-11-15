@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
+import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import { PRESS_BUTTON } from './pressable';
 
 type Details = { meal_name: string; measured_at: string; notes: string };
 
@@ -24,13 +26,16 @@ export default function DetailsForm({
     const { t } = useTranslation('common');
     const [draft, setDraft] = useState(details);
 
-    const submit = (event: FormEvent) => {
+    const submit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         onApply(draft);
     };
 
     return (
-        <form onSubmit={submit} className="flex flex-col gap-5 px-5 pb-6">
+        <form
+            onSubmit={submit}
+            className="flex flex-col gap-5 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+        >
             <div className="flex flex-col gap-2">
                 <Label htmlFor="meal-name">
                     {t('health_entries.detail.meal_name')}
@@ -40,6 +45,7 @@ export default function DetailsForm({
                     value={draft.meal_name}
                     maxLength={100}
                     placeholder={automaticName}
+                    enterKeyHint="done"
                     className="h-12 rounded-xl text-base"
                     onChange={(event) =>
                         setDraft({ ...draft, meal_name: event.target.value })
@@ -81,7 +87,7 @@ export default function DetailsForm({
             </div>
             <Button
                 type="submit"
-                className="h-12 rounded-2xl text-base"
+                className={cn('h-12 rounded-2xl text-base', PRESS_BUTTON)}
                 disabled={saving}
             >
                 {t(
