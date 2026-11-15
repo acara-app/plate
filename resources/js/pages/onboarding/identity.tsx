@@ -50,22 +50,10 @@ const OPTIONS = 'onboarding.identity.options';
 
 const GOALS: Choice[] = [
     {
-        value: GoalChoice.Spikes,
-        label: `${OPTIONS}.goals.spikes`,
-        description: `${OPTIONS}.goals.spikes_desc`,
-        Icon: Activity,
-    },
-    {
-        value: GoalChoice.WeightLoss,
-        label: `${OPTIONS}.goals.weight_loss`,
-        description: `${OPTIONS}.goals.weight_loss_desc`,
-        Icon: Flame,
-    },
-    {
-        value: GoalChoice.HeartHealth,
-        label: `${OPTIONS}.goals.heart_health`,
-        description: `${OPTIONS}.goals.heart_health_desc`,
-        Icon: HeartPulse,
+        value: GoalChoice.HealthyEating,
+        label: `${OPTIONS}.goals.healthy_eating`,
+        description: `${OPTIONS}.goals.healthy_eating_desc`,
+        Icon: Salad,
     },
     {
         value: GoalChoice.BuildMuscle,
@@ -74,10 +62,22 @@ const GOALS: Choice[] = [
         Icon: Dumbbell,
     },
     {
-        value: GoalChoice.HealthyEating,
-        label: `${OPTIONS}.goals.healthy_eating`,
-        description: `${OPTIONS}.goals.healthy_eating_desc`,
-        Icon: Salad,
+        value: GoalChoice.HeartHealth,
+        label: `${OPTIONS}.goals.heart_health`,
+        description: `${OPTIONS}.goals.heart_health_desc`,
+        Icon: HeartPulse,
+    },
+    {
+        value: GoalChoice.WeightLoss,
+        label: `${OPTIONS}.goals.weight_loss`,
+        description: `${OPTIONS}.goals.weight_loss_desc`,
+        Icon: Flame,
+    },
+    {
+        value: GoalChoice.Spikes,
+        label: `${OPTIONS}.goals.spikes`,
+        description: `${OPTIONS}.goals.spikes_desc`,
+        Icon: Activity,
     },
 ];
 
