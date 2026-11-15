@@ -2,14 +2,13 @@ import {
     AUTH_HEADLINE,
     AUTH_LEAD,
     AUTH_PRESSABLE,
-    AUTH_TEXT_LINK,
-    AuthBrand,
     AuthFieldError,
     AuthScreen,
     AuthSubmitButton,
 } from '@/components/auth/auth-screen';
 import { DISPLAY_FONT } from '@/components/dashboard/intake-plate';
 import { MeasurementRuler } from '@/components/onboarding/measurement-ruler';
+import { OnboardingHeader } from '@/components/onboarding/onboarding-shell';
 import useSharedProps from '@/hooks/use-shared-props';
 import {
     centimetersToFeetAndInches,
@@ -23,10 +22,9 @@ import {
     poundsToKilograms,
 } from '@/lib/body-measurements';
 import { cn } from '@/lib/utils';
-import { dashboard } from '@/routes';
 import onboarding from '@/routes/onboarding';
 import { BloodTypeOption, Profile, SexOption } from '@/types/user';
-import { Form, Link } from '@inertiajs/react';
+import { Form } from '@inertiajs/react';
 import { Info, Pencil, Scale } from 'lucide-react';
 import { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -510,44 +508,9 @@ export default function Biometrics({
 
                     return (
                         <>
-                            <header className="flex h-11 items-center gap-4">
-                                <AuthBrand />
-                                {!isCompletedReview && (
-                                    <div
-                                        role="progressbar"
-                                        aria-label={t(
-                                            'onboarding.biometrics.step',
-                                            { current: 1, total: 3 },
-                                        )}
-                                        aria-valuemin={1}
-                                        aria-valuemax={3}
-                                        aria-valuenow={1}
-                                        className="ml-auto flex w-28 gap-1.5"
-                                    >
-                                        {[0, 1, 2].map((index) => (
-                                            <span
-                                                key={index}
-                                                className={cn(
-                                                    'h-1.5 flex-1 rounded-full',
-                                                    index === 0
-                                                        ? 'bg-foreground'
-                                                        : 'bg-foreground/10',
-                                                )}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
-                                <Link
-                                    href={dashboard.url()}
-                                    className={cn(
-                                        AUTH_TEXT_LINK,
-                                        'text-sm font-medium text-muted-foreground no-underline',
-                                        isCompletedReview && 'ml-auto',
-                                    )}
-                                >
-                                    {t('onboarding.biometrics.exit')}
-                                </Link>
-                            </header>
+                            <OnboardingHeader
+                                step={isCompletedReview ? undefined : 1}
+                            />
 
                             <div className="mt-7 grid flex-1 grid-cols-1 content-start gap-2.5 md:mt-10 md:grid-cols-2 md:items-start md:gap-x-10 md:gap-y-4">
                                 <div
