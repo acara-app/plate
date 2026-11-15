@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Actions\FailPhotoAnalysis;
 use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RetryPhotoAnalysis;
+use App\Actions\ShrinkOversizedPhoto;
 use App\Actions\StartPhotoAnalysis;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Data\Billing\PhotoAnalysisContext;
@@ -160,7 +161,7 @@ class extends Component
         }
     }
 
-    public function analyze(StartPhotoAnalysis $start): void
+    public function analyze(StartPhotoAnalysis $start, ShrinkOversizedPhoto $shrinkOversizedPhoto): void
     {
         $existing = $this->ownedAnalyses()->where('request_id', $this->analysisRequestId)->first();
         if ($existing !== null) {
@@ -197,8 +198,7 @@ class extends Component
                 return;
             }
 
-            $imageContent = $this->photo->get();
-            $base64 = base64_encode($imageContent ?? '');
+            $base64 = base64_encode($shrinkOversizedPhoto->handle($this->photo->get() ?? ''));
             $image = Base64Image::decode($base64);
             if (! $image instanceof Base64Image) {
                 throw ValidationException::withMessages(['photo' => $this->photoMessages()['photo.mimes']]);

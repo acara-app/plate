@@ -212,6 +212,24 @@ it('shrinks large photos to 1024 pixels before analysis and keeps them upright',
     'photo the camera marked as rotated' => [fn (): UploadedFile => rotatedJpegForSnapToTrack(2000, 1500), [768, 1024]],
 ]);
 
+it('queues full-size photos at 2048 pixels so the background scan never decodes the original', function (UploadedFile $photo, array $size): void {
+    fakeTurnstileForSnapToTrack();
+    Queue::fake([ProcessPhotoAnalysis::class]);
+
+    Livewire::test('pages::snap-to-track')
+        ->set('photo', $photo)
+        ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
+        ->call('analyze');
+
+    $queuedPhoto = (string) base64_decode((string) PhotoAnalysisRequest::query()->sole()->image_base64, true);
+
+    expect(array_slice((array) getimagesizefromstring($queuedPhoto), 0, 2))->toBe($size);
+})->with([
+    'full-size photo' => [fn (): UploadedFile => UploadedFile::fake()->image('meal.jpg', 3000, 2250), [2048, 1536]],
+    'full-size photo the camera marked as rotated' => [fn (): UploadedFile => rotatedJpegForSnapToTrack(3000, 2250), [1536, 2048]],
+    'photo already within 2048 pixels' => [fn (): UploadedFile => UploadedFile::fake()->image('meal.png', 2000, 1500), [2000, 1500]],
+]);
+
 it('analyzes a photo it cannot redraw exactly as uploaded', function (): void {
     $truncatedPng = mb_substr(UploadedFile::fake()->image('meal.png', 2000, 1500)->getContent(), 0, 33, '8bit');
     fakeTurnstileForSnapToTrack();
