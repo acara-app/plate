@@ -11,7 +11,7 @@
         ],
         [
             'question' => 'Can I try it without signing up?',
-            'answer' => 'Yes. Try one free scan with Snap to Track without creating an account or entering a card. Create an account to save meals to your Logbook. Further photo scans depend on your plan allowance.',
+            'answer' => 'Yes. You can try Snap to Track without creating an account or entering a card. Create an account to save meals to your Logbook. Further photo scans depend on your plan allowance.',
         ],
         [
             'question' => 'What can I track in Logbook?',
@@ -540,7 +540,7 @@
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Scan</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Take or upload a meal photo in Snap to Track. Try one free scan without signing up.
+                                    Take or upload a meal photo in Snap to Track.
                                 </p>
                             </div>
                         </div>

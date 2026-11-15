@@ -1,20 +1,23 @@
-import { dashboard } from '@/routes';
-import onboarding from '@/routes/onboarding';
-import { Form, Head, Link } from '@inertiajs/react';
-import { LoaderCircle, Plus, X } from 'lucide-react';
-
-import InputError from '@/components/input-error';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+    AUTH_HEADLINE,
+    AUTH_LEAD,
+    AUTH_PRESSABLE,
+    AuthFieldError,
+    AuthScreen,
+    AuthSubmitButton,
+} from '@/components/auth/auth-screen';
+import {
+    ONBOARDING_COLUMNS,
+    ONBOARDING_LABEL,
+    ONBOARDING_RISE,
+    ONBOARDING_SURFACE,
+    OnboardingHeader,
+} from '@/components/onboarding/onboarding-shell';
 import { cn } from '@/lib/utils';
-import { useState } from 'react';
+import onboarding from '@/routes/onboarding';
+import { Form } from '@inertiajs/react';
+import { Check, NotebookPen, Plus } from 'lucide-react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface CategoryOption {
@@ -48,18 +51,301 @@ interface Props {
     severityOptions: SeverityOption[];
 }
 
-const COMMON_ALLERGIES = [
-    'Peanuts',
-    'Tree Nuts',
-    'Milk',
-    'Eggs',
-    'Wheat',
-    'Soy',
-    'Fish',
-    'Shellfish',
-    'Sesame',
-    'Gluten',
-];
+const ALLERGY = 'allergy';
+
+const CATEGORY_DETAILS: Record<
+    string,
+    { label: string; suggestions: string[] }
+> = {
+    allergy: {
+        label: 'onboarding.dietary_preferences.allergies',
+        suggestions: [
+            'Peanuts',
+            'Tree Nuts',
+            'Milk',
+            'Eggs',
+            'Wheat',
+            'Soy',
+            'Fish',
+            'Shellfish',
+            'Sesame',
+            'Gluten',
+        ],
+    },
+    intolerance: {
+        label: 'onboarding.dietary_preferences.intolerances',
+        suggestions: ['Lactose', 'Gluten', 'Fructose', 'Caffeine', 'Histamine'],
+    },
+    dietary_pattern: {
+        label: 'onboarding.dietary_preferences.patterns',
+        suggestions: [
+            'Low carb',
+            'High protein',
+            'Low sodium',
+            'Gluten-free',
+            'Dairy-free',
+            'Intermittent fasting',
+        ],
+    },
+    dislike: {
+        label: 'onboarding.dietary_preferences.dislikes',
+        suggestions: [
+            'Mushrooms',
+            'Cilantro',
+            'Olives',
+            'Seafood',
+            'Spicy food',
+            'Eggplant',
+        ],
+    },
+    restriction: {
+        label: 'onboarding.dietary_preferences.restrictions',
+        suggestions: ['Halal', 'Kosher', 'No pork', 'No beef', 'No alcohol'],
+    },
+};
+
+function isSame(a: string, b: string): boolean {
+    return a.trim().toLowerCase() === b.trim().toLowerCase();
+}
+
+function Chip({
+    selected,
+    onClick,
+    children,
+}: {
+    selected: boolean;
+    onClick: () => void;
+    children: ReactNode;
+}) {
+    return (
+        <button
+            type="button"
+            aria-pressed={selected}
+            onClick={onClick}
+            className={cn(
+                'flex h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-[0.9375rem] font-semibold transition-[background-color,color,scale] duration-150 ease-out active:scale-95',
+                selected
+                    ? 'bg-foreground text-background'
+                    : 'bg-foreground/[0.055] text-foreground dark:bg-white/[0.08]',
+                AUTH_PRESSABLE,
+            )}
+        >
+            {selected && (
+                <Check
+                    className="-ml-1 size-4 duration-150 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-75"
+                    strokeWidth={3}
+                    aria-hidden="true"
+                />
+            )}
+            {children}
+        </button>
+    );
+}
+
+function CategoryChips({
+    suggestions,
+    selected,
+    onToggle,
+    onAdd,
+}: {
+    suggestions: string[];
+    selected: AttributeEntry[];
+    onToggle: (value: string) => void;
+    onAdd: (value: string) => void;
+}) {
+    const { t } = useTranslation('common');
+    const [isAdding, setIsAdding] = useState(false);
+    const [draft, setDraft] = useState('');
+    const custom = selected.filter(
+        (entry) =>
+            !suggestions.some((suggestion) => isSame(suggestion, entry.value)),
+    );
+
+    const commit = () => {
+        onAdd(draft);
+        setDraft('');
+        setIsAdding(false);
+    };
+
+    return (
+        <div className="flex flex-wrap gap-2">
+            {suggestions.map((suggestion) => (
+                <Chip
+                    key={suggestion}
+                    selected={selected.some((entry) =>
+                        isSame(entry.value, suggestion),
+                    )}
+                    onClick={() => onToggle(suggestion)}
+                >
+                    {suggestion}
+                </Chip>
+            ))}
+            {custom.map((entry) => (
+                <Chip
+                    key={entry.value}
+                    selected
+                    onClick={() => onToggle(entry.value)}
+                >
+                    {entry.value}
+                </Chip>
+            ))}
+            {isAdding ? (
+                <input
+                    type="text"
+                    autoFocus
+                    enterKeyHint="done"
+                    maxLength={255}
+                    aria-label={t('onboarding.dietary_preferences.other_label')}
+                    placeholder={t(
+                        'onboarding.dietary_preferences.other_placeholder',
+                    )}
+                    value={draft}
+                    onChange={(event) => setDraft(event.target.value)}
+                    onBlur={commit}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                            event.preventDefault();
+                            commit();
+                        }
+
+                        if (event.key === 'Escape') {
+                            setDraft('');
+                            setIsAdding(false);
+                        }
+                    }}
+                    className="h-11 w-52 rounded-full bg-foreground/[0.055] px-4 text-base font-medium text-foreground caret-emerald-600 outline-none placeholder:font-normal placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-emerald-600 dark:bg-white/[0.08]"
+                />
+            ) : (
+                <button
+                    type="button"
+                    onClick={() => setIsAdding(true)}
+                    className={cn(
+                        'flex h-11 items-center gap-1 rounded-full px-3.5 text-[0.9375rem] font-medium text-muted-foreground inset-ring-[1.5px] inset-ring-foreground/15 transition-[scale] duration-150 ease-out active:scale-95',
+                        AUTH_PRESSABLE,
+                    )}
+                >
+                    <Plus className="size-4" aria-hidden="true" />
+                    {t('onboarding.dietary_preferences.other')}
+                </button>
+            )}
+        </div>
+    );
+}
+
+function DetailRow({
+    entry,
+    severityOptions,
+    onChange,
+}: {
+    entry: AttributeEntry;
+    severityOptions: SeverityOption[];
+    onChange: (field: 'severity' | 'notes', value: string) => void;
+}) {
+    const { t } = useTranslation('common');
+    const [showNote, setShowNote] = useState(entry.notes !== '');
+
+    return (
+        <div
+            className={cn(
+                'grid gap-2.5 rounded-3xl p-3.5 duration-200 ease-out motion-safe:animate-in motion-safe:fade-in',
+                ONBOARDING_SURFACE,
+            )}
+        >
+            <div className="flex items-center gap-2">
+                <span className="min-w-0 flex-1 truncate pl-1.5 text-[0.9375rem] font-bold text-foreground">
+                    {entry.value}
+                </span>
+                <button
+                    type="button"
+                    aria-pressed={showNote}
+                    aria-label={t('onboarding.dietary_preferences.notes')}
+                    onClick={() => setShowNote((value) => !value)}
+                    className={cn(
+                        'flex size-9 items-center justify-center rounded-full text-muted-foreground transition-[scale,background-color] duration-150 ease-out active:scale-90',
+                        showNote && 'bg-foreground/[0.07] text-foreground',
+                        AUTH_PRESSABLE,
+                    )}
+                >
+                    <NotebookPen className="size-4" aria-hidden="true" />
+                </button>
+            </div>
+            {entry.category === ALLERGY && (
+                <div
+                    role="radiogroup"
+                    aria-label={t('onboarding.dietary_preferences.severity')}
+                    className="grid h-10 auto-cols-fr grid-flow-col rounded-full bg-foreground/[0.05] p-1 dark:bg-white/[0.06]"
+                >
+                    {severityOptions.map((option) => {
+                        const isChecked = entry.severity === option.value;
+
+                        return (
+                            <button
+                                key={option.value}
+                                type="button"
+                                role="radio"
+                                aria-checked={isChecked}
+                                onClick={() =>
+                                    onChange(
+                                        'severity',
+                                        isChecked ? '' : option.value,
+                                    )
+                                }
+                                className={cn(
+                                    'rounded-full text-[0.8125rem] font-semibold transition-[background-color,color] duration-150 ease-out',
+                                    isChecked
+                                        ? option.value === 'severe'
+                                            ? 'bg-rose-500 text-white'
+                                            : 'bg-background text-foreground shadow-[0_1px_2px_rgb(0_0_0/0.1)] dark:bg-neutral-700'
+                                        : 'text-muted-foreground',
+                                    AUTH_PRESSABLE,
+                                )}
+                            >
+                                {t(
+                                    `onboarding.dietary_preferences.severity_${option.value}`,
+                                    option.label,
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+            {showNote && (
+                <input
+                    type="text"
+                    autoFocus={entry.notes === ''}
+                    maxLength={500}
+                    aria-label={t('onboarding.dietary_preferences.notes')}
+                    placeholder={t(
+                        'onboarding.dietary_preferences.notes_placeholder',
+                    )}
+                    value={entry.notes}
+                    onChange={(event) => onChange('notes', event.target.value)}
+                    className="h-11 w-full rounded-full bg-background px-4 text-base text-foreground outline-none placeholder:text-muted-foreground/60 focus-visible:ring-2 focus-visible:ring-emerald-600 dark:bg-white/[0.08]"
+                />
+            )}
+        </div>
+    );
+}
+
+function Section({
+    order,
+    label,
+    children,
+}: {
+    order: number;
+    label: string;
+    children: ReactNode;
+}) {
+    return (
+        <section
+            style={{ animationDelay: `${order * 45}ms` }}
+            className={ONBOARDING_RISE}
+        >
+            <h2 className={ONBOARDING_LABEL}>{label}</h2>
+            {children}
+        </section>
+    );
+}
 
 export default function DietaryPreferences({
     existingAttributes,
@@ -67,340 +353,189 @@ export default function DietaryPreferences({
     severityOptions,
 }: Props) {
     const { t } = useTranslation('common');
-
-    const [attributes, setAttributes] = useState<AttributeEntry[]>(
-        existingAttributes.length > 0
-            ? existingAttributes.map((a) => ({
-                  category: a.category,
-                  value: a.value,
-                  severity: a.severity ?? '',
-                  notes: a.notes ?? '',
-              }))
-            : [],
+    const [attributes, setAttributes] = useState<AttributeEntry[]>(() =>
+        existingAttributes.map((attribute) => ({
+            category: attribute.category,
+            value: attribute.value,
+            severity: attribute.severity ?? '',
+            notes: attribute.notes ?? '',
+        })),
     );
 
-    const addAttribute = (category: string = 'allergy', value: string = '') => {
-        setAttributes((prev) => [
-            ...prev,
-            { category, value, severity: '', notes: '' },
+    const isEntry = (entry: AttributeEntry, category: string, value: string) =>
+        entry.category === category && isSame(entry.value, value);
+
+    const add = (category: string, value: string) => {
+        if (
+            value.trim() === '' ||
+            attributes.some((entry) => isEntry(entry, category, value))
+        ) {
+            return;
+        }
+
+        setAttributes((current) => [
+            ...current,
+            { category, value: value.trim(), severity: '', notes: '' },
         ]);
     };
 
-    const removeAttribute = (index: number) => {
-        setAttributes((prev) => prev.filter((_, i) => i !== index));
-    };
+    const toggle = (category: string, value: string) =>
+        attributes.some((entry) => isEntry(entry, category, value))
+            ? setAttributes((current) =>
+                  current.filter((entry) => !isEntry(entry, category, value)),
+              )
+            : add(category, value);
 
-    const updateAttribute = (
-        index: number,
-        field: keyof AttributeEntry,
+    const update = (
+        target: AttributeEntry,
+        field: 'severity' | 'notes',
         value: string,
-    ) => {
-        setAttributes((prev) =>
-            prev.map((attr, i) =>
-                i === index ? { ...attr, [field]: value } : attr,
+    ) =>
+        setAttributes((current) =>
+            current.map((entry) =>
+                isEntry(entry, target.category, target.value)
+                    ? { ...entry, [field]: value }
+                    : entry,
             ),
         );
-    };
 
-    const addQuickAllergy = (allergen: string) => {
-        const exists = attributes.some(
-            (a) =>
-                a.value.toLowerCase() === allergen.toLowerCase() &&
-                a.category === 'allergy',
+    const sections = categories.filter(
+        (category) => category.value in CATEGORY_DETAILS,
+    );
+    const section = (category: CategoryOption, order: number) => {
+        const selected = attributes.filter(
+            (entry) => entry.category === category.value,
         );
 
-        if (!exists) {
-            addAttribute('allergy', allergen);
-        }
+        return (
+            <Section
+                key={category.value}
+                order={order}
+                label={t(
+                    CATEGORY_DETAILS[category.value].label,
+                    category.label,
+                )}
+            >
+                <CategoryChips
+                    suggestions={CATEGORY_DETAILS[category.value].suggestions}
+                    selected={selected}
+                    onToggle={(value) => toggle(category.value, value)}
+                    onAdd={(value) => add(category.value, value)}
+                />
+                {category.value === ALLERGY && selected.length > 0 && (
+                    <div className="mt-3 grid gap-2">
+                        {selected.map((entry) => (
+                            <DetailRow
+                                key={entry.value}
+                                entry={entry}
+                                severityOptions={severityOptions}
+                                onChange={(field, value) =>
+                                    update(entry, field, value)
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
+            </Section>
+        );
     };
+    const others = attributes.filter(
+        (entry) =>
+            entry.category !== ALLERGY && entry.category in CATEGORY_DETAILS,
+    );
 
     return (
-        <>
-            <Head title={t('onboarding.dietary_preferences.title')} />
-            <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8 dark:bg-gray-900">
-                <div className="w-full max-w-2xl">
-                    <div className="mb-8">
-                        <div className="flex justify-between text-xs font-medium text-gray-600 dark:text-gray-400">
-                            <span>
-                                {t('onboarding.biometrics.step', {
-                                    current: 3,
-                                    total: 3,
-                                })}
-                            </span>
-                            <span>100%</span>
+        <AuthScreen
+            title={t('onboarding.dietary_preferences.title')}
+            className="md:min-h-0 md:max-w-[54rem]"
+        >
+            <OnboardingHeader
+                step={3}
+                backHref={onboarding.identity.show.url()}
+            />
+            <Form
+                {...onboarding.dietary.store.form()}
+                noValidate
+                transform={() => ({
+                    attributes: attributes.map((entry) => ({
+                        ...entry,
+                        severity: entry.severity || null,
+                        notes: entry.notes || null,
+                    })),
+                })}
+                disableWhileProcessing
+                className={ONBOARDING_COLUMNS}
+            >
+                {({ processing, errors }) => (
+                    <>
+                        <div className="grid gap-7">
+                            <div className={ONBOARDING_RISE}>
+                                <h1 className={AUTH_HEADLINE}>
+                                    {t(
+                                        'onboarding.dietary_preferences.heading',
+                                    )}
+                                </h1>
+                                <p className={AUTH_LEAD}>
+                                    {t(
+                                        'onboarding.dietary_preferences.description',
+                                    )}
+                                </p>
+                            </div>
+                            {sections
+                                .filter(
+                                    (category) => category.value === ALLERGY,
+                                )
+                                .map((category) => section(category, 1))}
                         </div>
-                        <div className="mt-2 h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700">
-                            <div className="relative h-2 w-full overflow-hidden rounded-full bg-primary shadow-[0_0_12px_rgba(16,185,129,0.4)]">
-                                <div className="absolute inset-0 bg-linear-to-r from-white/30 via-transparent to-transparent"></div>
-                                <div className="absolute inset-0 bg-linear-to-l from-black/10 via-transparent to-white/10"></div>
+
+                        <div className="grid gap-7 md:pt-2">
+                            {sections
+                                .filter(
+                                    (category) => category.value !== ALLERGY,
+                                )
+                                .map((category, index) =>
+                                    section(category, index + 2),
+                                )}
+
+                            {others.length > 0 && (
+                                <Section
+                                    order={sections.length + 1}
+                                    label={t(
+                                        'onboarding.dietary_preferences.notes_heading',
+                                    )}
+                                >
+                                    <div className="grid gap-2">
+                                        {others.map((entry) => (
+                                            <DetailRow
+                                                key={`${entry.category}-${entry.value}`}
+                                                entry={entry}
+                                                severityOptions={
+                                                    severityOptions
+                                                }
+                                                onChange={(field, value) =>
+                                                    update(entry, field, value)
+                                                }
+                                            />
+                                        ))}
+                                    </div>
+                                </Section>
+                            )}
+
+                            <div className="grid gap-3">
+                                <AuthFieldError
+                                    message={Object.values(errors)[0]}
+                                    className="text-center"
+                                />
+                                <AuthSubmitButton processing={processing}>
+                                    {t(
+                                        'onboarding.dietary_preferences.complete',
+                                    )}
+                                </AuthSubmitButton>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="rounded-lg bg-white p-8 shadow-lg dark:bg-gray-800">
-                        <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
-                            {t('onboarding.dietary_preferences.heading')}
-                        </h1>
-                        <p className="mb-6 text-gray-600 dark:text-gray-300">
-                            {t('onboarding.dietary_preferences.description')}
-                        </p>
-
-                        <Form
-                            {...onboarding.dietary.store.form()}
-                            disableWhileProcessing
-                            className="space-y-6"
-                        >
-                            {({ processing, errors }) => (
-                                <>
-                                    <div>
-                                        <h2 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                            {t(
-                                                'onboarding.dietary_preferences.allergies',
-                                            )}
-                                        </h2>
-                                        <div className="mb-4 flex flex-wrap gap-2">
-                                            {COMMON_ALLERGIES.map(
-                                                (allergen) => {
-                                                    const isSelected =
-                                                        attributes.some(
-                                                            (a) =>
-                                                                a.value.toLowerCase() ===
-                                                                    allergen.toLowerCase() &&
-                                                                a.category ===
-                                                                    'allergy',
-                                                        );
-
-                                                    return (
-                                                        <button
-                                                            key={allergen}
-                                                            type="button"
-                                                            onClick={() =>
-                                                                isSelected
-                                                                    ? setAttributes(
-                                                                          (
-                                                                              prev,
-                                                                          ) =>
-                                                                              prev.filter(
-                                                                                  (
-                                                                                      a,
-                                                                                  ) =>
-                                                                                      !(
-                                                                                          a.value.toLowerCase() ===
-                                                                                              allergen.toLowerCase() &&
-                                                                                          a.category ===
-                                                                                              'allergy'
-                                                                                      ),
-                                                                              ),
-                                                                      )
-                                                                    : addQuickAllergy(
-                                                                          allergen,
-                                                                      )
-                                                            }
-                                                            className={cn(
-                                                                'rounded-full border px-3 py-1.5 text-sm font-medium transition-colors',
-                                                                isSelected
-                                                                    ? 'border-red-300 bg-red-50 text-red-700 dark:border-red-700 dark:bg-red-900/30 dark:text-red-300'
-                                                                    : 'border-gray-300 bg-white text-gray-600 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
-                                                            )}
-                                                        >
-                                                            {isSelected
-                                                                ? `${allergen} ✕`
-                                                                : `+ ${allergen}`}
-                                                        </button>
-                                                    );
-                                                },
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    {attributes.length > 0 && (
-                                        <div className="space-y-3">
-                                            {attributes.map((attr, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="rounded-lg border border-gray-200 p-4 dark:border-gray-600"
-                                                >
-                                                    <div className="flex items-start justify-between gap-2">
-                                                        <div className="grid flex-1 gap-3 sm:grid-cols-2">
-                                                            <div>
-                                                                <Select
-                                                                    name={`attributes[${index}][category]`}
-                                                                    value={
-                                                                        attr.category
-                                                                    }
-                                                                    onValueChange={(
-                                                                        v,
-                                                                    ) =>
-                                                                        updateAttribute(
-                                                                            index,
-                                                                            'category',
-                                                                            v,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <SelectTrigger>
-                                                                        <SelectValue placeholder="Type" />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        {categories.map(
-                                                                            (
-                                                                                cat,
-                                                                            ) => (
-                                                                                <SelectItem
-                                                                                    key={
-                                                                                        cat.value
-                                                                                    }
-                                                                                    value={
-                                                                                        cat.value
-                                                                                    }
-                                                                                >
-                                                                                    {
-                                                                                        cat.label
-                                                                                    }
-                                                                                </SelectItem>
-                                                                            ),
-                                                                        )}
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            </div>
-                                                            <Input
-                                                                name={`attributes[${index}][value]`}
-                                                                value={
-                                                                    attr.value
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateAttribute(
-                                                                        index,
-                                                                        'value',
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder="e.g. Peanuts, Lactose, Pork..."
-                                                                required
-                                                            />
-                                                            {attr.category ===
-                                                                'allergy' && (
-                                                                <Select
-                                                                    name={`attributes[${index}][severity]`}
-                                                                    value={
-                                                                        attr.severity
-                                                                    }
-                                                                    onValueChange={(
-                                                                        v,
-                                                                    ) =>
-                                                                        updateAttribute(
-                                                                            index,
-                                                                            'severity',
-                                                                            v,
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    <SelectTrigger>
-                                                                        <SelectValue
-                                                                            placeholder={t(
-                                                                                'onboarding.dietary_preferences.select_severity',
-                                                                            )}
-                                                                        />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        {severityOptions.map(
-                                                                            (
-                                                                                opt,
-                                                                            ) => (
-                                                                                <SelectItem
-                                                                                    key={
-                                                                                        opt.value
-                                                                                    }
-                                                                                    value={
-                                                                                        opt.value
-                                                                                    }
-                                                                                >
-                                                                                    {
-                                                                                        opt.label
-                                                                                    }
-                                                                                </SelectItem>
-                                                                            ),
-                                                                        )}
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            )}
-                                                            <Input
-                                                                name={`attributes[${index}][notes]`}
-                                                                value={
-                                                                    attr.notes
-                                                                }
-                                                                onChange={(e) =>
-                                                                    updateAttribute(
-                                                                        index,
-                                                                        'notes',
-                                                                        e.target
-                                                                            .value,
-                                                                    )
-                                                                }
-                                                                placeholder={t(
-                                                                    'onboarding.dietary_preferences.notes_placeholder',
-                                                                )}
-                                                            />
-                                                        </div>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                removeAttribute(
-                                                                    index,
-                                                                )
-                                                            }
-                                                            className="mt-1 text-gray-400 hover:text-red-500"
-                                                        >
-                                                            <X className="size-5" />
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    <InputError
-                                        message={errors['attributes']}
-                                    />
-
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => addAttribute()}
-                                        className="w-full gap-2"
-                                    >
-                                        <Plus className="size-4" />
-                                        {t('add')}
-                                    </Button>
-
-                                    <div className="flex flex-col items-center gap-4 pt-2">
-                                        <Button
-                                            type="submit"
-                                            disabled={processing}
-                                            className="w-full"
-                                        >
-                                            {processing && (
-                                                <LoaderCircle className="h-4 w-4 animate-spin" />
-                                            )}
-                                            {t(
-                                                'onboarding.dietary_preferences.complete',
-                                            )}
-                                        </Button>
-
-                                        <Link
-                                            href={dashboard.url()}
-                                            className="text-sm text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary"
-                                        >
-                                            {t('onboarding.biometrics.exit')}
-                                        </Link>
-                                    </div>
-                                </>
-                            )}
-                        </Form>
-                    </div>
-                </div>
-            </div>
-        </>
+                    </>
+                )}
+            </Form>
+        </AuthScreen>
     );
 }

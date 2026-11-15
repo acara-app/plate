@@ -55,6 +55,10 @@ final readonly class OnboardingController
     {
         $user = $this->user;
 
+        if ($request->has('name')) {
+            $user->update(['name' => $request->string('name')->value()]);
+        }
+
         $data = $request->profileAttributes();
 
         if ($user->profile?->currentAge() !== $data['age']) {

@@ -15,18 +15,30 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import type { HealthEntry } from '@/types/diabetes';
 import { Link, router } from '@inertiajs/react';
 import { ChevronLeft, MoreHorizontal, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PRESSABLE } from './pressable';
+
+const ROUND = cn(
+    'size-11 rounded-full transition-[color,background-color,box-shadow,scale] duration-150 ease-out active:scale-[0.94]',
+    PRESSABLE,
+);
+
+const OVERLAY =
+    'bg-black/35 text-white backdrop-blur-md hover:bg-black/50 hover:text-white active:bg-black/50 dark:hover:bg-black/50';
 
 export default function DetailTopBar({
     entry,
     backUrl,
+    overlay = false,
 }: {
     entry: HealthEntry;
     backUrl: string;
+    overlay?: boolean;
 }) {
     const { t } = useTranslation('common');
     const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -45,7 +57,7 @@ export default function DetailTopBar({
                 asChild
                 variant="ghost"
                 size="icon"
-                className="-ml-2 size-11 rounded-full"
+                className={cn(ROUND, overlay ? OVERLAY : '-ml-2')}
             >
                 <Link
                     href={backUrl}
@@ -59,7 +71,7 @@ export default function DetailTopBar({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="-mr-2 size-11 rounded-full"
+                        className={cn(ROUND, overlay ? OVERLAY : '-mr-2')}
                         aria-label={t('health_entries.timeline.more_actions')}
                     >
                         <MoreHorizontal className="size-6" aria-hidden="true" />
@@ -68,6 +80,7 @@ export default function DetailTopBar({
                 <DropdownMenuContent align="end">
                     <DropdownMenuItem
                         variant="destructive"
+                        className="min-h-11 touch-manipulation"
                         onSelect={() => setConfirmingDelete(true)}
                     >
                         <Trash2 aria-hidden="true" />

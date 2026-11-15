@@ -8,7 +8,7 @@ import { edit } from '@/routes/passkeys';
 import { router } from '@inertiajs/react';
 import { usePasskeyRegister } from '@laravel/passkeys/react';
 import { LoaderCircle, Plus } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import { type SubmitEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 export default function PasskeyRegister() {
@@ -30,7 +30,7 @@ export default function PasskeyRegister() {
         });
     const busy = checking || isLoading;
 
-    const handleSubmit = async (event: FormEvent) => {
+    const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
         if (!name.trim() || busy) return;
         setConfirmationError(null);

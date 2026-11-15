@@ -77,6 +77,22 @@ it('may store biometrics data with blood_type', function (): void {
         ->blood_type->toBe(BloodType::APositive);
 });
 
+it('saves the name given during onboarding', function (): void {
+    $user = User::factory()->create(['name' => 'Naraa']);
+
+    $this->actingAs($user)
+        ->post(route('onboarding.biometrics.store'), [
+            'name' => 'Naraa Bold',
+            'age' => 30,
+            'height' => 175,
+            'weight' => 70,
+            'sex' => Sex::Male->value,
+        ])
+        ->assertRedirectToRoute('onboarding.identity.show');
+
+    expect($user->refresh()->name)->toBe('Naraa Bold');
+});
+
 it('may store biometrics without date_of_birth and blood_type', function (): void {
     $user = User::factory()->create();
 
