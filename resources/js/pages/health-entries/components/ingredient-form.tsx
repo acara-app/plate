@@ -11,8 +11,9 @@ import {
 import { cn } from '@/lib/utils';
 import type { FoodBreakdownItem } from '@/types/diabetes';
 import { Sparkles, Trash2 } from 'lucide-react';
-import { useState, type FormEvent } from 'react';
+import { useState, type SubmitEvent } from 'react';
 import { useTranslation } from 'react-i18next';
+import { PRESS_BUTTON } from './pressable';
 
 export type EditableItem = FoodBreakdownItem & {
     key: string;
@@ -117,7 +118,7 @@ export default function IngredientForm({
         });
     };
 
-    const submit = (event: FormEvent) => {
+    const submit = (event: SubmitEvent<HTMLFormElement>) => {
         event.preventDefault();
 
         if (estimating || name === '') {
@@ -139,7 +140,10 @@ export default function IngredientForm({
     };
 
     return (
-        <form onSubmit={submit} className="flex flex-col gap-5 px-5 pb-6">
+        <form
+            onSubmit={submit}
+            className="flex flex-col gap-5 px-5 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+        >
             <fieldset disabled={estimating} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-2">
                     <Label htmlFor="ingredient-name">
@@ -151,6 +155,7 @@ export default function IngredientForm({
                         required
                         maxLength={100}
                         autoFocus={isNew}
+                        enterKeyHint="done"
                         className="h-12 rounded-xl text-base"
                         onChange={(event) => update('name', event.target.value)}
                     />
@@ -171,7 +176,10 @@ export default function IngredientForm({
                         <Button
                             type="button"
                             variant="outline"
-                            className="h-11 justify-start rounded-xl"
+                            className={cn(
+                                'h-11 justify-start rounded-xl',
+                                PRESS_BUTTON,
+                            )}
                             onClick={updateNutrition}
                         >
                             <Sparkles
@@ -206,6 +214,7 @@ export default function IngredientForm({
                         id="ingredient-portion"
                         value={draft.portion}
                         maxLength={100}
+                        enterKeyHint="done"
                         className="h-12 rounded-xl text-base"
                         onChange={(event) =>
                             update('portion', event.target.value)
@@ -229,6 +238,7 @@ export default function IngredientForm({
                                 id={`ingredient-${field}`}
                                 type="number"
                                 inputMode="decimal"
+                                enterKeyHint="done"
                                 min={0}
                                 step="0.1"
                                 value={draft[field]}
@@ -248,7 +258,10 @@ export default function IngredientForm({
                     <Button
                         type="button"
                         variant="ghost"
-                        className="h-12 rounded-2xl text-destructive hover:text-destructive"
+                        className={cn(
+                            'h-12 rounded-2xl text-destructive hover:text-destructive',
+                            PRESS_BUTTON,
+                        )}
                         disabled={estimating}
                         onClick={onRemove}
                     >
@@ -260,7 +273,10 @@ export default function IngredientForm({
                 )}
                 <Button
                     type="submit"
-                    className="h-12 rounded-2xl px-8 text-base"
+                    className={cn(
+                        'h-12 rounded-2xl px-8 text-base',
+                        PRESS_BUTTON,
+                    )}
                     disabled={estimating}
                 >
                     {t('health_entries.detail.apply')}

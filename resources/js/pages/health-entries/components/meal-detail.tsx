@@ -10,7 +10,6 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
     formatLocalDatetime,
     localDatetimeToIso,
@@ -22,11 +21,7 @@ import {
     SOURCE_META,
     userNotes,
 } from '@/lib/health-entry-registry';
-import {
-    getMealTypeConfig,
-    MEAL_TYPES,
-    mealTypeForTime,
-} from '@/lib/meal-types';
+import { getMealTypeConfig, mealTypeForTime } from '@/lib/meal-types';
 import { useUnsavedChanges } from '@/hooks/use-unsaved-changes';
 import { cn } from '@/lib/utils';
 import type { HealthEntry, LogTypeValue } from '@/types/diabetes';
@@ -40,14 +35,15 @@ import DetailTopBar from './detail-top-bar';
 import BottomSheet from './bottom-sheet';
 import IngredientForm, { type EditableItem } from './ingredient-form';
 import {
-    CALORIES,
     formatAmount,
     MACROS,
     type Nutrition,
     type NutritionField,
 } from './macros';
 import DetailsForm from './meal-details-form';
+import MealTypeSwitch from './meal-type-switch';
 import PhotoHero from './photo-hero';
+import { EASE_OUT, PRESS_BUTTON, PRESSABLE } from './pressable';
 import ValueForm from './value-form';
 
 type MealForm = {
@@ -62,6 +58,17 @@ type MealForm = {
 const MAX_ITEMS = 30;
 
 const DETAILS_FIELDS = ['meal_name', 'measured_at', 'notes'];
+
+const ENERGY_MACROS = MACROS.filter(
+    (
+        macro,
+    ): macro is (typeof MACROS)[number] & {
+        key: 'protein' | 'carbs' | 'fat';
+    } => macro.key !== 'fiber',
+);
+
+const ROW =
+    'flex w-full items-center gap-4 rounded-[1.375rem] px-4 text-left transition-[background-color,scale] duration-150 ease-out hover:bg-background focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.98] active:bg-background';
 
 export default function MealDetail({
     entry,
@@ -282,385 +289,463 @@ export default function MealDetail({
     const valueConfig = MACROS.find((macro) => macro.field === valueField);
     const valueLabel = valueConfig ? t(valueConfig.labelKey) : caloriesLabel;
 
-    return (
-        <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col gap-6 px-4 pt-3 pb-36 sm:px-6 md:pb-10">
-            <DetailTopBar entry={entry} backUrl={backUrl} />
-            <h1 className="-mt-3 text-4xl font-bold tracking-tight">
-                {t('health_entries.detail.nutrition')}
-            </h1>
-            {entry.photo_url && (
-                <PhotoHero
-                    src={entry.photo_url}
-                    measuredAt={entry.measured_at}
-                />
+    const energy = {
+        protein: (totals.protein_grams ?? 0) * 4,
+        carbs: (totals.carbs_grams ?? 0) * 4,
+        fat: (totals.fat_grams ?? 0) * 9,
+    };
+    const energyTotal = energy.protein + energy.carbs + energy.fat;
+
+    const meta = (onPhoto: boolean) => (
+        <div
+            className={cn(
+                'flex flex-wrap items-center gap-x-3 gap-y-1 text-sm',
+                onPhoto ? 'text-white/85' : 'text-muted-foreground',
             )}
-            <div className="flex items-start gap-4">
-                <span
-                    aria-hidden="true"
-                    className={cn(
-                        'flex size-14 shrink-0 items-center justify-center rounded-2xl',
-                        mealType.color,
-                    )}
-                >
-                    <mealType.Icon
-                        className={cn('size-6', mealType.iconColor)}
-                    />
+        >
+            <span
+                className={cn(
+                    'flex items-center gap-1.5 rounded-full py-1 pr-3 pl-2 text-xs font-semibold',
+                    onPhoto
+                        ? 'bg-white/20 text-white backdrop-blur-md'
+                        : mealType.color,
+                )}
+            >
+                <mealType.Icon className="size-3.5" aria-hidden="true" />
+                {t(mealType.labelKey)}
+            </span>
+            <time dateTime={entry.measured_at} className="tabular-nums">
+                {measuredAt.toLocaleTimeString(locale, {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                })}
+            </time>
+            {isItemized && (
+                <span>
+                    {t('health_entries.detail.items_count', {
+                        count: items.length,
+                    })}
                 </span>
-                <div className="flex min-w-0 flex-col gap-1.5">
-                    <h2 className="text-2xl leading-tight font-semibold tracking-tight break-words">
-                        {title}
-                    </h2>
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-                        <span className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-foreground ring-1 ring-border/60">
-                            {t(mealType.labelKey)}
-                        </span>
-                        <time
-                            dateTime={entry.measured_at}
-                            className="tabular-nums"
-                        >
-                            {measuredAt.toLocaleTimeString(locale, {
-                                hour: 'numeric',
-                                minute: '2-digit',
-                            })}
-                        </time>
-                        {isItemized && (
-                            <span>
-                                {t('health_entries.detail.items_count', {
-                                    count: items.length,
-                                })}
-                            </span>
-                        )}
+            )}
+        </div>
+    );
+
+    return (
+        <div className="mx-auto flex w-full max-w-xl min-w-0 flex-col pb-36 md:pb-10">
+            {entry.photo_url ? (
+                <header className="relative shrink-0 sm:px-6 sm:pt-4">
+                    <PhotoHero
+                        src={entry.photo_url}
+                        measuredAt={entry.measured_at}
+                        className="max-h-[60svh] sm:rounded-[2rem]"
+                    >
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-linear-to-b from-black/40 to-transparent"
+                        />
+                        <div
+                            aria-hidden="true"
+                            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-black/80 via-black/35 to-transparent"
+                        />
+                        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex flex-col gap-2.5 px-5 pb-12 text-white sm:px-6 sm:pb-6">
+                            <h1 className="line-clamp-3 text-[1.625rem] leading-[1.15] font-bold tracking-tight text-balance break-words">
+                                {title}
+                            </h1>
+                            {meta(true)}
+                        </div>
+                    </PhotoHero>
+                    <div className="absolute inset-x-3 top-3 sm:inset-x-9 sm:top-7">
+                        <DetailTopBar entry={entry} backUrl={backUrl} overlay />
                     </div>
-                </div>
-            </div>
+                </header>
+            ) : (
+                <header className="flex flex-col gap-3 px-4 pt-3 sm:px-6">
+                    <DetailTopBar entry={entry} backUrl={backUrl} />
+                    <div className="flex items-start gap-4">
+                        <span
+                            aria-hidden="true"
+                            className={cn(
+                                'flex size-14 shrink-0 items-center justify-center rounded-2xl',
+                                mealType.color,
+                            )}
+                        >
+                            <mealType.Icon
+                                className={cn('size-6', mealType.iconColor)}
+                            />
+                        </span>
+                        <div className="flex min-w-0 flex-col gap-2">
+                            <h1 className="line-clamp-3 text-2xl leading-tight font-bold tracking-tight text-balance break-words">
+                                {title}
+                            </h1>
+                            {meta(false)}
+                        </div>
+                    </div>
+                </header>
+            )}
             <div
                 className={cn(
-                    'flex items-center gap-4 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-border/60 sm:p-6',
-                    errors.calories && 'ring-2 ring-destructive',
+                    'relative flex flex-col gap-8 bg-background px-4 pt-7 fill-mode-both motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 sm:px-6',
+                    entry.photo_url &&
+                        '-mt-7 rounded-t-[1.75rem] sm:mt-0 sm:rounded-none',
+                    EASE_OUT,
                 )}
             >
-                <CALORIES.Icon
-                    className={cn('size-9 shrink-0', CALORIES.icon)}
-                    aria-hidden="true"
-                />
-                <p className="flex min-w-0 flex-1 items-baseline gap-2">
-                    <span className="sr-only">{caloriesLabel}</span>
-                    <span className="text-5xl font-bold tracking-tight tabular-nums">
-                        {totals.calories === null
-                            ? '—'
-                            : formatAmount(totals.calories, locale)}
-                    </span>
-                    <span className="text-lg text-muted-foreground">
-                        {t('health_entries.nutrition.kcal')}
-                    </span>
-                </p>
-                {!isItemized && (
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-11 shrink-0 rounded-full text-muted-foreground"
-                        aria-label={t('health_entries.detail.edit_value', {
-                            label: caloriesLabel,
-                        })}
-                        onClick={() => openValue('calories')}
+                <section
+                    aria-label={t('health_entries.detail.nutrition')}
+                    className="flex flex-col gap-4"
+                >
+                    <div
+                        className={cn(
+                            'flex items-end justify-between gap-3 rounded-2xl',
+                            errors.calories &&
+                                'ring-2 ring-destructive ring-offset-8 ring-offset-background',
+                        )}
                     >
-                        <Pencil aria-hidden="true" />
-                    </Button>
-                )}
-            </div>
-            <dl
-                className={cn(
-                    'grid gap-2 sm:gap-3',
-                    isItemized ? 'grid-cols-4' : 'grid-cols-2 sm:grid-cols-4',
-                )}
-            >
-                {MACROS.map((macro) => {
-                    const value = totals[macro.field];
-
-                    return (
-                        <div
-                            key={macro.key}
-                            className={cn(
-                                'relative flex min-w-0 flex-col gap-2 rounded-3xl p-3 sm:p-4',
-                                macro.card,
-                                errors[macro.field] &&
-                                    'ring-2 ring-destructive',
-                            )}
-                        >
-                            <span
-                                aria-hidden="true"
+                        <p className="flex min-w-0 items-baseline gap-2">
+                            <span className="sr-only">{caloriesLabel}</span>
+                            <span className="text-6xl leading-none font-bold tracking-tighter tabular-nums">
+                                {totals.calories === null
+                                    ? '—'
+                                    : formatAmount(totals.calories, locale)}
+                            </span>
+                            <span className="text-lg text-muted-foreground">
+                                {t('health_entries.nutrition.kcal')}
+                            </span>
+                        </p>
+                        {!isItemized && (
+                            <button
+                                type="button"
+                                aria-label={t(
+                                    'health_entries.detail.edit_value',
+                                    { label: caloriesLabel },
+                                )}
+                                onClick={() => openValue('calories')}
                                 className={cn(
-                                    'flex size-9 items-center justify-center rounded-full',
-                                    macro.tile,
+                                    'flex size-11 shrink-0 items-center justify-center rounded-full bg-muted/70 text-muted-foreground transition-[scale] duration-150 ease-out focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.94]',
+                                    PRESSABLE,
                                 )}
                             >
-                                <macro.Icon
-                                    className={cn('size-[18px]', macro.icon)}
-                                />
-                            </span>
-                            <div className="flex min-w-0 flex-col-reverse">
-                                <dt className="truncate text-xs text-muted-foreground sm:text-sm">
-                                    {t(macro.labelKey)}
-                                </dt>
-                                <dd className="text-lg font-semibold tabular-nums sm:text-xl">
-                                    {value === null
-                                        ? '—'
-                                        : t('health_entries.nutrition.grams', {
-                                              value: formatAmount(
-                                                  value,
-                                                  locale,
-                                                  1,
-                                              ),
-                                          })}
-                                </dd>
-                            </div>
-                            {!isItemized && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="absolute top-2 right-2 size-10 rounded-full text-muted-foreground"
-                                    aria-label={t(
-                                        'health_entries.detail.edit_value',
-                                        { label: t(macro.labelKey) },
-                                    )}
-                                    onClick={() => openValue(macro.field)}
-                                >
-                                    <Pencil
-                                        className="size-4"
-                                        aria-hidden="true"
-                                    />
-                                </Button>
+                                <Pencil className="size-4" aria-hidden="true" />
+                            </button>
+                        )}
+                    </div>
+                    {energyTotal > 0 && (
+                        <div aria-hidden="true" className="flex h-3 gap-1">
+                            {ENERGY_MACROS.map(
+                                (macro, index) =>
+                                    energy[macro.key] > 0 && (
+                                        <span
+                                            key={macro.key}
+                                            style={{
+                                                flexGrow:
+                                                    energy[macro.key] /
+                                                    energyTotal,
+                                                animationDelay: `${index * 60 + 120}ms`,
+                                            }}
+                                            className={cn(
+                                                'h-full min-w-3 basis-0 rounded-full fill-mode-both motion-safe:duration-300 motion-safe:animate-in motion-safe:fade-in',
+                                                macro.bar,
+                                            )}
+                                        />
+                                    ),
                             )}
                         </div>
-                    );
-                })}
-            </dl>
-            {isItemized && (
-                <section
-                    aria-labelledby="ingredients-heading"
-                    className="flex flex-col gap-3"
-                >
-                    <div className="flex items-baseline justify-between gap-3">
-                        <h2
-                            id="ingredients-heading"
-                            className="text-xl font-semibold tracking-tight"
-                        >
-                            {t('health_entries.detail.ingredients')}
-                        </h2>
-                        <p
-                            id="ingredients-hint"
-                            className="text-sm text-muted-foreground"
-                        >
-                            {t('health_entries.detail.ingredients_hint')}
-                        </p>
-                    </div>
-                    <ul className="divide-y overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-border/60">
-                        {items.map((item, index) => {
-                            const messages = Object.values(itemErrors(index));
+                    )}
+                    <ul className="grid grid-cols-4 gap-2">
+                        {MACROS.map((macro) => {
+                            const value = totals[macro.field];
+                            const label = t(macro.labelKey);
+                            const content = (
+                                <>
+                                    <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground sm:text-sm">
+                                        <span
+                                            aria-hidden="true"
+                                            className={cn(
+                                                'size-2 shrink-0 rounded-full',
+                                                macro.bar,
+                                            )}
+                                        />
+                                        <span className="truncate">
+                                            {label}
+                                        </span>
+                                    </span>
+                                    <span className="text-lg font-semibold tabular-nums sm:text-xl">
+                                        {value === null
+                                            ? '—'
+                                            : t(
+                                                  'health_entries.nutrition.grams',
+                                                  {
+                                                      value: formatAmount(
+                                                          value,
+                                                          locale,
+                                                          1,
+                                                      ),
+                                                  },
+                                              )}
+                                    </span>
+                                </>
+                            );
 
                             return (
-                                <li key={item.key}>
-                                    <button
-                                        type="button"
-                                        onClick={() => openIngredient(index)}
-                                        aria-describedby={
-                                            messages.length > 0
-                                                ? `ingredients-hint ingredient-error-${index}`
-                                                : 'ingredients-hint'
-                                        }
-                                        className={cn(
-                                            'flex min-h-16 w-full items-center gap-3 px-5 py-3 text-left transition-colors outline-none hover:bg-muted/50 focus-visible:bg-muted/60',
-                                            messages.length > 0 &&
-                                                'bg-destructive/5',
-                                        )}
-                                    >
-                                        <span className="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-                                            <span className="min-w-0 text-base break-words sm:flex-1 sm:truncate">
-                                                {item.name}
-                                            </span>
-                                            <span className="flex min-w-0 gap-2 text-sm text-muted-foreground">
-                                                <span className="shrink-0 tabular-nums">
-                                                    {formatAmount(
-                                                        item.calories,
-                                                        locale,
-                                                    )}{' '}
-                                                    {t(
-                                                        'health_entries.nutrition.kcal',
-                                                    )}
+                                <li key={macro.key} className="min-w-0">
+                                    {isItemized ? (
+                                        <div className="flex flex-col gap-0.5">
+                                            {content}
+                                        </div>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            aria-label={t(
+                                                'health_entries.detail.edit_value',
+                                                { label },
+                                            )}
+                                            onClick={() =>
+                                                openValue(macro.field)
+                                            }
+                                            className={cn(
+                                                '-m-2 flex w-[calc(100%+1rem)] flex-col gap-0.5 rounded-2xl p-2 text-left transition-[background-color,scale] duration-150 ease-out hover:bg-muted/70 focus-visible:ring-2 focus-visible:ring-primary/50 active:scale-[0.97] active:bg-muted/70',
+                                                errors[macro.field] &&
+                                                    'ring-2 ring-destructive',
+                                                PRESSABLE,
+                                            )}
+                                        >
+                                            {content}
+                                        </button>
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </section>
+                {isItemized && (
+                    <section
+                        aria-labelledby="ingredients-heading"
+                        className="flex flex-col gap-3"
+                    >
+                        <div className="flex items-baseline justify-between gap-3">
+                            <h2
+                                id="ingredients-heading"
+                                className="text-xl font-semibold tracking-tight"
+                            >
+                                {t('health_entries.detail.ingredients')}
+                            </h2>
+                            <p
+                                id="ingredients-hint"
+                                className="text-sm text-muted-foreground"
+                            >
+                                {t('health_entries.detail.ingredients_hint')}
+                            </p>
+                        </div>
+                        <ul className="flex flex-col gap-0.5 rounded-[1.75rem] bg-muted/60 p-1.5">
+                            {items.map((item, index) => {
+                                const messages = Object.values(
+                                    itemErrors(index),
+                                );
+
+                                return (
+                                    <li key={item.key}>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                openIngredient(index)
+                                            }
+                                            aria-describedby={
+                                                messages.length > 0
+                                                    ? `ingredients-hint ingredient-error-${index}`
+                                                    : 'ingredients-hint'
+                                            }
+                                            className={cn(
+                                                ROW,
+                                                'min-h-16 py-3',
+                                                messages.length > 0 &&
+                                                    'bg-destructive/10',
+                                                PRESSABLE,
+                                            )}
+                                        >
+                                            <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                                                <span className="font-medium break-words">
+                                                    {item.name}
                                                 </span>
                                                 {item.portion && (
-                                                    <span className="min-w-0 truncate text-muted-foreground/80 sm:max-w-40">
+                                                    <span className="truncate text-sm text-muted-foreground">
                                                         {item.portion}
                                                     </span>
                                                 )}
                                             </span>
-                                        </span>
-                                        <Pencil
-                                            className="size-4 shrink-0 text-muted-foreground"
+                                            <span className="shrink-0 text-right tabular-nums">
+                                                <span className="font-semibold">
+                                                    {formatAmount(
+                                                        item.calories,
+                                                        locale,
+                                                    )}
+                                                </span>{' '}
+                                                <span className="text-sm text-muted-foreground">
+                                                    {t(
+                                                        'health_entries.nutrition.kcal',
+                                                    )}
+                                                </span>
+                                            </span>
+                                        </button>
+                                        {messages.length > 0 && (
+                                            <p
+                                                id={`ingredient-error-${index}`}
+                                                className="px-4 pt-1 pb-2 text-sm text-destructive"
+                                            >
+                                                {messages[0]}
+                                            </p>
+                                        )}
+                                    </li>
+                                );
+                            })}
+                            {items.length < MAX_ITEMS && (
+                                <li>
+                                    <button
+                                        type="button"
+                                        onClick={() => openIngredient(null)}
+                                        className={cn(
+                                            ROW,
+                                            'min-h-13 justify-center gap-2 font-semibold text-primary',
+                                            PRESSABLE,
+                                        )}
+                                    >
+                                        <Plus
+                                            className="size-5"
                                             aria-hidden="true"
                                         />
-                                    </button>
-                                    {messages.length > 0 && (
-                                        <p
-                                            id={`ingredient-error-${index}`}
-                                            className="px-5 pb-3 text-sm text-destructive"
-                                        >
-                                            {messages[0]}
-                                        </p>
-                                    )}
-                                </li>
-                            );
-                        })}
-                        {items.length < MAX_ITEMS && (
-                            <li>
-                                <button
-                                    type="button"
-                                    onClick={() => openIngredient(null)}
-                                    className="flex min-h-14 w-full items-center justify-center gap-2 text-base font-semibold text-primary transition-colors outline-none hover:bg-muted/50 focus-visible:bg-muted/60"
-                                >
-                                    <Plus
-                                        className="size-5"
-                                        aria-hidden="true"
-                                    />
-                                    {t('health_entries.detail.add_ingredient')}
-                                </button>
-                            </li>
-                        )}
-                    </ul>
-                </section>
-            )}
-            <section
-                aria-labelledby="meal-type-heading"
-                className="flex flex-col gap-3"
-            >
-                <h2
-                    id="meal-type-heading"
-                    className="text-xl font-semibold tracking-tight"
-                >
-                    {t('health_entries.detail.meal_type')}
-                </h2>
-                <ToggleGroup
-                    type="single"
-                    value={data.meal_type}
-                    onValueChange={(value) =>
-                        value && form.setData('meal_type', value as MealType)
-                    }
-                    aria-labelledby="meal-type-heading"
-                    className="grid grid-cols-4 gap-1 rounded-full bg-card p-1 shadow-xs ring-1 ring-border/60"
-                >
-                    {MEAL_TYPES.map((option) => (
-                        <ToggleGroupItem
-                            key={option.key}
-                            value={option.key}
-                            className="h-11 min-w-0 rounded-full px-1.5 text-xs leading-tight whitespace-normal sm:text-sm"
-                        >
-                            {t(option.labelKey)}
-                        </ToggleGroupItem>
-                    ))}
-                </ToggleGroup>
-            </section>
-            {data.notes.trim() !== '' && (
-                <section
-                    aria-labelledby="meal-notes-heading"
-                    className="flex flex-col gap-3"
-                >
-                    <h2
-                        id="meal-notes-heading"
-                        className="text-xl font-semibold tracking-tight"
-                    >
-                        {t('health_entries.detail.notes')}
-                    </h2>
-                    <p className="rounded-3xl bg-card p-5 text-sm break-words whitespace-pre-wrap shadow-xs ring-1 ring-border/60">
-                        {data.notes}
-                    </p>
-                </section>
-            )}
-            {readingGroups.length > 0 && (
-                <section
-                    aria-labelledby="also-logged-heading"
-                    className="flex flex-col gap-3"
-                >
-                    <h2
-                        id="also-logged-heading"
-                        className="text-xl font-semibold tracking-tight"
-                    >
-                        {t('health_entries.detail.also_logged')}
-                    </h2>
-                    <ul className="flex flex-col gap-3">
-                        {readingGroups.map((group) => {
-                            const config = getTypeConfig(group.type);
-
-                            return (
-                                <li
-                                    key={group.type}
-                                    className="flex items-center gap-4 rounded-3xl bg-card p-4 shadow-xs ring-1 ring-border/60"
-                                >
-                                    <span
-                                        aria-hidden="true"
-                                        className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-muted"
-                                    >
-                                        <config.icon
-                                            className={cn(
-                                                'size-5',
-                                                config.accent,
-                                            )}
-                                        />
-                                    </span>
-                                    <div className="flex min-w-0 flex-1 flex-col">
-                                        <span className="text-sm text-muted-foreground">
-                                            {t(config.labelKey)}
-                                        </span>
-                                        <span className="font-semibold break-words first-letter:uppercase">
-                                            {group.badges
-                                                .map((badge) => badge.label)
-                                                .join(' · ')}
-                                        </span>
-                                    </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="size-11 shrink-0 rounded-full text-muted-foreground"
-                                        aria-label={t(
-                                            'health_entries.detail.edit_value',
-                                            { label: t(config.labelKey) },
+                                        {t(
+                                            'health_entries.detail.add_ingredient',
                                         )}
-                                        onClick={() =>
-                                            onEditReading(group.type)
-                                        }
-                                    >
-                                        <Pencil aria-hidden="true" />
-                                    </Button>
+                                    </button>
                                 </li>
-                            );
-                        })}
-                    </ul>
+                            )}
+                        </ul>
+                    </section>
+                )}
+                <section
+                    aria-labelledby="meal-type-heading"
+                    className="flex flex-col gap-3"
+                >
+                    <h2
+                        id="meal-type-heading"
+                        className="text-xl font-semibold tracking-tight"
+                    >
+                        {t('health_entries.detail.meal_type')}
+                    </h2>
+                    <MealTypeSwitch
+                        value={data.meal_type}
+                        onChange={(value) => form.setData('meal_type', value)}
+                        labelledBy="meal-type-heading"
+                    />
                 </section>
-            )}
-            {(analysis || source) && (
-                <p className="flex items-start gap-2 text-xs text-muted-foreground">
-                    {analysis && (
-                        <Sparkles
-                            className="mt-0.5 size-3.5 shrink-0 text-primary"
-                            aria-hidden="true"
-                        />
-                    )}
-                    <span>
-                        {[
-                            analysis ? t('snap_to_track.title') : null,
-                            !analysis && source ? t(source.labelKey) : null,
-                            analysis?.confidence != null
-                                ? t('snap_to_track.review.saved_confidence', {
-                                      confidence: analysis.confidence,
-                                  })
-                                : analysis
-                                  ? t('health_entries.detail.estimates_note')
-                                  : null,
-                        ]
-                            .filter(Boolean)
-                            .join(' · ')}
-                    </span>
-                </p>
-            )}
+                {data.notes.trim() !== '' && (
+                    <section
+                        aria-labelledby="meal-notes-heading"
+                        className="flex flex-col gap-3"
+                    >
+                        <h2
+                            id="meal-notes-heading"
+                            className="text-xl font-semibold tracking-tight"
+                        >
+                            {t('health_entries.detail.notes')}
+                        </h2>
+                        <p className="rounded-3xl bg-muted/60 p-5 text-sm break-words whitespace-pre-wrap">
+                            {data.notes}
+                        </p>
+                    </section>
+                )}
+                {readingGroups.length > 0 && (
+                    <section
+                        aria-labelledby="also-logged-heading"
+                        className="flex flex-col gap-3"
+                    >
+                        <h2
+                            id="also-logged-heading"
+                            className="text-xl font-semibold tracking-tight"
+                        >
+                            {t('health_entries.detail.also_logged')}
+                        </h2>
+                        <ul className="flex flex-col gap-3">
+                            {readingGroups.map((group) => {
+                                const config = getTypeConfig(group.type);
+
+                                return (
+                                    <li
+                                        key={group.type}
+                                        className="flex items-center gap-4 rounded-3xl bg-muted/60 p-4"
+                                    >
+                                        <span
+                                            aria-hidden="true"
+                                            className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-background"
+                                        >
+                                            <config.icon
+                                                className={cn(
+                                                    'size-5',
+                                                    config.accent,
+                                                )}
+                                            />
+                                        </span>
+                                        <div className="flex min-w-0 flex-1 flex-col">
+                                            <span className="text-sm text-muted-foreground">
+                                                {t(config.labelKey)}
+                                            </span>
+                                            <span className="font-semibold break-words first-letter:uppercase">
+                                                {group.badges
+                                                    .map((badge) => badge.label)
+                                                    .join(' · ')}
+                                            </span>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className={cn(
+                                                'size-11 shrink-0 rounded-full bg-transparent text-muted-foreground',
+                                                PRESS_BUTTON,
+                                            )}
+                                            aria-label={t(
+                                                'health_entries.detail.edit_value',
+                                                { label: t(config.labelKey) },
+                                            )}
+                                            onClick={() =>
+                                                onEditReading(group.type)
+                                            }
+                                        >
+                                            <Pencil aria-hidden="true" />
+                                        </Button>
+                                    </li>
+                                );
+                            })}
+                        </ul>
+                    </section>
+                )}
+                {(analysis || source) && (
+                    <p className="flex items-start gap-2 text-xs text-muted-foreground">
+                        {analysis && (
+                            <Sparkles
+                                className="mt-0.5 size-3.5 shrink-0 text-primary"
+                                aria-hidden="true"
+                            />
+                        )}
+                        <span>
+                            {[
+                                analysis ? t('snap_to_track.title') : null,
+                                !analysis && source ? t(source.labelKey) : null,
+                                analysis?.confidence != null
+                                    ? t(
+                                          'snap_to_track.review.saved_confidence',
+                                          { confidence: analysis.confidence },
+                                      )
+                                    : analysis
+                                      ? t(
+                                            'health_entries.detail.estimates_note',
+                                        )
+                                      : null,
+                            ]
+                                .filter(Boolean)
+                                .join(' · ')}
+                        </span>
+                    </p>
+                )}
+            </div>
             <DetailActions
                 onEdit={() => openSheet('details')}
                 doneUrl={backUrl}
