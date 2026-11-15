@@ -28,8 +28,7 @@ it('restores the selected units and measurement values after saving and reopenin
     $page = visit(route('onboarding.biometrics.show', absolute: false))
         ->withLocale('en-GB');
 
-    $page->assertValue('height', '177.8')
-        ->click('button:has-text("lb, ft, in")')
+    $page->assertAttribute('button:has-text("lb, ft, in")', 'aria-checked', 'true')
         ->assertValue('weight', '200')
         ->assertValue('height_feet', '5')
         ->assertValue('height_inches', '10')
