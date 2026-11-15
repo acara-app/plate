@@ -25,6 +25,7 @@ final class StoreBiometricsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
             'measurement_system' => ['nullable', Rule::enum(MeasurementSystem::class)],
             'age' => ['required', 'integer', 'min:13', 'max:120'],
             ...$this->measurementRules(),

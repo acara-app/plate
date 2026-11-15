@@ -27,16 +27,6 @@ export function isMeasurementSystem(value: string): value is MeasurementSystem {
     return value === 'metric' || value === 'imperial';
 }
 
-export function defaultMeasurementSystem(appLocale: string): MeasurementSystem {
-    if (typeof navigator === 'undefined') {
-        return 'metric';
-    }
-
-    return appLocale === 'en' && navigator.language.toLowerCase() === 'en-us'
-        ? 'imperial'
-        : 'metric';
-}
-
 export function kilogramsToPounds(kilograms: string): string {
     const value = parseMeasurement(kilograms);
 

@@ -45,8 +45,9 @@ export const AUTH_ENTER =
 
 export function AuthScreen({
     title,
+    className,
     children,
-}: PropsWithChildren<{ title: string }>) {
+}: PropsWithChildren<{ title: string; className?: string }>) {
     const [dayPart] = useState(currentDayPart);
 
     return (
@@ -64,7 +65,12 @@ export function AuthScreen({
                     DAYLIGHT[dayPart],
                 )}
             />
-            <div className="mx-auto flex w-full max-w-[27rem] flex-1 flex-col px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:min-h-[42rem] md:flex-none md:py-10">
+            <div
+                className={cn(
+                    'mx-auto flex w-full max-w-[27rem] flex-1 flex-col px-6 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.5rem,env(safe-area-inset-bottom))] md:min-h-[42rem] md:flex-none md:py-10',
+                    className,
+                )}
+            >
                 {children}
             </div>
         </div>
