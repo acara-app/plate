@@ -67,16 +67,22 @@ it('keeps a newly registered user signed in after their session expires', functi
     $this->assertAuthenticatedAs(User::query()->where('email', 'test@example.com')->sole());
 });
 
-it('requires name', function (): void {
-    $response = $this->fromRoute('register')
+it('names a new user after their email when no name is given', function (string $email, string $name): void {
+    $this->fromRoute('register')
         ->post(route('register.store'), [
-            'email' => 'test@example.com',
+            'email' => $email,
             'password' => 'password1234',
-        ]);
+            'accepted_disclaimer' => '1',
+            'health_data_consent' => '1',
+        ])
+        ->assertRedirectToRoute('dashboard');
 
-    $response->assertRedirectToRoute('register')
-        ->assertSessionHasErrors('name');
-});
+    expect(User::query()->where('email', $email)->sole()->name)->toBe($name);
+})->with([
+    'first word of the address' => ['naraa.bold@example.com', 'Naraa'],
+    'skips initials and tags' => ['j.smith+plate@example.com', 'Smith'],
+    'no letters to go on' => ['12345@example.com', 'Friend'],
+]);
 
 it('requires email', function (): void {
     $response = $this->fromRoute('register')

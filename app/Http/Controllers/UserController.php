@@ -30,7 +30,7 @@ final readonly class UserController
 
     public function store(CreateUserRequest $request, CreateUser $action, RecordSignUpAgreements $recordSignUpAgreements, RecordConsent $recordConsent): RedirectResponse
     {
-        /** @var array<string, mixed> $attributes */
+        /** @var array{email: string, name?: string|null} $attributes */
         $attributes = $request->safe()->only(['name', 'email']);
 
         $user = $action->handle(
