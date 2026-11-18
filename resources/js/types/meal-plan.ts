@@ -29,7 +29,6 @@ export interface Ingredient {
     name: string;
     quantity: string;
     specificity?: string | null;
-    barcode?: string | null;
 }
 
 export interface Meal {
