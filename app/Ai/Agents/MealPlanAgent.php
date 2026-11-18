@@ -27,6 +27,7 @@ use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
+use Laravel\Ai\Attributes\Strict;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasProviderOptions;
@@ -38,6 +39,7 @@ use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(64000)]
+#[Strict]
 #[Timeout(180)]
 final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
 {
@@ -87,8 +89,8 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
         $ingredientSchema = new ObjectType([
             'name' => $schema->string()->required(),
             'quantity' => $schema->string()->required(),
-            'specificity' => $schema->string()->nullable(),
-            'barcode' => $schema->string()->nullable(),
+            'specificity' => $schema->string()->nullable()->required(),
+            'barcode' => $schema->string()->nullable()->required(),
         ])->withoutAdditionalProperties();
 
         $mealSchema = new ObjectType([
@@ -107,12 +109,12 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
         ])->withoutAdditionalProperties();
 
         $metadataSchema = new ObjectType([
-            'preparation_notes' => $schema->string()->nullable(),
+            'preparation_notes' => $schema->string()->nullable()->required(),
         ])->withoutAdditionalProperties();
 
         return [
             'meals' => (new ArrayType)->items($mealSchema)->required(),
-            'metadata' => $metadataSchema->nullable(),
+            'metadata' => $metadataSchema->nullable()->required(),
         ];
     }
 

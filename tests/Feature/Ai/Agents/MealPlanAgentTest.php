@@ -8,9 +8,27 @@ use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
+use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Attributes\Strict;
+use Laravel\Ai\ObjectSchema;
 
 covers(MealPlanAgent::class);
+
+it('has the provider enforce every meal field, including calories', function (): void {
+    $agent = resolve(MealPlanAgent::class);
+    $schema = new ObjectSchema($agent->schema(new JsonSchemaTypeFactory), strict: true)->toSchema();
+
+    $meal = $schema['properties']['meals']['items'];
+    $ingredient = $meal['properties']['ingredients']['items'];
+    $metadata = $schema['properties']['metadata'];
+
+    expect(Strict::isAppliedTo($agent))->toBeTrue()
+        ->and($schema['required'])->toEqualCanonicalizing(array_keys($schema['properties']))
+        ->and($meal['required'])->toEqualCanonicalizing(array_keys($meal['properties']))
+        ->and($ingredient['required'])->toEqualCanonicalizing(array_keys($ingredient['properties']))
+        ->and($metadata['required'])->toEqualCanonicalizing(array_keys($metadata['properties']));
+});
 
 it('returns fluent interface when setting diet type', function (): void {
     $action = resolve(MealPlanAgent::class);
