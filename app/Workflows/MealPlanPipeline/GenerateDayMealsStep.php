@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Workflows\MealPlanPipeline;
 
+use App\Exceptions\EmptyMealPlanDayException;
 use App\Workflows\MealPlanDayGeneratorActivity;
 use Closure;
 
@@ -16,7 +17,7 @@ final readonly class GenerateDayMealsStep
      */
     public function handle(MealPlanDayContext $context, Closure $next): MealPlanDayContext
     {
-        $context->dayMeals = $this->generator->handle(
+        $dayMeals = $this->generator->handle(
             $context->user,
             $context->dayNumber,
             $context->totalDays,
@@ -25,6 +26,12 @@ final readonly class GenerateDayMealsStep
             $context->mealPlan,
             $context->dietType,
         );
+
+        if ($dayMeals->meals->count() === 0) {
+            throw new EmptyMealPlanDayException($context->dayNumber);
+        }
+
+        $context->dayMeals = $dayMeals;
 
         return $next($context);
     }
