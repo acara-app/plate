@@ -90,7 +90,6 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
             'name' => $schema->string()->required(),
             'quantity' => $schema->string()->required(),
             'specificity' => $schema->string()->nullable()->required(),
-            'barcode' => $schema->string()->nullable()->required(),
         ])->withoutAdditionalProperties();
 
         $mealSchema = new ObjectType([

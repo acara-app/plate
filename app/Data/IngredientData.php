@@ -13,6 +13,5 @@ final class IngredientData extends Data
         public string $name,
         public string $quantity,
         public ?string $specificity = null,
-        public ?string $barcode = null,
     ) {}
 }

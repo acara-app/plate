@@ -7,6 +7,7 @@ use App\Data\ExtractedIngredientData;
 use App\Models\Meal;
 use App\Models\MealPlan;
 use App\Models\User;
+use Laravel\Ai\Prompts\AgentPrompt;
 
 covers(GroceryListAgent::class);
 
@@ -115,6 +116,29 @@ it('generates grocery list from meal plan with ingredients', function (): void {
         ->and($result->items->first()->name)->toBe('Chicken Breast')
         ->and($result->items->first()->quantity)->toBe('2 lbs')
         ->and($result->items->first()->category)->toBe('Meat & Seafood');
+});
+
+it('builds the list from ingredients saved by older meal plans', function (): void {
+    GroceryListAgent::fake([[
+        'items' => [
+            ['name' => 'Penne Pasta', 'quantity' => '85g', 'category' => 'Pantry', 'days' => [1]],
+        ],
+    ]]);
+
+    $mealPlan = MealPlan::factory()->for($this->user)->create(['duration_days' => 7]);
+
+    Meal::factory()->for($mealPlan)->create([
+        'day_number' => 1,
+        'name' => 'Dinner',
+        'ingredients' => [
+            ['name' => 'penne pasta', 'quantity' => '85g', 'specificity' => 'specific', 'barcode' => null],
+        ],
+    ]);
+
+    $result = $this->agent->generate($mealPlan);
+
+    expect($result->items)->toHaveCount(1);
+    GroceryListAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('penne pasta') && $prompt->contains('85g'));
 });
 
 it('returns empty list when meal plan has no meals', function (): void {
