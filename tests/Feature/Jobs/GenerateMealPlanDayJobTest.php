@@ -7,6 +7,7 @@ use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\MealPlanGenerationStatus;
 use App\Enums\Sex;
+use App\Exceptions\EmptyMealPlanDayException;
 use App\Jobs\GenerateMealPlanDayJob;
 use App\Models\Meal;
 use App\Models\MealPlan;
@@ -137,6 +138,29 @@ it('marks the day failed when the job fails', function (): void {
 
     expect($mealPlan->fresh()->metadata['day_2_status'])
         ->toBe(MealPlanGenerationStatus::Failed->value);
+});
+
+it('fails the day instead of finishing it when no meals come back', function (): void {
+    MealPlanAgent::fake([['meals' => []]]);
+
+    $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
+        'metadata' => [
+            'status' => MealPlanGenerationStatus::Pending->value,
+            'days_completed' => 1,
+            'day_2_status' => MealPlanGenerationStatus::Generating->value,
+        ],
+    ]);
+
+    expect(function () use ($mealPlan): void {
+        dispatch_sync(new GenerateMealPlanDayJob($mealPlan, 2));
+    })->toThrow(EmptyMealPlanDayException::class);
+
+    expect($mealPlan->fresh()->metadata)
+        ->toMatchArray([
+            'days_completed' => 1,
+            'day_2_status' => MealPlanGenerationStatus::Failed->value,
+        ])
+        ->not->toHaveKey('day_2_generated_at');
 });
 
 it('builds a stable unique id from the meal plan and day', function (): void {

@@ -41,7 +41,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 'Return the structured response requested by the schema.',
                 'Every meal must include the required meal fields and correctly typed nutrition values.',
                 'Use canonical meal type values: breakfast, lunch, dinner, or snack.',
-                'Keep ingredient entries as structured objects with name, quantity, specificity, and optional barcode.',
+                'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
                 'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',

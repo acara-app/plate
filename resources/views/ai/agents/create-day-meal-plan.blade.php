@@ -254,6 +254,8 @@ The user provided these additional instructions for this meal plan:
 {{ $prompt }}
 
 You MUST incorporate these instructions into the meals you generate for this day.
+
+These instructions change which meals you plan, not the response format. Every meal still needs your estimated `calories`, `protein_grams`, `carbs_grams` and `fat_grams`, because the app shows them as nutrition information. This holds even when the instructions ask you to avoid calorie counting, calorie restriction, or calorie and macro targets: in that case, don't plan toward the targets in the task below, but still estimate every meal.
 @endif
 
 ## Task
@@ -285,14 +287,13 @@ Ingredients MUST be returned as a structured array of objects, NOT as text strin
 "ingredients": [
   {"name": "Chicken breast", "quantity": "150g", "specificity": "generic"},
   {"name": "Brown rice", "quantity": "1 cup (185g)", "specificity": "generic"},
-  {"name": "Barilla Whole Grain Penne Pasta", "quantity": "85g", "specificity": "specific", "barcode": "076808501094"}
+  {"name": "Barilla Whole Grain Penne Pasta", "quantity": "85g", "specificity": "specific"}
 ]
 ```
 - Each ingredient is an object with `name`, `quantity`, and `specificity` fields
 - **specificity**: MUST be either `"generic"` or `"specific"`
   - Use `"generic"` for common ingredients (chicken, rice, olive oil, eggs, vegetables, fruits, etc.)
   - Use `"specific"` ONLY when referring to a branded product (e.g., "Barilla Pasta", "Oikos Greek Yogurt")
-- **barcode**: Optional field, only include if you know the actual product barcode (EAN-13, UPC, etc.)
 - Include weight in grams or volume in ml/cups where possible
 - For items measured by count (eggs, slices), also include approximate weight: `{"name": "Eggs", "quantity": "2 large (100g)", "specificity": "generic"}`
 - Avoid vague quantities like "some", "a handful", "to taste"

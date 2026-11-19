@@ -603,3 +603,18 @@ it('keeps the language directive language-agnostic for english users', function 
         ->not->toContain('If language is')
         ->toContain('Use natural, idiomatic terms in English');
 });
+
+it('still asks for calories and macros on every meal when custom instructions avoid calorie targets', function (): void {
+    $user = User::factory()->create();
+
+    $result = resolve(MealPlanPromptBuilder::class)->handleForDay(
+        $user,
+        1,
+        7,
+        customPrompt: 'Do not use calorie or macro targets.',
+    );
+
+    expect($result)
+        ->toContain('Do not use calorie or macro targets.')
+        ->toContain('Every meal still needs your estimated `calories`, `protein_grams`, `carbs_grams` and `fat_grams`');
+});
