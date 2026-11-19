@@ -27,7 +27,6 @@ use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
 use Laravel\Ai\Attributes\MaxTokens;
-use Laravel\Ai\Attributes\Strict;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasProviderOptions;
@@ -39,7 +38,6 @@ use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(64000)]
-#[Strict]
 #[Timeout(180)]
 final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
 {

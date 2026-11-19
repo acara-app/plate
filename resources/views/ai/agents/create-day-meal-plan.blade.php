@@ -254,6 +254,8 @@ The user provided these additional instructions for this meal plan:
 {{ $prompt }}
 
 You MUST incorporate these instructions into the meals you generate for this day.
+
+These instructions change which meals you plan, not the response format. Every meal still needs your estimated `calories`, `protein_grams`, `carbs_grams` and `fat_grams`, because the app shows them as nutrition information. This holds even when the instructions ask you to avoid calorie counting, calorie restriction, or calorie and macro targets: in that case, don't plan toward the targets in the task below, but still estimate every meal.
 @endif
 
 ## Task
