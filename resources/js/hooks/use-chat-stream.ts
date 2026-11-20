@@ -83,6 +83,7 @@ export function useChatStream({
     });
 
     const { isConnected } = useStreamChannel({
+        conversationId,
         userId,
         status: state.status,
         dispatch,

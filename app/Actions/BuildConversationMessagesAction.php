@@ -52,7 +52,17 @@ final readonly class BuildConversationMessagesAction
             ->values()
             ->all();
 
-        return [$textPart, ...$attachmentParts, ...$this->approvalParts($message)];
+        $parts = [$textPart];
+        $visual = $message->chatStreamMeta()['visual_part'] ?? null;
+        if ($message->role === MessageRole::Assistant
+            && is_array($visual)
+            && ($visual['type'] ?? null) === 'data-spec'
+            && is_string($visual['id'] ?? null)
+            && is_array($visual['data'] ?? null)) {
+            $parts[] = ['type' => 'data-spec', 'id' => $visual['id'], 'data' => $visual['data']];
+        }
+
+        return [...$parts, ...$attachmentParts, ...$this->approvalParts($message)];
     }
 
     /**

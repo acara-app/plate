@@ -124,6 +124,39 @@ it('holds back sub-agent progress so a specialist tool only reports its final re
     Event::assertDispatchedTimes(AnonymousEvent::class, 3);
 });
 
+it('delivers one successful chart and a plain text fallback when the model omits its takeaway', function (): void {
+    Event::fake([AnonymousEvent::class]);
+    $events = $this->spy(StreamEventStore::class);
+    $aggregator = resolve(StreamAggregator::class);
+    $summary = json_encode([
+        'success' => true,
+        'date_range' => ['from' => '2026-11-09', 'to' => '2026-11-15'],
+        'summaries' => [['type' => 'stepCount', 'date' => '2026-11-09', 'primary_value' => 0]],
+    ], JSON_THROW_ON_ERROR);
+
+    $result = fn (string $id): ToolResult => new ToolResult($id, 'show_weekly_steps', [], $summary);
+    $stream = [
+        new ToolResultEvent('preliminary', $result('call-1'), true, null, 1, preliminary: true),
+        new ToolResultEvent('failed', $result('call-2'), false, 'Unavailable', 2),
+        new ToolResultEvent('valid', $result('call-3'), true, null, 3),
+        new ToolResultEvent('again', $result('call-4'), true, null, 4),
+        new StreamEnd('end', 'stop', new TextUsage, 5),
+    ];
+
+    $delivery = new BroadcastConnector($events, $aggregator)->deliver($stream, 1, 'conversation-1');
+
+    $broadcasts = Event::dispatched(AnonymousEvent::class)->map(fn (array $arguments): array => $arguments[0]->broadcastWith());
+    expect($broadcasts->pluck('type')->all())->toBe(['tool_result', 'tool_result', 'chat_visual', 'tool_result', 'text_delta', 'stream_end']);
+    $visual = $broadcasts[2];
+    expect($visual['part']['id'])->toBe('call-3');
+    expect($delivery->result->text)->toContain('2026-11-09: 0', '2026-11-10: no reading');
+    expect($broadcasts[4]['delta'])->toBe($delivery->result->text);
+
+    $interrupted = $aggregator->aggregateStoredEvents([['sequence' => 2, 'type' => 'chat_visual', 'data' => $visual]])->withoutPendingApprovals();
+    expect($interrupted->text)->toBe($delivery->result->text);
+    expect($interrupted->visualPart)->toBe($visual['part']);
+});
+
 it('keeps streaming and reports the error when the websocket server rejects a broadcast', function (): void {
     Exceptions::fake();
 

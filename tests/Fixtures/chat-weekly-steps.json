@@ -1,0 +1,71 @@
+{
+  "liveEvent": {
+    "type": "chat_visual",
+    "conversationId": "019a7eb4-9400-7000-8000-000000000001",
+    "id": "tool-result-1:visual",
+    "invocation_id": "invocation-1",
+    "timestamp": 1794787200,
+    "part": {
+      "type": "data-spec",
+      "id": "call_weekly_steps",
+      "data": {
+        "spec": {
+          "root": "weekly-steps",
+          "elements": {
+            "weekly-steps": {
+              "type": "WeeklyStepsChart",
+              "props": {
+                "days": [
+                  { "date": "2026-11-09", "steps": 4200 },
+                  { "date": "2026-11-10", "steps": 0 },
+                  { "date": "2026-11-11", "steps": null },
+                  { "date": "2026-11-12", "steps": 7900 },
+                  { "date": "2026-11-13", "steps": 4500 },
+                  { "date": "2026-11-14", "steps": 6100 },
+                  { "date": "2026-11-15", "steps": 3300 }
+                ]
+              }
+            }
+          }
+        },
+        "fallbackText": "Daily steps (UTC): 2026-11-09: 4200, 2026-11-10: 0, 2026-11-11: no reading, 2026-11-12: 7900, 2026-11-13: 4500, 2026-11-14: 6100, 2026-11-15: 3300"
+      }
+    }
+  },
+  "savedMessage": {
+    "id": "019a7eb4-9500-7000-8000-000000000001",
+    "role": "assistant",
+    "parts": [
+      {
+        "type": "text",
+        "text": "Thursday had the most steps, with 7,900. Wednesday has no reading."
+      },
+      {
+        "type": "data-spec",
+        "id": "call_weekly_steps",
+        "data": {
+          "spec": {
+            "root": "weekly-steps",
+            "elements": {
+              "weekly-steps": {
+                "type": "WeeklyStepsChart",
+                "props": {
+                  "days": [
+                    { "date": "2026-11-09", "steps": 4200 },
+                    { "date": "2026-11-10", "steps": 0 },
+                    { "date": "2026-11-11", "steps": null },
+                    { "date": "2026-11-12", "steps": 7900 },
+                    { "date": "2026-11-13", "steps": 4500 },
+                    { "date": "2026-11-14", "steps": 6100 },
+                    { "date": "2026-11-15", "steps": 3300 }
+                  ]
+                }
+              }
+            }
+          },
+          "fallbackText": "Daily steps (UTC): 2026-11-09: 4200, 2026-11-10: 0, 2026-11-11: no reading, 2026-11-12: 7900, 2026-11-13: 4500, 2026-11-14: 6100, 2026-11-15: 3300"
+        }
+      }
+    ]
+  }
+}

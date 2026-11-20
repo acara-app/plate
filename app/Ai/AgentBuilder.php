@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
+use App\Ai\Tools\ShowWeeklySteps;
 use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Skills\LoadsSkills;
 use App\Enums\DataSensitivity;
@@ -16,6 +17,7 @@ use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
+use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
@@ -60,6 +62,7 @@ final readonly class AgentBuilder
             'summaries' => $summaries,
             'emergencyNumber' => EmergencyNumberUtil::emergencyNumber($timezone),
             'availableSkills' => $this->skillLoader->loadAll(),
+            'supportsChatCharts' => $this->supportsChatCharts(),
             'billingEnabled' => $this->stripeBilling->isConfigured(),
         ])->render();
 
@@ -74,6 +77,10 @@ final readonly class AgentBuilder
     public function buildTools(AgentRequest $request, ?User $user = null): array
     {
         $tools = $this->toolRegistry->getTools();
+
+        if ($this->supportsChatCharts()) {
+            $tools[] = resolve(ShowWeeklySteps::class);
+        }
 
         if ($request->hasImages()) {
             $imageTools = $this->toolRegistry->getImageTools($request->images, $user, $request->streamId);
@@ -108,6 +115,11 @@ final readonly class AgentBuilder
         }
 
         return $this->toolSensitivity->maxSensitivity($tools);
+    }
+
+    private function supportsChatCharts(): bool
+    {
+        return in_array(Context::get('chat.channel'), ['web', 'mobile'], true);
     }
 
     private function renderMemories(AgentRequest $request, ?User $user): string

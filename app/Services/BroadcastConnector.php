@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Broadcast;
 use Laravel\Ai\Streaming\Events\StreamEnd;
 use Laravel\Ai\Streaming\Events\StreamEvent;
 use Laravel\Ai\Streaming\Events\StreamStart;
+use Laravel\Ai\Streaming\Events\TextDelta;
 use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
 use Laravel\Ai\Streaming\Events\ToolResult;
 
@@ -33,12 +34,13 @@ final readonly class BroadcastConnector
     public function deliver(iterable $stream, int $userId, string $conversationId): ChatStreamDelivery
     {
         $channel = ChatChannel::private($userId);
-        $sequence = 0;
         $cancelled = false;
         $lastCancellationCheck = 0.0;
         $payloads = [];
         $steps = new Collection;
         $provider = null;
+        $visual = null;
+        $hasText = false;
 
         foreach ($stream as $event) {
             if ($event instanceof StreamStart) {
@@ -63,10 +65,30 @@ final readonly class BroadcastConnector
                 continue;
             }
 
-            $payload = $this->aggregator->normalizeEvent($event);
-            $payloads[] = $payload;
-            $this->events->append($conversationId, $payload, $sequence++);
-            $this->broadcastEvent($payload, $channel);
+            $batch = [$this->aggregator->normalizeEvent($event)];
+
+            if ($event instanceof ToolResult && $visual === null) {
+                $visual = $this->aggregator->visualEvent($event, $conversationId);
+                if ($visual !== null) {
+                    $batch[] = $visual;
+                }
+            }
+
+            if ($event instanceof TextDelta && ! $hasText) {
+                $hasText = mb_trim($event->delta) !== '';
+            }
+
+            if ($event instanceof StreamEnd && $visual !== null && ! $hasText) {
+                $fallback = new TextDelta($event->id.':fallback', $visual['part']['id'], $visual['part']['data']['fallbackText'], $event->timestamp);
+                $fallback->invocationId = $event->invocationId;
+                array_unshift($batch, [...$this->aggregator->normalizeEvent($fallback), 'conversationId' => $conversationId]);
+            }
+
+            foreach ($batch as $payload) {
+                $this->events->append($conversationId, $payload, count($payloads));
+                $payloads[] = $payload;
+                $this->broadcastEvent($payload, $channel);
+            }
         }
 
         return new ChatStreamDelivery(

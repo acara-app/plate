@@ -1,3 +1,4 @@
+import type { ChatVisualPart } from '@/components/chat/visual-part';
 import type { AiAllowance } from '@/types';
 import type {
     ApprovalCardData,
@@ -30,6 +31,7 @@ export type ChatAction =
     | { type: 'PROCESSING' }
     | { type: 'STREAM_START'; id: string }
     | { type: 'APPEND_TEXT'; delta: string }
+    | { type: 'ADD_VISUAL'; visual: ChatVisualPart }
     | { type: 'ADD_CITATION'; citation: UrlCitationPayload }
     | {
           type: 'ADD_APPROVAL';
@@ -207,6 +209,20 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
                 ...state,
                 messages: updateLastAssistant(state.messages, (message) =>
                     appendText(message, action.delta),
+                ),
+            };
+
+        case 'ADD_VISUAL':
+            return {
+                ...state,
+                messages: updateLastAssistant(state.messages, (message) =>
+                    upsertDataPart(
+                        message,
+                        action.visual.type,
+                        action.visual.id,
+                        () => action.visual.data,
+                        (data) => data,
+                    ),
                 ),
             };
 

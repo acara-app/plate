@@ -141,6 +141,7 @@ final readonly class CompletePendingChatStreamTurn
             'provider_tools' => $result->providerTools,
             'citations' => $result->citations,
             'errors' => $result->errors,
+            'visual_part' => $result->visualPart,
             ...$result->hasPendingApprovals() ? [
                 'approvals' => $result->pendingApprovals,
                 'agent_models' => resolve(AgentModelContext::class)->selections(),

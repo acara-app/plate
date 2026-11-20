@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Data\ChatStreamResult;
+use App\Data\WeeklyStepsChart;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
 use Laravel\Ai\Approvals\PendingApproval;
@@ -26,7 +27,9 @@ use Laravel\Ai\Streaming\Events\ToolCall;
 use Laravel\Ai\Streaming\Events\ToolResult;
 
 /**
- * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, approvals?: list<array{id: string, tool: string, arguments: array<string, mixed>, reason: string|null}>, ...<string, mixed>}
+ * @phpstan-import-type TVisualPart from ChatStreamResult
+ *
+ * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, part?: TVisualPart, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, approvals?: list<array{id: string, tool: string, arguments: array<string, mixed>, reason: string|null}>, ...<string, mixed>}
  */
 final readonly class StreamAggregator
 {
@@ -239,6 +242,29 @@ final readonly class StreamAggregator
     }
 
     /**
+     * @return array{type: 'chat_visual', id: string, invocation_id: string|null, conversationId: string, timestamp: int, part: TVisualPart}|null
+     */
+    public function visualEvent(ToolResult $event, string $conversationId): ?array
+    {
+        $result = $event->toolResult;
+
+        if (! $event->successful || $event->denied || ! $result->successful()) {
+            return null;
+        }
+
+        $data = WeeklyStepsChart::fromToolResult($result->name, $result->result);
+
+        return $data === null ? null : [
+            'type' => 'chat_visual',
+            'id' => $event->id.':visual',
+            'conversationId' => $conversationId,
+            'invocation_id' => $event->invocationId,
+            'timestamp' => $event->timestamp,
+            'part' => ['type' => 'data-spec', 'id' => $result->id, 'data' => $data],
+        ];
+    }
+
+    /**
      * @param  list<array{sequence: int, type: string, data: TNormalizedEvent}>  $storedEvents
      */
     public function aggregateStoredEvents(array $storedEvents): ChatStreamResult
@@ -261,8 +287,10 @@ final readonly class StreamAggregator
             $this->ofType($events, 'text_delta'),
         ));
 
+        $visualPart = $this->ofType($events, 'chat_visual')[0]['part'] ?? null;
+
         return new ChatStreamResult(
-            text: $text,
+            text: $visualPart !== null && mb_trim($text) === '' ? $visualPart['data']['fallbackText'] : $text,
             toolCalls: $this->toolCalls($events),
             toolResults: $this->toolResults($events),
             providerTools: $this->providerTools($events),
@@ -270,6 +298,7 @@ final readonly class StreamAggregator
             errors: $this->errors($events),
             usage: $this->usage($events),
             pendingApprovals: $this->pendingApprovals($events),
+            visualPart: $visualPart,
         );
     }
 

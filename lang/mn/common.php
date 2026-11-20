@@ -1132,6 +1132,10 @@ return [
     ],
 
     'chat' => [
+        'weekly_steps' => [
+            'title' => 'Өдөр бүрийн алхмын тоо (UTC)',
+            'no_reading' => 'Бүртгэлгүй',
+        ],
         'placeholder' => 'AI-аас асуух',
         'stop' => 'Зогсоох',
         'modes' => [

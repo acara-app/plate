@@ -19,6 +19,7 @@ const STREAM_EVENTS = [
     '.tool_call',
     '.tool_result',
     '.tool_approval_request',
+    '.chat_visual',
     '.provider_tool',
     '.citation',
 ];
@@ -33,6 +34,7 @@ interface ChatErrorPayload {
 }
 
 interface UseStreamChannelOptions {
+    conversationId: string;
     userId: number;
     status: ChatStatus;
     dispatch: React.Dispatch<ChatAction>;
@@ -50,6 +52,7 @@ interface UseStreamChannelReturn {
 }
 
 export function useStreamChannel({
+    conversationId,
     userId,
     status,
     dispatch,
@@ -70,6 +73,13 @@ export function useStreamChannel({
         channelName,
         STREAM_EVENTS,
         (raw) => {
+            if (
+                (raw.type === 'chat_visual' ||
+                    raw.conversationId !== undefined) &&
+                raw.conversationId !== conversationId
+            ) {
+                return;
+            }
             stopReplayPolling();
 
             if (raw.type === 'stream_start') {
@@ -84,6 +94,7 @@ export function useStreamChannel({
             );
         },
         [
+            conversationId,
             stopReplayPolling,
             streamActiveRef,
             dispatch,

@@ -1,12 +1,15 @@
 import { parseApprovalRequest } from '@/components/chat/approval-part';
+import { parseVisualPart } from '@/components/chat/visual-part';
 import type { ChatAction, UrlCitationPayload } from './message-reducer';
 
 export interface RawStreamEvent {
     type: string;
     id?: string;
+    conversationId?: string;
     delta?: string;
     citation?: UrlCitationPayload;
     result?: unknown;
+    part?: unknown;
     reasoning_id?: string;
     tool_id?: string;
     tool_name?: string;
@@ -151,6 +154,15 @@ export function applyStreamEvent(
                 }
             }
             break;
+
+        case 'chat_visual': {
+            const visual = parseVisualPart(raw.part);
+            if (visual) {
+                seenEventIds.add(raw.id);
+                dispatch({ type: 'ADD_VISUAL', visual });
+            }
+            break;
+        }
 
         case 'tool_result': {
             if (typeof raw.tool_id === 'string') {

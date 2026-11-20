@@ -1147,6 +1147,10 @@ return [
     ],
 
     'chat' => [
+        'weekly_steps' => [
+            'title' => 'Pas par jour (UTC)',
+            'no_reading' => 'Aucun relevé',
+        ],
         'placeholder' => "Posez n'importe quelle question",
         'stop' => 'Arrêter',
         'modes' => [

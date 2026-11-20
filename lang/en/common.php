@@ -1146,6 +1146,10 @@ return [
     ],
 
     'chat' => [
+        'weekly_steps' => [
+            'title' => 'Daily steps (UTC)',
+            'no_reading' => 'No reading',
+        ],
         'placeholder' => 'Ask anything',
         'stop' => 'Stop',
         'modes' => [

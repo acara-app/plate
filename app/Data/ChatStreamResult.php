@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-/** @codeCoverageIgnore */
+/**
+ * @codeCoverageIgnore
+ *
+ * @phpstan-type TVisualPart array{type: 'data-spec', id: string, data: array{spec: array<string, mixed>, fallbackText: string}}
+ */
 final readonly class ChatStreamResult
 {
     /**
@@ -15,6 +19,7 @@ final readonly class ChatStreamResult
      * @param  list<array<string, mixed>>  $errors
      * @param  array<string, mixed>  $usage
      * @param  array<string, string|null>  $pendingApprovals
+     * @param  TVisualPart|null  $visualPart
      */
     public function __construct(
         public string $text = '',
@@ -25,6 +30,7 @@ final readonly class ChatStreamResult
         public array $errors = [],
         public array $usage = [],
         public array $pendingApprovals = [],
+        public ?array $visualPart = null,
     ) {}
 
     public function hasAssistantContent(): bool
@@ -34,6 +40,7 @@ final readonly class ChatStreamResult
             || $this->toolResults !== []
             || $this->providerTools !== []
             || $this->citations !== []
+            || $this->visualPart !== null
             || $this->pendingApprovals !== [];
     }
 
@@ -52,6 +59,7 @@ final readonly class ChatStreamResult
             citations: $this->citations,
             errors: $this->errors,
             usage: $this->usage,
+            visualPart: $this->visualPart,
         );
     }
 }

@@ -8,6 +8,11 @@ import {
     SourcesSection,
     type SourceLink,
 } from '@/components/chat/sources-section';
+import { ChatVisual, weeklyStepsSpec } from '@/components/chat/chat-visual';
+import {
+    parseVisualPart,
+    type ChatVisualPart,
+} from '@/components/chat/visual-part';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import type {
@@ -16,6 +21,7 @@ import type {
     ChatStatus,
 } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
+import type { Spec } from '@json-render/core';
 import {
     CircleAlert,
     CircleDashed,
@@ -173,6 +179,7 @@ function UserMessage({
 
 type ContentBlock =
     | { kind: 'text'; key: string; text: string }
+    | { kind: 'visual'; key: string; spec: Spec }
     | { kind: 'file'; key: string; file: FilePart }
     | { kind: 'approval'; key: string; approval: ApprovalCardData };
 
@@ -180,9 +187,10 @@ function partitionAssistantParts(message: UIMessage, live: boolean) {
     const parts = message.parts ?? [];
     const approvals: ApprovalCardData[] = [];
     const sources: SourceLink[] = [];
-    const blocks: ContentBlock[] = [];
+    let visual: ChatVisualPart | null = null;
+    let blocks: ContentBlock[] = [];
 
-    parts.forEach((part, index) => {
+    for (const [index, part] of parts.entries()) {
         const approval = extractApprovalPayload(part);
 
         if (approval) {
@@ -198,12 +206,39 @@ function partitionAssistantParts(message: UIMessage, live: boolean) {
                 key: `text-${index}`,
                 text: part.text,
             });
+        } else if (part.type === 'data-spec') {
+            visual ??= parseVisualPart(part);
         } else if (part.type === 'file') {
             blocks.push({ kind: 'file', key: `file-${index}`, file: part });
         } else if (part.type === 'source-url') {
             sources.push({ url: part.url, title: part.title ?? part.url });
         }
-    });
+    }
+
+    if (visual) {
+        const { spec, fallbackText } = visual.data;
+        const parsed = weeklyStepsSpec.safeParse(spec);
+        const textBlocks = blocks.filter((block) => block.kind === 'text');
+        const answer = textBlocks
+            .map((block) => block.text)
+            .join('')
+            .trim();
+        if (parsed.success) {
+            // A synthetic fallback is also a text part for clients that cannot draw charts.
+            if (answer === fallbackText) {
+                blocks = blocks.filter((block) => block.kind !== 'text');
+            }
+            const afterTakeaway =
+                blocks.findLastIndex((block) => block.kind === 'text') + 1;
+            blocks.splice(afterTakeaway, 0, {
+                kind: 'visual',
+                key: visual.id,
+                spec: parsed.data,
+            });
+        } else if (answer !== fallbackText) {
+            blocks.push({ kind: 'text', key: visual.id, text: fallbackText });
+        }
+    }
 
     const activity = buildActivity(parts, approvals, live);
 
@@ -227,6 +262,7 @@ function hasRenderableContent(message: UIMessage): boolean {
             part.type === 'data-reasoning' ||
             part.type === 'data-tool-call' ||
             part.type === 'data-provider-tool' ||
+            (part.type === 'data-spec' && parseVisualPart(part) !== null) ||
             part.type === 'data-approval' ||
             part.type === 'source-url'
         );
@@ -273,6 +309,9 @@ function AssistantMessage({
                         );
                     }
 
+                    if (block.kind === 'visual') {
+                        return <ChatVisual key={block.key} spec={block.spec} />;
+                    }
                     if (block.kind === 'file') {
                         return (
                             <Attachments key={block.key} files={[block.file]} />
