@@ -23,7 +23,6 @@ export function LimitGauge({
 }: {
     props: {
         label: string;
-        value_label: string;
         limit_mg: number | null;
         max_mg: number;
         tone: Tone;

@@ -16,6 +16,12 @@ final readonly class ResolveCaffeineLimit
 
     private const int ROUNDING_INCREMENT_MG = 25;
 
+    private const int GENERAL_ADULT_MAX_MG = 400;
+
+    private const int CUTOFF_HOURS_BEFORE_BED = 6;
+
+    private const int DEFAULT_BEDTIME_HOUR = 23;
+
     private const float EFSA_MG_PER_KG = 3.0;
 
     /**
@@ -45,10 +51,14 @@ final readonly class ResolveCaffeineLimit
         string $sensitivity,
         ?string $context = null,
         array $conditions = [],
+        ?int $bedtimeHour = null,
     ): CaffeineLimitData {
+        $bedtimeHour ??= self::DEFAULT_BEDTIME_HOUR;
+
         throw_if($weightKg < 30 || $weightKg > 300, InvalidArgumentException::class, 'Weight must be between 30 and 300 kilograms.');
         throw_unless(in_array($sex, ['male', 'female', 'decline'], true), InvalidArgumentException::class, 'Sex must be male, female, or decline.');
         throw_unless(array_key_exists($sensitivity, self::SENSITIVITY_MULTIPLIERS), InvalidArgumentException::class, 'Sensitivity must be low, normal, or high.');
+        throw_if($bedtimeHour < 0 || $bedtimeHour > 23, InvalidArgumentException::class, 'Bedtime hour must be between 0 and 23.');
 
         $detectedConditions = $this->detectConditions($context);
         $allConditions = array_values(array_unique(array_merge($detectedConditions, $conditions)));
@@ -70,6 +80,9 @@ final readonly class ResolveCaffeineLimit
             sensitivity: $sensitivity,
             sensitivityLabel: self::SENSITIVITY_LABELS[$sensitivity],
             limitMg: $limitMg,
+            generalMaxMg: self::GENERAL_ADULT_MAX_MG,
+            bedtimeHour: $bedtimeHour,
+            cutoffHour: ($bedtimeHour - self::CUTOFF_HOURS_BEFORE_BED + 24) % 24,
             status: $hasCautionContext ? 'context_limited' : 'weight_adjusted_limit',
             hasCautionContext: $hasCautionContext,
             contextLabel: $hasCautionContext ? $this->buildContextLabel($allConditions) : null,

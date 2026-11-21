@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Utilities\LanguageUtil;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -40,7 +41,8 @@ final class CaffeineAssessmentRequest extends FormRequest
             'context' => ['nullable', 'string', 'max:1000'],
             'conditions' => ['nullable', 'array', 'max:'.count(self::ALLOWED_CONDITIONS)],
             'conditions.*' => ['string', Rule::in(self::ALLOWED_CONDITIONS)],
-            'locale' => ['nullable', 'string', Rule::in(['en', 'mn', 'fr'])],
+            'bedtime_hour' => ['nullable', 'integer', 'between:0,23'],
+            'locale' => ['nullable', 'string', Rule::in(LanguageUtil::keys())],
         ];
     }
 
@@ -90,6 +92,13 @@ final class CaffeineAssessmentRequest extends FormRequest
         }
 
         return array_values(array_filter($conditions, is_string(...)));
+    }
+
+    public function bedtimeHour(): ?int
+    {
+        $bedtimeHour = $this->validated('bedtime_hour');
+
+        return is_numeric($bedtimeHour) ? (int) $bedtimeHour : null;
     }
 
     public function locale(): string
