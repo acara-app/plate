@@ -304,6 +304,8 @@ final class ReplyComposer
 
             if ($props instanceof stdClass && $dataset instanceof VisualDataset) {
                 $dayBoundary = __("visuals.day_boundary.{$dataset->dayBoundary}", locale: $this->locale);
+                $props->xKey = 'day';
+                $props->yKey = 'value';
                 $props->unit = $dataset->unit;
                 $props->dayBoundary = is_string($dayBoundary) ? $dayBoundary : null;
             }

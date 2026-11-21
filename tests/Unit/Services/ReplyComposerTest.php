@@ -65,18 +65,18 @@ it('withholds a visual it cannot accept and keeps the prose', function (string $
     'data Altani wrote itself' => ["```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/state/data\",\"value\":{\"step_count\":[{\"day\":\"2026-11-16\",\"value\":99999}]}}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"BarChart\",\"props\":{\"title\":\"Steps\",\"data\":{\"\$state\":\"/data/step_count\"},\"xKey\":\"day\",\"yKey\":\"value\",\"unit\":\"steps\"},\"children\":[]}}\n```\n", 'state_outside_ui'],
 ]);
 
-it('binds the rows a tool fetched this turn and lets Plate supply their unit and day boundary', function (): void {
+it('binds the rows a tool fetched this turn and lets Plate supply their keys, unit and day boundary', function (): void {
     $events = withSteps(['2026-11-16' => 4200, '2026-11-17' => 0, '2026-11-18' => null], fn (): array => composeReply(implode("\n", [
         'Your week:',
         '```spec',
         '{"op":"add","path":"/root","value":"steps"}',
-        '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"km","dayBoundary":"Local days"},"children":[]}}',
+        '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"date","yKey":"steps","unit":"km","dayBoundary":"Local days"},"children":[]}}',
         '```',
     ])));
     $spec = reassemble(array_merge(...array_column(array_filter($events, fn (array $event): bool => $event['type'] === 'visual_patch'), 'patches')));
 
     expect(json_encode($spec->state, JSON_UNESCAPED_SLASHES))->toBe('{"data":{"step_count":[{"day":"2026-11-16","value":4200},{"day":"2026-11-17","value":0},{"day":"2026-11-18","value":null}]}}')
-        ->and([$spec->elements->steps->props->unit, $spec->elements->steps->props->dayBoundary])->toBe(['steps', 'Each day runs from midnight to midnight UTC.'])
+        ->and(array_values(array_intersect_key((array) $spec->elements->steps->props, array_flip(['xKey', 'yKey', 'unit', 'dayBoundary']))))->toBe(['day', 'value', 'steps', 'Each day runs from midnight to midnight UTC.'])
         ->and(end($events))->toMatchArray([
             'type' => 'visual_end',
             'accepted' => true,
@@ -84,21 +84,25 @@ it('binds the rows a tool fetched this turn and lets Plate supply their unit and
         ]);
 });
 
-it('sums up a long bound series in a text that fits one event in Mongolian', function (): void {
-    $days = array_map(fn (int $day): string => now()->setDate(2026, 8, 25)->addDays($day)->toDateString(), range(0, 89));
-    $steps = array_combine($days, array_map(fn (int $day): ?int => $day % 10 === 3 ? null : 3000 + $day * 50, range(0, 89)));
+it('releases a year of bound rows in events that fit and sums them up in Mongolian', function (): void {
+    $days = array_map(fn (int $day): string => now()->setDate(2025, 11, 22)->addDays($day)->toDateString(), range(0, 365));
+    $steps = array_combine($days, array_map(fn (int $day): ?int => $day % 10 === 3 ? null : 3000 + $day * 10, range(0, 365)));
     $events = withSteps($steps, fn (): array => composeReply(implode("\n", [
         '```spec',
         '{"op":"add","path":"/root","value":"steps"}',
         '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Алхам","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"steps"},"children":[]}}',
         '```',
     ]), options: ['locale' => 'mn']));
+    $releases = array_values(array_filter($events, fn (array $event): bool => $event['type'] === 'visual_patch' && $event['patches'] !== []));
 
-    expect(array_map(fn (array $event): int => mb_strlen((string) json_encode((string) json_encode($event))), $events))->each->toBeLessThanOrEqual(ReplyComposer::EVENT_BUDGET_BYTES)
+    expect(count($releases))->toBeGreaterThan(1)
+        ->and(array_map(fn (array $event): int => mb_strlen((string) json_encode((string) json_encode($event))), $events))->each->toBeLessThanOrEqual(ReplyComposer::EVENT_BUDGET_BYTES)
+        ->and(json_decode((string) json_encode(reassemble(array_merge(...array_column($releases, 'patches')))->state->data->step_count), true))
+        ->toBe(array_map(fn (string $day, ?int $value): array => ['day' => $day, 'value' => $value], $days, array_values($steps)))
         ->and(end($events))->toMatchArray([
             'type' => 'visual_end',
             'accepted' => true,
-            'fallback_text' => "Алхам\nМя 2026 8 сар 25 – Ня 2026 11 сар 22\nДундаж: 5,233.33 алхам\nХамгийн их: 7,450 алхам (Ня 2026 11 сар 22)\nХамгийн бага: 3,000 алхам (Мя 2026 8 сар 25)\nХэмжилт байхгүй: 9 (нийт 90)\nӨдөр бүрийг UTC цагаар шөнө дундаас шөнө дунд хүртэл тооцно.",
+            'fallback_text' => "Алхам\nБя 2025 11 сар 22 – Ня 2026 11 сар 22\nДундаж: 4,824.44 алхам\nХамгийн их: 6,650 алхам (Ня 2026 11 сар 22)\nХамгийн бага: 3,000 алхам (Бя 2025 11 сар 22)\nХэмжилт байхгүй: 37 (нийт 366)\nӨдөр бүрийг UTC цагаар шөнө дундаас шөнө дунд хүртэл тооцно.",
         ]);
 });
 

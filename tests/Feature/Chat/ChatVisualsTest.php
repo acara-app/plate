@@ -293,6 +293,7 @@ it('lets Altani bind only data fetched in the same reply, for a client that draw
     expect($fetched->chatStreamMeta()['visuals'])->toBe([['id' => "{$fetched->id}-1", 'accepted' => true, 'reason' => null, 'bound' => 1, 'literal' => 0]])
         ->and($repeated->chatStreamMeta()['visuals'])->toBe([['id' => "{$repeated->id}-1", 'accepted' => false, 'reason' => 'unresolved_reference', 'bound' => 0, 'literal' => 0]])
         ->and(json_encode($fetched->steps))->toContain('Datasets for visuals:\\n- step_count: Steps, daily total in steps, 2026-11-22 to 2026-11-22, 1 day, 0 without a reading')
+        ->and(json_encode($fetched->steps, JSON_UNESCAPED_UNICODE))->toContain('[visual]\\nSteps\\n- Sun Nov 22, 2026: 4,300 steps')
         ->and(json_encode($proseOnly->steps))->toContain('You walked 4,300 steps.')->not->toContain('Datasets for visuals');
 });
 
