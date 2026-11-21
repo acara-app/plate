@@ -24,7 +24,6 @@ export const caffeineGuidanceCatalog = defineCatalog(schema, {
         LimitGauge: {
             props: z.object({
                 label: z.string(),
-                value_label: z.string(),
                 limit_mg: z.number().nullable(),
                 max_mg: z.number(),
                 tone,

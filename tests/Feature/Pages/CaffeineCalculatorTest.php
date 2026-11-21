@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Http\Controllers\CaffeineCalculatorController;
+use Tests\Fixtures\CaffeineGuidanceFixture;
 
 covers(CaffeineCalculatorController::class);
 
@@ -13,6 +14,7 @@ it('returns 200 for the caffeine calculator route without authentication', funct
         ->assertInertia(fn ($page) => $page
             ->component('caffeine-calculator')
             ->where('locale', 'en')
+            ->where('bedtimeLabels.22', '10:00 PM')
             ->where('seo.appName', config('app.name'))
             ->where('seo.appUrl', url('/'))
             ->where('seo.canonicalUrl', route('caffeine-calculator')));
@@ -24,6 +26,7 @@ it('returns 200 for the mongolian caffeine calculator route without authenticati
         ->assertInertia(fn ($page) => $page
             ->component('caffeine-calculator')
             ->where('locale', 'mn')
+            ->where('bedtimeLabels.22', '22:00')
             ->where('seo.appName', config('app.name'))
             ->where('seo.appUrl', url('/'))
             ->where('seo.canonicalUrl', route('caffeine-calculator.locale', ['locale' => 'mn'])));
@@ -46,64 +49,48 @@ it('rejects unknown values in the conditions array', function (): void {
         ->assertJsonValidationErrors(['conditions.0']);
 });
 
-it('returns a caffeine guidance spec from the agent', function (): void {
-    CaffeineGuidanceAgent::fake([
-        [
-            'summary' => 'Keep caffeine under 150 mg per day.',
-            'verdict_card' => [
-                'title' => '150 mg is your limit',
-                'body' => 'Because your context calls for a lower cap, treat anything above 150 mg as too much.',
-                'badge' => 'Normal sensitivity',
-                'tone' => 'amber',
-                'limit_mg' => 150,
-            ],
-            'limit_gauge' => [
-                'label' => 'Daily caffeine limit',
-                'value_label' => '150 mg',
-                'limit_mg' => 150,
-                'max_mg' => 400,
-                'tone' => 'amber',
-                'caption' => 'Adjusted from the EFSA weight-based guideline.',
-            ],
-            'timing_card' => [
-                'title' => 'Last drink by 5:00 pm.',
-                'body' => "Caffeine's half-life is about five hours.",
-                'cutoff_label' => '5:00 pm',
-                'bedtime_label' => '11:00 pm',
-                'cutoff_24h' => 17,
-                'bedtime_24h' => 23,
-            ],
-            'guidance_list' => [
-                'title' => 'What to do today',
-                'items' => ['Stay below 150 mg.', 'Stop if you feel jittery.'],
-            ],
-            'safety_note' => [
-                'title' => 'Safety note',
-                'body' => 'This is educational guidance, not medical advice.',
-                'items' => ['Medication interactions', 'Heart symptoms'],
-            ],
-            'condition_sections' => [],
+it('fills the result cards with the numbers, times and links Plate calculated', function (): void {
+    $copy = CaffeineGuidanceFixture::response([
+        'verdict_card' => ['limit_mg' => 999],
+        'limit_gauge' => ['limit_mg' => 999, 'max_mg' => 1000],
+        'timing_card' => ['cutoff_24h' => 3, 'bedtime_24h' => 4, 'cutoff_label' => '3:00 AM', 'bedtime_label' => '4:00 AM'],
+        'condition_sections' => [
+            ['condition' => 'pregnancy', 'title' => 'Grossesse', 'body' => 'Restez sous 200 mg.', 'tone' => 'green', 'link_url' => 'https://example.com/made-up'],
+            ['condition' => 'anxiety', 'title' => 'Anxiété', 'body' => 'La caféine peut accentuer l\'anxiété.', 'tone' => 'blue'],
         ],
     ]);
+    $copy['safety_note']['items'] = [];
+    CaffeineGuidanceAgent::fake([$copy]);
 
     $this->postJson(route('caffeine-calculator.plan'), [
         'weight_kg' => 70,
         'sex' => 'female',
         'sensitivity' => 'normal',
-        'context' => 'Breastfeeding',
+        'conditions' => ['pregnancy'],
+        'bedtime_hour' => 22,
+        'locale' => 'fr',
     ])
         ->assertSuccessful()
-        ->assertJsonStructure([
-            'summary',
-            'limit',
-            'spec' => ['root', 'elements'],
-        ])
-        ->assertJsonPath('summary', 'Keep caffeine under 150 mg per day.')
-        ->assertJsonPath('spec.root', 'root')
-        ->assertJsonPath('spec.elements.root.type', 'Stack')
-        ->assertJsonPath('spec.elements.verdict.type', 'VerdictCard')
-        ->assertJsonPath('spec.elements.gauge.type', 'LimitGauge')
-        ->assertJsonPath('spec.elements.drinks.type', 'DrinkSizeGrid')
-        ->assertJsonPath('spec.elements.timing.type', 'TimingCard')
-        ->assertJsonPath('spec.elements.guidance.type', 'GuidanceList');
+        ->assertJsonPath('spec.elements.verdict.props.limit_mg', 150)
+        ->assertJsonPath('spec.elements.gauge.props.max_mg', 400)
+        ->assertJsonPath('spec.elements.drinks.props.limit_mg', 150)
+        ->assertJsonPath('spec.elements.timing.props.cutoff_24h', 16)
+        ->assertJsonPath('spec.elements.timing.props.cutoff_label', '16:00')
+        ->assertJsonPath('spec.elements.condition_0.props.link_url', 'https://www.acog.org/womens-health/faqs/moderate-caffeine-consumption-during-pregnancy')
+        ->assertJsonMissingPath('spec.elements.condition_1')
+        ->assertJsonPath('spec.elements.safety.props.items', []);
+});
+
+it('withholds the result when the model copy is incomplete', function (): void {
+    CaffeineGuidanceAgent::fake([CaffeineGuidanceFixture::response([
+        'timing_card' => ['title' => ''],
+    ])]);
+
+    $this->postJson(route('caffeine-calculator.plan'), [
+        'weight_kg' => 70,
+        'sex' => 'female',
+        'sensitivity' => 'normal',
+    ])
+        ->assertServiceUnavailable()
+        ->assertExactJson(['error' => 'guidance_unavailable']);
 });

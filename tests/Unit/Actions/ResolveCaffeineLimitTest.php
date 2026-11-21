@@ -40,6 +40,13 @@ it('accepts explicit pregnancy condition without text scanning', function (): vo
         ->and($result->conditions)->toBe(['pregnancy']);
 });
 
+it('counts back from bedtime to the caffeine cut-off', function (): void {
+    $result = (new ResolveCaffeineLimit)->handle(weightKg: 70, sex: 'male', sensitivity: 'normal', bedtimeHour: 1);
+
+    expect($result->cutoffHour)->toBe(19)
+        ->and($result->generalMaxMg)->toBe(400);
+});
+
 it('detects health conditions from free-text context', function (string $context, array $expectedConditions): void {
     expect(resolveCaffeineLimit(['context' => $context])->conditions)->toBe($expectedConditions);
 })->with([

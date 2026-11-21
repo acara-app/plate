@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace App\Data;
 
+use App\Data\CaffeineGuidance\ConditionSectionData;
+use App\Data\CaffeineGuidance\GuidanceListData;
+use App\Data\CaffeineGuidance\LimitGaugeData;
+use App\Data\CaffeineGuidance\SafetyNoteData;
+use App\Data\CaffeineGuidance\TimingCardData;
+use App\Data\CaffeineGuidance\VerdictCardData;
+use Spatie\LaravelData\Attributes\DataCollectionOf;
 use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -15,20 +22,16 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 final class CaffeineGuidanceData extends Data
 {
     /**
-     * @param  array{title: string, body: string, badge: string, tone: string, limit_mg: int|null}  $verdictCard
-     * @param  array{label: string, value_label: string, limit_mg: int|null, max_mg: int, tone: string, caption: string}  $limitGauge
-     * @param  array{title: string, body: string, cutoff_label: string, bedtime_label: string, cutoff_24h: int, bedtime_24h: int}  $timingCard
-     * @param  array{title: string, items: array<int, string>}  $guidanceList
-     * @param  array{title: string, body: string, items: array<int, string>}  $safetyNote
-     * @param  array<int, array{condition: string, title: string, body: string, tone: string, link_url?: string|null, link_label?: string|null}>|null  $conditionSections
+     * @param  array<int, ConditionSectionData>|null  $conditionSections
      */
     public function __construct(
         public string $summary,
-        public array $verdictCard,
-        public array $limitGauge,
-        public array $timingCard,
-        public array $guidanceList,
-        public array $safetyNote,
+        public VerdictCardData $verdictCard,
+        public LimitGaugeData $limitGauge,
+        public TimingCardData $timingCard,
+        public GuidanceListData $guidanceList,
+        public SafetyNoteData $safetyNote,
+        #[DataCollectionOf(ConditionSectionData::class)]
         public ?array $conditionSections = [],
     ) {}
 }

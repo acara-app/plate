@@ -4,10 +4,24 @@ declare(strict_types=1);
 
 namespace App\Utilities;
 
+use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 
 final class LocalizedDate
 {
+    public static function hour(int $hour, string $locale): string
+    {
+        return CarbonImmutable::createFromTime($hour)->settings(['locale' => $locale])->isoFormat('LT');
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function hours(string $locale): array
+    {
+        return array_map(static fn (int $hour): string => self::hour($hour, $locale), range(0, 23));
+    }
+
     public static function format(CarbonInterface $date, string $locale): string
     {
         if ($locale === 'mn') {
