@@ -1,0 +1,301 @@
+{
+    "catalog": {
+        "name": "acara-chat",
+        "version": 1
+    },
+    "events": [
+        {
+            "sequence": 0,
+            "type": "stream_start",
+            "data": {
+                "id": "id-1",
+                "invocation_id": "id-2",
+                "type": "stream_start",
+                "provider": "openai",
+                "model": "model",
+                "timestamp": 0,
+                "metadata": null
+            }
+        },
+        {
+            "sequence": 1,
+            "type": "text_start",
+            "data": {
+                "id": "id-3",
+                "invocation_id": "id-2",
+                "type": "text_start",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 2,
+            "type": "text_delta",
+            "data": {
+                "id": "id-5.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Here",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 3,
+            "type": "text_delta",
+            "data": {
+                "id": "id-6.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " is",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 4,
+            "type": "text_delta",
+            "data": {
+                "id": "id-7.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 5,
+            "type": "text_delta",
+            "data": {
+                "id": "id-8.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " quick",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 6,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " comparison.\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 7,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 8,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-9.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 9,
+            "type": "visual_end",
+            "data": {
+                "id": "id-9.4",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "accepted": false,
+                "fallback_text": "",
+                "reason": "unknown_component",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 10,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.5",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 11,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.6",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Oatmeal",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 12,
+            "type": "text_delta",
+            "data": {
+                "id": "id-10.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " usually",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 13,
+            "type": "text_delta",
+            "data": {
+                "id": "id-11.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " raises",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 14,
+            "type": "text_delta",
+            "data": {
+                "id": "id-12.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " blood",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 15,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " sugar",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 16,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " more",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 17,
+            "type": "text_delta",
+            "data": {
+                "id": "id-15.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " gently",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 18,
+            "type": "text_delta",
+            "data": {
+                "id": "id-16.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " than",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 19,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " white",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 20,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rice.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 21,
+            "type": "text_complete",
+            "data": {
+                "id": "id-19",
+                "invocation_id": "id-2",
+                "type": "text_complete",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 22,
+            "type": "stream_end",
+            "data": {
+                "id": "id-20",
+                "invocation_id": "id-2",
+                "type": "stream_end",
+                "reason": "stop",
+                "usage": {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "cache_read_input_tokens": null,
+                    "cache_write_input_tokens": null,
+                    "reasoning_tokens": null
+                },
+                "timestamp": 0
+            }
+        }
+    ],
+    "message": {
+        "id": "assistant-message",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "text",
+                "text": "Here is a quick comparison.\n\n\nOatmeal usually raises blood sugar more gently than white rice."
+            }
+        ]
+    }
+}

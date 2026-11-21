@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\Ai\AgentModelContext;
 use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
+use App\Services\ReplyComposer;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use App\Utilities\LanguageUtil;
@@ -56,6 +57,7 @@ final class ProcessChatStream implements ShouldQueue
         public ?string $locale = null,
         public ?array $decisions = null,
         public ?array $agentModels = null,
+        public ?int $catalogVersion = null,
     ) {}
 
     /**
@@ -142,6 +144,7 @@ final class ProcessChatStream implements ShouldQueue
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
                 model: $model,
+                catalogVersion: $this->catalogVersion,
             );
 
             $decisions = $this->approvalDecisions();
@@ -150,13 +153,14 @@ final class ProcessChatStream implements ShouldQueue
                 ? $agentRunner->resume($request, $user, $decisions)
                 : $agentRunner->run($request, $user);
 
-            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
+            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId, $this->composer($user));
 
             $this->completePendingTurn(
                 complete: $complete,
                 user: $user,
                 delivery: $delivery,
                 status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+                contextComposer: $this->composer($user),
             );
 
             if ($delivery->cancelled) {
@@ -202,7 +206,7 @@ final class ProcessChatStream implements ShouldQueue
         return false;
     }
 
-    private function completePendingTurn(CompletePendingChatStreamTurn $complete, User $user, ChatStreamDelivery $delivery, string $status): void
+    private function completePendingTurn(CompletePendingChatStreamTurn $complete, User $user, ChatStreamDelivery $delivery, string $status, ?ReplyComposer $contextComposer = null): void
     {
         $complete->handle(
             conversationId: $this->conversationId,
@@ -213,8 +217,23 @@ final class ProcessChatStream implements ShouldQueue
             status: $status,
             steps: $delivery->steps,
             provider: $delivery->provider,
+            contextComposer: $contextComposer,
         );
         // @codeCoverageIgnoreEnd
+    }
+
+    private function composer(User $user): ?ReplyComposer
+    {
+        if ($this->catalogVersion === null) {
+            return null;
+        }
+
+        return resolve(ReplyComposer::class, [
+            'catalogVersion' => $this->catalogVersion,
+            'locale' => App::getLocale(),
+            'timezone' => $user->resolveTimezone(),
+            'visualIdPrefix' => $this->assistantMessageId,
+        ]);
     }
 
     private function approvalDecisions(): ?Decisions
