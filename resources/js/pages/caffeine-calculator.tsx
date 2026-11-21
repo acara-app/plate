@@ -60,6 +60,7 @@ interface AssessmentFormData {
     sex: 'male' | 'female' | 'decline';
     sensitivity: 'low' | 'normal' | 'high';
     context: string;
+    bedtime_hour: string;
     unit_system: 'metric' | 'imperial';
     locale: string;
 }
@@ -89,6 +90,7 @@ interface CaffeineCalculatorPageProps {
         xDefaultUrl: string;
     };
     locale: string;
+    bedtimeLabels: string[];
     [key: string]: unknown;
 }
 
@@ -177,16 +179,19 @@ const inputClass = cn(
 
 export default function CaffeineCalculator() {
     const { t } = useTranslation('caffeine');
-    const { seo, locale } = usePage<CaffeineCalculatorPageProps>().props;
+    const { seo, locale, bedtimeLabels } =
+        usePage<CaffeineCalculatorPageProps>().props;
     const form = useHttp<AssessmentFormData, AssessmentResponse>(planRoute(), {
         weight_kg: '',
         weight_lb: '',
         sex: 'decline',
         sensitivity: 'normal',
         context: '',
+        bedtime_hour: '23',
         unit_system: 'metric',
         locale: locale ?? 'en',
     });
+    const [failed, setFailed] = useState(false);
 
     const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>(
         'metric',
@@ -247,10 +252,15 @@ export default function CaffeineCalculator() {
             sensitivity: data.sensitivity,
             context: data.context.trim() === '' ? null : data.context.trim(),
             conditions: selectedConditions,
+            bedtime_hour: Number(data.bedtime_hour),
             locale: data.locale,
         }));
 
-        void form.submit();
+        setFailed(false);
+        form.submit({
+            onHttpException: () => setFailed(true),
+            onNetworkError: () => setFailed(true),
+        }).catch(() => undefined);
     }
 
     const canSubmit =
@@ -534,7 +544,7 @@ export default function CaffeineCalculator() {
                                 </div>
 
                                 {/* Region 2: sensitivity */}
-                                <div className="space-y-3 border-t border-[#D9CFBC] pt-6">
+                                <div className="space-y-5 border-t border-[#D9CFBC] pt-6">
                                     <FieldShell
                                         label={t('sensitivity')}
                                         error={form.errors.sensitivity}
@@ -556,6 +566,39 @@ export default function CaffeineCalculator() {
                                                 )
                                             }
                                         />
+                                    </FieldShell>
+
+                                    <FieldShell
+                                        label={t('bedtime')}
+                                        hint={t('bedtime_description')}
+                                        error={form.errors.bedtime_hour}
+                                    >
+                                        <select
+                                            id="bedtime_hour"
+                                            aria-label={t('bedtime')}
+                                            value={form.data.bedtime_hour}
+                                            onChange={(event) =>
+                                                form.setData(
+                                                    'bedtime_hour',
+                                                    event.target.value,
+                                                )
+                                            }
+                                            className={cn(
+                                                inputClass,
+                                                'w-full px-3 transition-[color,box-shadow] outline-none focus-visible:ring-[3px] md:text-sm',
+                                            )}
+                                        >
+                                            {bedtimeLabels.map(
+                                                (label, hour) => (
+                                                    <option
+                                                        key={hour}
+                                                        value={String(hour)}
+                                                    >
+                                                        {label}
+                                                    </option>
+                                                ),
+                                            )}
+                                        </select>
                                     </FieldShell>
                                 </div>
 
@@ -650,14 +693,15 @@ export default function CaffeineCalculator() {
                             }
                         >
                             {form.processing && <LoadingResult />}
-                            {!form.processing && form.response && (
+                            {!form.processing && failed && <ResultError />}
+                            {!form.processing && !failed && form.response && (
                                 <div className="motion-safe:duration-200 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2">
                                     <CaffeineGuidanceRenderer
                                         spec={form.response.spec}
                                     />
                                 </div>
                             )}
-                            {!form.processing && !form.response && (
+                            {!form.processing && !failed && !form.response && (
                                 <EmptyResult />
                             )}
                         </section>
@@ -1129,6 +1173,30 @@ function EmptyResult() {
                     {t('empty_result_description')}
                 </p>
             </div>
+        </div>
+    );
+}
+
+function ResultError() {
+    const { t } = useTranslation('caffeine');
+
+    return (
+        <div
+            role="alert"
+            className={cn(
+                'rounded-none border-2 border-dashed p-10 text-center',
+                RULE,
+                PAPER,
+            )}
+        >
+            <p
+                className={cn(
+                    INK_2,
+                    'mx-auto max-w-sm text-sm leading-relaxed',
+                )}
+            >
+                {t('result_error')}
+            </p>
         </div>
     );
 }

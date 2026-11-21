@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Data\CaffeineGuidanceData;
+use App\Utilities\LanguageUtil;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Illuminate\Support\Str;
+use Laravel\Ai\Prompts\AgentPrompt;
 use Tests\Fixtures\CaffeineGuidanceFixture;
 
 covers(CaffeineGuidanceAgent::class);
@@ -18,9 +20,7 @@ it('has conservative caffeine guidance instructions', function (): void {
     expect($this->agent->instructions())
         ->toContain('deterministic caffeine limits')
         ->toContain('personalize the wording only')
-        ->toContain('structured response requested by the schema')
-        ->toContain('extract bedtime_24h')
-        ->toContain('cutoff_24h');
+        ->toContain('structured response requested by the schema');
 });
 
 it('defines schema fields matching the caffeine guidance data shape', function (): void {
@@ -44,20 +44,18 @@ it('defines schema fields matching the caffeine guidance data shape', function (
     $safetyNote = $schema['safety_note']->toArray();
     $conditionSections = $schema['condition_sections']->toArray();
 
-    expect($verdictCard['properties'])->toHaveKeys(['title', 'body', 'badge', 'tone', 'limit_mg'])
+    expect($verdictCard['properties'])->toHaveKeys(['title', 'body', 'badge', 'tone'])
         ->and($verdictCard['additionalProperties'])->toBeFalse()
-        ->and($limitGauge['properties'])->toHaveKeys(['label', 'value_label', 'limit_mg', 'max_mg', 'tone', 'caption'])
-        ->and($timingCard['properties'])->toHaveKeys(['title', 'body', 'cutoff_label', 'bedtime_label', 'cutoff_24h', 'bedtime_24h'])
+        ->and($limitGauge['properties'])->toHaveKeys(['label', 'tone', 'caption'])
+        ->and($timingCard['properties'])->toHaveKeys(['title', 'body'])
         ->and($timingCard['additionalProperties'])->toBeFalse()
-        ->and($timingCard['properties']['cutoff_24h']['minimum'])->toBe(0)
-        ->and($timingCard['properties']['cutoff_24h']['maximum'])->toBe(23)
         ->and($guidanceList['properties'])->toHaveKeys(['title', 'items'])
         ->and($guidanceList['properties']['items']['minItems'])->toBe(2)
         ->and($guidanceList['properties']['items']['maxItems'])->toBe(4)
         ->and($safetyNote['properties'])->toHaveKeys(['title', 'body', 'items'])
         ->and($safetyNote['properties']['items']['minItems'])->toBe(2)
         ->and($safetyNote['properties']['items']['maxItems'])->toBe(3)
-        ->and($conditionSections['items']['properties'])->toHaveKeys(['condition', 'title', 'body', 'tone', 'link_url', 'link_label']);
+        ->and($conditionSections['items']['properties'])->toHaveKeys(['condition', 'title', 'body', 'tone']);
 });
 
 it('keeps the schema snake_case keys aligned with the DTO camelCase properties', function (): void {
@@ -87,19 +85,14 @@ it('assesses deterministic limits with structured agent output', function (): vo
     expect($result)
         ->toBeInstanceOf(CaffeineGuidanceData::class)
         ->summary->toBe('Keep caffeine under 200 mg today.')
-        ->verdictCard->toHaveKey('limit_mg', 200)
-        ->safetyNote->toHaveKey('items')
-        ->and($result->conditionSections)->toHaveCount(1)
-        ->and($result->conditionSections[0])->toHaveKey('link_url', 'https://www.acog.org/womens-health/faqs/moderate-caffeine-consumption-during-pregnancy');
+        ->and($result->verdictCard->title)->toBe('200 mg is your ceiling')
+        ->and($result->conditionSections)->toHaveCount(1);
 });
 
-it('assesses with mongolian locale', function (): void {
-    CaffeineGuidanceAgent::fake([CaffeineGuidanceFixture::response([
-        'summary' => '200 mg',
-        'condition_sections' => null,
-    ])]);
+it('asks for every text value in the requested language', function (): void {
+    CaffeineGuidanceAgent::fake([CaffeineGuidanceFixture::response()]);
 
-    $result = $this->agent->assess(CaffeineGuidanceFixture::limit(), null, 'mn');
+    $this->agent->assess(CaffeineGuidanceFixture::limit(), null, 'fr');
 
-    expect($result)->toBeInstanceOf(CaffeineGuidanceData::class);
+    CaffeineGuidanceAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('Write every text value in '.LanguageUtil::get('fr')));
 });
