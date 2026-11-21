@@ -1,4 +1,5 @@
 import { UIMessage } from '@ai-sdk/react';
+import type { Spec } from '@json-render/core';
 
 export type { UIMessage } from '@ai-sdk/react';
 
@@ -51,6 +52,13 @@ export interface ToolCallData {
     result: unknown;
     status: ToolCallStatus;
     error: string | null;
+}
+
+export interface VisualPartData {
+    id: string;
+    spec: Spec;
+    fallback_text: string;
+    status?: 'pending' | 'accepted';
 }
 
 export type ProviderToolKind = 'web_search' | 'web_fetch' | 'other';

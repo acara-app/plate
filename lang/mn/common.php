@@ -1144,6 +1144,12 @@ return [
         'assistant' => 'Acara',
         'scroll_to_latest' => 'Сүүлийн мессеж рүү очих',
         'stopped' => 'Та энэ хариултыг зогсоосон.',
+        'visual' => [
+            'label' => 'Дүрслэл',
+            'preparing' => 'Дүрслэл бэлдэж байна…',
+            'progress' => '{{value}} / {{goal}}',
+            'better_choice' => 'Илүү тохиромжтой',
+        ],
         'empty' => [
             'greeting' => 'Сайн байна уу, {{name}}. Өнөөдөр юуны талаар ярилцах вэ?',
             'greeting_anonymous' => 'Өнөөдөр юуны талаар ярилцах вэ?',

@@ -21,6 +21,8 @@ const STREAM_EVENTS = [
     '.tool_approval_request',
     '.provider_tool',
     '.citation',
+    '.visual_patch',
+    '.visual_end',
 ];
 
 interface RetryingPayload {
