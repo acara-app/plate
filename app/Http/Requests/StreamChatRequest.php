@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Services\VisualCatalog;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Laravel\Ai\Files\Base64Image;
@@ -29,7 +30,22 @@ class StreamChatRequest extends FormRequest
 
             'messages.*.parts.*.mediaType' => ['nullable', 'string'],
             'messages.*.parts.*.url' => ['nullable', 'string'],
+
+            'catalog' => ['nullable', 'array'],
+            'catalog.name' => ['nullable', 'string'],
+            'catalog.version' => ['nullable', 'integer', 'min:1'],
         ];
+    }
+
+    public function catalogVersion(): ?int
+    {
+        if ($this->validated('catalog.name') !== VisualCatalog::NAME) {
+            return null;
+        }
+
+        $version = $this->validated('catalog.version');
+
+        return is_numeric($version) ? (int) $version : null;
     }
 
     public function userMessage(): string

@@ -99,6 +99,7 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
             'messages' => [
                 ['role' => 'user', 'parts' => [['type' => 'text', 'text' => 'Hello mobile']]],
             ],
+            'catalog' => ['name' => 'acara-chat', 'version' => 1],
         ])
         ->assertAccepted()
         ->assertJson([
@@ -111,7 +112,8 @@ it('dispatches api v2 chat streams with the mobile channel marker', function ():
         ]);
 
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->streamId !== ''
-        && $job->channel === 'mobile');
+        && $job->channel === 'mobile'
+        && $job->catalogVersion === 1);
 });
 
 it('requests cancellation for owned web conversations', function (): void {

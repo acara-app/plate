@@ -1,0 +1,2620 @@
+{
+    "catalog": {
+        "name": "acara-chat",
+        "version": 1
+    },
+    "events": [
+        {
+            "sequence": 0,
+            "type": "stream_start",
+            "data": {
+                "id": "id-1",
+                "invocation_id": "id-2",
+                "type": "stream_start",
+                "provider": "openai",
+                "model": "model",
+                "timestamp": 0,
+                "metadata": null
+            }
+        },
+        {
+            "sequence": 1,
+            "type": "text_start",
+            "data": {
+                "id": "id-3",
+                "invocation_id": "id-2",
+                "type": "text_start",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 2,
+            "type": "text_delta",
+            "data": {
+                "id": "id-5.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Here",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 3,
+            "type": "text_delta",
+            "data": {
+                "id": "id-6.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " is",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 4,
+            "type": "text_delta",
+            "data": {
+                "id": "id-7.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 5,
+            "type": "text_delta",
+            "data": {
+                "id": "id-8.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " six-month",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 6,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " plan",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 7,
+            "type": "text_delta",
+            "data": {
+                "id": "id-10.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " that",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 8,
+            "type": "text_delta",
+            "data": {
+                "id": "id-11.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " builds",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 9,
+            "type": "text_delta",
+            "data": {
+                "id": "id-12.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " up",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 10,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " slowly.\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 11,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 12,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-13.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 13,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-14.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "chart"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/type",
+                        "value": "BarChart"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/title",
+                        "value": "Daily step target"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data",
+                        "value": []
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/0",
+                        "value": {
+                            "day": "2026-01-01",
+                            "steps": 4000
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/1",
+                        "value": {
+                            "day": "2026-01-02",
+                            "steps": 4025
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/2",
+                        "value": {
+                            "day": "2026-01-03",
+                            "steps": 4050
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/3",
+                        "value": {
+                            "day": "2026-01-04",
+                            "steps": 0
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/4",
+                        "value": {
+                            "day": "2026-01-05",
+                            "steps": 4100
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/5",
+                        "value": {
+                            "day": "2026-01-06",
+                            "steps": null
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/6",
+                        "value": {
+                            "day": "2026-01-07",
+                            "steps": 4150
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/7",
+                        "value": {
+                            "day": "2026-01-08",
+                            "steps": 4175
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/8",
+                        "value": {
+                            "day": "2026-01-09",
+                            "steps": 4200
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/9",
+                        "value": {
+                            "day": "2026-01-10",
+                            "steps": 4225
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/10",
+                        "value": {
+                            "day": "2026-01-11",
+                            "steps": 4250
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/11",
+                        "value": {
+                            "day": "2026-01-12",
+                            "steps": 4275
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/12",
+                        "value": {
+                            "day": "2026-01-13",
+                            "steps": 4300
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/13",
+                        "value": {
+                            "day": "2026-01-14",
+                            "steps": 4325
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/14",
+                        "value": {
+                            "day": "2026-01-15",
+                            "steps": 4350
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/15",
+                        "value": {
+                            "day": "2026-01-16",
+                            "steps": 4375
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/16",
+                        "value": {
+                            "day": "2026-01-17",
+                            "steps": 4400
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/17",
+                        "value": {
+                            "day": "2026-01-18",
+                            "steps": 4425
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/18",
+                        "value": {
+                            "day": "2026-01-19",
+                            "steps": 4450
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/19",
+                        "value": {
+                            "day": "2026-01-20",
+                            "steps": 4475
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/20",
+                        "value": {
+                            "day": "2026-01-21",
+                            "steps": 4500
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/21",
+                        "value": {
+                            "day": "2026-01-22",
+                            "steps": 4525
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/22",
+                        "value": {
+                            "day": "2026-01-23",
+                            "steps": 4550
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/23",
+                        "value": {
+                            "day": "2026-01-24",
+                            "steps": 4575
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/24",
+                        "value": {
+                            "day": "2026-01-25",
+                            "steps": 4600
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/25",
+                        "value": {
+                            "day": "2026-01-26",
+                            "steps": 4625
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/26",
+                        "value": {
+                            "day": "2026-01-27",
+                            "steps": 4650
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/27",
+                        "value": {
+                            "day": "2026-01-28",
+                            "steps": 4675
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/28",
+                        "value": {
+                            "day": "2026-01-29",
+                            "steps": 4700
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/29",
+                        "value": {
+                            "day": "2026-01-30",
+                            "steps": 4725
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/30",
+                        "value": {
+                            "day": "2026-01-31",
+                            "steps": 4750
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/31",
+                        "value": {
+                            "day": "2026-02-01",
+                            "steps": 4775
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/32",
+                        "value": {
+                            "day": "2026-02-02",
+                            "steps": 4800
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/33",
+                        "value": {
+                            "day": "2026-02-03",
+                            "steps": 4825
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/34",
+                        "value": {
+                            "day": "2026-02-04",
+                            "steps": 4850
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/35",
+                        "value": {
+                            "day": "2026-02-05",
+                            "steps": 4875
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/36",
+                        "value": {
+                            "day": "2026-02-06",
+                            "steps": 4900
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/37",
+                        "value": {
+                            "day": "2026-02-07",
+                            "steps": 4925
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/38",
+                        "value": {
+                            "day": "2026-02-08",
+                            "steps": 4950
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/39",
+                        "value": {
+                            "day": "2026-02-09",
+                            "steps": 4975
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/40",
+                        "value": {
+                            "day": "2026-02-10",
+                            "steps": 5000
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/41",
+                        "value": {
+                            "day": "2026-02-11",
+                            "steps": 5025
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/42",
+                        "value": {
+                            "day": "2026-02-12",
+                            "steps": 5050
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/43",
+                        "value": {
+                            "day": "2026-02-13",
+                            "steps": 5075
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/44",
+                        "value": {
+                            "day": "2026-02-14",
+                            "steps": 5100
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/45",
+                        "value": {
+                            "day": "2026-02-15",
+                            "steps": 5125
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/46",
+                        "value": {
+                            "day": "2026-02-16",
+                            "steps": 5150
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/47",
+                        "value": {
+                            "day": "2026-02-17",
+                            "steps": 5175
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/48",
+                        "value": {
+                            "day": "2026-02-18",
+                            "steps": 5200
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/49",
+                        "value": {
+                            "day": "2026-02-19",
+                            "steps": 5225
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/50",
+                        "value": {
+                            "day": "2026-02-20",
+                            "steps": 5250
+                        }
+                    }
+                ],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 14,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-14.2",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/51",
+                        "value": {
+                            "day": "2026-02-21",
+                            "steps": 5275
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/52",
+                        "value": {
+                            "day": "2026-02-22",
+                            "steps": 5300
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/53",
+                        "value": {
+                            "day": "2026-02-23",
+                            "steps": 5325
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/54",
+                        "value": {
+                            "day": "2026-02-24",
+                            "steps": 5350
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/55",
+                        "value": {
+                            "day": "2026-02-25",
+                            "steps": 5375
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/56",
+                        "value": {
+                            "day": "2026-02-26",
+                            "steps": 5400
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/57",
+                        "value": {
+                            "day": "2026-02-27",
+                            "steps": 5425
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/58",
+                        "value": {
+                            "day": "2026-02-28",
+                            "steps": 5450
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/59",
+                        "value": {
+                            "day": "2026-03-01",
+                            "steps": 5475
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/60",
+                        "value": {
+                            "day": "2026-03-02",
+                            "steps": 5500
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/61",
+                        "value": {
+                            "day": "2026-03-03",
+                            "steps": 5525
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/62",
+                        "value": {
+                            "day": "2026-03-04",
+                            "steps": 5550
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/63",
+                        "value": {
+                            "day": "2026-03-05",
+                            "steps": 5575
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/64",
+                        "value": {
+                            "day": "2026-03-06",
+                            "steps": 5600
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/65",
+                        "value": {
+                            "day": "2026-03-07",
+                            "steps": 5625
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/66",
+                        "value": {
+                            "day": "2026-03-08",
+                            "steps": 5650
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/67",
+                        "value": {
+                            "day": "2026-03-09",
+                            "steps": 5675
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/68",
+                        "value": {
+                            "day": "2026-03-10",
+                            "steps": 5700
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/69",
+                        "value": {
+                            "day": "2026-03-11",
+                            "steps": 5725
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/70",
+                        "value": {
+                            "day": "2026-03-12",
+                            "steps": 5750
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/71",
+                        "value": {
+                            "day": "2026-03-13",
+                            "steps": 5775
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/72",
+                        "value": {
+                            "day": "2026-03-14",
+                            "steps": 5800
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/73",
+                        "value": {
+                            "day": "2026-03-15",
+                            "steps": 5825
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/74",
+                        "value": {
+                            "day": "2026-03-16",
+                            "steps": 5850
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/75",
+                        "value": {
+                            "day": "2026-03-17",
+                            "steps": 5875
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/76",
+                        "value": {
+                            "day": "2026-03-18",
+                            "steps": 5900
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/77",
+                        "value": {
+                            "day": "2026-03-19",
+                            "steps": 5925
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/78",
+                        "value": {
+                            "day": "2026-03-20",
+                            "steps": 5950
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/79",
+                        "value": {
+                            "day": "2026-03-21",
+                            "steps": 5975
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/80",
+                        "value": {
+                            "day": "2026-03-22",
+                            "steps": 6000
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/81",
+                        "value": {
+                            "day": "2026-03-23",
+                            "steps": 6025
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/82",
+                        "value": {
+                            "day": "2026-03-24",
+                            "steps": 6050
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/83",
+                        "value": {
+                            "day": "2026-03-25",
+                            "steps": 6075
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/84",
+                        "value": {
+                            "day": "2026-03-26",
+                            "steps": 6100
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/85",
+                        "value": {
+                            "day": "2026-03-27",
+                            "steps": 6125
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/86",
+                        "value": {
+                            "day": "2026-03-28",
+                            "steps": 6150
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/87",
+                        "value": {
+                            "day": "2026-03-29",
+                            "steps": 6175
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/88",
+                        "value": {
+                            "day": "2026-03-30",
+                            "steps": 6200
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/89",
+                        "value": {
+                            "day": "2026-03-31",
+                            "steps": 6225
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/90",
+                        "value": {
+                            "day": "2026-04-01",
+                            "steps": 6250
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/91",
+                        "value": {
+                            "day": "2026-04-02",
+                            "steps": 6275
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/92",
+                        "value": {
+                            "day": "2026-04-03",
+                            "steps": 6300
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/93",
+                        "value": {
+                            "day": "2026-04-04",
+                            "steps": 6325
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/94",
+                        "value": {
+                            "day": "2026-04-05",
+                            "steps": 6350
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/95",
+                        "value": {
+                            "day": "2026-04-06",
+                            "steps": 6375
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/96",
+                        "value": {
+                            "day": "2026-04-07",
+                            "steps": 6400
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/97",
+                        "value": {
+                            "day": "2026-04-08",
+                            "steps": 6425
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/98",
+                        "value": {
+                            "day": "2026-04-09",
+                            "steps": 6450
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/99",
+                        "value": {
+                            "day": "2026-04-10",
+                            "steps": 6475
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/100",
+                        "value": {
+                            "day": "2026-04-11",
+                            "steps": 6500
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/101",
+                        "value": {
+                            "day": "2026-04-12",
+                            "steps": 6525
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/102",
+                        "value": {
+                            "day": "2026-04-13",
+                            "steps": 6550
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/103",
+                        "value": {
+                            "day": "2026-04-14",
+                            "steps": 6575
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/104",
+                        "value": {
+                            "day": "2026-04-15",
+                            "steps": 6600
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/105",
+                        "value": {
+                            "day": "2026-04-16",
+                            "steps": 6625
+                        }
+                    }
+                ],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 15,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-14.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/106",
+                        "value": {
+                            "day": "2026-04-17",
+                            "steps": 6650
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/107",
+                        "value": {
+                            "day": "2026-04-18",
+                            "steps": 6675
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/108",
+                        "value": {
+                            "day": "2026-04-19",
+                            "steps": 6700
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/109",
+                        "value": {
+                            "day": "2026-04-20",
+                            "steps": 6725
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/110",
+                        "value": {
+                            "day": "2026-04-21",
+                            "steps": 6750
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/111",
+                        "value": {
+                            "day": "2026-04-22",
+                            "steps": 6775
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/112",
+                        "value": {
+                            "day": "2026-04-23",
+                            "steps": 6800
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/113",
+                        "value": {
+                            "day": "2026-04-24",
+                            "steps": 6825
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/114",
+                        "value": {
+                            "day": "2026-04-25",
+                            "steps": 6850
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/115",
+                        "value": {
+                            "day": "2026-04-26",
+                            "steps": 6875
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/116",
+                        "value": {
+                            "day": "2026-04-27",
+                            "steps": 6900
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/117",
+                        "value": {
+                            "day": "2026-04-28",
+                            "steps": 6925
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/118",
+                        "value": {
+                            "day": "2026-04-29",
+                            "steps": 6950
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/119",
+                        "value": {
+                            "day": "2026-04-30",
+                            "steps": 6975
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/120",
+                        "value": {
+                            "day": "2026-05-01",
+                            "steps": 7000
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/121",
+                        "value": {
+                            "day": "2026-05-02",
+                            "steps": 7025
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/122",
+                        "value": {
+                            "day": "2026-05-03",
+                            "steps": 7050
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/123",
+                        "value": {
+                            "day": "2026-05-04",
+                            "steps": 7075
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/124",
+                        "value": {
+                            "day": "2026-05-05",
+                            "steps": 7100
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/125",
+                        "value": {
+                            "day": "2026-05-06",
+                            "steps": 7125
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/126",
+                        "value": {
+                            "day": "2026-05-07",
+                            "steps": 7150
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/127",
+                        "value": {
+                            "day": "2026-05-08",
+                            "steps": 7175
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/128",
+                        "value": {
+                            "day": "2026-05-09",
+                            "steps": 7200
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/129",
+                        "value": {
+                            "day": "2026-05-10",
+                            "steps": 7225
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/130",
+                        "value": {
+                            "day": "2026-05-11",
+                            "steps": 7250
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/131",
+                        "value": {
+                            "day": "2026-05-12",
+                            "steps": 7275
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/132",
+                        "value": {
+                            "day": "2026-05-13",
+                            "steps": 7300
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/133",
+                        "value": {
+                            "day": "2026-05-14",
+                            "steps": 7325
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/134",
+                        "value": {
+                            "day": "2026-05-15",
+                            "steps": 7350
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/135",
+                        "value": {
+                            "day": "2026-05-16",
+                            "steps": 7375
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/136",
+                        "value": {
+                            "day": "2026-05-17",
+                            "steps": 7400
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/137",
+                        "value": {
+                            "day": "2026-05-18",
+                            "steps": 7425
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/138",
+                        "value": {
+                            "day": "2026-05-19",
+                            "steps": 7450
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/139",
+                        "value": {
+                            "day": "2026-05-20",
+                            "steps": 7475
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/140",
+                        "value": {
+                            "day": "2026-05-21",
+                            "steps": 7500
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/141",
+                        "value": {
+                            "day": "2026-05-22",
+                            "steps": 7525
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/142",
+                        "value": {
+                            "day": "2026-05-23",
+                            "steps": 7550
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/143",
+                        "value": {
+                            "day": "2026-05-24",
+                            "steps": 7575
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/144",
+                        "value": {
+                            "day": "2026-05-25",
+                            "steps": 7600
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/145",
+                        "value": {
+                            "day": "2026-05-26",
+                            "steps": 7625
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/146",
+                        "value": {
+                            "day": "2026-05-27",
+                            "steps": 7650
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/147",
+                        "value": {
+                            "day": "2026-05-28",
+                            "steps": 7675
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/148",
+                        "value": {
+                            "day": "2026-05-29",
+                            "steps": 7700
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/149",
+                        "value": {
+                            "day": "2026-05-30",
+                            "steps": 7725
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/150",
+                        "value": {
+                            "day": "2026-05-31",
+                            "steps": 7750
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/151",
+                        "value": {
+                            "day": "2026-06-01",
+                            "steps": 7775
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/152",
+                        "value": {
+                            "day": "2026-06-02",
+                            "steps": 7800
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/153",
+                        "value": {
+                            "day": "2026-06-03",
+                            "steps": 7825
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/154",
+                        "value": {
+                            "day": "2026-06-04",
+                            "steps": 7850
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/155",
+                        "value": {
+                            "day": "2026-06-05",
+                            "steps": 7875
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/156",
+                        "value": {
+                            "day": "2026-06-06",
+                            "steps": 7900
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/157",
+                        "value": {
+                            "day": "2026-06-07",
+                            "steps": 7925
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/158",
+                        "value": {
+                            "day": "2026-06-08",
+                            "steps": 7950
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/159",
+                        "value": {
+                            "day": "2026-06-09",
+                            "steps": 7975
+                        }
+                    }
+                ],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 16,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-14.4",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/160",
+                        "value": {
+                            "day": "2026-06-10",
+                            "steps": 8000
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/161",
+                        "value": {
+                            "day": "2026-06-11",
+                            "steps": 8025
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/162",
+                        "value": {
+                            "day": "2026-06-12",
+                            "steps": 8050
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/163",
+                        "value": {
+                            "day": "2026-06-13",
+                            "steps": 8075
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/164",
+                        "value": {
+                            "day": "2026-06-14",
+                            "steps": 8100
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/165",
+                        "value": {
+                            "day": "2026-06-15",
+                            "steps": 8125
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/166",
+                        "value": {
+                            "day": "2026-06-16",
+                            "steps": 8150
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/167",
+                        "value": {
+                            "day": "2026-06-17",
+                            "steps": 8175
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/168",
+                        "value": {
+                            "day": "2026-06-18",
+                            "steps": 8200
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/169",
+                        "value": {
+                            "day": "2026-06-19",
+                            "steps": 8225
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/170",
+                        "value": {
+                            "day": "2026-06-20",
+                            "steps": 8250
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/171",
+                        "value": {
+                            "day": "2026-06-21",
+                            "steps": 8275
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/172",
+                        "value": {
+                            "day": "2026-06-22",
+                            "steps": 8300
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/173",
+                        "value": {
+                            "day": "2026-06-23",
+                            "steps": 8325
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/174",
+                        "value": {
+                            "day": "2026-06-24",
+                            "steps": 8350
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/175",
+                        "value": {
+                            "day": "2026-06-25",
+                            "steps": 8375
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/176",
+                        "value": {
+                            "day": "2026-06-26",
+                            "steps": 8400
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/177",
+                        "value": {
+                            "day": "2026-06-27",
+                            "steps": 8425
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/178",
+                        "value": {
+                            "day": "2026-06-28",
+                            "steps": 8450
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/data/179",
+                        "value": {
+                            "day": "2026-06-29",
+                            "steps": 8475
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/xKey",
+                        "value": "day"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/yKey",
+                        "value": "steps"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/props/unit",
+                        "value": "steps"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/chart/children",
+                        "value": []
+                    }
+                ],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 17,
+            "type": "visual_end",
+            "data": {
+                "id": "id-14.5",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "accepted": true,
+                "fallback_text": "Daily step target\n- Thu Jan 1, 2026: 4,000 steps\n- Fri Jan 2, 2026: 4,025 steps\n- Sat Jan 3, 2026: 4,050 steps\n- Sun Jan 4, 2026: 0 steps\n- Mon Jan 5, 2026: 4,100 steps\n- Tue Jan 6, 2026: no reading\n- Wed Jan 7, 2026: 4,150 steps\n- Thu Jan 8, 2026: 4,175 steps\n- Fri Jan 9, 2026: 4,200 steps\n- Sat Jan 10, 2026: 4,225 steps\n- Sun Jan 11, 2026: 4,250 steps\n- Mon Jan 12, 2026: 4,275 steps\n- Tue Jan 13, 2026: 4,300 steps\n- Wed Jan 14, 2026: 4,325 steps\n- Thu Jan 15, 2026: 4,350 steps\n- Fri Jan 16, 2026: 4,375 steps\n- Sat Jan 17, 2026: 4,400 steps\n- Sun Jan 18, 2026: 4,425 steps\n- Mon Jan 19, 2026: 4,450 steps\n- Tue Jan 20, 2026: 4,475 steps\n- Wed Jan 21, 2026: 4,500 steps\n- Thu Jan 22, 2026: 4,525 steps\n- Fri Jan 23, 2026: 4,550 steps\n- Sat Jan 24, 2026: 4,575 steps\n- Sun Jan 25, 2026: 4,600 steps\n- Mon Jan 26, 2026: 4,625 steps\n- Tue Jan 27, 2026: 4,650 steps\n- Wed Jan 28, 2026: 4,675 steps\n- Thu Jan 29, 2026: 4,700 steps\n- Fri Jan 30, 2026: 4,725 steps\n- Sat Jan 31, 2026: 4,750 steps\n- Sun Feb 1, 2026: 4,775 steps\n- Mon Feb 2, 2026: 4,800 steps\n- Tue Feb 3, 2026: 4,825 steps\n- Wed Feb 4, 2026: 4,850 steps\n- Thu Feb 5, 2026: 4,875 steps\n- Fri Feb 6, 2026: 4,900 steps\n- Sat Feb 7, 2026: 4,925 steps\n- Sun Feb 8, 2026: 4,950 steps\n- Mon Feb 9, 2026: 4,975 steps\n- Tue Feb 10, 2026: 5,000 steps\n- Wed Feb 11, 2026: 5,025 steps\n- Thu Feb 12, 2026: 5,050 steps\n- Fri Feb 13, 2026: 5,075 steps\n- Sat Feb 14, 2026: 5,100 steps\n- Sun Feb 15, 2026: 5,125 steps\n- Mon Feb 16, 2026: 5,150 steps\n- Tue Feb 17, 2026: 5,175 steps\n- Wed Feb 18, 2026: 5,200 steps\n- Thu Feb 19, 2026: 5,225 steps\n- Fri Feb 20, 2026: 5,250 steps\n- Sat Feb 21, 2026: 5,275 steps\n- Sun Feb 22, 2026: 5,300 steps\n- Mon Feb 23, 2026: 5,325 steps\n- Tue Feb 24, 2026: 5,350 steps\n- Wed Feb 25, 2026: 5,375 steps\n- Thu Feb 26, 2026: 5,400 steps\n- Fri Feb 27, 2026: 5,425 steps\n- Sat Feb 28, 2026: 5,450 steps\n- Sun Mar 1, 2026: 5,475 steps\n- Mon Mar 2, 2026: 5,500 steps\n- Tue Mar 3, 2026: 5,525 steps\n- Wed Mar 4, 2026: 5,550 steps\n- Thu Mar 5, 2026: 5,575 steps\n- Fri Mar 6, 2026: 5,600 steps\n- Sat Mar 7, 2026: 5,625 steps\n- Sun Mar 8, 2026: 5,650 steps\n- Mon Mar 9, 2026: 5,675 steps\n- Tue Mar 10, 2026: 5,700 steps\n- Wed Mar 11, 2026: 5,725 steps\n- Thu Mar 12, 2026: 5,750 steps\n- Fri Mar 13, 2026: 5,775 steps\n- Sat Mar 14, 2026: 5,800 steps\n- Sun Mar 15, 2026: 5,825 steps\n- Mon Mar 16, 2026: 5,850 steps\n- Tue Mar 17, 2026: 5,875 steps\n- Wed Mar 18, 2026: 5,900 steps\n- Thu Mar 19, 2026: 5,925 steps\n- Fri Mar 20, 2026: 5,950 steps\n- Sat Mar 21, 2026: 5,975 steps\n- Sun Mar 22, 2026: 6,000 steps\n- Mon Mar 23, 2026: 6,025 steps\n- Tue Mar 24, 2026: 6,050 steps\n- Wed Mar 25, 2026: 6,075 steps\n- Thu Mar 26, 2026: 6,100 steps\n- Fri Mar 27, 2026: 6,125 steps\n- Sat Mar 28, 2026: 6,150 steps\n- Sun Mar 29, 2026: 6,175 steps\n- Mon Mar 30, 2026: 6,200 steps\n- Tue Mar 31, 2026: 6,225 steps\n- Wed Apr 1, 2026: 6,250 steps\n- Thu Apr 2, 2026: 6,275 steps\n- Fri Apr 3, 2026: 6,300 steps\n- Sat Apr 4, 2026: 6,325 steps\n- Sun Apr 5, 2026: 6,350 steps\n- Mon Apr 6, 2026: 6,375 steps\n- Tue Apr 7, 2026: 6,400 steps\n- Wed Apr 8, 2026: 6,425 steps\n- Thu Apr 9, 2026: 6,450 steps\n- Fri Apr 10, 2026: 6,475 steps\n- Sat Apr 11, 2026: 6,500 steps\n- Sun Apr 12, 2026: 6,525 steps\n- Mon Apr 13, 2026: 6,550 steps\n- Tue Apr 14, 2026: 6,575 steps\n- Wed Apr 15, 2026: 6,600 steps\n- Thu Apr 16, 2026: 6,625 steps\n- Fri Apr 17, 2026: 6,650 steps\n- Sat Apr 18, 2026: 6,675 steps\n- Sun Apr 19, 2026: 6,700 steps\n- Mon Apr 20, 2026: 6,725 steps\n- Tue Apr 21, 2026: 6,750 steps\n- Wed Apr 22, 2026: 6,775 steps\n- Thu Apr 23, 2026: 6,800 steps\n- Fri Apr 24, 2026: 6,825 steps\n- Sat Apr 25, 2026: 6,850 steps\n- Sun Apr 26, 2026: 6,875 steps\n- Mon Apr 27, 2026: 6,900 steps\n- Tue Apr 28, 2026: 6,925 steps\n- Wed Apr 29, 2026: 6,950 steps\n- Thu Apr 30, 2026: 6,975 steps\n- Fri May 1, 2026: 7,000 steps\n- Sat May 2, 2026: 7,025 steps\n- Sun May 3, 2026: 7,050 steps\n- Mon May 4, 2026: 7,075 steps\n- Tue May 5, 2026: 7,100 steps\n- Wed May 6, 2026: 7,125 steps\n- Thu May 7, 2026: 7,150 steps\n- Fri May 8, 2026: 7,175 steps\n- Sat May 9, 2026: 7,200 steps\n- Sun May 10, 2026: 7,225 steps\n- Mon May 11, 2026: 7,250 steps\n- Tue May 12, 2026: 7,275 steps\n- Wed May 13, 2026: 7,300 steps\n- Thu May 14, 2026: 7,325 steps\n- Fri May 15, 2026: 7,350 steps\n- Sat May 16, 2026: 7,375 steps\n- Sun May 17, 2026: 7,400 steps\n- Mon May 18, 2026: 7,425 steps\n- Tue May 19, 2026: 7,450 steps\n- Wed May 20, 2026: 7,475 steps\n- Thu May 21, 2026: 7,500 steps\n- Fri May 22, 2026: 7,525 steps\n- Sat May 23, 2026: 7,550 steps\n- Sun May 24, 2026: 7,575 steps\n- Mon May 25, 2026: 7,600 steps\n- Tue May 26, 2026: 7,625 steps\n- Wed May 27, 2026: 7,650 steps\n- Thu May 28, 2026: 7,675 steps\n- Fri May 29, 2026: 7,700 steps\n- Sat May 30, 2026: 7,725 steps\n- Sun May 31, 2026: 7,750 steps\n- Mon Jun 1, 2026: 7,775 steps\n- Tue Jun 2, 2026: 7,800 steps\n- Wed Jun 3, 2026: 7,825 steps\n- Thu Jun 4, 2026: 7,850 steps\n- Fri Jun 5, 2026: 7,875 steps\n- Sat Jun 6, 2026: 7,900 steps\n- Sun Jun 7, 2026: 7,925 steps\n- Mon Jun 8, 2026: 7,950 steps\n- Tue Jun 9, 2026: 7,975 steps\n- Wed Jun 10, 2026: 8,000 steps\n- Thu Jun 11, 2026: 8,025 steps\n- Fri Jun 12, 2026: 8,050 steps\n- Sat Jun 13, 2026: 8,075 steps\n- Sun Jun 14, 2026: 8,100 steps\n- Mon Jun 15, 2026: 8,125 steps\n- Tue Jun 16, 2026: 8,150 steps\n- Wed Jun 17, 2026: 8,175 steps\n- Thu Jun 18, 2026: 8,200 steps\n- Fri Jun 19, 2026: 8,225 steps\n- Sat Jun 20, 2026: 8,250 steps\n- Sun Jun 21, 2026: 8,275 steps\n- Mon Jun 22, 2026: 8,300 steps\n- Tue Jun 23, 2026: 8,325 steps\n- Wed Jun 24, 2026: 8,350 steps\n- Thu Jun 25, 2026: 8,375 steps\n- Fri Jun 26, 2026: 8,400 steps\n- Sat Jun 27, 2026: 8,425 steps\n- Sun Jun 28, 2026: 8,450 steps\n- Mon Jun 29, 2026: 8,475 steps",
+                "reason": null,
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 18,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.6",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 19,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.7",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Take",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 20,
+            "type": "text_delta",
+            "data": {
+                "id": "id-15.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 21,
+            "type": "text_delta",
+            "data": {
+                "id": "id-16.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rest",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 22,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " day",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 23,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " whenever",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 24,
+            "type": "text_delta",
+            "data": {
+                "id": "id-19.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " you",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 25,
+            "type": "text_delta",
+            "data": {
+                "id": "id-20.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " need",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 26,
+            "type": "text_delta",
+            "data": {
+                "id": "id-21.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " one.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 27,
+            "type": "text_complete",
+            "data": {
+                "id": "id-22",
+                "invocation_id": "id-2",
+                "type": "text_complete",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 28,
+            "type": "stream_end",
+            "data": {
+                "id": "id-23",
+                "invocation_id": "id-2",
+                "type": "stream_end",
+                "reason": "stop",
+                "usage": {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "cache_read_input_tokens": null,
+                    "cache_write_input_tokens": null,
+                    "reasoning_tokens": null
+                },
+                "timestamp": 0
+            }
+        }
+    ],
+    "message": {
+        "id": "assistant-message",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "text",
+                "text": "Here is a six-month plan that builds up slowly.\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-1",
+                    "spec": {
+                        "root": "chart",
+                        "elements": {
+                            "chart": {
+                                "type": "BarChart",
+                                "props": {
+                                    "title": "Daily step target",
+                                    "data": [
+                                        {
+                                            "day": "2026-01-01",
+                                            "steps": 4000
+                                        },
+                                        {
+                                            "day": "2026-01-02",
+                                            "steps": 4025
+                                        },
+                                        {
+                                            "day": "2026-01-03",
+                                            "steps": 4050
+                                        },
+                                        {
+                                            "day": "2026-01-04",
+                                            "steps": 0
+                                        },
+                                        {
+                                            "day": "2026-01-05",
+                                            "steps": 4100
+                                        },
+                                        {
+                                            "day": "2026-01-06",
+                                            "steps": null
+                                        },
+                                        {
+                                            "day": "2026-01-07",
+                                            "steps": 4150
+                                        },
+                                        {
+                                            "day": "2026-01-08",
+                                            "steps": 4175
+                                        },
+                                        {
+                                            "day": "2026-01-09",
+                                            "steps": 4200
+                                        },
+                                        {
+                                            "day": "2026-01-10",
+                                            "steps": 4225
+                                        },
+                                        {
+                                            "day": "2026-01-11",
+                                            "steps": 4250
+                                        },
+                                        {
+                                            "day": "2026-01-12",
+                                            "steps": 4275
+                                        },
+                                        {
+                                            "day": "2026-01-13",
+                                            "steps": 4300
+                                        },
+                                        {
+                                            "day": "2026-01-14",
+                                            "steps": 4325
+                                        },
+                                        {
+                                            "day": "2026-01-15",
+                                            "steps": 4350
+                                        },
+                                        {
+                                            "day": "2026-01-16",
+                                            "steps": 4375
+                                        },
+                                        {
+                                            "day": "2026-01-17",
+                                            "steps": 4400
+                                        },
+                                        {
+                                            "day": "2026-01-18",
+                                            "steps": 4425
+                                        },
+                                        {
+                                            "day": "2026-01-19",
+                                            "steps": 4450
+                                        },
+                                        {
+                                            "day": "2026-01-20",
+                                            "steps": 4475
+                                        },
+                                        {
+                                            "day": "2026-01-21",
+                                            "steps": 4500
+                                        },
+                                        {
+                                            "day": "2026-01-22",
+                                            "steps": 4525
+                                        },
+                                        {
+                                            "day": "2026-01-23",
+                                            "steps": 4550
+                                        },
+                                        {
+                                            "day": "2026-01-24",
+                                            "steps": 4575
+                                        },
+                                        {
+                                            "day": "2026-01-25",
+                                            "steps": 4600
+                                        },
+                                        {
+                                            "day": "2026-01-26",
+                                            "steps": 4625
+                                        },
+                                        {
+                                            "day": "2026-01-27",
+                                            "steps": 4650
+                                        },
+                                        {
+                                            "day": "2026-01-28",
+                                            "steps": 4675
+                                        },
+                                        {
+                                            "day": "2026-01-29",
+                                            "steps": 4700
+                                        },
+                                        {
+                                            "day": "2026-01-30",
+                                            "steps": 4725
+                                        },
+                                        {
+                                            "day": "2026-01-31",
+                                            "steps": 4750
+                                        },
+                                        {
+                                            "day": "2026-02-01",
+                                            "steps": 4775
+                                        },
+                                        {
+                                            "day": "2026-02-02",
+                                            "steps": 4800
+                                        },
+                                        {
+                                            "day": "2026-02-03",
+                                            "steps": 4825
+                                        },
+                                        {
+                                            "day": "2026-02-04",
+                                            "steps": 4850
+                                        },
+                                        {
+                                            "day": "2026-02-05",
+                                            "steps": 4875
+                                        },
+                                        {
+                                            "day": "2026-02-06",
+                                            "steps": 4900
+                                        },
+                                        {
+                                            "day": "2026-02-07",
+                                            "steps": 4925
+                                        },
+                                        {
+                                            "day": "2026-02-08",
+                                            "steps": 4950
+                                        },
+                                        {
+                                            "day": "2026-02-09",
+                                            "steps": 4975
+                                        },
+                                        {
+                                            "day": "2026-02-10",
+                                            "steps": 5000
+                                        },
+                                        {
+                                            "day": "2026-02-11",
+                                            "steps": 5025
+                                        },
+                                        {
+                                            "day": "2026-02-12",
+                                            "steps": 5050
+                                        },
+                                        {
+                                            "day": "2026-02-13",
+                                            "steps": 5075
+                                        },
+                                        {
+                                            "day": "2026-02-14",
+                                            "steps": 5100
+                                        },
+                                        {
+                                            "day": "2026-02-15",
+                                            "steps": 5125
+                                        },
+                                        {
+                                            "day": "2026-02-16",
+                                            "steps": 5150
+                                        },
+                                        {
+                                            "day": "2026-02-17",
+                                            "steps": 5175
+                                        },
+                                        {
+                                            "day": "2026-02-18",
+                                            "steps": 5200
+                                        },
+                                        {
+                                            "day": "2026-02-19",
+                                            "steps": 5225
+                                        },
+                                        {
+                                            "day": "2026-02-20",
+                                            "steps": 5250
+                                        },
+                                        {
+                                            "day": "2026-02-21",
+                                            "steps": 5275
+                                        },
+                                        {
+                                            "day": "2026-02-22",
+                                            "steps": 5300
+                                        },
+                                        {
+                                            "day": "2026-02-23",
+                                            "steps": 5325
+                                        },
+                                        {
+                                            "day": "2026-02-24",
+                                            "steps": 5350
+                                        },
+                                        {
+                                            "day": "2026-02-25",
+                                            "steps": 5375
+                                        },
+                                        {
+                                            "day": "2026-02-26",
+                                            "steps": 5400
+                                        },
+                                        {
+                                            "day": "2026-02-27",
+                                            "steps": 5425
+                                        },
+                                        {
+                                            "day": "2026-02-28",
+                                            "steps": 5450
+                                        },
+                                        {
+                                            "day": "2026-03-01",
+                                            "steps": 5475
+                                        },
+                                        {
+                                            "day": "2026-03-02",
+                                            "steps": 5500
+                                        },
+                                        {
+                                            "day": "2026-03-03",
+                                            "steps": 5525
+                                        },
+                                        {
+                                            "day": "2026-03-04",
+                                            "steps": 5550
+                                        },
+                                        {
+                                            "day": "2026-03-05",
+                                            "steps": 5575
+                                        },
+                                        {
+                                            "day": "2026-03-06",
+                                            "steps": 5600
+                                        },
+                                        {
+                                            "day": "2026-03-07",
+                                            "steps": 5625
+                                        },
+                                        {
+                                            "day": "2026-03-08",
+                                            "steps": 5650
+                                        },
+                                        {
+                                            "day": "2026-03-09",
+                                            "steps": 5675
+                                        },
+                                        {
+                                            "day": "2026-03-10",
+                                            "steps": 5700
+                                        },
+                                        {
+                                            "day": "2026-03-11",
+                                            "steps": 5725
+                                        },
+                                        {
+                                            "day": "2026-03-12",
+                                            "steps": 5750
+                                        },
+                                        {
+                                            "day": "2026-03-13",
+                                            "steps": 5775
+                                        },
+                                        {
+                                            "day": "2026-03-14",
+                                            "steps": 5800
+                                        },
+                                        {
+                                            "day": "2026-03-15",
+                                            "steps": 5825
+                                        },
+                                        {
+                                            "day": "2026-03-16",
+                                            "steps": 5850
+                                        },
+                                        {
+                                            "day": "2026-03-17",
+                                            "steps": 5875
+                                        },
+                                        {
+                                            "day": "2026-03-18",
+                                            "steps": 5900
+                                        },
+                                        {
+                                            "day": "2026-03-19",
+                                            "steps": 5925
+                                        },
+                                        {
+                                            "day": "2026-03-20",
+                                            "steps": 5950
+                                        },
+                                        {
+                                            "day": "2026-03-21",
+                                            "steps": 5975
+                                        },
+                                        {
+                                            "day": "2026-03-22",
+                                            "steps": 6000
+                                        },
+                                        {
+                                            "day": "2026-03-23",
+                                            "steps": 6025
+                                        },
+                                        {
+                                            "day": "2026-03-24",
+                                            "steps": 6050
+                                        },
+                                        {
+                                            "day": "2026-03-25",
+                                            "steps": 6075
+                                        },
+                                        {
+                                            "day": "2026-03-26",
+                                            "steps": 6100
+                                        },
+                                        {
+                                            "day": "2026-03-27",
+                                            "steps": 6125
+                                        },
+                                        {
+                                            "day": "2026-03-28",
+                                            "steps": 6150
+                                        },
+                                        {
+                                            "day": "2026-03-29",
+                                            "steps": 6175
+                                        },
+                                        {
+                                            "day": "2026-03-30",
+                                            "steps": 6200
+                                        },
+                                        {
+                                            "day": "2026-03-31",
+                                            "steps": 6225
+                                        },
+                                        {
+                                            "day": "2026-04-01",
+                                            "steps": 6250
+                                        },
+                                        {
+                                            "day": "2026-04-02",
+                                            "steps": 6275
+                                        },
+                                        {
+                                            "day": "2026-04-03",
+                                            "steps": 6300
+                                        },
+                                        {
+                                            "day": "2026-04-04",
+                                            "steps": 6325
+                                        },
+                                        {
+                                            "day": "2026-04-05",
+                                            "steps": 6350
+                                        },
+                                        {
+                                            "day": "2026-04-06",
+                                            "steps": 6375
+                                        },
+                                        {
+                                            "day": "2026-04-07",
+                                            "steps": 6400
+                                        },
+                                        {
+                                            "day": "2026-04-08",
+                                            "steps": 6425
+                                        },
+                                        {
+                                            "day": "2026-04-09",
+                                            "steps": 6450
+                                        },
+                                        {
+                                            "day": "2026-04-10",
+                                            "steps": 6475
+                                        },
+                                        {
+                                            "day": "2026-04-11",
+                                            "steps": 6500
+                                        },
+                                        {
+                                            "day": "2026-04-12",
+                                            "steps": 6525
+                                        },
+                                        {
+                                            "day": "2026-04-13",
+                                            "steps": 6550
+                                        },
+                                        {
+                                            "day": "2026-04-14",
+                                            "steps": 6575
+                                        },
+                                        {
+                                            "day": "2026-04-15",
+                                            "steps": 6600
+                                        },
+                                        {
+                                            "day": "2026-04-16",
+                                            "steps": 6625
+                                        },
+                                        {
+                                            "day": "2026-04-17",
+                                            "steps": 6650
+                                        },
+                                        {
+                                            "day": "2026-04-18",
+                                            "steps": 6675
+                                        },
+                                        {
+                                            "day": "2026-04-19",
+                                            "steps": 6700
+                                        },
+                                        {
+                                            "day": "2026-04-20",
+                                            "steps": 6725
+                                        },
+                                        {
+                                            "day": "2026-04-21",
+                                            "steps": 6750
+                                        },
+                                        {
+                                            "day": "2026-04-22",
+                                            "steps": 6775
+                                        },
+                                        {
+                                            "day": "2026-04-23",
+                                            "steps": 6800
+                                        },
+                                        {
+                                            "day": "2026-04-24",
+                                            "steps": 6825
+                                        },
+                                        {
+                                            "day": "2026-04-25",
+                                            "steps": 6850
+                                        },
+                                        {
+                                            "day": "2026-04-26",
+                                            "steps": 6875
+                                        },
+                                        {
+                                            "day": "2026-04-27",
+                                            "steps": 6900
+                                        },
+                                        {
+                                            "day": "2026-04-28",
+                                            "steps": 6925
+                                        },
+                                        {
+                                            "day": "2026-04-29",
+                                            "steps": 6950
+                                        },
+                                        {
+                                            "day": "2026-04-30",
+                                            "steps": 6975
+                                        },
+                                        {
+                                            "day": "2026-05-01",
+                                            "steps": 7000
+                                        },
+                                        {
+                                            "day": "2026-05-02",
+                                            "steps": 7025
+                                        },
+                                        {
+                                            "day": "2026-05-03",
+                                            "steps": 7050
+                                        },
+                                        {
+                                            "day": "2026-05-04",
+                                            "steps": 7075
+                                        },
+                                        {
+                                            "day": "2026-05-05",
+                                            "steps": 7100
+                                        },
+                                        {
+                                            "day": "2026-05-06",
+                                            "steps": 7125
+                                        },
+                                        {
+                                            "day": "2026-05-07",
+                                            "steps": 7150
+                                        },
+                                        {
+                                            "day": "2026-05-08",
+                                            "steps": 7175
+                                        },
+                                        {
+                                            "day": "2026-05-09",
+                                            "steps": 7200
+                                        },
+                                        {
+                                            "day": "2026-05-10",
+                                            "steps": 7225
+                                        },
+                                        {
+                                            "day": "2026-05-11",
+                                            "steps": 7250
+                                        },
+                                        {
+                                            "day": "2026-05-12",
+                                            "steps": 7275
+                                        },
+                                        {
+                                            "day": "2026-05-13",
+                                            "steps": 7300
+                                        },
+                                        {
+                                            "day": "2026-05-14",
+                                            "steps": 7325
+                                        },
+                                        {
+                                            "day": "2026-05-15",
+                                            "steps": 7350
+                                        },
+                                        {
+                                            "day": "2026-05-16",
+                                            "steps": 7375
+                                        },
+                                        {
+                                            "day": "2026-05-17",
+                                            "steps": 7400
+                                        },
+                                        {
+                                            "day": "2026-05-18",
+                                            "steps": 7425
+                                        },
+                                        {
+                                            "day": "2026-05-19",
+                                            "steps": 7450
+                                        },
+                                        {
+                                            "day": "2026-05-20",
+                                            "steps": 7475
+                                        },
+                                        {
+                                            "day": "2026-05-21",
+                                            "steps": 7500
+                                        },
+                                        {
+                                            "day": "2026-05-22",
+                                            "steps": 7525
+                                        },
+                                        {
+                                            "day": "2026-05-23",
+                                            "steps": 7550
+                                        },
+                                        {
+                                            "day": "2026-05-24",
+                                            "steps": 7575
+                                        },
+                                        {
+                                            "day": "2026-05-25",
+                                            "steps": 7600
+                                        },
+                                        {
+                                            "day": "2026-05-26",
+                                            "steps": 7625
+                                        },
+                                        {
+                                            "day": "2026-05-27",
+                                            "steps": 7650
+                                        },
+                                        {
+                                            "day": "2026-05-28",
+                                            "steps": 7675
+                                        },
+                                        {
+                                            "day": "2026-05-29",
+                                            "steps": 7700
+                                        },
+                                        {
+                                            "day": "2026-05-30",
+                                            "steps": 7725
+                                        },
+                                        {
+                                            "day": "2026-05-31",
+                                            "steps": 7750
+                                        },
+                                        {
+                                            "day": "2026-06-01",
+                                            "steps": 7775
+                                        },
+                                        {
+                                            "day": "2026-06-02",
+                                            "steps": 7800
+                                        },
+                                        {
+                                            "day": "2026-06-03",
+                                            "steps": 7825
+                                        },
+                                        {
+                                            "day": "2026-06-04",
+                                            "steps": 7850
+                                        },
+                                        {
+                                            "day": "2026-06-05",
+                                            "steps": 7875
+                                        },
+                                        {
+                                            "day": "2026-06-06",
+                                            "steps": 7900
+                                        },
+                                        {
+                                            "day": "2026-06-07",
+                                            "steps": 7925
+                                        },
+                                        {
+                                            "day": "2026-06-08",
+                                            "steps": 7950
+                                        },
+                                        {
+                                            "day": "2026-06-09",
+                                            "steps": 7975
+                                        },
+                                        {
+                                            "day": "2026-06-10",
+                                            "steps": 8000
+                                        },
+                                        {
+                                            "day": "2026-06-11",
+                                            "steps": 8025
+                                        },
+                                        {
+                                            "day": "2026-06-12",
+                                            "steps": 8050
+                                        },
+                                        {
+                                            "day": "2026-06-13",
+                                            "steps": 8075
+                                        },
+                                        {
+                                            "day": "2026-06-14",
+                                            "steps": 8100
+                                        },
+                                        {
+                                            "day": "2026-06-15",
+                                            "steps": 8125
+                                        },
+                                        {
+                                            "day": "2026-06-16",
+                                            "steps": 8150
+                                        },
+                                        {
+                                            "day": "2026-06-17",
+                                            "steps": 8175
+                                        },
+                                        {
+                                            "day": "2026-06-18",
+                                            "steps": 8200
+                                        },
+                                        {
+                                            "day": "2026-06-19",
+                                            "steps": 8225
+                                        },
+                                        {
+                                            "day": "2026-06-20",
+                                            "steps": 8250
+                                        },
+                                        {
+                                            "day": "2026-06-21",
+                                            "steps": 8275
+                                        },
+                                        {
+                                            "day": "2026-06-22",
+                                            "steps": 8300
+                                        },
+                                        {
+                                            "day": "2026-06-23",
+                                            "steps": 8325
+                                        },
+                                        {
+                                            "day": "2026-06-24",
+                                            "steps": 8350
+                                        },
+                                        {
+                                            "day": "2026-06-25",
+                                            "steps": 8375
+                                        },
+                                        {
+                                            "day": "2026-06-26",
+                                            "steps": 8400
+                                        },
+                                        {
+                                            "day": "2026-06-27",
+                                            "steps": 8425
+                                        },
+                                        {
+                                            "day": "2026-06-28",
+                                            "steps": 8450
+                                        },
+                                        {
+                                            "day": "2026-06-29",
+                                            "steps": 8475
+                                        }
+                                    ],
+                                    "xKey": "day",
+                                    "yKey": "steps",
+                                    "unit": "steps"
+                                },
+                                "children": []
+                            }
+                        }
+                    },
+                    "fallback_text": "Daily step target\n- Thu Jan 1, 2026: 4,000 steps\n- Fri Jan 2, 2026: 4,025 steps\n- Sat Jan 3, 2026: 4,050 steps\n- Sun Jan 4, 2026: 0 steps\n- Mon Jan 5, 2026: 4,100 steps\n- Tue Jan 6, 2026: no reading\n- Wed Jan 7, 2026: 4,150 steps\n- Thu Jan 8, 2026: 4,175 steps\n- Fri Jan 9, 2026: 4,200 steps\n- Sat Jan 10, 2026: 4,225 steps\n- Sun Jan 11, 2026: 4,250 steps\n- Mon Jan 12, 2026: 4,275 steps\n- Tue Jan 13, 2026: 4,300 steps\n- Wed Jan 14, 2026: 4,325 steps\n- Thu Jan 15, 2026: 4,350 steps\n- Fri Jan 16, 2026: 4,375 steps\n- Sat Jan 17, 2026: 4,400 steps\n- Sun Jan 18, 2026: 4,425 steps\n- Mon Jan 19, 2026: 4,450 steps\n- Tue Jan 20, 2026: 4,475 steps\n- Wed Jan 21, 2026: 4,500 steps\n- Thu Jan 22, 2026: 4,525 steps\n- Fri Jan 23, 2026: 4,550 steps\n- Sat Jan 24, 2026: 4,575 steps\n- Sun Jan 25, 2026: 4,600 steps\n- Mon Jan 26, 2026: 4,625 steps\n- Tue Jan 27, 2026: 4,650 steps\n- Wed Jan 28, 2026: 4,675 steps\n- Thu Jan 29, 2026: 4,700 steps\n- Fri Jan 30, 2026: 4,725 steps\n- Sat Jan 31, 2026: 4,750 steps\n- Sun Feb 1, 2026: 4,775 steps\n- Mon Feb 2, 2026: 4,800 steps\n- Tue Feb 3, 2026: 4,825 steps\n- Wed Feb 4, 2026: 4,850 steps\n- Thu Feb 5, 2026: 4,875 steps\n- Fri Feb 6, 2026: 4,900 steps\n- Sat Feb 7, 2026: 4,925 steps\n- Sun Feb 8, 2026: 4,950 steps\n- Mon Feb 9, 2026: 4,975 steps\n- Tue Feb 10, 2026: 5,000 steps\n- Wed Feb 11, 2026: 5,025 steps\n- Thu Feb 12, 2026: 5,050 steps\n- Fri Feb 13, 2026: 5,075 steps\n- Sat Feb 14, 2026: 5,100 steps\n- Sun Feb 15, 2026: 5,125 steps\n- Mon Feb 16, 2026: 5,150 steps\n- Tue Feb 17, 2026: 5,175 steps\n- Wed Feb 18, 2026: 5,200 steps\n- Thu Feb 19, 2026: 5,225 steps\n- Fri Feb 20, 2026: 5,250 steps\n- Sat Feb 21, 2026: 5,275 steps\n- Sun Feb 22, 2026: 5,300 steps\n- Mon Feb 23, 2026: 5,325 steps\n- Tue Feb 24, 2026: 5,350 steps\n- Wed Feb 25, 2026: 5,375 steps\n- Thu Feb 26, 2026: 5,400 steps\n- Fri Feb 27, 2026: 5,425 steps\n- Sat Feb 28, 2026: 5,450 steps\n- Sun Mar 1, 2026: 5,475 steps\n- Mon Mar 2, 2026: 5,500 steps\n- Tue Mar 3, 2026: 5,525 steps\n- Wed Mar 4, 2026: 5,550 steps\n- Thu Mar 5, 2026: 5,575 steps\n- Fri Mar 6, 2026: 5,600 steps\n- Sat Mar 7, 2026: 5,625 steps\n- Sun Mar 8, 2026: 5,650 steps\n- Mon Mar 9, 2026: 5,675 steps\n- Tue Mar 10, 2026: 5,700 steps\n- Wed Mar 11, 2026: 5,725 steps\n- Thu Mar 12, 2026: 5,750 steps\n- Fri Mar 13, 2026: 5,775 steps\n- Sat Mar 14, 2026: 5,800 steps\n- Sun Mar 15, 2026: 5,825 steps\n- Mon Mar 16, 2026: 5,850 steps\n- Tue Mar 17, 2026: 5,875 steps\n- Wed Mar 18, 2026: 5,900 steps\n- Thu Mar 19, 2026: 5,925 steps\n- Fri Mar 20, 2026: 5,950 steps\n- Sat Mar 21, 2026: 5,975 steps\n- Sun Mar 22, 2026: 6,000 steps\n- Mon Mar 23, 2026: 6,025 steps\n- Tue Mar 24, 2026: 6,050 steps\n- Wed Mar 25, 2026: 6,075 steps\n- Thu Mar 26, 2026: 6,100 steps\n- Fri Mar 27, 2026: 6,125 steps\n- Sat Mar 28, 2026: 6,150 steps\n- Sun Mar 29, 2026: 6,175 steps\n- Mon Mar 30, 2026: 6,200 steps\n- Tue Mar 31, 2026: 6,225 steps\n- Wed Apr 1, 2026: 6,250 steps\n- Thu Apr 2, 2026: 6,275 steps\n- Fri Apr 3, 2026: 6,300 steps\n- Sat Apr 4, 2026: 6,325 steps\n- Sun Apr 5, 2026: 6,350 steps\n- Mon Apr 6, 2026: 6,375 steps\n- Tue Apr 7, 2026: 6,400 steps\n- Wed Apr 8, 2026: 6,425 steps\n- Thu Apr 9, 2026: 6,450 steps\n- Fri Apr 10, 2026: 6,475 steps\n- Sat Apr 11, 2026: 6,500 steps\n- Sun Apr 12, 2026: 6,525 steps\n- Mon Apr 13, 2026: 6,550 steps\n- Tue Apr 14, 2026: 6,575 steps\n- Wed Apr 15, 2026: 6,600 steps\n- Thu Apr 16, 2026: 6,625 steps\n- Fri Apr 17, 2026: 6,650 steps\n- Sat Apr 18, 2026: 6,675 steps\n- Sun Apr 19, 2026: 6,700 steps\n- Mon Apr 20, 2026: 6,725 steps\n- Tue Apr 21, 2026: 6,750 steps\n- Wed Apr 22, 2026: 6,775 steps\n- Thu Apr 23, 2026: 6,800 steps\n- Fri Apr 24, 2026: 6,825 steps\n- Sat Apr 25, 2026: 6,850 steps\n- Sun Apr 26, 2026: 6,875 steps\n- Mon Apr 27, 2026: 6,900 steps\n- Tue Apr 28, 2026: 6,925 steps\n- Wed Apr 29, 2026: 6,950 steps\n- Thu Apr 30, 2026: 6,975 steps\n- Fri May 1, 2026: 7,000 steps\n- Sat May 2, 2026: 7,025 steps\n- Sun May 3, 2026: 7,050 steps\n- Mon May 4, 2026: 7,075 steps\n- Tue May 5, 2026: 7,100 steps\n- Wed May 6, 2026: 7,125 steps\n- Thu May 7, 2026: 7,150 steps\n- Fri May 8, 2026: 7,175 steps\n- Sat May 9, 2026: 7,200 steps\n- Sun May 10, 2026: 7,225 steps\n- Mon May 11, 2026: 7,250 steps\n- Tue May 12, 2026: 7,275 steps\n- Wed May 13, 2026: 7,300 steps\n- Thu May 14, 2026: 7,325 steps\n- Fri May 15, 2026: 7,350 steps\n- Sat May 16, 2026: 7,375 steps\n- Sun May 17, 2026: 7,400 steps\n- Mon May 18, 2026: 7,425 steps\n- Tue May 19, 2026: 7,450 steps\n- Wed May 20, 2026: 7,475 steps\n- Thu May 21, 2026: 7,500 steps\n- Fri May 22, 2026: 7,525 steps\n- Sat May 23, 2026: 7,550 steps\n- Sun May 24, 2026: 7,575 steps\n- Mon May 25, 2026: 7,600 steps\n- Tue May 26, 2026: 7,625 steps\n- Wed May 27, 2026: 7,650 steps\n- Thu May 28, 2026: 7,675 steps\n- Fri May 29, 2026: 7,700 steps\n- Sat May 30, 2026: 7,725 steps\n- Sun May 31, 2026: 7,750 steps\n- Mon Jun 1, 2026: 7,775 steps\n- Tue Jun 2, 2026: 7,800 steps\n- Wed Jun 3, 2026: 7,825 steps\n- Thu Jun 4, 2026: 7,850 steps\n- Fri Jun 5, 2026: 7,875 steps\n- Sat Jun 6, 2026: 7,900 steps\n- Sun Jun 7, 2026: 7,925 steps\n- Mon Jun 8, 2026: 7,950 steps\n- Tue Jun 9, 2026: 7,975 steps\n- Wed Jun 10, 2026: 8,000 steps\n- Thu Jun 11, 2026: 8,025 steps\n- Fri Jun 12, 2026: 8,050 steps\n- Sat Jun 13, 2026: 8,075 steps\n- Sun Jun 14, 2026: 8,100 steps\n- Mon Jun 15, 2026: 8,125 steps\n- Tue Jun 16, 2026: 8,150 steps\n- Wed Jun 17, 2026: 8,175 steps\n- Thu Jun 18, 2026: 8,200 steps\n- Fri Jun 19, 2026: 8,225 steps\n- Sat Jun 20, 2026: 8,250 steps\n- Sun Jun 21, 2026: 8,275 steps\n- Mon Jun 22, 2026: 8,300 steps\n- Tue Jun 23, 2026: 8,325 steps\n- Wed Jun 24, 2026: 8,350 steps\n- Thu Jun 25, 2026: 8,375 steps\n- Fri Jun 26, 2026: 8,400 steps\n- Sat Jun 27, 2026: 8,425 steps\n- Sun Jun 28, 2026: 8,450 steps\n- Mon Jun 29, 2026: 8,475 steps"
+                }
+            },
+            {
+                "type": "text",
+                "text": "\nTake the rest day whenever you need one."
+            }
+        ]
+    }
+}

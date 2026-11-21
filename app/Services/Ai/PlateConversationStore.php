@@ -6,6 +6,7 @@ namespace App\Services\Ai;
 
 use App\Actions\AbandonPendingApprovals;
 use App\Models\History;
+use App\Services\ReplyComposer;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Enums\MessageStatus;
@@ -67,12 +68,13 @@ final class PlateConversationStore extends DatabaseConversationStore
     /**
      * @param  Collection<int, Step>  $steps
      * @param  array<string, string|null>  $pendingApprovals
+     * @param  ReplyComposer|null  $composer  rewrites each visual as its text rendering, so later turns never see raw specs
      * @return list<TStoredStep>
      */
-    public function storableSteps(Collection $steps, array $pendingApprovals): array
+    public function storableSteps(Collection $steps, array $pendingApprovals, ?ReplyComposer $composer = null): array
     {
         return array_values($steps->map(fn (Step $step): array => [
-            'content' => $step->text,
+            'content' => $composer?->contextText($step->text) ?? $step->text,
             'tool_calls' => $this->toolCallsFor($step->toolCalls, $step->toolResults, collect($pendingApprovals)),
             'reasoning' => $step->reasoning,
             'replay_blocks' => $pendingApprovals === [] ? [] : $step->replayBlocks,

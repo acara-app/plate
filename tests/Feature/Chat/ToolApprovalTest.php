@@ -63,6 +63,7 @@ function pausedConversation(User $user, string $reason = 'Glucose 140 mg/dL, fas
             'content' => 'Let me log that.',
             'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, [
                 'model' => 'gemini-3.5-flash',
+                'catalog_version' => 1,
                 'approvals' => ['call_abc' => $reason],
             ]) + ['provider' => 'gemini'],
         ]);
@@ -136,6 +137,7 @@ it('queues a resumed stream carrying the approval decision', function (): void {
     Queue::assertPushed(ProcessChatStream::class, fn (ProcessChatStream $job): bool => $job->conversationId === $conversation->id
         && $job->userMessageId === null
         && $job->modelName === 'gemini-3.5-flash'
+        && $job->catalogVersion === 1
         && $job->decisions === [['id' => 'call_abc', 'action' => 'approve', 'result' => null]]);
 });
 

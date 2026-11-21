@@ -26,6 +26,7 @@ final readonly class StartChatStream
         private DispatchesMemoryExtraction $memoryExtraction,
         private StreamEventStore $events,
         private CreatePendingChatStreamTurn $pendingTurn,
+        private ResolveVisualCatalogVersion $resolveCatalogVersion,
     ) {}
 
     public function handle(StreamChatRequest $request, User $user, Conversation $conversation, string $channel = 'web', ?string $locale = null): ChatStreamTurn
@@ -40,7 +41,8 @@ final readonly class StartChatStream
         $this->events->clear($conversation->id);
 
         $attachments = $this->serializeAttachments($request->userAttachments());
-        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->model);
+        $catalogVersion = $this->resolveCatalogVersion->handle($request->catalogVersion());
+        $turn = $this->pendingTurn->handle($conversation, $user, $request->userMessage(), $attachments, $channel, $modelName->model, $catalogVersion);
 
         if ($messageCount === 0) {
             dispatch(new GenerateConversationTitleJob($conversation->withoutRelations()));
@@ -56,6 +58,7 @@ final readonly class StartChatStream
             assistantMessageId: $turn->assistantMessageId,
             locale: $locale,
             agentModels: [AgentRunner::class => $modelName->toSelection()],
+            catalogVersion: $catalogVersion,
         ));
 
         return $turn;
