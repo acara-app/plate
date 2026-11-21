@@ -8,12 +8,15 @@ import {
     SourcesSection,
     type SourceLink,
 } from '@/components/chat/sources-section';
+import { visualData } from '@/components/chat/stream-parts';
+import { ChatVisual } from '@/components/chat/visuals/chat-visual';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import type {
     ApprovalCardData,
     ApprovalDecisionsPayload,
     ChatStatus,
+    VisualPartData,
 } from '@/types/chat';
 import { type UIMessage } from '@ai-sdk/react';
 import {
@@ -174,7 +177,8 @@ function UserMessage({
 type ContentBlock =
     | { kind: 'text'; key: string; text: string }
     | { kind: 'file'; key: string; file: FilePart }
-    | { kind: 'approval'; key: string; approval: ApprovalCardData };
+    | { kind: 'approval'; key: string; approval: ApprovalCardData }
+    | { kind: 'visual'; key: string; visual: VisualPartData };
 
 function partitionAssistantParts(message: UIMessage, live: boolean) {
     const parts = message.parts ?? [];
@@ -184,8 +188,15 @@ function partitionAssistantParts(message: UIMessage, live: boolean) {
 
     parts.forEach((part, index) => {
         const approval = extractApprovalPayload(part);
+        const visual = visualData(part);
 
-        if (approval) {
+        if (visual) {
+            blocks.push({
+                kind: 'visual',
+                key: `visual-${visual.id}`,
+                visual,
+            });
+        } else if (approval) {
             approvals.push(approval);
             blocks.push({
                 kind: 'approval',
@@ -228,6 +239,7 @@ function hasRenderableContent(message: UIMessage): boolean {
             part.type === 'data-tool-call' ||
             part.type === 'data-provider-tool' ||
             part.type === 'data-approval' ||
+            part.type === 'data-spec' ||
             part.type === 'source-url'
         );
     });
@@ -276,6 +288,16 @@ function AssistantMessage({
                     if (block.kind === 'file') {
                         return (
                             <Attachments key={block.key} files={[block.file]} />
+                        );
+                    }
+
+                    if (block.kind === 'visual') {
+                        return (
+                            <ChatVisual
+                                key={block.key}
+                                visual={block.visual}
+                                isStreaming={isStreaming}
+                            />
                         );
                     }
 

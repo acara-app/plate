@@ -1158,6 +1158,12 @@ return [
         'assistant' => 'Acara',
         'scroll_to_latest' => 'Jump to latest',
         'stopped' => 'You stopped this reply.',
+        'visual' => [
+            'label' => 'Visual',
+            'preparing' => 'Preparing a visual…',
+            'progress' => '{{value}} of {{goal}}',
+            'better_choice' => 'Better choice',
+        ],
         'empty' => [
             'greeting' => 'Hi {{name}}, what would you like to work on?',
             'greeting_anonymous' => 'What would you like to work on?',
