@@ -10,6 +10,7 @@ export const VISUAL_LIMITS = {
     depth: 12,
     pointsPerSeries: 366,
     visualsPerReply: 6,
+    patchesPerVisual: 2048,
 } as const;
 
 export const VISUAL_ICONS = [
@@ -44,7 +45,7 @@ export const VISUAL_TONES = [
 
 export const VISUAL_DESTINATIONS = ['snap', 'log', 'sync'] as const;
 
-const text = z.string().min(1);
+const text = z.string().regex(/\S/);
 const optionalText = z.string().nullish();
 const tone = z.enum(VISUAL_TONES);
 const gap = z.enum(['none', 'sm', 'md', 'lg']);
