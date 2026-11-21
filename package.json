@@ -4,9 +4,11 @@
     "scripts": {
         "build": "vite build",
         "build:ssr": "vite build && vite build --ssr",
+        "catalog": "bun resources/js/components/chat/visuals/generate-catalog.ts",
         "dev": "vite",
         "lint": "oxlint . --fix && prettier --write resources/",
-        "test:lint": "oxlint . && prettier --check resources/",
+        "test:lint": "oxlint . && prettier --check resources/ && bun run test:catalog",
+        "test:catalog": "bun resources/js/components/chat/visuals/generate-catalog.ts --check",
         "test:types": "tsc --noEmit"
     },
     "devDependencies": {
@@ -29,8 +31,8 @@
         "@headlessui/react": "^2.2.10",
         "@inertiajs/react": "^3.7.1",
         "@inertiajs/vite": "^3.7.1",
-        "@json-render/core": "^0.21.0",
-        "@json-render/react": "^0.21.0",
+        "@json-render/core": "0.21.4",
+        "@json-render/react": "0.21.4",
         "@laravel/echo-react": "^2.5.0",
         "@laravel/passkeys": "^0.4.0",
         "@radix-ui/react-alert-dialog": "^1.1.23",
@@ -75,7 +77,8 @@
         "tailwindcss": "^4.3.3",
         "tailwindcss-animate": "^1.0.7",
         "typescript": "^7.0.2",
-        "vite": "^8.3.0"
+        "vite": "^8.3.0",
+        "zod": "4.3.6"
     },
     "optionalDependencies": {
         "@tailwindcss/oxide-linux-x64-gnu": "^4.3.3",
