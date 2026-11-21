@@ -7,7 +7,8 @@
         "elements": 128,
         "depth": 12,
         "pointsPerSeries": 366,
-        "visualsPerReply": 6
+        "visualsPerReply": 6,
+        "patchesPerVisual": 2048
     },
     "vocabularies": {
         "icon": [
@@ -235,7 +236,7 @@
                 "properties": {
                     "text": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "level": {
                         "anyOf": [
@@ -274,7 +275,7 @@
                 "properties": {
                     "text": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "variant": {
                         "anyOf": [
@@ -313,7 +314,7 @@
                 "properties": {
                     "text": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "tone": {
                         "anyOf": [
@@ -362,7 +363,7 @@
                     },
                     "message": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "tone": {
                         "anyOf": [
@@ -402,7 +403,7 @@
                 "properties": {
                     "label": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "value": {
                         "anyOf": [
@@ -523,7 +524,7 @@
                 "properties": {
                     "label": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "value": {
                         "type": "number"
@@ -607,7 +608,7 @@
                 "properties": {
                     "title": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "subtitle": {
                         "anyOf": [
@@ -679,7 +680,7 @@
                             "properties": {
                                 "title": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 },
                                 "detail": {
                                     "anyOf": [
@@ -742,7 +743,7 @@
                         "type": "array",
                         "items": {
                             "type": "string",
-                            "minLength": 1
+                            "pattern": "\\S"
                         }
                     },
                     "rows": {
@@ -753,7 +754,7 @@
                             "properties": {
                                 "label": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 },
                                 "values": {
                                     "minItems": 2,
@@ -831,7 +832,7 @@
                 "properties": {
                     "title": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "data": {
                         "maxItems": 366,
@@ -858,15 +859,15 @@
                     },
                     "xKey": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "yKey": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "unit": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "goal": {
                         "anyOf": [
@@ -973,7 +974,7 @@
                 "properties": {
                     "title": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "data": {
                         "maxItems": 366,
@@ -1000,15 +1001,15 @@
                     },
                     "xKey": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "yKey": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "unit": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "goal": {
                         "anyOf": [
@@ -1177,7 +1178,7 @@
                     },
                     "label": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     },
                     "detail": {
                         "anyOf": [
@@ -1218,11 +1219,11 @@
                             "properties": {
                                 "label": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 },
                                 "value": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 }
                             },
                             "required": [
@@ -1234,7 +1235,7 @@
                     },
                     "value": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     }
                 },
                 "required": [
@@ -1267,7 +1268,7 @@
                 "properties": {
                     "title": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     }
                 },
                 "required": [
@@ -1295,11 +1296,11 @@
                             "properties": {
                                 "id": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 },
                                 "label": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 }
                             },
                             "required": [
@@ -1348,7 +1349,7 @@
                 "properties": {
                     "label": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     }
                 },
                 "required": [
@@ -1376,7 +1377,7 @@
                             "properties": {
                                 "label": {
                                     "type": "string",
-                                    "minLength": 1
+                                    "pattern": "\\S"
                                 },
                                 "action": {
                                     "oneOf": [
@@ -1392,7 +1393,7 @@
                                                     "properties": {
                                                         "text": {
                                                             "type": "string",
-                                                            "minLength": 1
+                                                            "pattern": "\\S"
                                                         }
                                                     },
                                                     "required": [
@@ -1516,7 +1517,7 @@
                 "properties": {
                     "text": {
                         "type": "string",
-                        "minLength": 1
+                        "pattern": "\\S"
                     }
                 },
                 "required": [
