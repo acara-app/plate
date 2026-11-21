@@ -10,6 +10,14 @@ return [
     'progress' => ':value sur :goal (:percent %)',
     'better_choice' => 'Meilleur choix : :option',
     'done' => ':item (fait)',
+    'span' => ':from – :to',
+    'average' => 'Moyenne',
+    'highest' => 'Maximum',
+    'lowest' => 'Minimum',
+    'missing_count' => 'Aucune mesure : :count sur :total',
+    'day_boundary' => [
+        'utc' => 'Chaque journée va de minuit à minuit, heure UTC.',
+    ],
     'nutrient' => ':nutrient :value',
     'nutrients' => [
         'carbs' => 'glucides',

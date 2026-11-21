@@ -203,8 +203,8 @@ it('keeps a visual released before a stop and drops the one still open', functio
         ->and(array_column($saved->replyParts(), 'type'))->toBe(['text', 'data-spec', 'text'])
         ->and($saved->content)->toBe("Warm up first.\nWalk for 5 minutes\nThen:\n")
         ->and($saved->chatStreamMeta()['visuals'])->toBe([
-            ['id' => "{$turn->assistantMessageId}-1", 'accepted' => true, 'reason' => null],
-            ['id' => "{$turn->assistantMessageId}-2", 'accepted' => false, 'reason' => 'cancelled'],
+            ['id' => "{$turn->assistantMessageId}-1", 'accepted' => true, 'reason' => null, 'bound' => 0, 'literal' => 0],
+            ['id' => "{$turn->assistantMessageId}-2", 'accepted' => false, 'reason' => 'cancelled', 'bound' => 0, 'literal' => 0],
         ]);
 
     Event::assertDispatched(AnonymousEvent::class, fn (AnonymousEvent $event): bool => $event->broadcastAs() === 'visual_end'
@@ -236,7 +236,7 @@ it('composes a visual that follows a tool call in a new text block', function ()
     );
 
     expect($delivery->result->text)->toBe("Let me check your profile.Walk after lunch.\nEnjoy it.")
-        ->and($delivery->result->visuals)->toBe([['id' => 'reply-1', 'accepted' => true, 'reason' => null]])
+        ->and($delivery->result->visuals)->toBe([['id' => 'reply-1', 'accepted' => true, 'reason' => null, 'bound' => 0, 'literal' => 0]])
         ->and(array_column($delivery->result->parts, 'type'))->toBe(['text', 'data-spec', 'text']);
 });
 

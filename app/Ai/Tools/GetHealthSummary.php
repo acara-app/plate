@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Actions\RegisterDailyHealthDatasets;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
 use App\Enums\HealthAggregationFunction;
@@ -63,7 +64,11 @@ final readonly class GetHealthSummary implements Tool
             $query->whereIn('type_identifier', $typeFilter);
         }
 
-        $summaries = $query->get()->map(function (HealthDailyAggregate $aggregate): array {
+        $aggregates = $query->get();
+
+        resolve(RegisterDailyHealthDatasets::class)->handle($aggregates, $startDate, $endDate);
+
+        $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate): array {
             $total = (float) ($aggregate->value_sum ?? 0.0);
             $avg = (float) ($aggregate->value_avg ?? 0.0);
             $min = (float) ($aggregate->value_min ?? 0.0);

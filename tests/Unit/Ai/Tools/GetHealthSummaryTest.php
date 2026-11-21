@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\GetHealthSummary;
+use App\Data\VisualDataset;
 use App\Models\HealthDailyAggregate;
 use App\Models\User;
+use App\Services\TurnDataRegistry;
 use Carbon\CarbonImmutable;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
@@ -61,6 +63,42 @@ it('returns step count aggregate rows with compatibility and metadata fields', f
         ->and((float) $json['summaries'][0]['primary_value'])->toBe(8000.0)
         ->and($json['summaries'][0]['canonical_unit'])->toBe('count')
         ->and($json['summaries'][0]['source_primary'])->toBe('Apple Watch');
+});
+
+it('offers each metric it returns as a daily dataset only while a reply collects data', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    foreach (['2026-11-16' => 6200, '2026-11-18' => 0] as $day => $steps) {
+        HealthDailyAggregate::factory()->for($user)->stepCount()->create(['local_date' => $day, 'date' => $day, 'value_sum' => $steps]);
+    }
+
+    HealthDailyAggregate::factory()->for($user)->heartRate()->create(['local_date' => '2026-11-17', 'date' => '2026-11-17', 'value_avg' => 72.25]);
+
+    $request = new Request(['type' => 'all', 'days' => 3, 'date' => '2026-11-18']);
+    $datasets = resolve(TurnDataRegistry::class);
+
+    $this->tool->handle($request);
+    $outsideAReply = $datasets->datasets();
+    $collected = $datasets->collect(function () use ($datasets, $request): array {
+        $this->tool->handle($request);
+
+        return $datasets->datasets();
+    });
+
+    expect($outsideAReply)->toBe([])
+        ->and(array_map(fn (VisualDataset $dataset): array => [$dataset->label, $dataset->measure, $dataset->unit, $dataset->rows], $collected))->toBe([
+            'step_count' => ['Steps', 'daily total', 'steps', [
+                ['day' => '2026-11-16', 'value' => 6200],
+                ['day' => '2026-11-17', 'value' => null],
+                ['day' => '2026-11-18', 'value' => 0],
+            ]],
+            'heart_rate' => ['Heart Rate', 'daily average', 'bpm', [
+                ['day' => '2026-11-16', 'value' => null],
+                ['day' => '2026-11-17', 'value' => 72.3],
+                ['day' => '2026-11-18', 'value' => null],
+            ]],
+        ]);
 });
 
 it('returns heart rate with avg min max from aggregates', function (): void {

@@ -313,7 +313,8 @@ final readonly class StreamAggregator
 
             $accepted = ($event['accepted'] ?? false) === true;
             $reason = $event['reason'] ?? null;
-            $visuals[] = ['id' => $visualId, 'accepted' => $accepted, 'reason' => is_string($reason) ? $reason : null];
+            $spec = $accepted ? $this->spec($patches[$visualId] ?? []) : new stdClass;
+            $visuals[] = ['id' => $visualId, 'accepted' => $accepted, 'reason' => is_string($reason) ? $reason : null, ...$this->series($spec)];
 
             if (! $accepted) {
                 continue;
@@ -325,7 +326,7 @@ final readonly class StreamAggregator
             $prose = '';
             $parts[] = ['type' => 'data-spec', 'data' => [
                 'id' => $visualId,
-                'spec' => $this->spec($patches[$visualId] ?? []),
+                'spec' => (string) json_encode($spec, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE),
                 'fallback_text' => $fallbackText,
             ]];
         }
@@ -348,7 +349,7 @@ final readonly class StreamAggregator
     /**
      * @param  list<mixed>  $patches
      */
-    private function spec(array $patches): string
+    private function spec(array $patches): stdClass
     {
         $spec = new stdClass;
         $operations = json_decode((string) json_encode($patches));
@@ -359,7 +360,30 @@ final readonly class StreamAggregator
             }
         }
 
-        return (string) json_encode($spec, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        return $spec instanceof stdClass ? $spec : new stdClass;
+    }
+
+    /**
+     * @return array{bound: int, literal: int}
+     */
+    private function series(stdClass $spec): array
+    {
+        $series = ['bound' => 0, 'literal' => 0];
+        $elements = $spec->elements ?? null;
+
+        foreach ($elements instanceof stdClass ? get_object_vars($elements) : [] as $element) {
+            $props = $element instanceof stdClass ? $element->props ?? null : null;
+            $data = $props instanceof stdClass && in_array($element->type ?? null, ['BarChart', 'LineChart', 'Metric'], true) ? $props->data ?? null : null;
+            $pointer = $data instanceof stdClass ? $data->{'$state'} ?? null : null;
+
+            if (is_array($data)) {
+                $series['literal']++;
+            } elseif (is_string($pointer) && str_starts_with($pointer, '/data/')) {
+                $series['bound']++;
+            }
+        }
+
+        return $series;
     }
 
     /**

@@ -11,6 +11,7 @@ This person's app shows visuals inside your reply. Prefer one, after a short lea
 - whether a food will spike blood sugar: RiskMeter, with the reason as detail
 - a shopping or packing list: Checklist
 - one to four headline numbers: Metric, in a Grid when there are several
+- the person's own figures over several days, such as a week of steps or a month of sleep: BarChart or LineChart bound to a dataset (see DATA)
 Greetings, simple facts and short answers stay prose. A visual does not count toward your length limit.
 
 FORMAT
@@ -24,8 +25,20 @@ Write each visual as a ```spec fenced block of JSONL lines: RFC 6902 JSON Patch 
 - children lists element keys, and leaves use []. Only components marked [children] take children, and every key you list must be added as an element.
 - Every Comparison row has one value per column: {"columns":["White rice","Brown rice"],"rows":[{"label":"Fibre","values":["0.6 g","3.5 g"]}]}.
 - Numbers are JSON numbers, with their unit in a unit prop. Days are ISO dates such as 2026-11-10, and times are ISO 8601.
-- Never type the person's recorded health figures (readings, logs, totals) into a visual, and never invent sample data. Keep recorded figures in prose. Literal numbers are fine for your own estimates, such as a suggested meal's macros or a routine's durations.
+- Never type the person's recorded health figures (readings, logs, totals) into a visual, and never invent sample data. Chart recorded figures by binding a dataset, as DATA explains. Literal numbers are fine for your own estimates, such as a suggested meal's macros or a routine's durations.
 - Your earlier visuals appear in the conversation as [visual] … [/visual] text. That is only a record of what was shown. To show a visual, always write a ```spec block.
+
+DATA
+When a tool fetched the person's daily figures during this reply, its result ends with "Datasets for visuals", one handle per line, for example "- step_count: Steps, daily total in steps, 2026-11-16 to 2026-11-22, 7 days, 1 without a reading".
+- Each dataset holds one row per day, {"day":"2026-11-16","value":4200}, and value is null on a day without a reading.
+- Chart a dataset by binding it, never by copying its values: set data to {"$state":"/data/<handle>"}, xKey to "day" and yKey to "value". Plate fills in the rows, the unit and the day boundary.
+```spec
+{"op":"add","path":"/root","value":"steps"}
+{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"steps","goal":7000},"children":[]}}
+```
+- Bind only a handle listed in a tool result of this reply. Handles from earlier replies no longer exist, so fetch the data again.
+- Write a goal or a target range in the dataset's unit.
+- Never add /state/data yourself.
 
 COMPONENTS
 - Card: { title?: string, subtitle?: string, icon?: string, tint?: string } — The surface for one visual. A Card inside a Card renders as a titled section. [children]

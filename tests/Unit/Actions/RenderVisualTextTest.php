@@ -47,6 +47,26 @@ it('tells a recorded zero apart from a missing day', function (string $locale, s
     'Mongolian' => ['mn', "Daily steps\n- Мя 2026 11 сар 10: 4,200 алхам\n- Лх 2026 11 сар 11: 0 алхам\n- Пү 2026 11 сар 12: хэмжилт байхгүй\nЗорилт: 7,000 алхам\nDays use UTC."],
 ]);
 
+it('sums up a series longer than a month instead of listing every day', function (string $locale, string $expected): void {
+    $rows = array_map(fn (int $day): array => [
+        'day' => now()->setDate(2026, 10, 1)->addDays($day)->toDateString(),
+        'steps' => match ($day) {
+            4 => 0,
+            9, 20 => null,
+            default => 5000 + $day * 10,
+        },
+    ], range(0, 31));
+    $spec = [
+        'root' => 'chart',
+        'elements' => ['chart' => ['type' => 'LineChart', 'props' => ['title' => 'Daily steps', 'data' => $rows, 'xKey' => 'day', 'yKey' => 'steps', 'unit' => 'steps'], 'children' => []]],
+    ];
+
+    expect((new RenderVisualText)->handle($spec, $locale))->toBe($expected);
+})->with([
+    'English' => ['en', "Daily steps\nThu Oct 1, 2026 – Sun Nov 1, 2026\nAverage: 4,987.67 steps\nHighest: 5,310 steps (Sun Nov 1, 2026)\nLowest: 0 steps (Mon Oct 5, 2026)\nNo reading: 2 of 32"],
+    'French' => ['fr', "Daily steps\njeu. 1 oct. 2026 – dim. 1 nov. 2026\nMoyenne : 4\u{202F}987,67 pas\nMaximum : 5\u{202F}310 pas (dim. 1 nov. 2026)\nMinimum : 0 pas (lun. 5 oct. 2026)\nAucune mesure : 2 sur 32"],
+]);
+
 it('renders a nested visual in order with every switchable view', function (): void {
     $spec = [
         'root' => 'review',

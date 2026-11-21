@@ -10,7 +10,7 @@ use App\Services\ReplyComposer;
  * @codeCoverageIgnore
  *
  * @phpstan-type TReplyPart array{type: 'text', text: string}|array{type: 'data-spec', data: array{id: string, spec: string, fallback_text: string}}
- * @phpstan-type TVisualOutcome array{id: string, accepted: bool, reason: string|null}
+ * @phpstan-type TVisualOutcome array{id: string, accepted: bool, reason: string|null, bound: int, literal: int}
  */
 final readonly class ChatStreamResult
 {
