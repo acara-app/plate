@@ -2,6 +2,7 @@ import { defineCatalog, type Spec } from '@json-render/core';
 import { createRenderer } from '@json-render/react';
 import { schema } from '@json-render/react/schema';
 import { acaraChatComponents } from './catalog';
+import { BarChart, LineChart } from './components/chart';
 import { Comparison } from './components/comparison';
 import { Card, Disclosure, Grid, Separator, Stack } from './components/layout';
 import { List, ListItem, Steps } from './components/list';
@@ -24,6 +25,8 @@ const RENDERED = [
     'ListItem',
     'Steps',
     'Comparison',
+    'BarChart',
+    'LineChart',
     'MacroBreakdown',
     'RiskMeter',
     'Disclosure',
@@ -63,6 +66,8 @@ export const ChatVisualRenderer = createRenderer(webCatalog, {
     ),
     Steps: ({ element }) => <Steps props={element.props} />,
     Comparison: ({ element }) => <Comparison props={element.props} />,
+    BarChart: ({ element }) => <BarChart props={element.props} />,
+    LineChart: ({ element }) => <LineChart props={element.props} />,
     MacroBreakdown: ({ element }) => <MacroBreakdown props={element.props} />,
     RiskMeter: ({ element }) => <RiskMeter props={element.props} />,
     Disclosure: ({ element, children }) => (
