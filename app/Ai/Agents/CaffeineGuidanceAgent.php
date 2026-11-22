@@ -9,6 +9,10 @@ use App\Ai\SystemPrompt;
 use App\Contracts\Ai\BillsUsageToUser;
 use App\Data\CaffeineGuidanceData;
 use App\Data\CaffeineLimitData;
+use App\Enums\CaffeineTone;
+use App\Http\Requests\CaffeineAssessmentRequest;
+use App\Utilities\LanguageUtil;
+use App\Utilities\LocalizedDate;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
@@ -28,11 +32,6 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
 {
     use HasUsageUser;
     use Promptable;
-
-    /**
-     * @var array<int, string>
-     */
-    private const array TONES = ['green', 'amber', 'red', 'blue', 'slate'];
 
     public function instructions(): string
     {
@@ -55,11 +54,10 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
                 'Return only the structured response requested by the schema.',
                 'Always return every required top-level field: summary, verdict_card, limit_gauge, timing_card, guidance_list, safety_note. condition_sections is the only optional field and may be an empty array or null when no conditions are detected.',
                 'Component copy must fit compact UI cards.',
-                'Use the exact provided limit_mg value when present.',
-                'For condition_sections, only include conditions that are actually detected in the assessment.',
+                'The application renders the limit, the general maximum, and the bedtime timeline from the assessment. Quote milligram figures and clock times only from the assessment.',
+                'For condition_sections, only include conditions that are actually detected in the assessment, and set condition to that exact condition key.',
                 'Tone mapping for condition_sections: pregnancy/breastfeeding/trying_to_conceive use "green"; heart_condition/medication use "amber"; anxiety/insomnia/gerd use "blue"; otherwise "slate".',
-                'For pregnancy/breastfeeding/trying_to_conceive sections, set link_url to "https://www.acog.org/womens-health/faqs/moderate-caffeine-consumption-during-pregnancy" and link_label to "ACOG guidance".',
-                'For timing_card: extract bedtime_24h (0-23 integer) from optional_context if a bedtime is mentioned (e.g., "I sleep at 11pm" -> 23, "bedtime is 10:30" -> 22); otherwise default bedtime_24h to 23. Compute cutoff_24h as (bedtime_24h - 6 + 24) % 24. The title must include the cutoff time in a natural sentence; the body should briefly explain the ~5h half-life and recommend stopping ~6h before bed. cutoff_label and bedtime_label are short locale-formatted time strings (English: "5:00 pm", "11:00 pm"; Mongolian: "17:00", "23:00"). For insomnia in conditions, the body may suggest stopping earlier than 6h.',
+                'For timing_card: the title states the caffeine cut-off using the assessment cutoffLabel in a natural sentence; the body briefly explains the ~5h half-life and why stopping ~6h before bed helps. For insomnia in conditions, the body may suggest stopping earlier without naming another clock time.',
             ],
         );
     }
@@ -85,7 +83,7 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt($this->buildPrompt($limit, $context, $locale));
 
-        return CaffeineGuidanceData::from($response->toArray());
+        return CaffeineGuidanceData::validateAndCreate($response->toArray());
     }
 
     private function summarySchema(JsonSchema $schema): Type
@@ -101,8 +99,7 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
             'title' => $s->string()->required(),
             'body' => $s->string()->required(),
             'badge' => $s->string()->required(),
-            'tone' => $s->string()->enum(self::TONES)->required(),
-            'limit_mg' => $s->integer()->required()->nullable(),
+            'tone' => $s->string()->enum(CaffeineTone::class)->required(),
         ])->withoutAdditionalProperties()->required();
     }
 
@@ -110,10 +107,7 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
     {
         return $schema->object(fn (JsonSchema $s): array => [
             'label' => $s->string()->required(),
-            'value_label' => $s->string()->required(),
-            'limit_mg' => $s->integer()->required()->nullable(),
-            'max_mg' => $s->integer()->required(),
-            'tone' => $s->string()->enum(self::TONES)->required(),
+            'tone' => $s->string()->enum(CaffeineTone::class)->required(),
             'caption' => $s->string()->required(),
         ])->withoutAdditionalProperties()->required();
     }
@@ -123,10 +117,6 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
         return $schema->object(fn (JsonSchema $s): array => [
             'title' => $s->string()->required(),
             'body' => $s->string()->required(),
-            'cutoff_label' => $s->string()->required(),
-            'bedtime_label' => $s->string()->required(),
-            'cutoff_24h' => $s->integer()->min(0)->max(23)->required(),
-            'bedtime_24h' => $s->integer()->min(0)->max(23)->required(),
         ])->withoutAdditionalProperties()->required();
     }
 
@@ -159,20 +149,24 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
     {
         return (new ArrayType)->items(
             $schema->object(fn (JsonSchema $s): array => [
-                'condition' => $s->string()->required(),
+                'condition' => $s->string()->enum(CaffeineAssessmentRequest::ALLOWED_CONDITIONS)->required(),
                 'title' => $s->string()->required(),
                 'body' => $s->string()->required(),
-                'tone' => $s->string()->enum(self::TONES)->required(),
-                'link_url' => $s->string()->nullable(),
-                'link_label' => $s->string()->nullable(),
+                'tone' => $s->string()->enum(CaffeineTone::class)->required(),
             ])->withoutAdditionalProperties()
         )->nullable();
     }
 
     private function buildPrompt(CaffeineLimitData $limit, ?string $context, string $locale): string
     {
+        ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($locale);
+
         $payload = [
-            'assessment' => $limit->toArray(),
+            'assessment' => [
+                ...$limit->toArray(),
+                'cutoffLabel' => LocalizedDate::hour($limit->cutoffHour, $languageCode),
+                'bedtimeLabel' => LocalizedDate::hour($limit->bedtimeHour, $languageCode),
+            ],
             'optional_context' => filled($context) ? $context : null,
             'copy_rules' => [
                 'answer_first' => true,
@@ -184,13 +178,11 @@ final class CaffeineGuidanceAgent implements Agent, BillsUsageToUser, HasStructu
                 'address_detected_conditions_personally' => true,
                 'never_recommend_a_specific_brand_or_product' => true,
             ],
-            'locale' => $locale,
-            'language_instruction' => $locale === 'mn'
-                ? 'Respond entirely in Mongolian using clear, professional, and friendly medical tone. Use Mongolian medical terminology where appropriate.'
-                : 'Respond in English.',
+            'locale' => $languageCode,
+            'language_instruction' => "Write every text value in {$language} (language code: {$languageCode}). Keep JSON keys, condition keys, and tone values exactly as given.",
         ];
 
         return "Create the caffeine guidance UI copy from this deterministic assessment JSON:\n"
-            .json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            .json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 }

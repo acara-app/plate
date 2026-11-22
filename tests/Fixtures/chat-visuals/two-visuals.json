@@ -1,0 +1,1075 @@
+{
+    "catalog": {
+        "name": "acara-chat",
+        "version": 1
+    },
+    "events": [
+        {
+            "sequence": 0,
+            "type": "stream_start",
+            "data": {
+                "id": "id-1",
+                "invocation_id": "id-2",
+                "type": "stream_start",
+                "provider": "openai",
+                "model": "model",
+                "timestamp": 0,
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
+            }
+        },
+        {
+            "sequence": 1,
+            "type": "text_start",
+            "data": {
+                "id": "id-3",
+                "invocation_id": "id-2",
+                "type": "text_start",
+                "message_id": "id-4",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 1
+            }
+        },
+        {
+            "sequence": 2,
+            "type": "text_delta",
+            "data": {
+                "id": "id-5.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "A",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 2
+            }
+        },
+        {
+            "sequence": 3,
+            "type": "text_delta",
+            "data": {
+                "id": "id-6.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " big",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 3
+            }
+        },
+        {
+            "sequence": 4,
+            "type": "text_delta",
+            "data": {
+                "id": "id-7.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " bowl",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
+            }
+        },
+        {
+            "sequence": 5,
+            "type": "text_delta",
+            "data": {
+                "id": "id-8.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " of",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
+            }
+        },
+        {
+            "sequence": 6,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " white",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
+            }
+        },
+        {
+            "sequence": 7,
+            "type": "text_delta",
+            "data": {
+                "id": "id-10.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rice",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
+            }
+        },
+        {
+            "sequence": 8,
+            "type": "text_delta",
+            "data": {
+                "id": "id-11.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " with",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 8
+            }
+        },
+        {
+            "sequence": 9,
+            "type": "text_delta",
+            "data": {
+                "id": "id-12.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " teriyaki",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 9
+            }
+        },
+        {
+            "sequence": 10,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " chicken",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
+            }
+        },
+        {
+            "sequence": 11,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " is",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
+            }
+        },
+        {
+            "sequence": 12,
+            "type": "text_delta",
+            "data": {
+                "id": "id-15.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " **likely",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 12
+            }
+        },
+        {
+            "sequence": 13,
+            "type": "text_delta",
+            "data": {
+                "id": "id-16.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " to",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 13
+            }
+        },
+        {
+            "sequence": 14,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " raise",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 14
+            }
+        },
+        {
+            "sequence": 15,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " your",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 15
+            }
+        },
+        {
+            "sequence": 16,
+            "type": "text_delta",
+            "data": {
+                "id": "id-19.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " blood",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 16
+            }
+        },
+        {
+            "sequence": 17,
+            "type": "text_delta",
+            "data": {
+                "id": "id-20.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " sugar",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 17
+            }
+        },
+        {
+            "sequence": 18,
+            "type": "text_delta",
+            "data": {
+                "id": "id-21.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " substantially**,",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 18
+            }
+        },
+        {
+            "sequence": 19,
+            "type": "text_delta",
+            "data": {
+                "id": "id-22.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " though",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
+            }
+        },
+        {
+            "sequence": 20,
+            "type": "text_delta",
+            "data": {
+                "id": "id-23.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
+            }
+        },
+        {
+            "sequence": 21,
+            "type": "text_delta",
+            "data": {
+                "id": "id-24.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " size",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
+            }
+        },
+        {
+            "sequence": 22,
+            "type": "text_delta",
+            "data": {
+                "id": "id-25.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " of",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
+            }
+        },
+        {
+            "sequence": 23,
+            "type": "text_delta",
+            "data": {
+                "id": "id-26.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 23
+            }
+        },
+        {
+            "sequence": 24,
+            "type": "text_delta",
+            "data": {
+                "id": "id-27.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rise",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 24
+            }
+        },
+        {
+            "sequence": 25,
+            "type": "text_delta",
+            "data": {
+                "id": "id-28.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " varies",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 25
+            }
+        },
+        {
+            "sequence": 26,
+            "type": "text_delta",
+            "data": {
+                "id": "id-29.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " from",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 26
+            }
+        },
+        {
+            "sequence": 27,
+            "type": "text_delta",
+            "data": {
+                "id": "id-30.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " person",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 27
+            }
+        },
+        {
+            "sequence": 28,
+            "type": "text_delta",
+            "data": {
+                "id": "id-31.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " to",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 28
+            }
+        },
+        {
+            "sequence": 29,
+            "type": "text_delta",
+            "data": {
+                "id": "id-32.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " person.\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 29
+            }
+        },
+        {
+            "sequence": 30,
+            "type": "text_delta",
+            "data": {
+                "id": "id-32.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 30
+            }
+        },
+        {
+            "sequence": 31,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-32.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [],
+                "timestamp": 0,
+                "sequence": 31
+            }
+        },
+        {
+            "sequence": 32,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-33.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "risk"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/risk",
+                        "value": {
+                            "type": "RiskMeter",
+                            "props": {
+                                "level": "high",
+                                "label": "Higher likelihood of a substantial rise",
+                                "detail": "A large portion of white rice and sweet teriyaki sauce can add up to a lot of carbohydrate. Individual responses vary."
+                            },
+                            "children": []
+                        }
+                    }
+                ],
+                "timestamp": 0,
+                "sequence": 32
+            }
+        },
+        {
+            "sequence": 33,
+            "type": "visual_end",
+            "data": {
+                "id": "id-33.2",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "accepted": true,
+                "fallback_text": "Higher likelihood of a substantial rise: High risk — A large portion of white rice and sweet teriyaki sauce can add up to a lot of carbohydrate. Individual responses vary.",
+                "reason": null,
+                "timestamp": 0,
+                "sequence": 33
+            }
+        },
+        {
+            "sequence": 34,
+            "type": "text_delta",
+            "data": {
+                "id": "id-33.3",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 34
+            }
+        },
+        {
+            "sequence": 35,
+            "type": "text_delta",
+            "data": {
+                "id": "id-33.4",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Here",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 35
+            }
+        },
+        {
+            "sequence": 36,
+            "type": "text_delta",
+            "data": {
+                "id": "id-34.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " is",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 36
+            }
+        },
+        {
+            "sequence": 37,
+            "type": "text_delta",
+            "data": {
+                "id": "id-35.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 37
+            }
+        },
+        {
+            "sequence": 38,
+            "type": "text_delta",
+            "data": {
+                "id": "id-36.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rough",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 38
+            }
+        },
+        {
+            "sequence": 39,
+            "type": "text_delta",
+            "data": {
+                "id": "id-37.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " estimate",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 39
+            }
+        },
+        {
+            "sequence": 40,
+            "type": "text_delta",
+            "data": {
+                "id": "id-38.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " for",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 40
+            }
+        },
+        {
+            "sequence": 41,
+            "type": "text_delta",
+            "data": {
+                "id": "id-39.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 41
+            }
+        },
+        {
+            "sequence": 42,
+            "type": "text_delta",
+            "data": {
+                "id": "id-40.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " large",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 42
+            }
+        },
+        {
+            "sequence": 43,
+            "type": "text_delta",
+            "data": {
+                "id": "id-41.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " bowl:\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 43
+            }
+        },
+        {
+            "sequence": 44,
+            "type": "text_delta",
+            "data": {
+                "id": "id-41.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 44
+            }
+        },
+        {
+            "sequence": 45,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-41.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "patches": [],
+                "timestamp": 0,
+                "sequence": 45
+            }
+        },
+        {
+            "sequence": 46,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-42.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "bowl"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/bowl",
+                        "value": {
+                            "type": "Card",
+                            "props": {
+                                "title": "Teriyaki chicken rice bowl"
+                            },
+                            "children": [
+                                "macros",
+                                "line",
+                                "tip"
+                            ]
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/macros",
+                        "value": {
+                            "type": "MacroBreakdown",
+                            "props": {
+                                "calories": 820,
+                                "carbs": 110,
+                                "protein": 42,
+                                "fat": 20
+                            },
+                            "children": []
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/line",
+                        "value": {
+                            "type": "Separator",
+                            "props": {},
+                            "children": []
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/tip",
+                        "value": {
+                            "type": "Text",
+                            "props": {
+                                "text": "Half the rice saves about 40 g of carbohydrate."
+                            },
+                            "children": []
+                        }
+                    }
+                ],
+                "timestamp": 0,
+                "sequence": 46
+            }
+        },
+        {
+            "sequence": 47,
+            "type": "visual_end",
+            "data": {
+                "id": "id-42.2",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "accepted": true,
+                "fallback_text": "Teriyaki chicken rice bowl\n820 kcal: carbs 110 g, protein 42 g, fat 20 g\nHalf the rice saves about 40 g of carbohydrate.",
+                "reason": null,
+                "timestamp": 0,
+                "sequence": 47
+            }
+        },
+        {
+            "sequence": 48,
+            "type": "text_delta",
+            "data": {
+                "id": "id-42.3",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 48
+            }
+        },
+        {
+            "sequence": 49,
+            "type": "text_delta",
+            "data": {
+                "id": "id-42.4",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "To",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 49
+            }
+        },
+        {
+            "sequence": 50,
+            "type": "text_delta",
+            "data": {
+                "id": "id-43.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " soften",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 50
+            }
+        },
+        {
+            "sequence": 51,
+            "type": "text_delta",
+            "data": {
+                "id": "id-44.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 51
+            }
+        },
+        {
+            "sequence": 52,
+            "type": "text_delta",
+            "data": {
+                "id": "id-45.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rise,",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 52
+            }
+        },
+        {
+            "sequence": 53,
+            "type": "text_delta",
+            "data": {
+                "id": "id-46.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " try",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 53
+            }
+        },
+        {
+            "sequence": 54,
+            "type": "text_delta",
+            "data": {
+                "id": "id-47.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 54
+            }
+        },
+        {
+            "sequence": 55,
+            "type": "text_delta",
+            "data": {
+                "id": "id-48.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " smaller",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 55
+            }
+        },
+        {
+            "sequence": 56,
+            "type": "text_delta",
+            "data": {
+                "id": "id-49.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " rice",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 56
+            }
+        },
+        {
+            "sequence": 57,
+            "type": "text_delta",
+            "data": {
+                "id": "id-50.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " portion",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 57
+            }
+        },
+        {
+            "sequence": 58,
+            "type": "text_delta",
+            "data": {
+                "id": "id-51.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " and",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 58
+            }
+        },
+        {
+            "sequence": 59,
+            "type": "text_delta",
+            "data": {
+                "id": "id-52.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " add",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 59
+            }
+        },
+        {
+            "sequence": 60,
+            "type": "text_delta",
+            "data": {
+                "id": "id-53.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " non-starchy",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 60
+            }
+        },
+        {
+            "sequence": 61,
+            "type": "text_delta",
+            "data": {
+                "id": "id-54.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " vegetables.",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 61
+            }
+        },
+        {
+            "sequence": 62,
+            "type": "text_complete",
+            "data": {
+                "id": "id-55",
+                "invocation_id": "id-2",
+                "type": "text_complete",
+                "message_id": "id-4",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 62
+            }
+        },
+        {
+            "sequence": 63,
+            "type": "stream_end",
+            "data": {
+                "id": "id-56",
+                "invocation_id": "id-2",
+                "type": "stream_end",
+                "reason": "stop",
+                "usage": {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "cache_read_input_tokens": null,
+                    "cache_write_input_tokens": null,
+                    "reasoning_tokens": null
+                },
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 63
+            }
+        }
+    ],
+    "message": {
+        "id": "assistant-message",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "text",
+                "text": "A big bowl of white rice with teriyaki chicken is **likely to raise your blood sugar substantially**, though the size of the rise varies from person to person.\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-1",
+                    "spec": {
+                        "root": "risk",
+                        "elements": {
+                            "risk": {
+                                "type": "RiskMeter",
+                                "props": {
+                                    "level": "high",
+                                    "label": "Higher likelihood of a substantial rise",
+                                    "detail": "A large portion of white rice and sweet teriyaki sauce can add up to a lot of carbohydrate. Individual responses vary."
+                                },
+                                "children": []
+                            }
+                        }
+                    },
+                    "fallback_text": "Higher likelihood of a substantial rise: High risk — A large portion of white rice and sweet teriyaki sauce can add up to a lot of carbohydrate. Individual responses vary."
+                }
+            },
+            {
+                "type": "text",
+                "text": "\nHere is a rough estimate for a large bowl:\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-2",
+                    "spec": {
+                        "root": "bowl",
+                        "elements": {
+                            "bowl": {
+                                "type": "Card",
+                                "props": {
+                                    "title": "Teriyaki chicken rice bowl"
+                                },
+                                "children": [
+                                    "macros",
+                                    "line",
+                                    "tip"
+                                ]
+                            },
+                            "macros": {
+                                "type": "MacroBreakdown",
+                                "props": {
+                                    "calories": 820,
+                                    "carbs": 110,
+                                    "protein": 42,
+                                    "fat": 20
+                                },
+                                "children": []
+                            },
+                            "line": {
+                                "type": "Separator",
+                                "props": {},
+                                "children": []
+                            },
+                            "tip": {
+                                "type": "Text",
+                                "props": {
+                                    "text": "Half the rice saves about 40 g of carbohydrate."
+                                },
+                                "children": []
+                            }
+                        }
+                    },
+                    "fallback_text": "Teriyaki chicken rice bowl\n820 kcal: carbs 110 g, protein 42 g, fat 20 g\nHalf the rice saves about 40 g of carbohydrate."
+                }
+            },
+            {
+                "type": "text",
+                "text": "\nTo soften the rise, try a smaller rice portion and add non-starchy vegetables."
+            }
+        ]
+    }
+}

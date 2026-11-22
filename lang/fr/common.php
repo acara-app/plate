@@ -1159,6 +1159,18 @@ return [
         'assistant' => 'Acara',
         'scroll_to_latest' => 'Aller au dernier message',
         'stopped' => 'Vous avez arrêté cette réponse.',
+        'visual' => [
+            'label' => 'Visuel',
+            'preparing' => 'Préparation d’un visuel…',
+            'progress' => '{{value}} sur {{goal}}',
+            'better_choice' => 'Meilleur choix',
+            'goal' => 'Objectif {{value}}',
+            'target_range' => 'Plage cible {{low}}–{{high}}',
+            'point' => '{{label}} : {{value}}',
+            'suggestions' => 'Suites suggérées',
+            'choices' => 'Options',
+            'new_tab' => '(s’ouvre dans un nouvel onglet)',
+        ],
         'empty' => [
             'greeting' => 'Bonjour {{name}}, sur quoi voulez-vous avancer ?',
             'greeting_anonymous' => 'Sur quoi voulez-vous avancer ?',

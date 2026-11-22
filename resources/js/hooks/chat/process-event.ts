@@ -1,9 +1,12 @@
 import { parseApprovalRequest } from '@/components/chat/approval-part';
+import type { JsonPatch } from '@json-render/core';
 import type { ChatAction, UrlCitationPayload } from './message-reducer';
 
 export interface RawStreamEvent {
     type: string;
     id?: string;
+    conversation_id?: string;
+    sequence?: number;
     delta?: string;
     citation?: UrlCitationPayload;
     result?: unknown;
@@ -19,6 +22,10 @@ export interface RawStreamEvent {
     status?: string;
     denied?: boolean;
     approvals?: unknown[];
+    visual_id?: string;
+    patches?: JsonPatch[];
+    accepted?: boolean;
+    fallback_text?: string;
 }
 
 export interface StreamTracking {
@@ -201,6 +208,35 @@ export function applyStreamEvent(
             if (typeof raw.citation?.url === 'string') {
                 seenEventIds.add(raw.id);
                 dispatch({ type: 'ADD_CITATION', citation: raw.citation });
+            }
+            break;
+
+        case 'visual_patch':
+            if (
+                typeof raw.visual_id === 'string' &&
+                Array.isArray(raw.patches)
+            ) {
+                seenEventIds.add(raw.id);
+                dispatch({
+                    type: 'VISUAL_PATCH',
+                    visualId: raw.visual_id,
+                    patches: raw.patches,
+                });
+            }
+            break;
+
+        case 'visual_end':
+            if (typeof raw.visual_id === 'string') {
+                seenEventIds.add(raw.id);
+                dispatch({
+                    type: 'VISUAL_END',
+                    visualId: raw.visual_id,
+                    accepted: raw.accepted === true,
+                    fallbackText:
+                        typeof raw.fallback_text === 'string'
+                            ? raw.fallback_text
+                            : '',
+                });
             }
             break;
 

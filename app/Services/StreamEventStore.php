@@ -6,6 +6,7 @@ namespace App\Services;
 
 use Illuminate\Redis\Connections\Connection;
 use Illuminate\Support\Facades\Redis;
+use stdClass;
 
 /**
  * @phpstan-import-type TNormalizedEvent from StreamAggregator
@@ -58,6 +59,12 @@ class StreamEventStore
             static function (string $event): array {
                 /** @var array{sequence: int, type: string, data: TNormalizedEvent} $decoded */
                 $decoded = json_decode($event, true, flags: JSON_THROW_ON_ERROR);
+
+                if ($decoded['type'] === 'visual_patch') {
+                    $exact = json_decode($event, flags: JSON_THROW_ON_ERROR);
+                    $data = $exact instanceof stdClass ? $exact->data ?? null : null;
+                    $decoded['data']['patches'] = $data instanceof stdClass ? $data->patches ?? [] : [];
+                }
 
                 return $decoded;
             },

@@ -6,6 +6,7 @@ import { AppSidebar } from '@/components/app-sidebar';
 import { LifecycleBanner } from '@/components/billing/lifecycle-banner';
 import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { dayPartAt, type DayPart } from '@/components/chat/day-part';
+import { ACARA_CHAT_CATALOG } from '@/components/chat/visuals/catalog-handshake';
 import { DISPLAY_FONT, IntakePlate } from '@/components/dashboard/intake-plate';
 import { HealthDataConsentCard } from '@/components/health-data-consent-card';
 import { OnboardingBanner } from '@/components/onboarding-banner';
@@ -143,6 +144,7 @@ export default function Dashboard({
 
         form.transform(() => ({
             messages: [{ role: 'user', parts }],
+            catalog: ACARA_CHAT_CATALOG,
         }));
         form.post(chat.store(conversationId).url);
     }

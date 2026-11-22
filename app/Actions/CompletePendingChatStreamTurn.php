@@ -10,6 +10,7 @@ use App\Models\History;
 use App\Models\User;
 use App\Services\Ai\AgentModelContext;
 use App\Services\Ai\PlateConversationStore;
+use App\Services\ReplyComposer;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -40,12 +41,13 @@ final readonly class CompletePendingChatStreamTurn
         string $status,
         Collection $steps = new Collection,
         ?string $provider = null,
+        ?ReplyComposer $contextComposer = null,
     ): void {
         if ($status !== History::STREAM_STATUS_COMPLETED) {
             $result = $result->withoutPendingApprovals();
         }
 
-        DB::transaction(function () use ($conversationId, $user, $userMessageId, $assistantMessageId, $result, $status, $steps, $provider): void {
+        DB::transaction(function () use ($conversationId, $user, $userMessageId, $assistantMessageId, $result, $status, $steps, $provider, $contextComposer): void {
             $now = now();
 
             $conversation = Conversation::query()
@@ -73,7 +75,7 @@ final readonly class CompletePendingChatStreamTurn
 
             $assistantMessage->forceFill([
                 'content' => $result->text,
-                'steps' => $this->steps($result, $steps),
+                'steps' => $this->steps($result, $steps, $contextComposer),
                 'usage' => $result->usage,
                 'meta' => $this->assistantMeta($assistantMessage, $result, $status, $provider),
                 'status' => $this->messageStatus($result, $status),
@@ -88,13 +90,13 @@ final readonly class CompletePendingChatStreamTurn
      * @param  Collection<int, Step>  $steps
      * @return list<TStoredStep>
      */
-    private function steps(ChatStreamResult $result, Collection $steps): array
+    private function steps(ChatStreamResult $result, Collection $steps, ?ReplyComposer $contextComposer): array
     {
         if ($steps->isEmpty()) {
-            return [$this->conversationStore->storableStep($result->text, $result->toolCalls, $result->toolResults, $result->pendingApprovals)];
+            return [$this->conversationStore->storableStep($result->contextText(), $result->toolCalls, $result->toolResults, $result->pendingApprovals)];
         }
 
-        return $this->conversationStore->storableSteps($steps, $result->pendingApprovals);
+        return $this->conversationStore->storableSteps($steps, $result->pendingApprovals, $contextComposer);
     }
 
     private function messageStatus(ChatStreamResult $result, string $status): MessageStatus
@@ -141,6 +143,8 @@ final readonly class CompletePendingChatStreamTurn
             'provider_tools' => $result->providerTools,
             'citations' => $result->citations,
             'errors' => $result->errors,
+            ...$result->parts !== [] ? ['parts' => $result->parts] : [],
+            ...$result->visuals !== [] ? ['visuals' => $result->visuals] : [],
             ...$result->hasPendingApprovals() ? [
                 'approvals' => $result->pendingApprovals,
                 'agent_models' => resolve(AgentModelContext::class)->selections(),

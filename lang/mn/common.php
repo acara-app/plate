@@ -1144,6 +1144,18 @@ return [
         'assistant' => 'Acara',
         'scroll_to_latest' => 'Сүүлийн мессеж рүү очих',
         'stopped' => 'Та энэ хариултыг зогсоосон.',
+        'visual' => [
+            'label' => 'Дүрслэл',
+            'preparing' => 'Дүрслэл бэлдэж байна…',
+            'progress' => '{{value}} / {{goal}}',
+            'better_choice' => 'Илүү тохиромжтой',
+            'goal' => 'Зорилт {{value}}',
+            'target_range' => 'Зорилтот хүрээ {{low}}–{{high}}',
+            'point' => '{{label}}: {{value}}',
+            'suggestions' => 'Санал болгох дараагийн алхмууд',
+            'choices' => 'Сонголтууд',
+            'new_tab' => '(шинэ табад нээгдэнэ)',
+        ],
         'empty' => [
             'greeting' => 'Сайн байна уу, {{name}}. Өнөөдөр юуны талаар ярилцах вэ?',
             'greeting_anonymous' => 'Өнөөдөр юуны талаар ярилцах вэ?',

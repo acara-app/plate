@@ -33,6 +33,7 @@ use App\Services\Memory\NullMemoryExtractionDispatcher;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\Skills\NullSkillLoader;
 use App\Services\StripeService;
+use App\Services\TurnDataRegistry;
 use Carbon\CarbonImmutable;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -58,6 +59,7 @@ final class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(AgentModelContext::class);
+        $this->app->scoped(TurnDataRegistry::class);
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
         $this->app->scoped(PhotoPlanCatalog::class);
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);

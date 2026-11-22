@@ -204,7 +204,7 @@ final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conve
 
         $this->currentRequest = new AgentRequest(
             message: $request->message, images: $request->images, conversationId: $request->conversationId,
-            streamId: $request->streamId, model: $modelName,
+            streamId: $request->streamId, model: $modelName, catalogVersion: $request->catalogVersion,
         );
         $this->user = $user;
 

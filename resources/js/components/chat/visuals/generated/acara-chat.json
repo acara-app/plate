@@ -1,0 +1,1650 @@
+{
+    "name": "acara-chat",
+    "version": 1,
+    "propsDescribe": "resolved values",
+    "limits": {
+        "bytes": 131072,
+        "elements": 128,
+        "depth": 12,
+        "pointsPerSeries": 366,
+        "visualsPerReply": 6,
+        "patchesPerVisual": 2048
+    },
+    "vocabularies": {
+        "icon": [
+            "steps",
+            "sleep",
+            "glucose",
+            "heart",
+            "meal",
+            "water",
+            "weight",
+            "workout",
+            "energy",
+            "medication"
+        ],
+        "tint": [
+            "brand",
+            "positive",
+            "caution",
+            "critical",
+            "info",
+            "neutral",
+            "steps",
+            "sleep",
+            "glucose",
+            "heart",
+            "meal",
+            "water",
+            "weight",
+            "workout",
+            "energy",
+            "medication"
+        ],
+        "tone": [
+            "info",
+            "positive",
+            "caution",
+            "critical"
+        ]
+    },
+    "components": {
+        "Card": {
+            "introducedIn": 1,
+            "description": "The surface for one visual. A Card inside a Card renders as a titled section.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "subtitle": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "icon": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "tint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Movement this week",
+                "subtitle": "November 10–16",
+                "icon": "steps",
+                "tint": "brand"
+            }
+        },
+        "Stack": {
+            "introducedIn": 1,
+            "description": "Lays out its children in a column, or in a row.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "direction": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "vertical",
+                                    "horizontal"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "gap": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "none",
+                                    "sm",
+                                    "md",
+                                    "lg"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "align": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "start",
+                                    "center",
+                                    "end",
+                                    "stretch"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "example": {
+                "direction": "vertical",
+                "gap": "sm",
+                "align": "start"
+            }
+        },
+        "Grid": {
+            "introducedIn": 1,
+            "description": "Lays out its children in one to three columns. It collapses to one column on narrow screens.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "columns": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 1,
+                                "maximum": 3
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "gap": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "none",
+                                    "sm",
+                                    "md",
+                                    "lg"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "example": {
+                "columns": 2,
+                "gap": "md"
+            }
+        },
+        "Separator": {
+            "introducedIn": 1,
+            "description": "A thin divider between sections.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+            },
+            "example": {}
+        },
+        "Heading": {
+            "introducedIn": 1,
+            "description": "A section heading.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "level": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "h1",
+                                    "h2",
+                                    "h3",
+                                    "h4"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "text": "Weekly review",
+                "level": "h2"
+            }
+        },
+        "Text": {
+            "introducedIn": 1,
+            "description": "A short paragraph or caption.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "variant": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "body",
+                                    "lead",
+                                    "caption",
+                                    "muted"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "text": "A recorded zero and a day without a reading appear separately.",
+                "variant": "caption"
+            }
+        },
+        "Badge": {
+            "introducedIn": 1,
+            "description": "A short status label.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "tone": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "info",
+                                    "positive",
+                                    "caution",
+                                    "critical"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "text": "On track",
+                "tone": "positive"
+            }
+        },
+        "Callout": {
+            "introducedIn": 1,
+            "description": "A note set apart from the prose. Use the caution or critical tone for warnings.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "message": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "tone": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "info",
+                                    "positive",
+                                    "caution",
+                                    "critical"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "message"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Missing day",
+                "message": "No reading was available for Thursday.",
+                "tone": "caution"
+            }
+        },
+        "Metric": {
+            "introducedIn": 1,
+            "description": "A headline number with its label and unit. data is an optional sparkline in which null is a missing reading.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "value": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "string"
+                            }
+                        ]
+                    },
+                    "unit": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "detail": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "trend": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "up",
+                                    "down",
+                                    "neutral"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "icon": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "tint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "data": {
+                        "anyOf": [
+                            {
+                                "maxItems": 366,
+                                "type": "array",
+                                "items": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "label",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "label": "Daily average",
+                "value": 5400,
+                "unit": "steps",
+                "detail": "Last 7 days",
+                "trend": "up",
+                "icon": "steps",
+                "tint": "steps",
+                "data": [
+                    4200,
+                    0,
+                    null,
+                    6100
+                ]
+            }
+        },
+        "Progress": {
+            "introducedIn": 1,
+            "description": "Progress toward a goal, drawn as a bar or a ring.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "value": {
+                        "type": "number"
+                    },
+                    "goal": {
+                        "type": "number",
+                        "exclusiveMinimum": 0
+                    },
+                    "unit": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "style": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "enum": [
+                                    "bar",
+                                    "ring"
+                                ]
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "label",
+                    "value",
+                    "goal"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "label": "Daily movement",
+                "value": 5400,
+                "goal": 7000,
+                "unit": "steps",
+                "style": "ring"
+            }
+        },
+        "List": {
+            "introducedIn": 1,
+            "description": "A list of ListItem children with an optional title.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Activities"
+            }
+        },
+        "ListItem": {
+            "introducedIn": 1,
+            "description": "One row of a List, with an optional trailing value.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "subtitle": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "icon": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "tint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "trailing": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "title"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Walk",
+                "subtitle": "Wednesday afternoon",
+                "icon": "workout",
+                "tint": "brand",
+                "trailing": "20 min"
+            }
+        },
+        "Steps": {
+            "introducedIn": 1,
+            "description": "Numbered steps to follow in order, each with an optional duration.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "title": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                },
+                                "detail": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                },
+                                "duration": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "title"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": [
+                    "items"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "items": [
+                    {
+                        "title": "Warm up",
+                        "detail": "Walk at an easy pace.",
+                        "duration": "5 min"
+                    },
+                    {
+                        "title": "Brisk walk",
+                        "duration": "10 min"
+                    }
+                ]
+            }
+        },
+        "Comparison": {
+            "introducedIn": 1,
+            "description": "Two or three options side by side, row by row. winner is the zero-based index of the better column.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "columns": {
+                        "minItems": 2,
+                        "maxItems": 3,
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "pattern": "\\S"
+                        }
+                    },
+                    "rows": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                },
+                                "values": {
+                                    "minItems": 2,
+                                    "maxItems": 3,
+                                    "type": "array",
+                                    "items": {
+                                        "anyOf": [
+                                            {
+                                                "type": "number"
+                                            },
+                                            {
+                                                "type": "string"
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "label",
+                                "values"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "winner": {
+                        "anyOf": [
+                            {
+                                "type": "integer",
+                                "minimum": 0,
+                                "maximum": 2
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "columns",
+                    "rows"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "columns": [
+                    "Oats",
+                    "White rice"
+                ],
+                "rows": [
+                    {
+                        "label": "Fiber",
+                        "values": [
+                            "4 g",
+                            "1 g"
+                        ]
+                    },
+                    {
+                        "label": "Glycemic index",
+                        "values": [
+                            55,
+                            73
+                        ]
+                    }
+                ],
+                "winner": 0
+            }
+        },
+        "BarChart": {
+            "introducedIn": 1,
+            "description": "Bars for a daily or categorical series. A null or missing y value is a missing reading, drawn differently from a recorded zero.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "data": {
+                        "maxItems": 366,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "propertyNames": {
+                                "type": "string"
+                            },
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "xKey": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "yKey": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "goal": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "range": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "low": {
+                                        "type": "number"
+                                    },
+                                    "high": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": [
+                                    "low",
+                                    "high"
+                                ],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "dayBoundary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "tint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "title",
+                    "data",
+                    "xKey",
+                    "yKey",
+                    "unit"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Daily steps",
+                "data": [
+                    {
+                        "day": "2026-11-10",
+                        "steps": 4200,
+                        "sleep": 6.5
+                    },
+                    {
+                        "day": "2026-11-11",
+                        "steps": 0,
+                        "sleep": 7
+                    },
+                    {
+                        "day": "2026-11-12",
+                        "steps": null,
+                        "sleep": null
+                    },
+                    {
+                        "day": "2026-11-13",
+                        "steps": 6100,
+                        "sleep": 7.4
+                    }
+                ],
+                "xKey": "day",
+                "yKey": "steps",
+                "unit": "steps",
+                "goal": 7000,
+                "dayBoundary": "Days run midnight to midnight UTC.",
+                "tint": "steps"
+            }
+        },
+        "LineChart": {
+            "introducedIn": 1,
+            "description": "A line for a series over time, with an optional goal line and target range band. A null y value is a gap.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "data": {
+                        "maxItems": 366,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "propertyNames": {
+                                "type": "string"
+                            },
+                            "additionalProperties": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ]
+                            }
+                        }
+                    },
+                    "xKey": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "yKey": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "goal": {
+                        "anyOf": [
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "range": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "properties": {
+                                    "low": {
+                                        "type": "number"
+                                    },
+                                    "high": {
+                                        "type": "number"
+                                    }
+                                },
+                                "required": [
+                                    "low",
+                                    "high"
+                                ],
+                                "additionalProperties": false
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "dayBoundary": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    },
+                    "tint": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "title",
+                    "data",
+                    "xKey",
+                    "yKey",
+                    "unit"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "Sleep",
+                "data": [
+                    {
+                        "day": "2026-11-10",
+                        "steps": 4200,
+                        "sleep": 6.5
+                    },
+                    {
+                        "day": "2026-11-11",
+                        "steps": 0,
+                        "sleep": 7
+                    },
+                    {
+                        "day": "2026-11-12",
+                        "steps": null,
+                        "sleep": null
+                    },
+                    {
+                        "day": "2026-11-13",
+                        "steps": 6100,
+                        "sleep": 7.4
+                    }
+                ],
+                "xKey": "day",
+                "yKey": "sleep",
+                "unit": "h",
+                "range": {
+                    "low": 7,
+                    "high": 9
+                },
+                "tint": "sleep"
+            }
+        },
+        "MacroBreakdown": {
+            "introducedIn": 1,
+            "description": "Calories with carbohydrate, protein and fat grams for one meal or one day.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "calories": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "carbs": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "protein": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "fat": {
+                        "type": "number",
+                        "minimum": 0
+                    },
+                    "fiber": {
+                        "anyOf": [
+                            {
+                                "type": "number",
+                                "minimum": 0
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "calories",
+                    "carbs",
+                    "protein",
+                    "fat"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "calories": 410,
+                "carbs": 50,
+                "protein": 21,
+                "fat": 14,
+                "fiber": 5
+            }
+        },
+        "RiskMeter": {
+            "introducedIn": 1,
+            "description": "A low, medium or high risk verdict with its reason.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "level": {
+                        "type": "string",
+                        "enum": [
+                            "low",
+                            "medium",
+                            "high"
+                        ]
+                    },
+                    "label": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    },
+                    "detail": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "level",
+                    "label"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "level": "medium",
+                "label": "Blood sugar spike",
+                "detail": "White rice on its own digests quickly."
+            }
+        },
+        "Segmented": {
+            "introducedIn": 1,
+            "description": "Switches what a visual shows. Bind value to a /ui path with $bindState and give each switched element a visible condition on that path.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "options": {
+                        "minItems": 2,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                }
+                            },
+                            "required": [
+                                "label",
+                                "value"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "value": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    }
+                },
+                "required": [
+                    "options",
+                    "value"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "options": [
+                    {
+                        "label": "Steps",
+                        "value": "steps"
+                    },
+                    {
+                        "label": "Sleep",
+                        "value": "sleep"
+                    }
+                ],
+                "value": "steps"
+            }
+        },
+        "Disclosure": {
+            "introducedIn": 1,
+            "description": "Detail tucked behind a title until it is opened.",
+            "acceptsChildren": true,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    }
+                },
+                "required": [
+                    "title"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "title": "About these readings"
+            }
+        },
+        "Checklist": {
+            "introducedIn": 1,
+            "description": "Items the person can tick off during this session. Bind checked to a /ui path with $bindState.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "id": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                },
+                                "label": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "label"
+                            ],
+                            "additionalProperties": false
+                        }
+                    },
+                    "checked": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "items",
+                    "checked"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "items": [
+                    {
+                        "id": "oats",
+                        "label": "Oats"
+                    },
+                    {
+                        "id": "berries",
+                        "label": "Berries"
+                    }
+                ],
+                "checked": [
+                    "oats"
+                ]
+            }
+        },
+        "Button": {
+            "introducedIn": 1,
+            "description": "A tap target. Put its action in the on.press field of the element.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "label": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    }
+                },
+                "required": [
+                    "label"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "label": "Open logbook"
+            }
+        },
+        "SuggestionChips": {
+            "introducedIn": 1,
+            "description": "Up to four follow-ups the person can tap after reading the reply.",
+            "acceptsChildren": false,
+            "props": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "minItems": 1,
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "label": {
+                                    "type": "string",
+                                    "pattern": "\\S"
+                                },
+                                "action": {
+                                    "oneOf": [
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "action": {
+                                                    "type": "string",
+                                                    "const": "sendMessage"
+                                                },
+                                                "params": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "text": {
+                                                            "type": "string",
+                                                            "pattern": "\\S"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "text"
+                                                    ],
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "required": [
+                                                "action",
+                                                "params"
+                                            ],
+                                            "additionalProperties": false
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "action": {
+                                                    "type": "string",
+                                                    "const": "openDestination"
+                                                },
+                                                "params": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "destination": {
+                                                            "type": "string",
+                                                            "enum": [
+                                                                "snap",
+                                                                "log",
+                                                                "sync"
+                                                            ]
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "destination"
+                                                    ],
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "required": [
+                                                "action",
+                                                "params"
+                                            ],
+                                            "additionalProperties": false
+                                        },
+                                        {
+                                            "type": "object",
+                                            "properties": {
+                                                "action": {
+                                                    "type": "string",
+                                                    "const": "openLink"
+                                                },
+                                                "params": {
+                                                    "type": "object",
+                                                    "properties": {
+                                                        "url": {
+                                                            "type": "string",
+                                                            "pattern": "^https:\\/\\/.*"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "url"
+                                                    ],
+                                                    "additionalProperties": false
+                                                }
+                                            },
+                                            "required": [
+                                                "action",
+                                                "params"
+                                            ],
+                                            "additionalProperties": false
+                                        }
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "label",
+                                "action"
+                            ],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": [
+                    "items"
+                ],
+                "additionalProperties": false
+            },
+            "example": {
+                "items": [
+                    {
+                        "label": "Review my sleep",
+                        "action": {
+                            "action": "sendMessage",
+                            "params": {
+                                "text": "Review my sleep this week."
+                            }
+                        }
+                    },
+                    {
+                        "label": "Open sync",
+                        "action": {
+                            "action": "openDestination",
+                            "params": {
+                                "destination": "sync"
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "actions": {
+        "sendMessage": {
+            "introducedIn": 1,
+            "builtIn": false,
+            "description": "Sends the text as the person’s next message, exactly as if they had typed it.",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "pattern": "\\S"
+                    }
+                },
+                "required": [
+                    "text"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "openDestination": {
+            "introducedIn": 1,
+            "builtIn": false,
+            "description": "Opens Snap (photo logging), Log (the logbook) or Sync (health sync).",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "destination": {
+                        "type": "string",
+                        "enum": [
+                            "snap",
+                            "log",
+                            "sync"
+                        ]
+                    }
+                },
+                "required": [
+                    "destination"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "openLink": {
+            "introducedIn": 1,
+            "builtIn": false,
+            "description": "Opens an https page outside the chat.",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "pattern": "^https:\\/\\/.*"
+                    }
+                },
+                "required": [
+                    "url"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "setState": {
+            "introducedIn": 1,
+            "builtIn": true,
+            "description": "Sets a value under /ui.",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "statePath": {
+                        "type": "string",
+                        "pattern": "^\\/ui\\/.*"
+                    },
+                    "value": {}
+                },
+                "required": [
+                    "statePath",
+                    "value"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "pushState": {
+            "introducedIn": 1,
+            "builtIn": true,
+            "description": "Appends a value to an array under /ui.",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "statePath": {
+                        "type": "string",
+                        "pattern": "^\\/ui\\/.*"
+                    },
+                    "value": {},
+                    "clearStatePath": {
+                        "anyOf": [
+                            {
+                                "type": "string",
+                                "pattern": "^\\/ui\\/.*"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "statePath",
+                    "value"
+                ],
+                "additionalProperties": false
+            }
+        },
+        "removeState": {
+            "introducedIn": 1,
+            "builtIn": true,
+            "description": "Removes the item at index from an array under /ui.",
+            "params": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                    "statePath": {
+                        "type": "string",
+                        "pattern": "^\\/ui\\/.*"
+                    },
+                    "index": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 9007199254740991
+                    }
+                },
+                "required": [
+                    "statePath",
+                    "index"
+                ],
+                "additionalProperties": false
+            }
+        }
+    }
+}

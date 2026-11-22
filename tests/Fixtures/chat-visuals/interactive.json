@@ -1,0 +1,983 @@
+{
+    "catalog": {
+        "name": "acara-chat",
+        "version": 1
+    },
+    "events": [
+        {
+            "sequence": 0,
+            "type": "stream_start",
+            "data": {
+                "id": "id-1",
+                "invocation_id": "id-2",
+                "type": "stream_start",
+                "provider": "openai",
+                "model": "model",
+                "timestamp": 0,
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
+            }
+        },
+        {
+            "sequence": 1,
+            "type": "text_start",
+            "data": {
+                "id": "id-3",
+                "invocation_id": "id-2",
+                "type": "text_start",
+                "message_id": "id-4",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 1
+            }
+        },
+        {
+            "sequence": 2,
+            "type": "text_delta",
+            "data": {
+                "id": "id-5.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Here",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 2
+            }
+        },
+        {
+            "sequence": 3,
+            "type": "text_delta",
+            "data": {
+                "id": "id-6.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " are",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 3
+            }
+        },
+        {
+            "sequence": 4,
+            "type": "text_delta",
+            "data": {
+                "id": "id-7.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " two",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
+            }
+        },
+        {
+            "sequence": 5,
+            "type": "text_delta",
+            "data": {
+                "id": "id-8.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " wind-down",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
+            }
+        },
+        {
+            "sequence": 6,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " routines:",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
+            }
+        },
+        {
+            "sequence": 7,
+            "type": "text_delta",
+            "data": {
+                "id": "id-10.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " one",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
+            }
+        },
+        {
+            "sequence": 8,
+            "type": "text_delta",
+            "data": {
+                "id": "id-11.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " for",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 8
+            }
+        },
+        {
+            "sequence": 9,
+            "type": "text_delta",
+            "data": {
+                "id": "id-12.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " work",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 9
+            }
+        },
+        {
+            "sequence": 10,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " nights",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
+            }
+        },
+        {
+            "sequence": 11,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " and",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
+            }
+        },
+        {
+            "sequence": 12,
+            "type": "text_delta",
+            "data": {
+                "id": "id-15.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " one",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 12
+            }
+        },
+        {
+            "sequence": 13,
+            "type": "text_delta",
+            "data": {
+                "id": "id-16.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " for",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 13
+            }
+        },
+        {
+            "sequence": 14,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " weekends.\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 14
+            }
+        },
+        {
+            "sequence": 15,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 15
+            }
+        },
+        {
+            "sequence": 16,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-17.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [],
+                "timestamp": 0,
+                "sequence": 16
+            }
+        },
+        {
+            "sequence": 17,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-18.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "routine"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/state/ui",
+                        "value": {
+                            "night": "weeknight",
+                            "done": []
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/routine",
+                        "value": {
+                            "type": "Card",
+                            "props": {
+                                "title": "Wind-down routine",
+                                "icon": "sleep",
+                                "tint": "sleep"
+                            },
+                            "children": [
+                                "switch",
+                                "weeknight",
+                                "weekend",
+                                "prep",
+                                "log"
+                            ]
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/switch",
+                        "value": {
+                            "type": "Segmented",
+                            "props": {
+                                "options": [
+                                    {
+                                        "label": "Weeknights",
+                                        "value": "weeknight"
+                                    },
+                                    {
+                                        "label": "Weekends",
+                                        "value": "weekend"
+                                    }
+                                ],
+                                "value": {
+                                    "$bindState": "/ui/night"
+                                }
+                            },
+                            "children": []
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/weeknight",
+                        "value": {
+                            "type": "Steps",
+                            "props": {
+                                "items": [
+                                    {
+                                        "title": "Dim the lights",
+                                        "duration": "9:30 PM"
+                                    },
+                                    {
+                                        "title": "Put your phone away",
+                                        "duration": "10:00 PM"
+                                    },
+                                    {
+                                        "title": "Read a paper book",
+                                        "duration": "20 min"
+                                    }
+                                ]
+                            },
+                            "children": [],
+                            "visible": {
+                                "$state": "/ui/night",
+                                "eq": "weeknight"
+                            }
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/weekend",
+                        "value": {
+                            "type": "Steps",
+                            "props": {
+                                "items": [
+                                    {
+                                        "title": "Start winding down by 10:30 PM",
+                                        "detail": "Stay within an hour of your weekday bedtime."
+                                    },
+                                    {
+                                        "title": "Take a warm shower",
+                                        "duration": "10 min"
+                                    },
+                                    {
+                                        "title": "Stretch gently",
+                                        "duration": "10 min"
+                                    }
+                                ]
+                            },
+                            "children": [],
+                            "visible": {
+                                "$state": "/ui/night",
+                                "eq": "weekend"
+                            }
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/prep",
+                        "value": {
+                            "type": "Checklist",
+                            "props": {
+                                "items": [
+                                    {
+                                        "id": "blinds",
+                                        "label": "Close the blinds"
+                                    },
+                                    {
+                                        "id": "alarm",
+                                        "label": "Set tomorrow's alarm"
+                                    },
+                                    {
+                                        "id": "water",
+                                        "label": "Put water by the bed"
+                                    }
+                                ],
+                                "checked": {
+                                    "$bindState": "/ui/done"
+                                }
+                            },
+                            "children": []
+                        }
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/log",
+                        "value": {
+                            "type": "Button",
+                            "props": {
+                                "label": "Log last night's sleep"
+                            },
+                            "children": [],
+                            "on": {
+                                "press": {
+                                    "action": "openDestination",
+                                    "params": {
+                                        "destination": "log"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                ],
+                "timestamp": 0,
+                "sequence": 17
+            }
+        },
+        {
+            "sequence": 18,
+            "type": "visual_end",
+            "data": {
+                "id": "id-18.2",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "accepted": true,
+                "fallback_text": "Wind-down routine\nWeeknights\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\nWeekends\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed",
+                "reason": null,
+                "timestamp": 0,
+                "sequence": 18
+            }
+        },
+        {
+            "sequence": 19,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.3",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
+            }
+        },
+        {
+            "sequence": 20,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.4",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Keeping",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
+            }
+        },
+        {
+            "sequence": 21,
+            "type": "text_delta",
+            "data": {
+                "id": "id-19.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " your",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
+            }
+        },
+        {
+            "sequence": 22,
+            "type": "text_delta",
+            "data": {
+                "id": "id-20.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " bedtime",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
+            }
+        },
+        {
+            "sequence": 23,
+            "type": "text_delta",
+            "data": {
+                "id": "id-21.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " within",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 23
+            }
+        },
+        {
+            "sequence": 24,
+            "type": "text_delta",
+            "data": {
+                "id": "id-22.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " an",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 24
+            }
+        },
+        {
+            "sequence": 25,
+            "type": "text_delta",
+            "data": {
+                "id": "id-23.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " hour",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 25
+            }
+        },
+        {
+            "sequence": 26,
+            "type": "text_delta",
+            "data": {
+                "id": "id-24.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " on",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 26
+            }
+        },
+        {
+            "sequence": 27,
+            "type": "text_delta",
+            "data": {
+                "id": "id-25.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " weekends",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 27
+            }
+        },
+        {
+            "sequence": 28,
+            "type": "text_delta",
+            "data": {
+                "id": "id-26.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " helps",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 28
+            }
+        },
+        {
+            "sequence": 29,
+            "type": "text_delta",
+            "data": {
+                "id": "id-27.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " your",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 29
+            }
+        },
+        {
+            "sequence": 30,
+            "type": "text_delta",
+            "data": {
+                "id": "id-28.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " body",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 30
+            }
+        },
+        {
+            "sequence": 31,
+            "type": "text_delta",
+            "data": {
+                "id": "id-29.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " clock",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 31
+            }
+        },
+        {
+            "sequence": 32,
+            "type": "text_delta",
+            "data": {
+                "id": "id-30.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " stay",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 32
+            }
+        },
+        {
+            "sequence": 33,
+            "type": "text_delta",
+            "data": {
+                "id": "id-31.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " steady.\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 33
+            }
+        },
+        {
+            "sequence": 34,
+            "type": "text_delta",
+            "data": {
+                "id": "id-31.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 34
+            }
+        },
+        {
+            "sequence": 35,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-31.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "patches": [],
+                "timestamp": 0,
+                "sequence": 35
+            }
+        },
+        {
+            "sequence": 36,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-32.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "next"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/next",
+                        "value": {
+                            "type": "SuggestionChips",
+                            "props": {
+                                "items": [
+                                    {
+                                        "label": "Make it shorter",
+                                        "action": {
+                                            "action": "sendMessage",
+                                            "params": {
+                                                "text": "Make the weeknight routine 15 minutes long."
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "label": "Snap my dinner",
+                                        "action": {
+                                            "action": "openDestination",
+                                            "params": {
+                                                "destination": "snap"
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "label": "Sleep hygiene guide",
+                                        "action": {
+                                            "action": "openLink",
+                                            "params": {
+                                                "url": "https://www.example.com/sleep-hygiene"
+                                            }
+                                        }
+                                    }
+                                ]
+                            },
+                            "children": []
+                        }
+                    }
+                ],
+                "timestamp": 0,
+                "sequence": 36
+            }
+        },
+        {
+            "sequence": 37,
+            "type": "visual_end",
+            "data": {
+                "id": "id-32.2",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-2",
+                "accepted": true,
+                "fallback_text": "",
+                "reason": null,
+                "timestamp": 0,
+                "sequence": 37
+            }
+        },
+        {
+            "sequence": 38,
+            "type": "text_complete",
+            "data": {
+                "id": "id-32",
+                "invocation_id": "id-2",
+                "type": "text_complete",
+                "message_id": "id-4",
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 38
+            }
+        },
+        {
+            "sequence": 39,
+            "type": "stream_end",
+            "data": {
+                "id": "id-33",
+                "invocation_id": "id-2",
+                "type": "stream_end",
+                "reason": "stop",
+                "usage": {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "cache_read_input_tokens": null,
+                    "cache_write_input_tokens": null,
+                    "reasoning_tokens": null
+                },
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 39
+            }
+        }
+    ],
+    "message": {
+        "id": "assistant-message",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "text",
+                "text": "Here are two wind-down routines: one for work nights and one for weekends.\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-1",
+                    "spec": {
+                        "root": "routine",
+                        "elements": {
+                            "routine": {
+                                "type": "Card",
+                                "props": {
+                                    "title": "Wind-down routine",
+                                    "icon": "sleep",
+                                    "tint": "sleep"
+                                },
+                                "children": [
+                                    "switch",
+                                    "weeknight",
+                                    "weekend",
+                                    "prep",
+                                    "log"
+                                ]
+                            },
+                            "switch": {
+                                "type": "Segmented",
+                                "props": {
+                                    "options": [
+                                        {
+                                            "label": "Weeknights",
+                                            "value": "weeknight"
+                                        },
+                                        {
+                                            "label": "Weekends",
+                                            "value": "weekend"
+                                        }
+                                    ],
+                                    "value": {
+                                        "$bindState": "/ui/night"
+                                    }
+                                },
+                                "children": []
+                            },
+                            "weeknight": {
+                                "type": "Steps",
+                                "props": {
+                                    "items": [
+                                        {
+                                            "title": "Dim the lights",
+                                            "duration": "9:30 PM"
+                                        },
+                                        {
+                                            "title": "Put your phone away",
+                                            "duration": "10:00 PM"
+                                        },
+                                        {
+                                            "title": "Read a paper book",
+                                            "duration": "20 min"
+                                        }
+                                    ]
+                                },
+                                "children": [],
+                                "visible": {
+                                    "$state": "/ui/night",
+                                    "eq": "weeknight"
+                                }
+                            },
+                            "weekend": {
+                                "type": "Steps",
+                                "props": {
+                                    "items": [
+                                        {
+                                            "title": "Start winding down by 10:30 PM",
+                                            "detail": "Stay within an hour of your weekday bedtime."
+                                        },
+                                        {
+                                            "title": "Take a warm shower",
+                                            "duration": "10 min"
+                                        },
+                                        {
+                                            "title": "Stretch gently",
+                                            "duration": "10 min"
+                                        }
+                                    ]
+                                },
+                                "children": [],
+                                "visible": {
+                                    "$state": "/ui/night",
+                                    "eq": "weekend"
+                                }
+                            },
+                            "prep": {
+                                "type": "Checklist",
+                                "props": {
+                                    "items": [
+                                        {
+                                            "id": "blinds",
+                                            "label": "Close the blinds"
+                                        },
+                                        {
+                                            "id": "alarm",
+                                            "label": "Set tomorrow's alarm"
+                                        },
+                                        {
+                                            "id": "water",
+                                            "label": "Put water by the bed"
+                                        }
+                                    ],
+                                    "checked": {
+                                        "$bindState": "/ui/done"
+                                    }
+                                },
+                                "children": []
+                            },
+                            "log": {
+                                "type": "Button",
+                                "props": {
+                                    "label": "Log last night's sleep"
+                                },
+                                "children": [],
+                                "on": {
+                                    "press": {
+                                        "action": "openDestination",
+                                        "params": {
+                                            "destination": "log"
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "state": {
+                            "ui": {
+                                "night": "weeknight",
+                                "done": []
+                            }
+                        }
+                    },
+                    "fallback_text": "Wind-down routine\nWeeknights\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\nWeekends\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed"
+                }
+            },
+            {
+                "type": "text",
+                "text": "\nKeeping your bedtime within an hour on weekends helps your body clock stay steady.\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-2",
+                    "spec": {
+                        "root": "next",
+                        "elements": {
+                            "next": {
+                                "type": "SuggestionChips",
+                                "props": {
+                                    "items": [
+                                        {
+                                            "label": "Make it shorter",
+                                            "action": {
+                                                "action": "sendMessage",
+                                                "params": {
+                                                    "text": "Make the weeknight routine 15 minutes long."
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "label": "Snap my dinner",
+                                            "action": {
+                                                "action": "openDestination",
+                                                "params": {
+                                                    "destination": "snap"
+                                                }
+                                            }
+                                        },
+                                        {
+                                            "label": "Sleep hygiene guide",
+                                            "action": {
+                                                "action": "openLink",
+                                                "params": {
+                                                    "url": "https://www.example.com/sleep-hygiene"
+                                                }
+                                            }
+                                        }
+                                    ]
+                                },
+                                "children": []
+                            }
+                        }
+                    },
+                    "fallback_text": ""
+                }
+            }
+        ]
+    }
+}

@@ -9,8 +9,11 @@ use App\Actions\ResolveCaffeineLimit;
 use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Http\Requests\CaffeineAssessmentRequest;
 use App\Utilities\LanguageUtil;
+use App\Utilities\LocalizedDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,6 +27,7 @@ final readonly class CaffeineCalculatorController
         return Inertia::render('caffeine-calculator', [
             'locale' => $locale,
             'translations' => LanguageUtil::translations($locale),
+            'bedtimeLabels' => LocalizedDate::hours($locale),
             'seo' => [
                 'appName' => config()->string('app.name'),
                 'appUrl' => url('/'),
@@ -48,13 +52,22 @@ final readonly class CaffeineCalculatorController
             sensitivity: $request->sensitivity(),
             context: $context,
             conditions: $request->conditions(),
+            bedtimeHour: $request->bedtimeHour(),
         );
-        $guidance = resolve(CaffeineGuidanceAgent::class)->forModelUser($request->user())->assess(
-            limit: $limit,
-            context: $context,
-            locale: $locale,
-        );
-        $spec = resolve(BuildCaffeineGuidanceSpec::class)->handle($guidance);
+
+        try {
+            $guidance = resolve(CaffeineGuidanceAgent::class)->forModelUser($request->user())->assess(
+                limit: $limit,
+                context: $context,
+                locale: $locale,
+            );
+        } catch (ValidationException $validationException) {
+            Log::warning('Caffeine guidance copy failed validation.', ['errors' => $validationException->errors()]);
+
+            return response()->json(['error' => 'guidance_unavailable'], 503);
+        }
+
+        $spec = resolve(BuildCaffeineGuidanceSpec::class)->handle($guidance, $limit, $locale);
 
         return response()->json([
             'summary' => $guidance->summary,

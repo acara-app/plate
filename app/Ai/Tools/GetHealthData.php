@@ -7,6 +7,7 @@ namespace App\Ai\Tools;
 use App\Actions\GetMostRecentHealthSyncSamplesByTypeAction;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthSyncType;
 use App\Models\HealthSyncSample;
 use App\Models\User;
@@ -65,14 +66,20 @@ final readonly class GetHealthData implements Tool
         $totalMatching = (clone $query)->count();
         $samples = $query->limit($limit)->get();
 
-        $records = $samples->map(fn (HealthSyncSample $sample): array => [
-            'type' => $sample->type_identifier,
-            'value' => $sample->value,
-            'unit' => $sample->unit,
-            'measured_at' => $sample->measured_at->toIso8601String(),
-            'source' => $sample->source,
-            'metadata' => $sample->metadata,
-        ])->all();
+        $glucoseUnit = $user->glucoseUnit();
+
+        $records = $samples->map(function (HealthSyncSample $sample) use ($glucoseUnit): array {
+            $inPersonUnit = $sample->type_identifier === HealthSyncType::BloodGlucose->value && $sample->unit === GlucoseUnit::MgDl->value;
+
+            return [
+                'type' => $sample->type_identifier,
+                'value' => $inPersonUnit ? $glucoseUnit->fromMgDl($sample->value) : $sample->value,
+                'unit' => $inPersonUnit ? $glucoseUnit->value : $sample->unit,
+                'measured_at' => $sample->measured_at->toIso8601String(),
+                'source' => $sample->source,
+                'metadata' => $sample->metadata,
+            ];
+        })->all();
 
         $returnedCount = count($records);
         $response = [
