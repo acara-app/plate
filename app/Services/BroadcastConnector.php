@@ -160,6 +160,8 @@ final readonly class BroadcastConnector
      */
     private function publish(array $payload, string $conversationId, int $sequence, PrivateChannel $channel): void
     {
+        $payload = [...$payload, 'conversation_id' => $conversationId, 'sequence' => $sequence];
+
         $this->events->append($conversationId, $payload, $sequence);
         $this->broadcastEvent($payload, $channel);
     }

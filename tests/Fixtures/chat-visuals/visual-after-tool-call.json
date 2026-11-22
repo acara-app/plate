@@ -14,7 +14,9 @@
                 "provider": "openai",
                 "model": "model",
                 "timestamp": 0,
-                "metadata": null
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
             }
         },
         {
@@ -42,7 +44,9 @@
                     "reasoning_id": null,
                     "reasoning_summary": null,
                     "thought_signature": null
-                }
+                },
+                "conversation_id": "conversation",
+                "sequence": 1
             }
         },
         {
@@ -70,7 +74,9 @@
                     "result_id": null,
                     "denied": false,
                     "failed": false
-                }
+                },
+                "conversation_id": "conversation",
+                "sequence": 2
             }
         },
         {
@@ -83,7 +89,9 @@
                 "provider": "openai",
                 "model": "model",
                 "timestamp": 0,
-                "metadata": null
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 3
             }
         },
         {
@@ -94,7 +102,9 @@
                 "invocation_id": "id-2",
                 "type": "text_start",
                 "message_id": "id-7",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
             }
         },
         {
@@ -106,7 +116,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": "Here",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
             }
         },
         {
@@ -118,7 +130,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " is",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
             }
         },
         {
@@ -130,7 +144,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " a",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
             }
         },
         {
@@ -142,7 +158,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " breakfast",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 8
             }
         },
         {
@@ -154,7 +172,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " that",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 9
             }
         },
         {
@@ -166,7 +186,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " fits",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
             }
         },
         {
@@ -178,7 +200,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " your",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
             }
         },
         {
@@ -190,7 +214,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " goals.\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 12
             }
         },
         {
@@ -202,7 +228,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 13
             }
         },
         {
@@ -214,7 +242,8 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-1",
                 "patches": [],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 14
             }
         },
         {
@@ -264,7 +293,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 15
             }
         },
         {
@@ -278,7 +308,8 @@
                 "accepted": true,
                 "fallback_text": "Greek yogurt bowl\n350 kcal: carbs 38 g, protein 28 g, fat 9 g",
                 "reason": null,
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 16
             }
         },
         {
@@ -290,7 +321,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 17
             }
         },
         {
@@ -302,7 +335,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": "Add",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 18
             }
         },
         {
@@ -314,7 +349,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " berries",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
             }
         },
         {
@@ -326,7 +363,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " if",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
             }
         },
         {
@@ -338,7 +377,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " you",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
             }
         },
         {
@@ -350,7 +391,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " want",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
             }
         },
         {
@@ -362,7 +405,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " more",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 23
             }
         },
         {
@@ -374,7 +419,9 @@
                 "type": "text_delta",
                 "message_id": "id-7",
                 "delta": " fibre.",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 24
             }
         },
         {
@@ -385,7 +432,9 @@
                 "invocation_id": "id-2",
                 "type": "text_complete",
                 "message_id": "id-7",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 25
             }
         },
         {
@@ -403,7 +452,9 @@
                     "cache_write_input_tokens": null,
                     "reasoning_tokens": null
                 },
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 26
             }
         }
     ],

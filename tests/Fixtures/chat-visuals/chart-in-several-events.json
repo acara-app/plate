@@ -14,7 +14,9 @@
                 "provider": "openai",
                 "model": "model",
                 "timestamp": 0,
-                "metadata": null
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
             }
         },
         {
@@ -25,7 +27,9 @@
                 "invocation_id": "id-2",
                 "type": "text_start",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 1
             }
         },
         {
@@ -37,7 +41,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Here",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 2
             }
         },
         {
@@ -49,7 +55,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " is",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 3
             }
         },
         {
@@ -61,7 +69,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " a",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
             }
         },
         {
@@ -73,7 +83,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " six-month",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
             }
         },
         {
@@ -85,7 +97,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " plan",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
             }
         },
         {
@@ -97,7 +111,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " that",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
             }
         },
         {
@@ -109,7 +125,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " builds",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 8
             }
         },
         {
@@ -121,7 +139,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " up",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 9
             }
         },
         {
@@ -133,7 +153,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " slowly.\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
             }
         },
         {
@@ -145,7 +167,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
             }
         },
         {
@@ -157,7 +181,8 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-1",
                 "patches": [],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 12
             }
         },
         {
@@ -613,7 +638,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 13
             }
         },
         {
@@ -1066,7 +1092,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 14
             }
         },
         {
@@ -1511,7 +1538,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 15
             }
         },
         {
@@ -1704,7 +1732,8 @@
                         "value": []
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 16
             }
         },
         {
@@ -1718,7 +1747,8 @@
                 "accepted": true,
                 "fallback_text": "Daily step target\nThu Jan 1, 2026 – Mon Jun 29, 2026\nAverage: 6,226.54 steps\nHighest: 8,475 steps (Mon Jun 29, 2026)\nLowest: 0 steps (Sun Jan 4, 2026)\nNo reading: 1 of 180",
                 "reason": null,
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 17
             }
         },
         {
@@ -1730,7 +1760,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 18
             }
         },
         {
@@ -1742,7 +1774,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Take",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
             }
         },
         {
@@ -1754,7 +1788,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " the",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
             }
         },
         {
@@ -1766,7 +1802,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " rest",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
             }
         },
         {
@@ -1778,7 +1816,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " day",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
             }
         },
         {
@@ -1790,7 +1830,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " whenever",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 23
             }
         },
         {
@@ -1802,7 +1844,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " you",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 24
             }
         },
         {
@@ -1814,7 +1858,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " need",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 25
             }
         },
         {
@@ -1826,7 +1872,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " one.",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 26
             }
         },
         {
@@ -1837,7 +1885,9 @@
                 "invocation_id": "id-2",
                 "type": "text_complete",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 27
             }
         },
         {
@@ -1855,7 +1905,9 @@
                     "cache_write_input_tokens": null,
                     "reasoning_tokens": null
                 },
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 28
             }
         }
     ],

@@ -5,6 +5,8 @@ import type { ChatAction, UrlCitationPayload } from './message-reducer';
 export interface RawStreamEvent {
     type: string;
     id?: string;
+    conversation_id?: string;
+    sequence?: number;
     delta?: string;
     citation?: UrlCitationPayload;
     result?: unknown;

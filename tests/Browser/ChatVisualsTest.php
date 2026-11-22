@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\StreamEventStore;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\File;
+use Pest\Browser\Api\AwaitableWebpage;
 use Tests\TestCase;
 
 uses(TestCase::class, LazilyRefreshDatabase::class);
@@ -127,6 +128,96 @@ it('shows the plain text of a visual the web cannot draw, line by line', functio
         ->assertScript(visualBlockOrder(), ['text', 'visual', 'text', 'fallback', 'text'])
         ->assertNoJavaScriptErrors();
 });
+
+it("ignores live events from the person's other conversations", function (): void {
+    $user = User::factory()->create();
+    $streaming = Conversation::factory()->forUser($user)->create();
+    $open = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($open, 'two-visuals');
+
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $open->id, absolute: false))->assertCount('figure[data-test="chat-visual"]', 2);
+
+    foreach (goldenEvents('prose-visual-prose', $streaming->id) as $event) {
+        emitLiveEvent($page, $user, $event);
+    }
+
+    $page->wait(1)
+        ->assertDontSee('Try this')
+        ->assertCount('figure[data-test="chat-visual"]', 2)
+        ->assertCount('[data-test="chat-visual-placeholder"]', 0)
+        ->assertMissing('[aria-label="Stop the reply"]')
+        ->assertNoJavaScriptErrors();
+});
+
+it('fills in a visual whose patches the live stream missed', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $events = goldenEvents('prose-visual-prose', $conversation->id);
+    $store = new class($events) extends StreamEventStore
+    {
+        public int $stored = 51;
+
+        /**
+         * @param  list<stdClass>  $events
+         */
+        public function __construct(private readonly array $events) {}
+
+        public function eventsAfter(string $conversationId, int $afterSequence): array
+        {
+            return array_values(array_map(
+                fn (stdClass $event): array => ['sequence' => $event->sequence, 'type' => $event->type, 'data' => $event],
+                array_filter($this->events, fn (stdClass $event): bool => $event->sequence > $afterSequence && $event->sequence < $this->stored),
+            ));
+        }
+
+        public function isStreaming(string $conversationId): bool
+        {
+            return true;
+        }
+    };
+    $this->app->instance(StreamEventStore::class, $store);
+
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $conversation->id, absolute: false))->waitForText('cool down.');
+
+    emitLiveEvent($page, $user, $events[51]);
+    $page->assertPresent('[data-test="chat-visual-placeholder"]');
+
+    $store->stored = PHP_INT_MAX;
+    emitLiveEvent($page, $user, $events[53]);
+
+    $page->waitForText('Alternate brisk and easy walking')
+        ->assertCount('figure[data-test="chat-visual"]', 1)
+        ->assertCount('[data-test="chat-visual-fallback"]', 0)
+        ->assertNoJavaScriptErrors();
+});
+
+/**
+ * @return list<stdClass>
+ */
+function goldenEvents(string $scenario, string $conversationId): array
+{
+    return array_map(function (stdClass $event) use ($conversationId): stdClass {
+        $data = clone $event->data;
+        $data->conversation_id = $conversationId;
+
+        return $data;
+    }, json_decode(File::get(base_path("tests/Fixtures/chat-visuals/{$scenario}.json")))->events);
+}
+
+function emitLiveEvent(AwaitableWebpage $page, User $user, stdClass $event): void
+{
+    $page->script(sprintf(
+        "window.Pusher.instances[0].channel('private-chat.%d').emit(%s, %s)",
+        $user->id,
+        json_encode($event->type),
+        json_encode($event, JSON_THROW_ON_ERROR),
+    ));
+}
 
 function savedVisualReply(Conversation $conversation, string $scenario, ?Closure $change = null): void
 {
