@@ -7,6 +7,7 @@ namespace App\Ai\Tools;
 use App\Actions\RegisterDailyHealthDatasets;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthAggregationFunction;
 use App\Enums\HealthSyncType;
 use App\Models\HealthDailyAggregate;
@@ -65,27 +66,26 @@ final readonly class GetHealthSummary implements Tool
         }
 
         $aggregates = $query->get();
+        $glucoseUnit = $user->glucoseUnit();
 
-        resolve(RegisterDailyHealthDatasets::class)->handle($aggregates, $startDate, $endDate);
+        resolve(RegisterDailyHealthDatasets::class)->handle($aggregates, $startDate, $endDate, $glucoseUnit);
 
-        $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate): array {
-            $total = (float) ($aggregate->value_sum ?? 0.0);
-            $avg = (float) ($aggregate->value_avg ?? 0.0);
-            $min = (float) ($aggregate->value_min ?? 0.0);
-            $max = (float) ($aggregate->value_max ?? 0.0);
-            $count = (int) $aggregate->value_count;
+        $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate) use ($glucoseUnit): array {
+            $inPersonUnit = $aggregate->type_identifier === 'bloodGlucose' && $aggregate->unit === GlucoseUnit::MgDl->value;
+            $reading = fn (?float $value): float => $inPersonUnit ? $glucoseUnit->fromMgDl(round((float) $value, 1)) : round((float) $value, 1);
+            $primaryValue = $this->primaryValue($aggregate);
 
             return [
                 'date' => $aggregate->local_date?->toDateString() ?? $aggregate->date->toDateString(),
                 'type' => $aggregate->type_identifier,
-                'unit' => $aggregate->unit,
-                'total' => round($total, 1),
-                'avg' => round($avg, 1),
-                'min' => round($min, 1),
-                'max' => round($max, 1),
-                'count' => $count,
+                'unit' => $inPersonUnit ? $glucoseUnit->value : $aggregate->unit,
+                'total' => $reading($aggregate->value_sum),
+                'avg' => $reading($aggregate->value_avg),
+                'min' => $reading($aggregate->value_min),
+                'max' => $reading($aggregate->value_max),
+                'count' => (int) $aggregate->value_count,
                 'aggregation_function' => $aggregate->aggregation_function,
-                'primary_value' => $this->primaryValue($aggregate),
+                'primary_value' => $primaryValue === null ? null : $reading($primaryValue),
                 'canonical_unit' => $aggregate->canonical_unit,
                 'source_primary' => $aggregate->source_primary,
             ];

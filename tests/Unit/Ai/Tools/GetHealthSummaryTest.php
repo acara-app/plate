@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 use App\Ai\Tools\GetHealthSummary;
 use App\Data\VisualDataset;
+use App\Enums\GlucoseUnit;
 use App\Models\HealthDailyAggregate;
 use App\Models\User;
+use App\Models\UserProfile;
 use App\Services\TurnDataRegistry;
 use Carbon\CarbonImmutable;
 use Laravel\Ai\Tools\Request;
@@ -99,6 +101,32 @@ it('offers each metric it returns as a daily dataset only while a reply collects
                 ['day' => '2026-11-18', 'value' => null],
             ]],
         ]);
+});
+
+it("reports workouts as minutes and glucose in the person's unit, and charts no event that is not a measurement", function (): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['units_preference' => GlucoseUnit::MmolL]);
+    $this->actingAs($user);
+    $day = ['local_date' => '2026-11-18', 'date' => '2026-11-18'];
+
+    HealthDailyAggregate::factory()->for($user)->create([...$day, 'type_identifier' => 'workouts', 'value_sum' => 60, 'value_sum_canonical' => null, 'value_avg' => 30, 'value_min' => 20, 'value_max' => 40, 'value_last' => 40, 'value_count' => 2, 'unit' => 'min', 'canonical_unit' => null, 'aggregation_function' => 'count']);
+    HealthDailyAggregate::factory()->for($user)->bloodGlucose()->create([...$day, 'value_avg' => 126.0, 'value_min' => 90.0, 'value_max' => 180.0, 'value_last' => 110.0]);
+    HealthDailyAggregate::factory()->for($user)->create([...$day, 'type_identifier' => 'menstrualFlow', 'value_sum' => 2, 'value_sum_canonical' => null, 'value_avg' => 2, 'value_min' => 2, 'value_max' => 2, 'value_last' => 2, 'value_count' => 1, 'unit' => 'event', 'canonical_unit' => null, 'aggregation_function' => 'count']);
+
+    $datasets = resolve(TurnDataRegistry::class);
+    [$summaries, $collected] = $datasets->collect(function () use ($datasets): array {
+        $summary = json_decode((string) $this->tool->handle(new Request(['type' => 'all', 'days' => 1, 'date' => '2026-11-18'])), true);
+
+        return [array_column($summary['summaries'], null, 'type'), $datasets->datasets()];
+    });
+    ksort($collected);
+
+    expect(array_map(fn (VisualDataset $dataset): array => [$dataset->measure, $dataset->unit, $dataset->rows[0]['value']], $collected))->toBe([
+        'blood_glucose' => ['daily average', 'mmol/L', 7],
+        'workouts' => ['daily total', 'min', 60],
+    ])
+        ->and(array_intersect_key($summaries['bloodGlucose'], array_flip(['unit', 'avg', 'min', 'max', 'primary_value'])))
+        ->toBe(['unit' => 'mmol/L', 'avg' => 7, 'min' => 5, 'max' => 10, 'primary_value' => 7]);
 });
 
 it('returns heart rate with avg min max from aggregates', function (): void {

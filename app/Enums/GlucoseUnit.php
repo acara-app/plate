@@ -19,6 +19,11 @@ enum GlucoseUnit: string
         return round($value * 18.0182, 0);
     }
 
+    public function fromMgDl(float $value): float
+    {
+        return $this === self::MmolL ? self::mgDlToMmolL($value) : $value;
+    }
+
     public function placeholder(): string
     {
         return match ($this) {
