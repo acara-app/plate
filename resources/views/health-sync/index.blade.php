@@ -204,6 +204,12 @@
                 </div>
             </section>
 
+            <div class="mx-auto mt-24 max-w-7xl lg:px-8">
+                <x-snap-promo heading="Glucose shows what happened. Your meal shows why." location="health_sync">
+                    Your readings show the spike. A photo of the meal shows what caused it: snap your plate and our <x-snap-link location="health_sync">AI calorie estimator</x-snap-link> breaks it into calories, carbs, protein, and fat.
+                </x-snap-promo>
+            </div>
+
             {{-- Security --}}
             <section class="mx-auto mt-24 max-w-7xl lg:px-8">
                 <p class="font-mono text-[11px] uppercase tracking-[0.18em] text-[#6E665C]">Security</p>

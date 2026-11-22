@@ -425,7 +425,7 @@ class extends Component
                     <blockquote class="mt-6 border-l-4 border-[#C4623A] py-2 pl-6">
                         <p class="font-mono text-[10px] uppercase tracking-[0.18em] text-[#C4623A]">How to use</p>
                         <p class="mt-2 max-w-2xl text-sm leading-relaxed text-[#1A1814]">
-                            Check the nutrition label. Does your yogurt have more than 2.5&nbsp;g added sugar per ⅔&nbsp;cup? If yes, it exceeds the 2030 guideline for "healthy" foods.
+                            Check the nutrition label. Does your yogurt have more than 2.5&nbsp;g added sugar per ⅔&nbsp;cup? If yes, it exceeds the 2030 guideline for "healthy" foods. No label? Snap your plate with our <x-snap-link location="usda_servings_how_to">picture calorie counter</x-snap-link>.
                         </p>
                     </blockquote>
                 </div>
@@ -443,6 +443,12 @@ class extends Component
                 </p>
             </div>
         </section>
+
+        <div class="mx-auto mt-16 max-w-7xl lg:px-8">
+            <x-snap-promo heading="Check a real meal against your servings" location="usda_servings">
+                Your daily targets are set. Snap a meal and our <x-snap-link location="usda_servings">food calorie calculator by photo</x-snap-link> shows the calories, carbs, protein, and fat on the plate, so you can see how it fits.
+            </x-snap-promo>
+        </div>
 
         {{-- CTA: Personalized meal plan --}}
         <section class="mx-auto mt-16 max-w-7xl lg:px-8">

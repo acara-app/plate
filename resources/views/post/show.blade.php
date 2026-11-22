@@ -214,6 +214,12 @@
                 </div>
                 @endif
 
+                @if ($locale === 'en')
+                    <x-snap-promo class="mb-12" heading="Try it on your next meal" location="post_show">
+                        Wondering <x-snap-link location="post_show">how many calories are in a picture</x-snap-link> of your lunch? Snap it and see the calories, carbs, protein, and fat for every food on the plate.
+                    </x-snap-promo>
+                @endif
+
                 {{-- Language Switcher (bottom of article) --}}
                 @if($translations->isNotEmpty())
                 <div class="mt-12 mb-10 p-6 sm:p-8 bg-white shadow-[0_4px_20px_-8px_rgba(26,26,26,0.1)] overflow-hidden relative" style="border-radius: 2px 20px 2px 20px;">

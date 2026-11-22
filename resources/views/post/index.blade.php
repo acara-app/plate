@@ -216,6 +216,12 @@
                 </div>
             @endif
 
+            @if ($locale === 'en')
+                <x-snap-promo class="mb-14" heading="See what's really on your plate" location="post_index">
+                    Our <x-snap-link location="post_index">AI food scanner</x-snap-link> turns one meal photo into the calories, carbs, protein, and fat for every food on the plate.
+                </x-snap-promo>
+            @endif
+
             {{-- CTA Section --}}
             <div class="pb-20">
                 <div class="relative overflow-hidden bg-[#1b4332] p-10 sm:p-14 lg:p-16 shadow-[0_8px_32px_-8px_rgba(27,67,50,0.4)]"
