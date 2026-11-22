@@ -41,7 +41,7 @@ final class PhotoModel extends Data
             return [$this->provider => $this->model];
         }
 
-        throw_if($failoverProvider === $this->provider, InvalidArgumentException::class, 'The photo analysis failover must use a different provider than ['.$this->provider.'].');
+        throw_if($failoverProvider === $this->provider, InvalidArgumentException::class, "The photo analysis failover must use a different provider than [{$this->provider}].");
 
         return [$this->provider => $this->model, $failoverProvider => $this->failoverModel];
     }
