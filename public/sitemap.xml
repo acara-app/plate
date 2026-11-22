@@ -2,56 +2,56 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
     <url>
         <loc>https://plate.acara.app/</loc>
-        <lastmod>2026-11-16</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/about</loc>
-        <lastmod>2026-02-06</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.9</priority>
     </url>
 
     <url>
         <loc>https://plate.acara.app/ai-nutritionist</loc>
-        <lastmod>2026-05-30</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/ai-health-coach</loc>
-        <lastmod>2026-05-30</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/ai-personal-trainer</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/meet-altani</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/for-dietitians</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/meal-planner</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools/health-sync</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
@@ -64,74 +64,74 @@
 
     <url>
         <loc>https://plate.acara.app/post</loc>
-        <lastmod>2026-05-30</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
 
     <url>
         <loc>https://plate.acara.app/food</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/beverages</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/condiments_sauces</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/dairy_alternatives</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/fruits</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/grains_starches</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/nuts_seeds</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/proteins_legumes</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/snacks_sweets</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/vegetables</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/food/category/other</loc>
-        <lastmod>2026-01-29</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.7</priority>
     </url>
@@ -141,7 +141,7 @@
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
-        <lastmod>2026-11-14</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -151,7 +151,7 @@
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
-        <lastmod>2026-11-14</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -161,7 +161,7 @@
         <xhtml:link rel="alternate" hreflang="fr" href="https://plate.acara.app/fr/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/privacy-policy" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/privacy-policy" />
-        <lastmod>2026-11-14</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -197,67 +197,67 @@
     </url>
     <url>
         <loc>https://plate.acara.app/support</loc>
-        <lastmod>2026-04-07</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/ai-accuracy</loc>
-        <lastmod>2026-06-12</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/install-app</loc>
-        <lastmod>2026-04-07</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/diabetes-log-book</loc>
-        <lastmod>2025-12-04</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/diabetes-log-book-info</loc>
-        <lastmod>2026-04-07</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/10-day-meal-plan</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>weekly</changefreq>
         <priority>0.9</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools/spike-calculator</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools/snap-to-track</loc>
-        <lastmod>2026-11-10</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools/usda-daily-servings-calculator</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
     <url>
         <loc>https://plate.acara.app/tools/telegram-health-logging</loc>
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -266,7 +266,7 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/tools/caffeine-calculator" />
         <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/tools/caffeine-calculator" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/tools/caffeine-calculator" />
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.8</priority>
     </url>
@@ -275,7 +275,7 @@
         <xhtml:link rel="alternate" hreflang="en" href="https://plate.acara.app/tools/caffeine-calculator" />
         <xhtml:link rel="alternate" hreflang="mn" href="https://plate.acara.app/mn/tools/caffeine-calculator" />
         <xhtml:link rel="alternate" hreflang="x-default" href="https://plate.acara.app/tools/caffeine-calculator" />
-        <lastmod>2026-05-08</lastmod>
+        <lastmod>2026-11-22</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
