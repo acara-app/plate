@@ -10,7 +10,7 @@ use Illuminate\Support\Number;
 use Throwable;
 
 /**
- * @phpstan-type TVisual array{elements: array<array-key, mixed>, state: array<array-key, mixed>, locale: string, timezone: string}
+ * @phpstan-type TVisual array{elements: array<array-key, mixed>, state: array<array-key, mixed>, variants: array<string, array<string, string>>, locale: string, timezone: string}
  */
 final readonly class RenderVisualText
 {
@@ -34,6 +34,7 @@ final readonly class RenderVisualText
         $visual = [
             'elements' => $elements,
             'state' => is_array($state) ? $state : [],
+            'variants' => $this->variants($elements),
             'locale' => $locale,
             'timezone' => $timezone,
         ];
@@ -58,7 +59,7 @@ final readonly class RenderVisualText
         $props = is_array($resolved) ? $resolved : [];
         $children = fn (): array => $this->children($element, $visual, [...$ancestors, $key]);
 
-        return match ($element['type'] ?? null) {
+        return $this->named($this->variantLabel($element['visible'] ?? null, $visual), match ($element['type'] ?? null) {
             'Card' => [...$this->lines($this->joined([$this->text($props, 'title'), $this->text($props, 'subtitle')])), ...$children()],
             'Stack', 'Grid' => $children(),
             'List', 'Disclosure' => [...$this->lines($this->text($props, 'title')), ...$children()],
@@ -74,7 +75,59 @@ final readonly class RenderVisualText
             'RiskMeter' => $this->lines($this->risk($props, $visual)),
             'Checklist' => $this->checklist($props, $visual),
             default => [],
-        };
+        });
+    }
+
+    /**
+     * @param  array<array-key, mixed>  $elements
+     * @return array<string, array<string, string>>
+     */
+    private function variants(array $elements): array
+    {
+        $variants = [];
+
+        foreach ($elements as $element) {
+            $props = is_array($element) && ($element['type'] ?? null) === 'Segmented' && is_array($element['props'] ?? null) ? $element['props'] : [];
+            $binding = $props['value'] ?? null;
+            $path = is_array($binding) ? $binding['$bindState'] ?? null : null;
+            $options = $props['options'] ?? null;
+            if (! is_string($path)) {
+                continue;
+            }
+
+            if (! is_array($options)) {
+                continue;
+            }
+
+            foreach ($options as $option) {
+                if (is_array($option) && is_string($option['value'] ?? null) && is_string($option['label'] ?? null)) {
+                    $variants[$path][$option['value']] = $option['label'];
+                }
+            }
+        }
+
+        return $variants;
+    }
+
+    /**
+     * @param  TVisual  $visual
+     */
+    private function variantLabel(mixed $condition, array $visual): ?string
+    {
+        if (! is_array($condition) || array_keys($condition) !== ['$state', 'eq'] || ! is_string($condition['$state']) || ! is_string($condition['eq'])) {
+            return null;
+        }
+
+        return $visual['variants'][$condition['$state']][$condition['eq']] ?? null;
+    }
+
+    /**
+     * @param  list<string>  $lines
+     * @return list<string>
+     */
+    private function named(?string $label, array $lines): array
+    {
+        return $label === null || $lines === [] || $lines[0] === $label ? $lines : [$label, ...$lines];
     }
 
     /**

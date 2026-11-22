@@ -64,6 +64,13 @@ it('drops unknown props, blank optional text and unreachable elements', function
     );
 });
 
+it('releases a push without a clear path set to null', function (): void {
+    $spec = json_decode('{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Add"},"children":[],"on":{"press":[{"action":"pushState","params":{"statePath":"/ui/items","value":"oats","clearStatePath":null}}]}}},"state":{"ui":{"items":[]}}}', flags: JSON_THROW_ON_ERROR);
+
+    expect(json_encode(resolve(ValidateVisualSpec::class)->handle($spec, 1)->elements->a->on, JSON_UNESCAPED_SLASHES))
+        ->toBe('{"press":[{"action":"pushState","params":{"statePath":"/ui/items","value":"oats"}}]}');
+});
+
 it('rejects a visual with a stable reason', function (string $spec, string $reason): void {
     expect(fn () => resolve(ValidateVisualSpec::class)->handle(json_decode($spec, flags: JSON_THROW_ON_ERROR), 1))
         ->toThrow(function (InvalidVisualSpecException $exception) use ($reason): void {
@@ -96,6 +103,10 @@ it('rejects a visual with a stable reason', function (string $spec, string $reas
     'a state write into a prototype' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":{"action":"setState","params":{"statePath":"/ui/__proto__/polluted","value":1}}}}}}', 'invalid_action'],
     'a state path longer than 512 bytes' => [fn (): string => json_encode(['root' => 'a', 'elements' => ['a' => ['type' => 'Button', 'props' => ['label' => 'Go'], 'children' => [], 'on' => ['press' => ['action' => 'setState', 'params' => ['statePath' => '/ui/'.str_repeat('а', 300), 'value' => 1]]]]]], JSON_THROW_ON_ERROR), 'invalid_action'],
     'a link without a host' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Read"},"children":[],"on":{"press":{"action":"openLink","params":{"url":"https://"}}}}}}', 'invalid_action'],
+    'a link whose host is not a hostname' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Read"},"children":[],"on":{"press":{"action":"openLink","params":{"url":"https://bad host.example/guide"}}}}}}', 'invalid_action'],
+    'a chip link with a character the app cannot open' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Read","action":{"action":"openLink","params":{"url":"https://example.com/a|b"}}}]},"children":[]}}}', 'invalid_action'],
+    'removing from a value that is not a list' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Undo"},"children":[],"on":{"press":{"action":"removeState","params":{"statePath":"/ui/view","index":0}}}}},"state":{"ui":{"view":"week"}}}', 'invalid_action'],
+    'adding to a value that is not a list' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Add"},"children":[],"on":{"press":{"action":"pushState","params":{"statePath":"/ui/view","value":"month"}}}}},"state":{"ui":{"view":"week"}}}', 'invalid_action'],
     'a chip link with credentials' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Read","action":{"action":"openLink","params":{"url":"https://user:secret@example.com"}}}]},"children":[]}}}', 'invalid_action'],
     'a chip action read from state' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Ask","action":{"action":"sendMessage","params":{"text":{"$state":"/ui/question"}}}}]},"children":[]}},"state":{"ui":{"question":"How did I sleep?"}}}', 'unsupported_expression'],
     'chips read from state' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":{"$state":"/ui/chips"}},"children":[]}},"state":{"ui":{"chips":[{"label":"Ask","action":{"action":"sendMessage","params":{"text":"Hi"}}}]}}}', 'unsupported_expression'],

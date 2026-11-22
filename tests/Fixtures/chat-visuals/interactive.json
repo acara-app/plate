@@ -426,7 +426,7 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-1",
                 "accepted": true,
-                "fallback_text": "Wind-down routine\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed",
+                "fallback_text": "Wind-down routine\nWeeknights\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\nWeekends\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed",
                 "reason": null,
                 "timestamp": 0,
                 "sequence": 18
@@ -924,7 +924,7 @@
                             }
                         }
                     },
-                    "fallback_text": "Wind-down routine\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed"
+                    "fallback_text": "Wind-down routine\nWeeknights\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\nWeekends\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed"
                 }
             },
             {
