@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Ai\Messages\MessageRole;
 use Pest\Browser\Api\AwaitableWebpage;
+use Tests\Helpers\FakeStreamEventStore;
 use Tests\TestCase;
 
 uses(TestCase::class, LazilyRefreshDatabase::class);
@@ -37,13 +38,15 @@ it('reopens a reply with its visuals between the paragraphs Altani wrote', funct
 it('streams each visual once in its place, even when the replay repeats events', function (string $scenario, string $lastWords, int $visuals, array $order): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    replayGolden($this->app, $conversation, $user, $scenario, streamingPolls: 2);
+    $store = replayGolden($this->app, $conversation, $user, $scenario);
 
     $this->actingAs($user);
 
-    visit(route('chat.create', $conversation->id, absolute: false))
-        ->waitForText($lastWords)
-        ->wait(2.5)
+    $page = visit(route('chat.create', $conversation->id, absolute: false))->waitForText($lastWords);
+    $store->streaming = false;
+
+    $page->assertMissing('[aria-label="Stop the reply"]')
+        ->assertScript(timesShown($lastWords), 1)
         ->assertCount('figure[data-test="chat-visual"]', $visuals)
         ->assertCount('[data-test="chat-visual-placeholder"]', 0)
         ->assertScript(visualBlockOrder(), $order)
@@ -59,16 +62,18 @@ it('streams each visual once in its place, even when the replay repeats events',
 it('keeps a tick made while the reply was still streaming', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    replayGolden($this->app, $conversation, $user, 'interactive', streamingPolls: 5);
+    $store = replayGolden($this->app, $conversation, $user, 'interactive');
 
     $this->actingAs($user);
 
-    visit(route('chat.create', $conversation->id, absolute: false))
+    $page = visit(route('chat.create', $conversation->id, absolute: false))
         ->waitForText('helps your body clock stay steady.')
         ->assertPresent('[aria-label="Stop the reply"]')
-        ->click('Close the blinds')
-        ->wait(6)
-        ->assertMissing('[aria-label="Stop the reply"]')
+        ->click('Close the blinds');
+    $store->streaming = false;
+
+    $page->assertMissing('[aria-label="Stop the reply"]')
+        ->wait(1)
         ->assertScript(tickedItems(), ['Close the blinds'])
         ->assertNoJavaScriptErrors();
 });
@@ -77,17 +82,16 @@ it('gives every catalog component a web view', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
     $catalog = json_decode(File::get(resource_path('js/components/chat/visuals/generated/acara-chat.json')));
-    $parts = [];
+    $specs = [];
 
     foreach (get_object_vars($catalog->components) as $type => $component) {
         $props = clone $component->example;
         $state = new stdClass;
+        $boundProp = ['Segmented' => 'value', 'Checklist' => 'checked'][$type] ?? null;
 
-        foreach (['Segmented' => 'value', 'Checklist' => 'checked'] as $boundType => $prop) {
-            if ($type === $boundType) {
-                $state->{$prop} = $props->{$prop};
-                $props->{$prop} = (object) ['$bindState' => "/ui/{$prop}"];
-            }
+        if ($boundProp !== null) {
+            $state->{$boundProp} = $props->{$boundProp};
+            $props->{$boundProp} = (object) ['$bindState' => "/ui/{$boundProp}"];
         }
 
         $element = (object) ['type' => $type, 'props' => $props, 'children' => $component->acceptsChildren ? ['child'] : []];
@@ -96,16 +100,14 @@ it('gives every catalog component a web view', function (): void {
             $element->on = (object) ['press' => (object) ['action' => 'sendMessage', 'params' => (object) ['text' => 'Plan my lunch']]];
         }
 
-        $parts[] = ['type' => 'data-spec', 'data' => ['id' => "example-{$type}", 'fallback_text' => $type, 'spec' => json_encode([
+        $specs[] = [
             'root' => 'element',
             'elements' => ['element' => $element, 'child' => ['type' => 'Text', 'props' => ['text' => 'Inside'], 'children' => []]],
             'state' => ['ui' => $state],
-        ])]];
+        ];
     }
 
-    History::factory()->forConversation($conversation)->assistantMessage()->create([
-        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => $parts]),
-    ]);
+    savedVisuals($conversation, $specs);
 
     $this->actingAs($user);
 
@@ -137,16 +139,7 @@ it('switches views and ticks items in a visual, by pointer and by keyboard', fun
         ->click('Put water by the bed')
         ->assertScript(tickedItems(), ['Close the blinds', 'Put water by the bed']);
 
-    $page->keys('input[type="radio"][value="weeknight"]', ['Tab']);
-
-    $reached = [];
-
-    for ($tab = 0; $tab < 7; $tab++) {
-        $reached[] = $page->script('(() => { const element = document.activeElement; return ((element.labels && element.labels[0]) || element).textContent.trim(); })()');
-        $page->keys(':focus', ['Tab']);
-    }
-
-    expect($reached)->toBe(['Close the blinds', "Set tomorrow's alarm", 'Put water by the bed', "Log last night's sleep", 'Make it shorter', 'Snap my dinner', 'Sleep hygiene guide(opens in a new tab)']);
+    expect(focusOrder($page, from: 'input[type="radio"][value="weeknight"]', stops: 7))->toBe(['Close the blinds', "Set tomorrow's alarm", 'Put water by the bed', "Log last night's sleep", 'Make it shorter', 'Snap my dinner', 'Sleep hygiene guide(opens in a new tab)']);
 
     $page->assertNoJavaScriptErrors()->assertNoAccessibilityIssues();
 });
@@ -156,7 +149,7 @@ it('sends a follow-up chip once and keeps what the person ticked', function (): 
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
     savedVisualReply($conversation, 'interactive');
-    holdRepliesInFlight($this->app);
+    fakeStreamStore($this->app);
 
     $this->actingAs($user);
 
@@ -179,7 +172,7 @@ it('sends one message from a button that would send two', function (): void {
     Queue::fake();
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    holdRepliesInFlight($this->app);
+    fakeStreamStore($this->app);
     savedVisuals($conversation, [[
         'root' => 'ask',
         'elements' => ['ask' => ['type' => 'Button', 'props' => ['label' => 'Ask both'], 'children' => [], 'on' => ['press' => [
@@ -301,13 +294,13 @@ it("ignores live events from the person's other conversations", function (): voi
 
     $page = visit(route('chat.create', $open->id, absolute: false))->assertCount('figure[data-test="chat-visual"]', 2);
 
-    emitLifecycleEvent($page, $user, 'processing', ['conversationId' => $streaming->id]);
+    emitOnChat($page, $user, 'processing', ['conversationId' => $streaming->id]);
 
     foreach (goldenEvents('prose-visual-prose', $streaming->id) as $event) {
-        emitLiveEvent($page, $user, $event);
+        emitOnChat($page, $user, $event->type, $event);
     }
 
-    emitLifecycleEvent($page, $user, 'error', ['conversationId' => $streaming->id, 'message' => 'Failed to process your message after multiple attempts.']);
+    emitOnChat($page, $user, 'error', ['conversationId' => $streaming->id, 'message' => 'Failed to process your message after multiple attempts.']);
 
     $page->wait(1)
         ->assertDontSee('Try this')
@@ -323,39 +316,18 @@ it('fills in a visual whose patches the live stream missed', function (): void {
     $conversation = Conversation::factory()->forUser($user)->create();
     resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
     $events = goldenEvents('prose-visual-prose', $conversation->id);
-    $store = new class($events) extends StreamEventStore
-    {
-        public int $stored = 51;
-
-        /**
-         * @param  list<stdClass>  $events
-         */
-        public function __construct(private readonly array $events) {}
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return array_values(array_map(
-                fn (stdClass $event): array => ['sequence' => $event->sequence, 'type' => $event->type, 'data' => $event],
-                array_filter($this->events, fn (stdClass $event): bool => $event->sequence > $afterSequence && $event->sequence < $this->stored),
-            ));
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return true;
-        }
-    };
-    $this->app->instance(StreamEventStore::class, $store);
+    $store = fakeStreamStore($this->app);
+    $store->events = array_slice($events, 0, 51);
+    $store->streaming = true;
 
     $this->actingAs($user);
 
     $page = visit(route('chat.create', $conversation->id, absolute: false))->waitForText('cool down.');
-
-    emitLiveEvent($page, $user, $events[51]);
+    emitOnChat($page, $user, $events[51]->type, $events[51]);
     $page->assertPresent('[data-test="chat-visual-placeholder"]');
 
-    $store->stored = PHP_INT_MAX;
-    emitLiveEvent($page, $user, $events[53]);
+    $store->events = $events;
+    emitOnChat($page, $user, $events[53]->type, $events[53]);
 
     $page->waitForText('Alternate brisk and easy walking')
         ->assertCount('figure[data-test="chat-visual"]', 1)
@@ -364,144 +336,90 @@ it('fills in a visual whose patches the live stream missed', function (): void {
 });
 
 it('loads a reply from the stored stream when its live events carry no conversation', function (): void {
-    Queue::fake();
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    $events = array_map(function (stdClass $event): stdClass {
-        unset($event->conversation_id, $event->sequence);
-
-        return $event;
-    }, goldenEvents('prose-visual-prose', $conversation->id));
-    $store = new class(json_decode(File::get(base_path('tests/Fixtures/chat-visuals/prose-visual-prose.json')))->events) extends StreamEventStore
-    {
-        public bool $stored = false;
-
-        private bool $started = false;
-
-        private int $pollsSinceStored = 0;
-
-        /**
-         * @param  list<stdClass>  $events
-         */
-        public function __construct(private readonly array $events) {}
-
-        public function clear(string $conversationId): void
-        {
-            $this->started = true;
-        }
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return $this->stored ? array_values(array_map(
-                fn (stdClass $event): array => (array) $event,
-                array_filter($this->events, fn (stdClass $event): bool => $event->sequence > $afterSequence),
-            )) : [];
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return $this->started && (! $this->stored || ++$this->pollsSinceStored <= 1);
-        }
-    };
-    $this->app->instance(StreamEventStore::class, $store);
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $store = fakeStreamStore($this->app);
+    $store->streaming = true;
 
     $this->actingAs($user);
 
     $page = visit(route('chat.create', $conversation->id, absolute: false))->assertPresent('textarea[aria-label="Message Acara"]');
     holdLiveSocketOpen($page);
+    emitOnChat($page, $user, 'processing', ['conversationId' => $conversation->id]);
 
-    $page->fill('textarea[aria-label="Message Acara"]', 'Give me a walking workout.')
-        ->keys('textarea[aria-label="Message Acara"]', ['Enter'])
-        ->assertPresent('[aria-label="Stop the reply"]')
-        ->wait(2);
+    $store->events = goldenEvents('prose-visual-prose', $conversation->id);
+    $store->streaming = false;
 
-    emitLifecycleEvent($page, $user, 'processing', ['conversationId' => $conversation->id]);
-    $store->stored = true;
-
-    foreach (array_slice($events, 0, 6) as $event) {
-        emitLiveEvent($page, $user, $event);
+    foreach (array_slice($store->events, 0, 6) as $event) {
+        $unscoped = clone $event;
+        unset($unscoped->conversation_id, $unscoped->sequence);
+        emitOnChat($page, $user, $event->type, $unscoped);
     }
 
     $page->waitForText('stop if you feel dizzy')
         ->assertCount('figure[data-test="chat-visual"]', 1)
-        ->wait(3)
         ->assertMissing('[aria-label="Stop the reply"]')
         ->assertNoJavaScriptErrors();
 });
 
-it('finishes a reply that a backfill caught up', function (bool $liveEndArrives): void {
+it('finishes a reply when its live end repeats what a backfill applied', function (): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
     resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
     $events = goldenEvents('prose-visual-prose', $conversation->id);
-    $store = new class($events) extends StreamEventStore
-    {
-        public int $stored = 51;
-
-        public bool $complete = false;
-
-        /**
-         * @param  list<stdClass>  $events
-         */
-        public function __construct(private readonly array $events) {}
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return array_values(array_map(
-                fn (stdClass $event): array => ['sequence' => $event->sequence, 'type' => $event->type, 'data' => $event],
-                array_filter($this->events, fn (stdClass $event): bool => $event->sequence > $afterSequence && $event->sequence < $this->stored),
-            ));
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return ! $this->complete;
-        }
-    };
-    $this->app->instance(StreamEventStore::class, $store);
+    $store = fakeStreamStore($this->app);
+    $store->events = array_slice($events, 0, 51);
+    $store->streaming = true;
 
     $this->actingAs($user);
 
     $page = visit(route('chat.create', $conversation->id, absolute: false))->waitForText('cool down.');
     holdLiveSocketOpen($page);
+    emitOnChat($page, $user, $events[51]->type, $events[51]);
+    $store->events = $events;
+    emitOnChat($page, $user, $events[53]->type, $events[53]);
+    $page->waitForText('stop if you feel dizzy');
 
-    emitLiveEvent($page, $user, $events[51]);
-    $store->stored = PHP_INT_MAX;
-    emitLiveEvent($page, $user, $events[53]);
+    emitOnChat($page, $user, 'stream_end', end($events));
 
-    $page->waitForText('stop if you feel dizzy')->assertPresent('[aria-label="Stop the reply"]');
+    $page->assertMissing('[aria-label="Stop the reply"]')->assertNoJavaScriptErrors();
+});
 
-    if ($liveEndArrives) {
-        emitLiveEvent($page, $user, end($events));
-    } else {
-        $store->complete = true;
-    }
+it('finishes a reply from the stored stream when the live stream goes quiet after a backfill', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $events = goldenEvents('prose-visual-prose', $conversation->id);
+    $store = fakeStreamStore($this->app);
+    $store->events = array_slice($events, 0, 51);
+    $store->streaming = true;
 
-    $page->wait(2)
-        ->assertMissing('[aria-label="Stop the reply"]')
-        ->assertNoJavaScriptErrors();
-})->with([
-    'when its live end repeats the backfill' => true,
-    'when the live stream goes quiet' => false,
-]);
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $conversation->id, absolute: false))->waitForText('cool down.');
+    holdLiveSocketOpen($page);
+    emitOnChat($page, $user, $events[51]->type, $events[51]);
+    $store->events = $events;
+    emitOnChat($page, $user, $events[53]->type, $events[53]);
+    $page->waitForText('stop if you feel dizzy');
+
+    $store->streaming = false;
+
+    $page->assertMissing('[aria-label="Stop the reply"]')->assertNoJavaScriptErrors();
+});
 
 it('shows a saved visual as text when its button breaks the current rules', function (array $binding): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    History::factory()->forConversation($conversation)->assistantMessage()->create([
-        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => [['type' => 'data-spec', 'data' => [
-            'id' => 'visual-0',
-            'fallback_text' => 'Steps this week',
-            'spec' => json_encode([
-                'root' => 'card',
-                'elements' => [
-                    'card' => ['type' => 'Card', 'props' => ['title' => 'Steps this week'], 'children' => ['more']],
-                    'more' => visualButton('Show more', $binding),
-                ],
-                'state' => ['ui' => ['view' => 'week', 'note' => 'Show my month']],
-            ]),
-        ]]]]),
-    ]);
+    savedVisuals($conversation, [[
+        'root' => 'card',
+        'elements' => [
+            'card' => ['type' => 'Card', 'props' => ['title' => 'Steps this week'], 'children' => ['more']],
+            'more' => visualButton('Show more', $binding),
+        ],
+        'state' => ['ui' => ['view' => 'week', 'note' => 'Show my month']],
+    ]], fallbackText: 'Steps this week');
 
     $this->actingAs($user);
 
@@ -520,20 +438,7 @@ it('keeps sending chips unavailable while a queued reply resumes', function (): 
     $conversation = Conversation::factory()->forUser($user)->create();
     savedVisualReply($conversation, 'interactive');
     resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
-    $this->app->instance(StreamEventStore::class, new class extends StreamEventStore
-    {
-        public function __construct() {}
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return [];
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return false;
-        }
-    });
+    fakeStreamStore($this->app);
 
     $this->actingAs($user);
 
@@ -613,9 +518,9 @@ function goldenEvents(string $scenario, string $conversationId): array
 }
 
 /**
- * @param  array<string, mixed>  $payload
+ * @param  array<string, mixed>|stdClass  $payload
  */
-function emitLifecycleEvent(AwaitableWebpage $page, User $user, string $event, array $payload): void
+function emitOnChat(AwaitableWebpage $page, User $user, string $event, array|stdClass $payload): void
 {
     $page->script(sprintf(
         "window.Pusher.instances[0].channel('private-chat.%d').emit(%s, %s)",
@@ -629,16 +534,6 @@ function holdLiveSocketOpen(AwaitableWebpage $page): void
 {
     $page->script("(() => { const pusher = window.Pusher.instances[0]; pusher.disconnect(); pusher.connection.state = 'connected'; pusher.connection.emit('state_change', { previous: 'disconnected', current: 'connected' }); })()");
     $page->wait(0.5);
-}
-
-function emitLiveEvent(AwaitableWebpage $page, User $user, stdClass $event): void
-{
-    $page->script(sprintf(
-        "window.Pusher.instances[0].channel('private-chat.%d').emit(%s, %s)",
-        $user->id,
-        json_encode($event->type),
-        json_encode($event, JSON_THROW_ON_ERROR),
-    ));
 }
 
 function savedVisualReply(Conversation $conversation, string $scenario, ?Closure $change = null): void
@@ -666,69 +561,53 @@ function visualButton(string $label, array $binding): array
     return ['type' => 'Button', 'props' => ['label' => $label], 'children' => [], 'on' => ['press' => $binding]];
 }
 
-function savedVisuals(Conversation $conversation, array $specs): void
+/**
+ * @param  list<array<string, mixed>>  $specs
+ */
+function savedVisuals(Conversation $conversation, array $specs, string $fallbackText = ''): void
 {
     History::factory()->forConversation($conversation)->assistantMessage()->create([
         'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => array_map(
-            fn (array $spec, int $index): array => ['type' => 'data-spec', 'data' => ['id' => "visual-{$index}", 'spec' => json_encode($spec), 'fallback_text' => '']],
+            fn (array $spec, int $index): array => ['type' => 'data-spec', 'data' => ['id' => "visual-{$index}", 'spec' => json_encode($spec), 'fallback_text' => $fallbackText]],
             $specs,
             array_keys($specs),
         )]),
     ]);
 }
 
-function replayGolden(Application $app, Conversation $conversation, User $user, string $scenario, int $streamingPolls): void
+function fakeStreamStore(Application $app): FakeStreamEventStore
 {
-    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
-    $events = array_map(
-        fn (stdClass $event): array => (array) $event,
-        json_decode(File::get(base_path("tests/Fixtures/chat-visuals/{$scenario}.json")))->events,
-    );
+    $store = new FakeStreamEventStore;
+    $app->instance(StreamEventStore::class, $store);
 
-    $app->instance(StreamEventStore::class, new class($events, $streamingPolls) extends StreamEventStore
-    {
-        private int $polls = 0;
-
-        /**
-         * @param  list<array<string, mixed>>  $replay
-         */
-        public function __construct(private readonly array $replay, private readonly int $streamingPolls) {}
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return $this->replay;
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return ++$this->polls <= $this->streamingPolls;
-        }
-    });
+    return $store;
 }
 
-function holdRepliesInFlight(Application $app): void
+function replayGolden(Application $app, Conversation $conversation, User $user, string $scenario): FakeStreamEventStore
 {
-    $app->instance(StreamEventStore::class, new class extends StreamEventStore
-    {
-        private bool $started = false;
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $store = fakeStreamStore($app);
+    $store->events = goldenEvents($scenario, $conversation->id);
+    $store->streaming = true;
+    $store->repeatsEvents = true;
 
-        public function __construct() {}
+    return $store;
+}
 
-        public function clear(string $conversationId): void
-        {
-            $this->started = true;
-        }
+/**
+ * @return list<string>
+ */
+function focusOrder(AwaitableWebpage $page, string $from, int $stops): array
+{
+    $page->keys($from, ['Tab']);
+    $reached = [];
 
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return [];
-        }
+    for ($stop = 0; $stop < $stops; $stop++) {
+        $reached[] = $page->script('(() => { const element = document.activeElement; return ((element.labels && element.labels[0]) || element).textContent.trim(); })()');
+        $page->keys(':focus', ['Tab']);
+    }
 
-        public function isStreaming(string $conversationId): bool
-        {
-            return $this->started;
-        }
-    });
+    return $reached;
 }
 
 /**
@@ -746,6 +625,11 @@ function userMessages(Conversation $conversation): array
 function tickedItems(): string
 {
     return "Array.from(document.querySelectorAll('[role=\"checkbox\"][aria-checked=\"true\"]')).map((box) => box.labels[0].textContent.trim())";
+}
+
+function timesShown(string $text): string
+{
+    return sprintf('document.body.innerText.split(%s).length - 1', json_encode($text));
 }
 
 function visualBlockOrder(): string
