@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Ai\Tools;
 
+use App\Actions\RegisterDailyHealthDatasets;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
-use App\Enums\HealthAggregationFunction;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthSyncType;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
@@ -63,24 +64,27 @@ final readonly class GetHealthSummary implements Tool
             $query->whereIn('type_identifier', $typeFilter);
         }
 
-        $summaries = $query->get()->map(function (HealthDailyAggregate $aggregate): array {
-            $total = (float) ($aggregate->value_sum ?? 0.0);
-            $avg = (float) ($aggregate->value_avg ?? 0.0);
-            $min = (float) ($aggregate->value_min ?? 0.0);
-            $max = (float) ($aggregate->value_max ?? 0.0);
-            $count = (int) $aggregate->value_count;
+        $aggregates = $query->get();
+        $glucoseUnit = $user->glucoseUnit();
+
+        resolve(RegisterDailyHealthDatasets::class)->handle($aggregates, $startDate, $endDate, $glucoseUnit);
+
+        $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate) use ($glucoseUnit): array {
+            $inPersonUnit = $aggregate->type_identifier === 'bloodGlucose' && $aggregate->unit === GlucoseUnit::MgDl->value;
+            $reading = fn (?float $value): float => $inPersonUnit ? $glucoseUnit->fromMgDl(round((float) $value, 1)) : round((float) $value, 1);
+            $primaryValue = $aggregate->primaryValue();
 
             return [
                 'date' => $aggregate->local_date?->toDateString() ?? $aggregate->date->toDateString(),
                 'type' => $aggregate->type_identifier,
-                'unit' => $aggregate->unit,
-                'total' => round($total, 1),
-                'avg' => round($avg, 1),
-                'min' => round($min, 1),
-                'max' => round($max, 1),
-                'count' => $count,
+                'unit' => $inPersonUnit ? $glucoseUnit->value : $aggregate->unit,
+                'total' => $reading($aggregate->value_sum),
+                'avg' => $reading($aggregate->value_avg),
+                'min' => $reading($aggregate->value_min),
+                'max' => $reading($aggregate->value_max),
+                'count' => (int) $aggregate->value_count,
                 'aggregation_function' => $aggregate->aggregation_function,
-                'primary_value' => $this->primaryValue($aggregate),
+                'primary_value' => $primaryValue === null ? null : $reading($primaryValue),
                 'canonical_unit' => $aggregate->canonical_unit,
                 'source_primary' => $aggregate->source_primary,
             ];
@@ -130,28 +134,5 @@ final readonly class GetHealthSummary implements Tool
             ->all();
 
         return $matched !== [] ? $matched : [$type];
-    }
-
-    private function primaryValue(HealthDailyAggregate $aggregate): ?float
-    {
-        $aggregationFunction = $aggregate->aggregation_function !== null
-            ? HealthAggregationFunction::tryFrom($aggregate->aggregation_function)
-            : null;
-
-        $value = match ($aggregationFunction) {
-            HealthAggregationFunction::Sum => $aggregate->value_sum,
-            HealthAggregationFunction::Avg, HealthAggregationFunction::WeightedAvg => $aggregate->value_avg,
-            HealthAggregationFunction::Min => $aggregate->value_min,
-            HealthAggregationFunction::Max => $aggregate->value_max,
-            HealthAggregationFunction::Last => $aggregate->value_last,
-            HealthAggregationFunction::Count => (float) $aggregate->value_count,
-            HealthAggregationFunction::None, null => $aggregate->primaryValue(),
-        };
-
-        if ($value === null) {
-            return null;
-        }
-
-        return round((float) $value, 1);
     }
 }

@@ -1164,6 +1164,9 @@ return [
             'preparing' => 'Préparation d’un visuel…',
             'progress' => '{{value}} sur {{goal}}',
             'better_choice' => 'Meilleur choix',
+            'goal' => 'Objectif {{value}}',
+            'target_range' => 'Plage cible {{low}}–{{high}}',
+            'point' => '{{label}} : {{value}}',
         ],
         'empty' => [
             'greeting' => 'Bonjour {{name}}, sur quoi voulez-vous avancer ?',

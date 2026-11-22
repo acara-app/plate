@@ -13,6 +13,13 @@ final readonly class ValidateVisualSpec
 {
     private const string LOCAL_STATE_PREFIX = '/ui/';
 
+    private const string DATA_PREFIX = '/data/';
+
+    /**
+     * @var list<string>
+     */
+    private const array CHARTS = ['BarChart', 'LineChart'];
+
     /**
      * @var list<string>
      */
@@ -33,7 +40,7 @@ final readonly class ValidateVisualSpec
     /**
      * @throws InvalidVisualSpecException
      */
-    public function handle(stdClass $spec, int $catalogVersion): stdClass
+    public function handle(stdClass $spec, int $catalogVersion, ?stdClass $data = null): stdClass
     {
         $limits = $this->catalog->limits();
         $root = $spec->root ?? null;
@@ -48,18 +55,24 @@ final readonly class ValidateVisualSpec
 
         throw_if(count(get_object_vars($elements)) > $limits['elements'], InvalidVisualSpecException::class, 'too_many_elements');
 
+        $data ??= new stdClass;
+        $readable = clone $state;
+        $readable->data = $data;
+
         $sanitizedElements = new stdClass;
 
         foreach ($this->reachableKeys($root, $elements, $limits['depth']) as $key) {
-            $sanitizedElements->{$key} = $this->element($elements->{$key}, $state, $catalogVersion);
+            $sanitizedElements->{$key} = $this->element($elements->{$key}, $readable, $catalogVersion);
         }
 
         $sanitized = new stdClass;
         $sanitized->root = $root;
         $sanitized->elements = $sanitizedElements;
 
-        if (property_exists($state, 'ui')) {
-            $sanitized->state = $state;
+        $boundState = $this->boundState($state, $data, $sanitizedElements);
+
+        if ($boundState instanceof stdClass) {
+            $sanitized->state = $boundState;
         }
 
         throw_if(mb_strlen((string) json_encode($sanitized)) > $limits['bytes'], InvalidVisualSpecException::class, 'too_large');
@@ -124,7 +137,7 @@ final readonly class ValidateVisualSpec
         throw_if($children !== [] && ! $component['acceptsChildren'], InvalidVisualSpecException::class, 'children_not_allowed');
 
         $props = $this->props($element->props ?? new stdClass, $component['props']);
-        $resolved = $this->resolve($props, $state);
+        $resolved = $this->resolveProps($type, $props, $state);
         $this->assertMatches($resolved, $component['props'], 'invalid_props');
         $this->assertComponentRules($type, $resolved);
 
@@ -160,9 +173,11 @@ final readonly class ValidateVisualSpec
             if (! $known instanceof stdClass) {
                 continue;
             }
+
             if (! property_exists($known, $name)) {
                 continue;
             }
+
             if ($isBlank && ! in_array($name, $required, true)) {
                 continue;
             }
@@ -171,6 +186,26 @@ final readonly class ValidateVisualSpec
         }
 
         return $sanitized;
+    }
+
+    private function resolveProps(string $type, stdClass $props, stdClass $state): stdClass
+    {
+        $resolved = new stdClass;
+
+        foreach (get_object_vars($props) as $name => $value) {
+            $pointer = $name === 'data' && in_array($type, self::CHARTS, true) ? $this->datasetPointer($value) : null;
+            $resolved->{$name} = $pointer === null ? $this->resolve($value, $state) : $this->stateValue($state, $pointer);
+        }
+
+        return $resolved;
+    }
+
+    private function datasetPointer(mixed $value): ?string
+    {
+        $fields = $value instanceof stdClass ? get_object_vars($value) : [];
+        $pointer = array_keys($fields) === ['$state'] ? $fields['$state'] : null;
+
+        return is_string($pointer) && preg_match('#^'.self::DATA_PREFIX.'[^/]+$#', $pointer) === 1 ? $pointer : null;
     }
 
     private function resolve(mixed $value, stdClass $state): mixed
@@ -201,6 +236,48 @@ final readonly class ValidateVisualSpec
         }
 
         return $resolved;
+    }
+
+    private function boundState(stdClass $state, stdClass $data, stdClass $elements): ?stdClass
+    {
+        $handles = array_unique($this->datasetHandles(array_values(get_object_vars($elements))));
+        $bound = new stdClass;
+
+        if (property_exists($state, 'ui')) {
+            $bound->ui = $state->ui;
+        }
+
+        if ($handles !== []) {
+            $bound->data = new stdClass;
+
+            foreach ($handles as $handle) {
+                $bound->data->{$handle} = $data->{$handle};
+            }
+        }
+
+        return get_object_vars($bound) === [] ? null : $bound;
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function datasetHandles(mixed $value): array
+    {
+        if (is_array($value)) {
+            return array_merge([], ...array_map($this->datasetHandles(...), array_values($value)));
+        }
+
+        if (! $value instanceof stdClass) {
+            return [];
+        }
+
+        $pointer = $value->{'$state'} ?? null;
+
+        if (is_string($pointer) && str_starts_with($pointer, self::DATA_PREFIX)) {
+            return [str_replace(['~1', '~0'], ['/', '~'], explode('/', mb_substr($pointer, mb_strlen(self::DATA_PREFIX)))[0])];
+        }
+
+        return $this->datasetHandles(array_values(get_object_vars($value)));
     }
 
     private function stateValue(stdClass $state, string $pointer): mixed

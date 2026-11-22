@@ -1149,6 +1149,9 @@ return [
             'preparing' => 'Дүрслэл бэлдэж байна…',
             'progress' => '{{value}} / {{goal}}',
             'better_choice' => 'Илүү тохиромжтой',
+            'goal' => 'Зорилт {{value}}',
+            'target_range' => 'Зорилтот хүрээ {{low}}–{{high}}',
+            'point' => '{{label}}: {{value}}',
         ],
         'empty' => [
             'greeting' => 'Сайн байна уу, {{name}}. Өнөөдөр юуны талаар ярилцах вэ?',

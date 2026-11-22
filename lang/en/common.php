@@ -1163,6 +1163,9 @@ return [
             'preparing' => 'Preparing a visual…',
             'progress' => '{{value}} of {{goal}}',
             'better_choice' => 'Better choice',
+            'goal' => 'Goal {{value}}',
+            'target_range' => 'Target range {{low}}–{{high}}',
+            'point' => '{{label}}: {{value}}',
         ],
         'empty' => [
             'greeting' => 'Hi {{name}}, what would you like to work on?',

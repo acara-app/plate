@@ -73,6 +73,37 @@ it('streams each visual once in its place, even when the replay repeats events',
     'a visual between two paragraphs' => ['prose-visual-prose', 'stop if you feel dizzy', 1, ['text', 'visual', 'text']],
     'a visual Plate rejected' => ['rejected-visual', 'more gently than white rice', 0, ['text']],
     'a visual after a tool call' => ['visual-after-tool-call', 'Add berries if you want more fibre.', 1, ['text', 'visual', 'text']],
+    'a chart of the steps a health tool fetched' => ['bound-week', 'lift your average.', 1, ['text', 'visual', 'text']],
+]);
+
+it('draws the bound rows as a chart that tells a recorded zero from a missing day', function (string $type, string $mark): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'bound-week', function (stdClass $spec) use ($type): stdClass {
+        $spec->elements->steps->type = $type;
+
+        return $spec;
+    });
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Daily steps')
+        ->assertCount("[data-test=\"{$mark}\"]", 7)
+        ->assertCount("[data-test=\"{$mark}\"][data-reading=\"zero\"]", 1)
+        ->assertCount("[data-test=\"{$mark}\"][data-reading=\"missing\"]", 1)
+        ->assertCount('[data-test="chat-chart-goal"]', 1)
+        ->assertSee('Goal 7,000 steps')
+        ->assertSee('Each day runs from midnight to midnight UTC.')
+        ->assertScript(
+            "Array.from(document.querySelectorAll('figure ul.sr-only li')).map((item) => item.textContent)",
+            ['Mon, Nov 16: 6,200 steps', 'Tue, Nov 17: 7,400 steps', 'Wed, Nov 18: 0 steps', 'Thu, Nov 19: No reading', 'Fri, Nov 20: 5,100 steps', 'Sat, Nov 21: 9,800 steps', 'Sun, Nov 22: 4,300 steps'],
+        )
+        ->assertNoJavaScriptErrors()
+        ->assertNoAccessibilityIssues();
+})->with([
+    'bars' => ['BarChart', 'chat-chart-bar'],
+    'a line' => ['LineChart', 'chat-chart-point'],
 ]);
 
 it('shows the plain text of a visual the web cannot draw, line by line', function (): void {

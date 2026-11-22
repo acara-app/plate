@@ -3,7 +3,10 @@
 declare(strict_types=1);
 
 use App\Actions\ApplyJsonPatch;
+use App\Data\VisualDataset;
+use App\Enums\GlucoseUnit;
 use App\Services\ReplyComposer;
+use App\Services\TurnDataRegistry;
 
 covers(ReplyComposer::class);
 
@@ -58,8 +61,51 @@ it('withholds a visual it cannot accept and keeps the prose', function (string $
     'an unknown component' => ["```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Chart\",\"props\":{},\"children\":[]}}\n```\n", 'unknown_component'],
     'a seventh visual' => [fn (): string => str_repeat("```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}\n```\n", 7), 'too_many_visuals'],
     'more patches than the iOS app applies' => [fn (): string => yearCharts(6), 'too_large'],
-    'a text rendering too long for one event' => [fn (): string => yearCharts(1), 'too_large'],
+    'a text rendering too long for one event' => [fn (): string => paragraphs(40), 'too_large'],
+    'data this turn did not fetch' => ["```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"BarChart\",\"props\":{\"title\":\"Steps\",\"data\":{\"\$state\":\"/data/step_count\"},\"xKey\":\"day\",\"yKey\":\"value\",\"unit\":\"steps\"},\"children\":[]}}\n```\n", 'unresolved_reference'],
+    'data Altani wrote itself' => ["```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/state/data\",\"value\":{\"step_count\":[{\"day\":\"2026-11-16\",\"value\":99999}]}}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"BarChart\",\"props\":{\"title\":\"Steps\",\"data\":{\"\$state\":\"/data/step_count\"},\"xKey\":\"day\",\"yKey\":\"value\",\"unit\":\"steps\"},\"children\":[]}}\n```\n", 'state_outside_ui'],
 ]);
+
+it('binds the rows a tool fetched this turn and lets Plate supply their keys, unit and day boundary', function (): void {
+    $events = withSteps(['2026-11-16' => 4200, '2026-11-17' => 0, '2026-11-18' => null], fn (): array => composeReply(implode("\n", [
+        'Your week:',
+        '```spec',
+        '{"op":"add","path":"/root","value":"steps"}',
+        '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"date","yKey":"steps","unit":"km","dayBoundary":"Local days"},"children":[]}}',
+        '```',
+    ])));
+    $spec = reassemble(array_merge(...array_column(array_filter($events, fn (array $event): bool => $event['type'] === 'visual_patch'), 'patches')));
+
+    expect(json_encode($spec->state, JSON_UNESCAPED_SLASHES))->toBe('{"data":{"step_count":[{"day":"2026-11-16","value":4200},{"day":"2026-11-17","value":0},{"day":"2026-11-18","value":null}]}}')
+        ->and(array_values(array_intersect_key((array) $spec->elements->steps->props, array_flip(['xKey', 'yKey', 'unit', 'dayBoundary']))))->toBe(['day', 'value', 'steps', 'Each day runs from midnight to midnight UTC.'])
+        ->and(end($events))->toMatchArray([
+            'type' => 'visual_end',
+            'accepted' => true,
+            'fallback_text' => "Daily steps\n- Mon Nov 16, 2026: 4,200 steps\n- Tue Nov 17, 2026: 0 steps\n- Wed Nov 18, 2026: no reading\nEach day runs from midnight to midnight UTC.",
+        ]);
+});
+
+it('releases a year of bound rows in events that fit and sums them up in Mongolian', function (): void {
+    $days = array_map(fn (int $day): string => now()->setDate(2025, 11, 22)->addDays($day)->toDateString(), range(0, 365));
+    $steps = array_combine($days, array_map(fn (int $day): ?int => $day % 10 === 3 ? null : 3000 + $day * 10, range(0, 365)));
+    $events = withSteps($steps, fn (): array => composeReply(implode("\n", [
+        '```spec',
+        '{"op":"add","path":"/root","value":"steps"}',
+        '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Алхам","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"steps"},"children":[]}}',
+        '```',
+    ]), options: ['locale' => 'mn']));
+    $releases = array_values(array_filter($events, fn (array $event): bool => $event['type'] === 'visual_patch' && $event['patches'] !== []));
+
+    expect(count($releases))->toBeGreaterThan(1)
+        ->and(array_map(fn (array $event): int => mb_strlen((string) json_encode((string) json_encode($event))), $events))->each->toBeLessThanOrEqual(ReplyComposer::EVENT_BUDGET_BYTES)
+        ->and(json_decode((string) json_encode(reassemble(array_merge(...array_column($releases, 'patches')))->state->data->step_count), true))
+        ->toBe(array_map(fn (string $day, ?int $value): array => ['day' => $day, 'value' => $value], $days, array_values($steps)))
+        ->and(end($events))->toMatchArray([
+            'type' => 'visual_end',
+            'accepted' => true,
+            'fallback_text' => "Алхам\nБя 2025 11 сар 22 – Ня 2026 11 сар 22\nДундаж: 4,824.44 алхам\nХамгийн их: 6,650 алхам (Ня 2026 11 сар 22)\nХамгийн бага: 3,000 алхам (Бя 2025 11 сар 22)\nХэмжилт байхгүй: 37 (нийт 366)\nӨдөр бүрийг UTC цагаар шөнө дундаас шөнө дунд хүртэл тооцно.",
+        ]);
+});
 
 it('starts every text block at the beginning of a line', function (): void {
     $visual = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}\n```\n";
@@ -71,6 +117,48 @@ it('starts every text block at the beginning of a line', function (): void {
         ->and(composedText($events))->toBe('Let me check.Done.')
         ->and([$steps->contextText('Let me check.'), $steps->contextText($visual.'Done.')])->toBe(['Let me check.', ReplyComposer::contextMarker('Hi').'Done.']);
 });
+
+it("withholds a bound glucose chart whose goal or target range is not a plain number in its data's unit", function (string $unit, string $limits, string $outcome): void {
+    $datasets = resolve(TurnDataRegistry::class);
+    $events = $datasets->collect(function () use ($datasets, $unit, $limits): array {
+        $datasets->register('bloodGlucose', new VisualDataset(
+            label: 'Blood Glucose',
+            measure: 'daily average',
+            unit: $unit,
+            rows: [['day' => '2026-11-17', 'value' => $unit === 'mg/dL' ? 126 : 7], ['day' => '2026-11-18', 'value' => $unit === 'mg/dL' ? 108 : 6]],
+            valueRange: GlucoseUnit::from($unit)->validationRange(),
+        ));
+
+        return composeReply(implode("\n", [
+            '```spec',
+            '{"op":"add","path":"/root","value":"glucose"}',
+            '{"op":"add","path":"/state/ui","value":{"goal":180,"target":{"low":70,"high":180}}}',
+            '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L",'.$limits.'},"children":[]}}',
+            '```',
+        ]));
+    });
+
+    expect(end($events)['accepted'] ? end($events)['fallback_text'] : end($events)['reason'])->toBe($outcome);
+})->with([
+    'a range typed in mmol/L over mg/dL readings' => ['mg/dL', '"range":{"low":3.9,"high":10}', 'invalid_range'],
+    'a goal read from local state' => ['mmol/L', '"goal":{"$state":"/ui/goal"}', 'invalid_range'],
+    'a range read from local state' => ['mmol/L', '"range":{"$state":"/ui/target"}', 'invalid_range'],
+    "a range in the readings' own unit" => ['mmol/L', '"range":{"low":3.9,"high":10}', "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC."],
+]);
+
+it('binds a dataset only as the whole data of a chart', function (string $element): void {
+    $events = withSteps(['2026-11-16' => 4200, '2026-11-17' => 5100], fn (): array => composeReply(implode("\n", [
+        '```spec',
+        '{"op":"add","path":"/root","value":"a"}',
+        '{"op":"add","path":"/elements/a","value":'.$element.'}',
+        '```',
+    ])));
+
+    expect(end($events))->toMatchArray(['type' => 'visual_end', 'accepted' => false, 'reason' => 'unresolved_reference']);
+})->with([
+    'one day read into a Metric' => '{"type":"Metric","props":{"label":"Steps on Monday","value":{"$state":"/data/step_count/0/value"},"unit":"steps"},"children":[]}',
+    'one row bound as a chart' => '{"type":"BarChart","props":{"title":"Steps","data":{"$state":"/data/step_count/0"},"xKey":"day","yKey":"value","unit":"steps"},"children":[]}',
+]);
 
 it('closes a visual Altani forgot to fence off and drops one cut off by a stop', function (): void {
     $visual = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}";
@@ -116,11 +204,12 @@ function replyComposerOptions(): array
 }
 
 /**
+ * @param  array<string, mixed>  $options
  * @return list<array<string, mixed>>
  */
-function composeReply(string $reply, int $sliceLength = 7): array
+function composeReply(string $reply, int $sliceLength = 7, array $options = []): array
 {
-    $composer = resolve(ReplyComposer::class, replyComposerOptions());
+    $composer = resolve(ReplyComposer::class, [...replyComposerOptions(), ...$options]);
     $events = [];
 
     foreach (mb_str_split($reply, $sliceLength) as $slice) {
@@ -167,6 +256,44 @@ function reassemble(array $patches): stdClass
         fn (mixed $document, array $patch): mixed => (new ApplyJsonPatch)->handle($document, json_decode((string) json_encode($patch))),
         new stdClass,
     );
+}
+
+/**
+ * @template TResult
+ *
+ * @param  array<string, int|null>  $steps
+ * @param  Closure(): TResult  $compose
+ * @return TResult
+ */
+function withSteps(array $steps, Closure $compose): mixed
+{
+    $datasets = resolve(TurnDataRegistry::class);
+
+    return $datasets->collect(function () use ($datasets, $steps, $compose): mixed {
+        $datasets->register('stepCount', new VisualDataset(
+            label: 'Steps',
+            measure: 'daily total',
+            unit: 'steps',
+            rows: array_map(fn (string $day, ?int $value): array => ['day' => $day, 'value' => $value], array_keys($steps), $steps),
+        ));
+
+        return $compose();
+    });
+}
+
+function paragraphs(int $count): string
+{
+    $keys = array_map(fn (int $index): string => "text-{$index}", range(1, $count));
+    $lines = [
+        '{"op":"add","path":"/root","value":"texts"}',
+        json_encode(['op' => 'add', 'path' => '/elements/texts', 'value' => ['type' => 'Stack', 'props' => (object) [], 'children' => $keys]]),
+    ];
+
+    foreach ($keys as $key) {
+        $lines[] = json_encode(['op' => 'add', 'path' => "/elements/{$key}", 'value' => ['type' => 'Text', 'props' => ['text' => str_repeat('Walk a little more each day. ', 8)], 'children' => []]]);
+    }
+
+    return "```spec\n".implode("\n", $lines)."\n```\n";
 }
 
 function yearCharts(int $count): string

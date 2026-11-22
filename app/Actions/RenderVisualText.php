@@ -16,6 +16,8 @@ final readonly class RenderVisualText
 {
     private const int MAX_DEPTH = 12;
 
+    private const int LISTED_POINTS = 31;
+
     /**
      * @param  array<array-key, mixed>  $spec
      */
@@ -277,13 +279,15 @@ final readonly class RenderVisualText
         $xKey = $this->text($props, 'xKey');
         $yKey = $this->text($props, 'yKey');
         $unit = $this->text($props, 'unit');
-        $lines = $this->lines($this->text($props, 'title'));
-
-        foreach ($this->rows($props, 'data') as $row) {
-            $label = $xKey === null ? null : $this->axis($row[$xKey] ?? null, $visual);
-            $reading = $yKey === null ? null : $this->quantity($row[$yKey] ?? null, $unit, $visual);
-            $lines[] = "- {$this->labelled($label, $reading ?? $this->trans('missing_reading', $visual), $visual)}";
-        }
+        $rows = $this->rows($props, 'data');
+        $points = array_map(fn (array $row): array => [
+            'label' => $xKey === null ? null : $this->axis($row[$xKey] ?? null, $visual),
+            'value' => $yKey === null ? null : $row[$yKey] ?? null,
+        ], $rows);
+        $lines = [
+            ...$this->lines($this->text($props, 'title')),
+            ...(count($points) > self::LISTED_POINTS ? $this->seriesSummary($points, $unit, $visual) : $this->seriesPoints($points, $unit, $visual)),
+        ];
 
         $goal = $props['goal'] ?? null;
 
@@ -303,6 +307,59 @@ final readonly class RenderVisualText
         }
 
         return [...$lines, ...$this->lines($this->text($props, 'dayBoundary'))];
+    }
+
+    /**
+     * @param  list<array{label: string|null, value: mixed}>  $points
+     * @param  TVisual  $visual
+     * @return list<string>
+     */
+    private function seriesPoints(array $points, ?string $unit, array $visual): array
+    {
+        return array_map(
+            fn (array $point): string => "- {$this->labelled($point['label'], $this->quantity($point['value'], $unit, $visual) ?? $this->trans('missing_reading', $visual), $visual)}",
+            $points,
+        );
+    }
+
+    /**
+     * @param  list<array{label: string|null, value: mixed}>  $points
+     * @param  TVisual  $visual
+     * @return list<string>
+     */
+    private function seriesSummary(array $points, ?string $unit, array $visual): array
+    {
+        $readings = array_values(array_filter($points, fn (array $point): bool => is_int($point['value']) || is_float($point['value'])));
+        $missing = count($points) - count($readings);
+        $from = $points[0]['label'];
+        $to = $points[count($points) - 1]['label'];
+        $lines = $from === null || $to === null ? [] : [$this->trans('span', $visual, ['from' => $from, 'to' => $to])];
+
+        if ($readings !== []) {
+            $values = array_column($readings, 'value');
+            $highest = $readings[array_search(max($values), $values, true)];
+            $lowest = $readings[array_search(min($values), $values, true)];
+            $lines[] = (string) $this->labelled($this->trans('average', $visual), $this->quantity(array_sum($values) / count($values), $unit, $visual), $visual);
+            $lines[] = (string) $this->labelled($this->trans('highest', $visual), $this->reading($highest, $unit, $visual), $visual);
+            $lines[] = (string) $this->labelled($this->trans('lowest', $visual), $this->reading($lowest, $unit, $visual), $visual);
+        }
+
+        if ($missing > 0) {
+            $lines[] = $this->trans('missing_count', $visual, ['count' => (string) $missing, 'total' => (string) count($points)]);
+        }
+
+        return $lines;
+    }
+
+    /**
+     * @param  array{label: string|null, value: mixed}  $point
+     * @param  TVisual  $visual
+     */
+    private function reading(array $point, ?string $unit, array $visual): ?string
+    {
+        $quantity = $this->quantity($point['value'], $unit, $visual);
+
+        return $quantity === null || $point['label'] === null ? $quantity : "{$quantity} ({$point['label']})";
     }
 
     /**

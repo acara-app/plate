@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Actions\ApplyJsonPatch;
 use App\Actions\RenderVisualText;
 use App\Actions\ValidateVisualSpec;
+use App\Data\VisualDataset;
 use App\Exceptions\InvalidVisualSpecException;
 use InvalidArgumentException;
 use JsonException;
@@ -24,6 +25,8 @@ final class ReplyComposer
     private const string FENCE_OPEN = '```spec';
 
     private const string FENCE_CLOSE = '```';
+
+    private const array CHARTS = ['BarChart', 'LineChart'];
 
     private string $line = '';
 
@@ -45,6 +48,7 @@ final class ReplyComposer
         private readonly RenderVisualText $renderer,
         private readonly ApplyJsonPatch $patcher,
         private readonly VisualCatalog $catalog,
+        private readonly TurnDataRegistry $datasets,
         private readonly int $catalogVersion,
         private readonly string $locale,
         private readonly string $timezone,
@@ -229,7 +233,7 @@ final class ReplyComposer
         }
 
         try {
-            $spec = $this->validator->handle($this->document($lines), $this->catalogVersion);
+            $spec = $this->validator->handle($this->withDatasetFacts($this->document($lines)), $this->catalogVersion, $this->datasetRows());
             $patches = $this->releasePatches($visualId, $spec);
             $end = [
                 'type' => 'visual_end',
@@ -279,6 +283,62 @@ final class ReplyComposer
         return $document;
     }
 
+    private function datasetRows(): stdClass
+    {
+        $rows = new stdClass;
+
+        foreach ($this->datasets->datasets() as $handle => $dataset) {
+            $rows->{$handle} = json_decode((string) json_encode($dataset->rows));
+        }
+
+        return $rows;
+    }
+
+    private function withDatasetFacts(stdClass $document): stdClass
+    {
+        $elements = $document->elements ?? null;
+
+        foreach ($elements instanceof stdClass ? get_object_vars($elements) : [] as $element) {
+            $props = $element instanceof stdClass && in_array($element->type ?? null, self::CHARTS, true) ? $element->props ?? null : null;
+            $dataset = $props instanceof stdClass ? $this->boundDataset($props->data ?? null) : null;
+
+            if ($props instanceof stdClass && $dataset instanceof VisualDataset) {
+                $dayBoundary = __("visuals.day_boundary.{$dataset->dayBoundary}", locale: $this->locale);
+                $props->xKey = 'day';
+                $props->yKey = 'value';
+                $props->unit = $dataset->unit;
+                $props->dayBoundary = is_string($dayBoundary) ? $dayBoundary : null;
+                $this->assertPlainLimits($props, $dataset);
+            }
+        }
+
+        return $document;
+    }
+
+    private function assertPlainLimits(stdClass $props, VisualDataset $dataset): void
+    {
+        $range = $props->range ?? null;
+
+        throw_if($range instanceof stdClass && array_diff(array_keys(get_object_vars($range)), ['low', 'high']) !== [], InvalidVisualSpecException::class, 'invalid_range');
+
+        $limits = array_filter(
+            [$props->goal ?? null, ...($range instanceof stdClass ? [$range->low ?? null, $range->high ?? null] : [])],
+            fn (mixed $limit): bool => $limit !== null,
+        );
+
+        foreach ($limits as $limit) {
+            throw_unless(is_int($limit) || is_float($limit), InvalidVisualSpecException::class, 'invalid_range');
+            throw_if($dataset->valueRange !== null && ($limit < $dataset->valueRange['min'] || $limit > $dataset->valueRange['max']), InvalidVisualSpecException::class, 'invalid_range');
+        }
+    }
+
+    private function boundDataset(mixed $binding): ?VisualDataset
+    {
+        $pointer = $binding instanceof stdClass && count(get_object_vars($binding)) === 1 ? $binding->{'$state'} ?? null : null;
+
+        return is_string($pointer) && str_starts_with($pointer, '/data/') ? $this->datasets->datasets()[mb_substr($pointer, 6)] ?? null : null;
+    }
+
     /**
      * @return list<array{type: 'visual_patch', visual_id: string, patches: list<TPatch>}>
      */
@@ -293,6 +353,10 @@ final class ReplyComposer
 
         if ($state instanceof stdClass && property_exists($state, 'ui')) {
             array_push($patches, ...$this->split($visualId, '/state/ui', $state->ui));
+        }
+
+        if ($state instanceof stdClass && property_exists($state, 'data')) {
+            array_push($patches, ...$this->split($visualId, '/state/data', $state->data));
         }
 
         $elements = $spec->elements ?? new stdClass;

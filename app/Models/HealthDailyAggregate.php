@@ -49,6 +49,10 @@ final class HealthDailyAggregate extends Model
 
     public const string UTC_DAY_COLUMN = 'local_date';
 
+    public const string OCCURRENCE_UNIT = 'event';
+
+    private const string DURATION_UNIT = 'min';
+
     protected $guarded = [];
 
     /**
@@ -94,9 +98,15 @@ final class HealthDailyAggregate extends Model
 
     public function primaryValue(): ?float
     {
+        $descriptor = $this->descriptor();
+
+        if ($descriptor->isEvent() && ($this->unit ?? $descriptor->displayUnit) === self::DURATION_UNIT) {
+            return $this->value_sum;
+        }
+
         $fn = $this->aggregation_function !== null
             ? HealthAggregationFunction::tryFrom($this->aggregation_function)
-            : $this->descriptor()->function;
+            : $descriptor->function;
 
         return match ($fn) {
             HealthAggregationFunction::Sum => $this->value_sum,

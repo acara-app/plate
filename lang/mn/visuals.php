@@ -10,6 +10,14 @@ return [
     'progress' => ':value / :goal (:percent%)',
     'better_choice' => 'Илүү тохиромжтой: :option',
     'done' => ':item (хийсэн)',
+    'span' => ':from – :to',
+    'average' => 'Дундаж',
+    'highest' => 'Хамгийн их',
+    'lowest' => 'Хамгийн бага',
+    'missing_count' => 'Хэмжилт байхгүй: :count (нийт :total)',
+    'day_boundary' => [
+        'utc' => 'Өдөр бүрийг UTC цагаар шөнө дундаас шөнө дунд хүртэл тооцно.',
+    ],
     'nutrient' => ':nutrient :value',
     'nutrients' => [
         'carbs' => 'нүүрс ус',

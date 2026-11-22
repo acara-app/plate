@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 use App\Actions\CreatePendingChatStreamTurn;
 use App\Ai\Agents\AgentRunner;
+use App\Ai\Agents\HealthSpecialist;
 use App\Enums\SettingKey;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Jobs\ProcessChatStream;
 use App\Models\Conversation;
+use App\Models\HealthDailyAggregate;
 use App\Models\History;
 use App\Models\Setting;
 use App\Models\User;
@@ -31,10 +33,15 @@ beforeEach(function (): void {
     Event::fake([AnonymousEvent::class]);
 });
 
-it('streams, replays and saves a reply with its visuals in the order Altani wrote them', function (string $scenario, string $prompt, array $responses, array $outcomes): void {
+it('streams, replays and saves a reply with its visuals in the order Altani wrote them', function (string $scenario, string $prompt, array $responses, array $outcomes, array $steps = [], array $specialist = []): void {
     $user = User::factory()->create(['locale' => 'en', 'timezone' => 'UTC']);
     $conversation = Conversation::factory()->forUser($user)->create();
     AgentRunner::fake($responses)->preventStrayPrompts();
+    HealthSpecialist::fake($specialist)->preventStrayPrompts();
+
+    foreach ($steps as $day => $count) {
+        HealthDailyAggregate::factory()->for($user)->stepCount()->create(['local_date' => $day, 'date' => $day, 'value_sum' => $count]);
+    }
 
     $this->actingAs($user)->postJson(route('chat.stream', $conversation->id), [
         'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => $prompt]]]],
@@ -172,6 +179,29 @@ it('streams, replays and saves a reply with its visuals in the order Altani wrot
         ])],
         ['accepted'],
     ],
+    'a chart bound to the steps a health tool fetched' => [
+        'bound-week',
+        'How did my steps go this week?',
+        [
+            new ToolCall('call_health', 'health_specialist', ['task' => 'Daily step totals for the 7 days ending 2026-11-22.']),
+            implode("\n", [
+                'Your steps swung a lot this week, from **0 on Wednesday** to **9,800 on Saturday**, and Thursday has no reading.',
+                '',
+                '```spec',
+                '{"op":"add","path":"/root","value":"steps"}',
+                '{"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"steps","goal":7000},"children":[]}}',
+                '```',
+                '',
+                'A short walk after dinner on the quiet days would lift your average.',
+            ]),
+        ],
+        ['accepted'],
+        ['2026-11-16' => 6200, '2026-11-17' => 7400, '2026-11-18' => 0, '2026-11-20' => 5100, '2026-11-21' => 9800, '2026-11-22' => 4300],
+        [
+            new ToolCall('call_summary', 'get_health_summary', ['type' => 'steps', 'days' => 7, 'date' => '2026-11-22']),
+            'Steps from 2026-11-16 to 2026-11-22 ranged from 0 on 2026-11-18 to 9,800 on 2026-11-21. There is no reading for 2026-11-19.',
+        ],
+    ],
     'a visual after a tool call' => [
         'visual-after-tool-call',
         'Suggest a breakfast that fits my goals.',
@@ -237,6 +267,37 @@ it('shows a later turn the earlier visual as its text rendering', function (): v
         ->first(fn (object $message): bool => $message instanceof AssistantMessage);
 
     expect($turn->content)->toBe('Here you go.'."\n".ReplyComposer::contextMarker('Walk after lunch.').'Enjoy it.');
+});
+
+it('lets Altani bind only data fetched in the same reply, for a client that draws visuals', function (): void {
+    $user = User::factory()->create(['locale' => 'en']);
+    $conversation = Conversation::factory()->forUser($user)->create();
+    HealthDailyAggregate::factory()->for($user)->stepCount()->create(['local_date' => '2026-11-22', 'date' => '2026-11-22', 'value_sum' => 4300]);
+    $chart = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"steps\"}\n{\"op\":\"add\",\"path\":\"/elements/steps\",\"value\":{\"type\":\"BarChart\",\"props\":{\"title\":\"Steps\",\"data\":{\"\$state\":\"/data/step_count\"},\"xKey\":\"day\",\"yKey\":\"value\",\"unit\":\"steps\"},\"children\":[]}}\n```\n";
+    $summary = new ToolCall('call_summary', 'get_health_summary', ['type' => 'steps', 'days' => 1, 'date' => '2026-11-22']);
+    AgentRunner::fake([
+        new ToolCall('call_health_1', 'health_specialist', ['task' => 'Steps on 2026-11-22.']),
+        "Here it is.\n{$chart}",
+        "Here it is again.\n{$chart}",
+        new ToolCall('call_health_2', 'health_specialist', ['task' => 'Steps on 2026-11-22.']),
+        'You walked 4,300 steps.',
+    ])->preventStrayPrompts();
+    HealthSpecialist::fake([$summary, 'You walked 4,300 steps.', $summary, 'You walked 4,300 steps.'])->preventStrayPrompts();
+
+    foreach ([['acara-chat', 'Chart my steps.'], ['acara-chat', 'Show that again.'], [null, 'How many steps?']] as [$catalog, $text]) {
+        $this->actingAs($user)->postJson(route('chat.stream', $conversation->id), array_filter([
+            'messages' => [['role' => 'user', 'parts' => [['type' => 'text', 'text' => $text]]]],
+            'catalog' => $catalog === null ? null : ['name' => $catalog, 'version' => 1],
+        ]))->assertAccepted();
+    }
+
+    [$fetched, $repeated, $proseOnly] = History::query()->where('conversation_id', $conversation->id)->where('role', MessageRole::Assistant->value)->oldest('id')->get()->all();
+
+    expect($fetched->chatStreamMeta()['visuals'])->toBe([['id' => "{$fetched->id}-1", 'accepted' => true, 'reason' => null, 'bound' => 1, 'literal' => 0]])
+        ->and($repeated->chatStreamMeta()['visuals'])->toBe([['id' => "{$repeated->id}-1", 'accepted' => false, 'reason' => 'unresolved_reference', 'bound' => 0, 'literal' => 0]])
+        ->and(json_encode($fetched->steps))->toContain('Datasets for visuals:\\n- step_count: Steps, daily total in steps, 2026-11-22 to 2026-11-22, 1 day, 0 without a reading')
+        ->and(json_encode($fetched->steps, JSON_UNESCAPED_UNICODE))->toContain('[visual]\\nSteps\\n- Sun Nov 22, 2026: 4,300 steps')
+        ->and(json_encode($proseOnly->steps))->toContain('You walked 4,300 steps.')->not->toContain('Datasets for visuals');
 });
 
 it('finishes a prose reply that was queued before chat visuals existed', function (): void {

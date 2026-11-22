@@ -18,6 +18,7 @@ use App\Services\ChatChannel;
 use App\Services\ReplyComposer;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
+use App\Services\TurnDataRegistry;
 use App\Utilities\LanguageUtil;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -168,19 +169,25 @@ final class ProcessChatStream implements ShouldQueue
 
             $decisions = $this->approvalDecisions();
 
-            $stream = $decisions instanceof Decisions
-                ? $agentRunner->resume($request, $user, $decisions)
-                : $agentRunner->run($request, $user);
+            $turn = function () use ($request, $decisions, $agentRunner, $connector, $complete, $user): ChatStreamDelivery {
+                $stream = $decisions instanceof Decisions
+                    ? $agentRunner->resume($request, $user, $decisions)
+                    : $agentRunner->run($request, $user);
 
-            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId, $this->composer($user));
+                $delivery = $connector->deliver($stream, $this->userId, $this->conversationId, $this->composer($user));
 
-            $this->completePendingTurn(
-                complete: $complete,
-                user: $user,
-                delivery: $delivery,
-                status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
-                contextComposer: $this->composer($user),
-            );
+                $this->completePendingTurn(
+                    complete: $complete,
+                    user: $user,
+                    delivery: $delivery,
+                    status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+                    contextComposer: $this->composer($user),
+                );
+
+                return $delivery;
+            };
+
+            $delivery = $this->catalogVersion === null ? $turn() : resolve(TurnDataRegistry::class)->collect($turn);
 
             if ($delivery->cancelled) {
                 $this->broadcastLifecycle('stream_end');

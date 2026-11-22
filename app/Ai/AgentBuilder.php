@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Ai;
 
+use App\Ai\Tools\AgentToolWithDatasets;
 use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Skills\LoadsSkills;
 use App\Enums\DataSensitivity;
@@ -14,6 +15,7 @@ use App\Services\Ai\ToolSensitivityReader;
 use App\Services\Billing\StripeBilling;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
+use App\Services\TurnDataRegistry;
 use App\Services\VisualCatalog;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
@@ -32,6 +34,7 @@ final readonly class AgentBuilder
         private LoadsSkills $skillLoader,
         private StripeBilling $stripeBilling,
         private VisualCatalog $visualCatalog,
+        private TurnDataRegistry $datasets,
     ) {}
 
     /**
@@ -94,6 +97,10 @@ final readonly class AgentBuilder
         ) {
             $providerTools = $this->toolRegistry->getProviderTools();
             $tools = [...$tools, ...$providerTools];
+        }
+
+        if ($request->catalogVersion !== null) {
+            $subAgents = array_map(fn (Agent $agent): AgentToolWithDatasets => new AgentToolWithDatasets($agent, $this->datasets), $subAgents);
         }
 
         return [...$tools, ...$subAgents];
