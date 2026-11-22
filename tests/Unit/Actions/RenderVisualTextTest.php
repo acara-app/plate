@@ -67,6 +67,21 @@ it('sums up a series longer than a month instead of listing every day', function
     'French' => ['fr', "Daily steps\njeu. 1 oct. 2026 – dim. 1 nov. 2026\nMoyenne : 4\u{202F}987,67 pas\nMaximum : 5\u{202F}310 pas (dim. 1 nov. 2026)\nMinimum : 0 pas (lun. 5 oct. 2026)\nAucune mesure : 2 sur 32"],
 ]);
 
+it('names each switched view with the option that shows it', function (): void {
+    $spec = [
+        'root' => 'routine',
+        'elements' => [
+            'routine' => ['type' => 'Card', 'props' => ['title' => 'Wind-down routine'], 'children' => ['switch', 'weeknight', 'weekend']],
+            'switch' => ['type' => 'Segmented', 'props' => ['options' => [['label' => 'Weeknights', 'value' => 'weeknight'], ['label' => 'Weekends', 'value' => 'weekend']], 'value' => ['$bindState' => '/ui/night']], 'children' => []],
+            'weeknight' => ['type' => 'Steps', 'props' => ['items' => [['title' => 'Dim the lights']]], 'children' => [], 'visible' => ['$state' => '/ui/night', 'eq' => 'weeknight']],
+            'weekend' => ['type' => 'Steps', 'props' => ['items' => [['title' => 'Take a warm shower']]], 'children' => [], 'visible' => ['eq' => 'weekend', '$state' => '/ui/night']],
+        ],
+        'state' => ['ui' => ['night' => 'weeknight']],
+    ];
+
+    expect((new RenderVisualText)->handle($spec, 'en'))->toBe("Wind-down routine\nWeeknights\n1. Dim the lights\nWeekends\n1. Take a warm shower");
+});
+
 it('renders a nested visual in order with every switchable view', function (): void {
     $spec = [
         'root' => 'review',

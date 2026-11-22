@@ -7,4 +7,5 @@ export type VisualComponent = keyof typeof acaraChatComponents;
 export interface ViewProps<K extends VisualComponent> {
     props: z.infer<(typeof acaraChatComponents)[K]['props']>;
     children?: ReactNode;
+    bindings?: Record<string, string>;
 }

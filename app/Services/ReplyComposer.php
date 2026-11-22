@@ -57,7 +57,7 @@ final class ReplyComposer
 
     public static function contextMarker(string $fallbackText): string
     {
-        return "[visual]\n{$fallbackText}\n[/visual]\n";
+        return mb_trim($fallbackText) === '' ? '' : "[visual]\n{$fallbackText}\n[/visual]\n";
     }
 
     /**

@@ -321,7 +321,7 @@ final readonly class StreamAggregator
             }
 
             $fallbackText = is_string($event['fallback_text'] ?? null) ? $event['fallback_text'] : '';
-            $text .= $fallbackText.PHP_EOL;
+            $text .= mb_trim($fallbackText) === '' ? '' : $fallbackText.PHP_EOL;
             $parts = [...$parts, ...$this->proseParts($prose)];
             $prose = '';
             $parts[] = ['type' => 'data-spec', 'data' => [

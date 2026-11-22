@@ -8,6 +8,10 @@ import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { extractApprovalPayload } from '@/components/chat/approval-part';
 import { currentDayPart, DAYLIGHT } from '@/components/chat/day-part';
 import { ChatStarters } from '@/components/chat/starters';
+import {
+    VisualSessionContext,
+    type VisualSession,
+} from '@/components/chat/visuals/visual-session';
 import { GLASS } from '@/components/glass';
 import {
     DropdownMenu,
@@ -375,6 +379,35 @@ export default function CreateChat() {
         }
     }, [sendMessage]);
 
+    const latestSubmit = useRef(handleSubmit);
+    const visualSendLock = useRef(false);
+    const isVisualBusy = isStreaming || isSubmitting || isResuming;
+
+    useEffect(() => {
+        latestSubmit.current = handleSubmit;
+    });
+
+    useEffect(() => {
+        if (!isVisualBusy) {
+            visualSendLock.current = false;
+        }
+    }, [isVisualBusy]);
+
+    const visualSession = useMemo<VisualSession>(
+        () => ({
+            busy: isVisualBusy,
+            sendMessage: (text) => {
+                if (visualSendLock.current) {
+                    return;
+                }
+
+                visualSendLock.current = true;
+                latestSubmit.current(text);
+            },
+        }),
+        [isVisualBusy],
+    );
+
     const [composerHasOwnText, setComposerHasOwnText] = useState(
         () => !shouldAutoStartInitialPrompt && normalizedInitialPrompt !== '',
     );
@@ -569,24 +602,26 @@ export default function CreateChat() {
                             )}
                         >
                             <h1 className="sr-only">{t('chat.page_title')}</h1>
-                            <ChatMessages
-                                messages={messages}
-                                status={status}
-                                retentionHours={temporaryRetentionHours}
-                                stoppedMessageIds={stoppedMessageIds}
-                                isSubmitting={showWorkingIndicator}
-                                onApprovalDecision={submitApprovalDecisions}
-                                welcomeStarters={
-                                    showStarters && (
-                                        <ChatStarters
-                                            variant="grid"
-                                            dayPart={dayPart}
-                                            onPick={handleStarterPick}
-                                            className="mt-6 hidden @min-[40rem]:grid"
-                                        />
-                                    )
-                                }
-                            />
+                            <VisualSessionContext value={visualSession}>
+                                <ChatMessages
+                                    messages={messages}
+                                    status={status}
+                                    retentionHours={temporaryRetentionHours}
+                                    stoppedMessageIds={stoppedMessageIds}
+                                    isSubmitting={showWorkingIndicator}
+                                    onApprovalDecision={submitApprovalDecisions}
+                                    welcomeStarters={
+                                        showStarters && (
+                                            <ChatStarters
+                                                variant="grid"
+                                                dayPart={dayPart}
+                                                onPick={handleStarterPick}
+                                                className="mt-6 hidden @min-[40rem]:grid"
+                                            />
+                                        )
+                                    }
+                                />
+                            </VisualSessionContext>
                             {!usageLimitTrigger && (
                                 <ChatErrorNotice
                                     error={error}

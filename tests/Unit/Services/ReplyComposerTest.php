@@ -118,6 +118,14 @@ it('starts every text block at the beginning of a line', function (): void {
         ->and([$steps->contextText('Let me check.'), $steps->contextText($visual.'Done.')])->toBe(['Let me check.', ReplyComposer::contextMarker('Hi').'Done.']);
 });
 
+it('accepts follow-up chips and keeps them out of the text later turns read', function (): void {
+    $chips = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"next\"}\n{\"op\":\"add\",\"path\":\"/elements/next\",\"value\":{\"type\":\"SuggestionChips\",\"props\":{\"items\":[{\"label\":\"Plan lunch\",\"action\":{\"action\":\"sendMessage\",\"params\":{\"text\":\"Plan a light lunch for me.\"}}}]},\"children\":[]}}\n```\n";
+    $events = composeReply("Enjoy your walk.\n{$chips}");
+
+    expect(end($events))->toMatchArray(['type' => 'visual_end', 'accepted' => true, 'fallback_text' => ''])
+        ->and(resolve(ReplyComposer::class, replyComposerOptions())->contextText("Enjoy your walk.\n{$chips}"))->toBe("Enjoy your walk.\n");
+});
+
 it("withholds a bound glucose chart whose goal or target range is not a plain number in its data's unit", function (string $unit, string $limits, string $outcome): void {
     $datasets = resolve(TurnDataRegistry::class);
     $events = $datasets->collect(function () use ($datasets, $unit, $limits): array {

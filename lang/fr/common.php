@@ -1167,6 +1167,9 @@ return [
             'goal' => 'Objectif {{value}}',
             'target_range' => 'Plage cible {{low}}–{{high}}',
             'point' => '{{label}} : {{value}}',
+            'suggestions' => 'Suites suggérées',
+            'choices' => 'Options',
+            'new_tab' => '(s’ouvre dans un nouvel onglet)',
         ],
         'empty' => [
             'greeting' => 'Bonjour {{name}}, sur quoi voulez-vous avancer ?',

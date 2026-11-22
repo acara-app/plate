@@ -3,13 +3,16 @@
 declare(strict_types=1);
 
 use App\Actions\CreatePendingChatStreamTurn;
+use App\Jobs\ProcessChatStream;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
 use App\Services\StreamEventStore;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Messages\MessageRole;
 use Pest\Browser\Api\AwaitableWebpage;
 use Tests\TestCase;
 
@@ -34,31 +37,7 @@ it('reopens a reply with its visuals between the paragraphs Altani wrote', funct
 it('streams each visual once in its place, even when the replay repeats events', function (string $scenario, string $lastWords, int $visuals, array $order): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
-    $events = array_map(
-        fn (stdClass $event): array => (array) $event,
-        json_decode(File::get(base_path("tests/Fixtures/chat-visuals/{$scenario}.json")))->events,
-    );
-
-    $this->app->instance(StreamEventStore::class, new class($events) extends StreamEventStore
-    {
-        private int $polls = 0;
-
-        /**
-         * @param  list<array<string, mixed>>  $replay
-         */
-        public function __construct(private readonly array $replay) {}
-
-        public function eventsAfter(string $conversationId, int $afterSequence): array
-        {
-            return $this->replay;
-        }
-
-        public function isStreaming(string $conversationId): bool
-        {
-            return ++$this->polls < 3;
-        }
-    });
+    replayGolden($this->app, $conversation, $user, $scenario, streamingPolls: 2);
 
     $this->actingAs($user);
 
@@ -74,7 +53,189 @@ it('streams each visual once in its place, even when the replay repeats events',
     'a visual Plate rejected' => ['rejected-visual', 'more gently than white rice', 0, ['text']],
     'a visual after a tool call' => ['visual-after-tool-call', 'Add berries if you want more fibre.', 1, ['text', 'visual', 'text']],
     'a chart of the steps a health tool fetched' => ['bound-week', 'lift your average.', 1, ['text', 'visual', 'text']],
+    'interactive visuals and follow-up chips' => ['interactive', 'helps your body clock stay steady.', 2, ['text', 'visual', 'text', 'visual']],
 ]);
+
+it('keeps a tick made while the reply was still streaming', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    replayGolden($this->app, $conversation, $user, 'interactive', streamingPolls: 5);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->waitForText('helps your body clock stay steady.')
+        ->assertPresent('[aria-label="Stop the reply"]')
+        ->click('Close the blinds')
+        ->wait(6)
+        ->assertMissing('[aria-label="Stop the reply"]')
+        ->assertScript(tickedItems(), ['Close the blinds'])
+        ->assertNoJavaScriptErrors();
+});
+
+it('gives every catalog component a web view', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $catalog = json_decode(File::get(resource_path('js/components/chat/visuals/generated/acara-chat.json')));
+    $parts = [];
+
+    foreach (get_object_vars($catalog->components) as $type => $component) {
+        $props = clone $component->example;
+        $state = new stdClass;
+
+        foreach (['Segmented' => 'value', 'Checklist' => 'checked'] as $boundType => $prop) {
+            if ($type === $boundType) {
+                $state->{$prop} = $props->{$prop};
+                $props->{$prop} = (object) ['$bindState' => "/ui/{$prop}"];
+            }
+        }
+
+        $element = (object) ['type' => $type, 'props' => $props, 'children' => $component->acceptsChildren ? ['child'] : []];
+
+        if ($type === 'Button') {
+            $element->on = (object) ['press' => (object) ['action' => 'sendMessage', 'params' => (object) ['text' => 'Plan my lunch']]];
+        }
+
+        $parts[] = ['type' => 'data-spec', 'data' => ['id' => "example-{$type}", 'fallback_text' => $type, 'spec' => json_encode([
+            'root' => 'element',
+            'elements' => ['element' => $element, 'child' => ['type' => 'Text', 'props' => ['text' => 'Inside'], 'children' => []]],
+            'state' => ['ui' => $state],
+        ])]];
+    }
+
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => $parts]),
+    ]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertCount('figure[data-test="chat-visual"]', count(get_object_vars($catalog->components)))
+        ->assertCount('[data-test="chat-visual-fallback"]', 0)
+        ->assertScript("Array.from(document.querySelectorAll('figure[data-test=\"chat-visual\"]')).every((figure) => figure.firstElementChild !== null)", true)
+        ->assertNoJavaScriptErrors();
+});
+
+it('switches views and ticks items in a visual, by pointer and by keyboard', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'interactive');
+
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Dim the lights')
+        ->assertDontSee('Take a warm shower')
+        ->click('Weekends')
+        ->assertSee('Take a warm shower')
+        ->assertDontSee('Dim the lights')
+        ->keys('input[type="radio"][value="weekend"]', ['ArrowLeft'])
+        ->assertSee('Dim the lights')
+        ->assertDontSee('Take a warm shower')
+        ->keys('input[type="radio"][value="weeknight"]', ['Tab'])
+        ->keys(':focus', ['Space'])
+        ->click('Put water by the bed')
+        ->assertScript(tickedItems(), ['Close the blinds', 'Put water by the bed']);
+
+    $page->keys('input[type="radio"][value="weeknight"]', ['Tab']);
+
+    $reached = [];
+
+    for ($tab = 0; $tab < 7; $tab++) {
+        $reached[] = $page->script('(() => { const element = document.activeElement; return ((element.labels && element.labels[0]) || element).textContent.trim(); })()');
+        $page->keys(':focus', ['Tab']);
+    }
+
+    expect($reached)->toBe(['Close the blinds', "Set tomorrow's alarm", 'Put water by the bed', "Log last night's sleep", 'Make it shorter', 'Snap my dinner', 'Sleep hygiene guide(opens in a new tab)']);
+
+    $page->assertNoJavaScriptErrors()->assertNoAccessibilityIssues();
+});
+
+it('sends a follow-up chip once and keeps what the person ticked', function (): void {
+    Queue::fake();
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'interactive');
+    holdRepliesInFlight($this->app);
+
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $conversation->id, absolute: false));
+    $page->click('Close the blinds')
+        ->script("(() => { const chip = Array.from(document.querySelectorAll('button')).find((button) => button.textContent.trim() === 'Make it shorter'); chip.click(); chip.click(); })()");
+
+    $page->assertSee('Make the weeknight routine 15 minutes long.')
+        ->assertPresent('[aria-label="Stop the reply"]')
+        ->assertAttribute('[aria-label="Suggested next steps"] li:first-child button', 'aria-disabled', 'true')
+        ->assertScript(tickedItems(), ['Close the blinds'])
+        ->wait(1)
+        ->assertNoJavaScriptErrors();
+
+    expect(userMessages($conversation))->toBe(['Make the weeknight routine 15 minutes long.']);
+    Queue::assertPushed(ProcessChatStream::class, 1);
+});
+
+it('sends one message from a button that would send two', function (): void {
+    Queue::fake();
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    holdRepliesInFlight($this->app);
+    savedVisuals($conversation, [[
+        'root' => 'ask',
+        'elements' => ['ask' => ['type' => 'Button', 'props' => ['label' => 'Ask both'], 'children' => [], 'on' => ['press' => [
+            ['action' => 'sendMessage', 'params' => ['text' => 'What should I eat tonight?']],
+            ['action' => 'sendMessage', 'params' => ['text' => 'And tomorrow?']],
+        ]]]],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->click('Ask both')
+        ->assertSee('What should I eat tonight?')
+        ->wait(1)
+        ->assertDontSee('And tomorrow?')
+        ->assertNoJavaScriptErrors();
+
+    expect(userMessages($conversation))->toBe(['What should I eat tonight?']);
+});
+
+it('opens a Plate destination in place', function (string $kind, string $destination, string $path): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $action = ['action' => 'openDestination', 'params' => ['destination' => $destination]];
+    savedVisuals($conversation, [[
+        'root' => 'go',
+        'elements' => ['go' => $kind === 'button'
+            ? ['type' => 'Button', 'props' => ['label' => 'Go there'], 'children' => [], 'on' => ['press' => $action]]
+            : ['type' => 'SuggestionChips', 'props' => ['items' => [['label' => 'Go there', 'action' => $action]]], 'children' => []]],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->click('Go there')
+        ->assertPathIs($path);
+})->with([
+    'the daily log from a button' => ['button', 'log', '/health-entries'],
+    'snap to track from a chip' => ['chip', 'snap', '/app/snap-to-track'],
+    'the health sync guide from a chip' => ['chip', 'sync', '/tools/health-sync/setup'],
+]);
+
+it('opens an outside link in a new tab without a way back to Plate', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'interactive');
+
+    $this->actingAs($user);
+
+    $page = visit(route('chat.create', $conversation->id, absolute: false));
+    $page->script('window.open = (...options) => { window.openedWith = options; return null; }');
+
+    $page->click('Sleep hygiene guide')
+        ->assertScript('window.openedWith', ['https://www.example.com/sleep-hygiene', '_blank', 'noopener,noreferrer'])
+        ->assertNoJavaScriptErrors();
+});
 
 it('draws the bound rows as a chart that tells a recorded zero from a missing day', function (string $type, string $mark): void {
     $user = User::factory()->create();
@@ -324,6 +485,120 @@ it('finishes a reply that a backfill caught up', function (bool $liveEndArrives)
     'when the live stream goes quiet' => false,
 ]);
 
+it('shows a saved visual as text when its button breaks the current rules', function (array $binding): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => [['type' => 'data-spec', 'data' => [
+            'id' => 'visual-0',
+            'fallback_text' => 'Steps this week',
+            'spec' => json_encode([
+                'root' => 'card',
+                'elements' => [
+                    'card' => ['type' => 'Card', 'props' => ['title' => 'Steps this week'], 'children' => ['more']],
+                    'more' => visualButton('Show more', $binding),
+                ],
+                'state' => ['ui' => ['view' => 'week', 'note' => 'Show my month']],
+            ]),
+        ]]]]),
+    ]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Steps this week')
+        ->assertCount('figure[data-test="chat-visual"]', 0)
+        ->assertDontSee('Show more')
+        ->assertNoJavaScriptErrors();
+})->with([
+    'a write after the action' => [['action' => 'setState', 'params' => ['statePath' => '/ui/view', 'value' => 'month'], 'onSuccess' => ['set' => ['/data/step_count' => []]]]],
+    'a message read from state' => [['action' => 'sendMessage', 'params' => ['text' => ['$state' => '/ui/note']]]],
+]);
+
+it('keeps sending chips unavailable while a queued reply resumes', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'interactive');
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $this->app->instance(StreamEventStore::class, new class extends StreamEventStore
+    {
+        public function __construct() {}
+
+        public function eventsAfter(string $conversationId, int $afterSequence): array
+        {
+            return [];
+        }
+
+        public function isStreaming(string $conversationId): bool
+        {
+            return false;
+        }
+    });
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Make it shorter')
+        ->wait(1)
+        ->assertAttribute('[aria-label="Suggested next steps"] li:first-child button', 'aria-disabled', 'true')
+        ->assertNoJavaScriptErrors();
+});
+
+it("keeps a button's writes inside the visual's own state", function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisuals($conversation, [[
+        'root' => 'card',
+        'elements' => [
+            'card' => ['type' => 'Card', 'props' => ['title' => 'Your week'], 'children' => ['everyDay', 'farAhead', 'reset', 'jump', 'replace', 'remove', 'add']],
+            'everyDay' => ['type' => 'Text', 'props' => ['text' => 'Showing every day'], 'children' => [], 'visible' => ['$state' => '/ui/filter', 'eq' => null]],
+            'farAhead' => ['type' => 'Text', 'props' => ['text' => 'Written far past the list'], 'children' => [], 'visible' => ['$state' => '/ui/items/5000', 'eq' => 'x']],
+            'reset' => visualButton('Clear the filter', ['action' => 'setState', 'params' => ['statePath' => '/ui/filter', 'value' => null]]),
+            'jump' => visualButton('Write far ahead', ['action' => 'setState', 'params' => ['statePath' => '/ui/items/5000', 'value' => 'x']]),
+            'replace' => visualButton('Replace the list', ['action' => 'setState', 'params' => ['statePath' => '/ui/items', 'value' => 'none']]),
+            'remove' => visualButton('Remove the first', ['action' => 'removeState', 'params' => ['statePath' => '/ui/items', 'index' => 0]]),
+            'add' => visualButton('Add one', ['action' => 'pushState', 'params' => ['statePath' => '/ui/items', 'value' => 'b']]),
+        ],
+        'state' => ['ui' => ['filter' => 'steps', 'items' => ['a']]],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertDontSee('Showing every day')
+        ->click('Clear the filter')
+        ->assertSee('Showing every day')
+        ->click('Write far ahead')
+        ->assertDontSee('Written far past the list')
+        ->click('Replace the list')
+        ->click('Remove the first')
+        ->click('Add one')
+        ->wait(0.5)
+        ->assertNoJavaScriptErrors();
+});
+
+it('fits a segmented control in a narrow card and names it after the card', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisuals($conversation, [[
+        'root' => 'card',
+        'elements' => [
+            'card' => ['type' => 'Card', 'props' => ['title' => 'Eating pattern'], 'children' => ['pattern']],
+            'pattern' => ['type' => 'Segmented', 'props' => ['options' => [['label' => 'Mediterranean', 'value' => 'med'], ['label' => 'Vegetarian', 'value' => 'veg'], ['label' => 'Pescatarian', 'value' => 'fish']], 'value' => ['$bindState' => '/ui/pattern']], 'children' => []],
+        ],
+        'state' => ['ui' => ['pattern' => 'med']],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->resize(320, 720)
+        ->assertSee('Pescatarian')
+        ->assertScript("(() => { const group = document.querySelector('[role=\"radiogroup\"]').getBoundingClientRect(); return Array.from(document.querySelectorAll('[role=\"radiogroup\"] label')).every((label) => label.getBoundingClientRect().right <= group.right + 0.5); })()", true)
+        ->assertScript("document.getElementById(document.querySelector('[role=\"radiogroup\"]').getAttribute('aria-labelledby'))?.textContent.trim()", 'Eating pattern')
+        ->assertNoJavaScriptErrors();
+});
+
 /**
  * @return list<stdClass>
  */
@@ -380,6 +655,97 @@ function savedVisualReply(Conversation $conversation, string $scenario, ?Closure
     History::factory()->forConversation($conversation)->assistantMessage()->create([
         'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => $parts]),
     ]);
+}
+
+/**
+ * @param  array<string, mixed>  $binding
+ * @return array<string, mixed>
+ */
+function visualButton(string $label, array $binding): array
+{
+    return ['type' => 'Button', 'props' => ['label' => $label], 'children' => [], 'on' => ['press' => $binding]];
+}
+
+function savedVisuals(Conversation $conversation, array $specs): void
+{
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => array_map(
+            fn (array $spec, int $index): array => ['type' => 'data-spec', 'data' => ['id' => "visual-{$index}", 'spec' => json_encode($spec), 'fallback_text' => '']],
+            $specs,
+            array_keys($specs),
+        )]),
+    ]);
+}
+
+function replayGolden(Application $app, Conversation $conversation, User $user, string $scenario, int $streamingPolls): void
+{
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $events = array_map(
+        fn (stdClass $event): array => (array) $event,
+        json_decode(File::get(base_path("tests/Fixtures/chat-visuals/{$scenario}.json")))->events,
+    );
+
+    $app->instance(StreamEventStore::class, new class($events, $streamingPolls) extends StreamEventStore
+    {
+        private int $polls = 0;
+
+        /**
+         * @param  list<array<string, mixed>>  $replay
+         */
+        public function __construct(private readonly array $replay, private readonly int $streamingPolls) {}
+
+        public function eventsAfter(string $conversationId, int $afterSequence): array
+        {
+            return $this->replay;
+        }
+
+        public function isStreaming(string $conversationId): bool
+        {
+            return ++$this->polls <= $this->streamingPolls;
+        }
+    });
+}
+
+function holdRepliesInFlight(Application $app): void
+{
+    $app->instance(StreamEventStore::class, new class extends StreamEventStore
+    {
+        private bool $started = false;
+
+        public function __construct() {}
+
+        public function clear(string $conversationId): void
+        {
+            $this->started = true;
+        }
+
+        public function eventsAfter(string $conversationId, int $afterSequence): array
+        {
+            return [];
+        }
+
+        public function isStreaming(string $conversationId): bool
+        {
+            return $this->started;
+        }
+    });
+}
+
+/**
+ * @return list<string>
+ */
+function userMessages(Conversation $conversation): array
+{
+    return History::query()
+        ->where('conversation_id', $conversation->id)
+        ->where('role', MessageRole::User->value)
+        ->pluck('content')
+        ->all();
+}
+
+function tickedItems(): string
+{
+    return "Array.from(document.querySelectorAll('[role=\"checkbox\"][aria-checked=\"true\"]')).map((box) => box.labels[0].textContent.trim())";
 }
 
 function visualBlockOrder(): string

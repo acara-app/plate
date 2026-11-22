@@ -1,47 +1,18 @@
-import { defineCatalog, type Spec } from '@json-render/core';
+import type { Spec } from '@json-render/core';
 import { createRenderer } from '@json-render/react';
-import { schema } from '@json-render/react/schema';
-import { acaraChatComponents } from './catalog';
+import { acaraChatCatalog, acaraChatComponents } from './catalog';
+import { SuggestionChips, VisualButton } from './components/actions';
 import { BarChart, LineChart } from './components/chart';
 import { Comparison } from './components/comparison';
+import { Checklist, Segmented } from './components/controls';
 import { Card, Disclosure, Grid, Separator, Stack } from './components/layout';
 import { List, ListItem, Steps } from './components/list';
 import { Metric, Progress } from './components/metric';
 import { MacroBreakdown, RiskMeter } from './components/nutrition';
 import { Badge, Callout, Heading, Text } from './components/text';
+import { hasAllowedActions } from './visual-actions';
 
-const RENDERED = [
-    'Card',
-    'Stack',
-    'Grid',
-    'Separator',
-    'Heading',
-    'Text',
-    'Badge',
-    'Callout',
-    'Metric',
-    'Progress',
-    'List',
-    'ListItem',
-    'Steps',
-    'Comparison',
-    'BarChart',
-    'LineChart',
-    'MacroBreakdown',
-    'RiskMeter',
-    'Disclosure',
-] as const satisfies ReadonlyArray<keyof typeof acaraChatComponents>;
-
-const renderedTypes: ReadonlySet<string> = new Set(RENDERED);
-
-const webCatalog = defineCatalog(schema, {
-    components: Object.fromEntries(
-        RENDERED.map((name) => [name, acaraChatComponents[name]]),
-    ) as Pick<typeof acaraChatComponents, (typeof RENDERED)[number]>,
-    actions: {},
-});
-
-export const ChatVisualRenderer = createRenderer(webCatalog, {
+export const ChatVisualRenderer = createRenderer(acaraChatCatalog, {
     Card: ({ element, children }) => (
         <Card props={element.props}>{children}</Card>
     ),
@@ -70,9 +41,19 @@ export const ChatVisualRenderer = createRenderer(webCatalog, {
     LineChart: ({ element }) => <LineChart props={element.props} />,
     MacroBreakdown: ({ element }) => <MacroBreakdown props={element.props} />,
     RiskMeter: ({ element }) => <RiskMeter props={element.props} />,
+    Segmented: ({ element, bindings }) => (
+        <Segmented props={element.props} bindings={bindings} />
+    ),
     Disclosure: ({ element, children }) => (
         <Disclosure props={element.props}>{children}</Disclosure>
     ),
+    Checklist: ({ element, bindings }) => (
+        <Checklist props={element.props} bindings={bindings} />
+    ),
+    Button: ({ element }) => (
+        <VisualButton label={element.props.label} on={element.on} />
+    ),
+    SuggestionChips: ({ element }) => <SuggestionChips props={element.props} />,
 });
 
 export function canRenderVisual(spec: Spec): boolean {
@@ -81,7 +62,8 @@ export function canRenderVisual(spec: Spec): boolean {
     return (
         elements[spec.root] !== undefined &&
         Object.values(elements).every((element) =>
-            renderedTypes.has(element.type),
-        )
+            Object.hasOwn(acaraChatComponents, element.type),
+        ) &&
+        hasAllowedActions(spec)
     );
 }

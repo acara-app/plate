@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { VISUAL_SURFACE } from './components/layout';
 import { canRenderVisual, ChatVisualRenderer } from './render';
 
+const BARE_ROOTS: ReadonlySet<string> = new Set(['Button', 'SuggestionChips']);
+
 export function ChatVisual({
     visual,
     isStreaming,
@@ -39,7 +41,8 @@ export function ChatVisual({
         );
     }
 
-    const framed = visual.spec.elements[visual.spec.root]?.type === 'Card';
+    const rootType = visual.spec.elements[visual.spec.root]?.type ?? '';
+    const surfaced = rootType !== 'Card' && !BARE_ROOTS.has(rootType);
 
     return (
         <figure
@@ -47,7 +50,7 @@ export function ChatVisual({
             data-test="chat-visual"
             className={cn(
                 '@container my-2 duration-300 ease-out motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-1',
-                !framed && VISUAL_SURFACE,
+                surfaced && VISUAL_SURFACE,
             )}
         >
             <ChatVisualRenderer spec={visual.spec} state={visual.spec.state} />
