@@ -348,7 +348,7 @@
                         </div>
                         <h3 class="font-display text-xl font-bold text-[#f7f3ed] mb-3">Track Progress Without the Friction</h3>
                         <p class="text-[#f7f3ed]/60 leading-relaxed font-serif">
-                            Check in naturally over time. Acara Cloud can remember stable routine context and adjust recommendations as your habits shift. No manual tracking required unless you want it.
+                            Check in naturally over time. Acara Cloud can remember stable routine context and adjust recommendations as your habits shift. No manual tracking required unless you want it. When you do, a photo is enough: try our <x-snap-link location="ai_health_coach" class="text-[#f7f3ed]">free photo calorie counter</x-snap-link>.
                         </p>
                     </div>
                 </div>

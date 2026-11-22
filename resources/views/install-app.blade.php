@@ -170,6 +170,10 @@
                     <li>Tap <strong>Install app</strong> or <strong>Add to Home screen</strong>.</li>
                     <li>Follow the on-screen instructions to complete the installation.</li>
                 </ol>
+
+                <p>
+                    Not ready to install anything? The <x-snap-link location="install_app">free photo calorie counter</x-snap-link> works right in your browser.
+                </p>
             </div>
         </div>
     </div>

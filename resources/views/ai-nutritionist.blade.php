@@ -351,6 +351,14 @@
         </div>
     </section>
 
+    <section class="bg-[#FFEFE5] py-16 sm:py-20">
+        <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <x-snap-promo heading="Rather not type it? Snap your plate" location="ai_nutritionist">
+                Not every meal is easy to describe. Snap a photo and our <x-snap-link location="ai_nutritionist">AI calorie tracker</x-snap-link> estimates the calories, carbs, protein, and fat for each food on the plate.
+            </x-snap-promo>
+        </div>
+    </section>
+
     <section class="bg-white py-20 sm:py-28">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div class="mx-auto max-w-3xl text-center">
