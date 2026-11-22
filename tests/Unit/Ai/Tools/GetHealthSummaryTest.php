@@ -115,10 +115,12 @@ it("reports workout minutes, dose counts and glucose in the person's unit, and c
         ['type_identifier' => 'workouts', 'value' => 30, 'unit' => 'min', 'measured_at' => $day->setTime(18, 0)],
         ['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime(9, 0)],
         ['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime(21, 0)],
-        ['type_identifier' => 'bloodGlucose', 'value' => 90, 'unit' => 'mg/dL', 'measured_at' => $day->setTime(7, 0)],
-        ['type_identifier' => 'bloodGlucose', 'value' => 108, 'unit' => 'mg/dL', 'measured_at' => $day->setTime(12, 0)],
-        ['type_identifier' => 'bloodGlucose', 'value' => 180, 'unit' => 'mg/dL', 'measured_at' => $day->setTime(19, 0)],
         ['type_identifier' => 'menstrualFlow', 'value' => 2, 'unit' => 'event', 'measured_at' => $day->setTime(9, 0)],
+    ]);
+    HealthSyncSample::factory()->for($user)->bloodGlucose()->createMany([
+        ['value' => 90, 'measured_at' => $day->setTime(7, 0)],
+        ['value' => 108, 'measured_at' => $day->setTime(12, 0)],
+        ['value' => 180, 'measured_at' => $day->setTime(19, 0)],
     ]);
     resolve(AggregateHealthDailySamplesAction::class)->handle($user, $day);
     $datasets = resolve(TurnDataRegistry::class);
