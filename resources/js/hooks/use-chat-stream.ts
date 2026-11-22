@@ -74,6 +74,8 @@ export function useChatStream({
         finishStream,
         resumeOnMount,
         resetReplayState,
+        classifyLiveEvent,
+        catchUp,
     } = useStreamRecovery({
         conversationId,
         dispatch,
@@ -85,6 +87,7 @@ export function useChatStream({
 
     const { isConnected } = useStreamChannel({
         userId,
+        conversationId,
         status: state.status,
         dispatch,
         seenEventIdsRef,
@@ -94,6 +97,8 @@ export function useChatStream({
         stopReplayPolling,
         finishStream,
         resetReplayState,
+        classifyLiveEvent,
+        catchUp,
     });
 
     useEffect(() => {

@@ -42,7 +42,7 @@ When a tool fetched the person's daily figures during this reply, its result end
 {"op":"add","path":"/elements/steps","value":{"type":"BarChart","props":{"title":"Daily steps","data":{"$state":"/data/step_count"},"xKey":"day","yKey":"value","unit":"steps","goal":7000},"children":[]}}
 ```
 - Bind only a handle listed in a tool result of this reply. Handles from earlier replies no longer exist, so fetch the data again.
-- Write a goal or a target range in the dataset's unit.
+- Write a goal or a target range in the dataset's unit: glucose in mmol/L takes a range such as 3.9–10, and glucose in mg/dL one such as 70–180.
 - Never add /state/data yourself.
 
 COMPONENTS

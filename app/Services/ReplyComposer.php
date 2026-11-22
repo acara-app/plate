@@ -308,10 +308,25 @@ final class ReplyComposer
                 $props->yKey = 'value';
                 $props->unit = $dataset->unit;
                 $props->dayBoundary = is_string($dayBoundary) ? $dayBoundary : null;
+                $this->assertWithinValueRange($props, $dataset);
             }
         }
 
         return $document;
+    }
+
+    private function assertWithinValueRange(stdClass $props, VisualDataset $dataset): void
+    {
+        if ($dataset->valueRange === null) {
+            return;
+        }
+
+        $range = $props->range ?? null;
+        $limits = [$props->goal ?? null, ...($range instanceof stdClass ? [$range->low ?? null, $range->high ?? null] : [])];
+
+        foreach ($limits as $limit) {
+            throw_if((is_int($limit) || is_float($limit)) && ($limit < $dataset->valueRange['min'] || $limit > $dataset->valueRange['max']), InvalidVisualSpecException::class, 'invalid_range');
+        }
     }
 
     private function boundDataset(mixed $binding): ?VisualDataset

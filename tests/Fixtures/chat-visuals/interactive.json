@@ -14,7 +14,9 @@
                 "provider": "openai",
                 "model": "model",
                 "timestamp": 0,
-                "metadata": null
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
             }
         },
         {
@@ -25,7 +27,9 @@
                 "invocation_id": "id-2",
                 "type": "text_start",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 1
             }
         },
         {
@@ -37,7 +41,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Here",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 2
             }
         },
         {
@@ -49,7 +55,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " are",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 3
             }
         },
         {
@@ -61,7 +69,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " two",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
             }
         },
         {
@@ -73,7 +83,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " wind-down",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
             }
         },
         {
@@ -85,7 +97,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " routines:",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
             }
         },
         {
@@ -97,7 +111,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " one",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
             }
         },
         {
@@ -109,7 +125,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " for",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 8
             }
         },
         {
@@ -121,7 +139,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " work",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 9
             }
         },
         {
@@ -133,7 +153,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " nights",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
             }
         },
         {
@@ -145,7 +167,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " and",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
             }
         },
         {
@@ -157,7 +181,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " one",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 12
             }
         },
         {
@@ -169,7 +195,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " for",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 13
             }
         },
         {
@@ -181,7 +209,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " weekends.\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 14
             }
         },
         {
@@ -193,7 +223,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 15
             }
         },
         {
@@ -205,7 +237,8 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-1",
                 "patches": [],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 16
             }
         },
         {
@@ -380,7 +413,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 17
             }
         },
         {
@@ -394,7 +428,8 @@
                 "accepted": true,
                 "fallback_text": "Wind-down routine\n1. Dim the lights (9:30 PM)\n2. Put your phone away (10:00 PM)\n3. Read a paper book (20 min)\n1. Start winding down by 10:30 PM — Stay within an hour of your weekday bedtime.\n2. Take a warm shower (10 min)\n3. Stretch gently (10 min)\n- Close the blinds\n- Set tomorrow's alarm\n- Put water by the bed",
                 "reason": null,
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 18
             }
         },
         {
@@ -406,7 +441,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
             }
         },
         {
@@ -418,7 +455,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Keeping",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
             }
         },
         {
@@ -430,7 +469,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " your",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
             }
         },
         {
@@ -442,7 +483,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " bedtime",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
             }
         },
         {
@@ -454,7 +497,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " within",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 23
             }
         },
         {
@@ -466,7 +511,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " an",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 24
             }
         },
         {
@@ -478,7 +525,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " hour",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 25
             }
         },
         {
@@ -490,7 +539,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " on",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 26
             }
         },
         {
@@ -502,7 +553,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " weekends",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 27
             }
         },
         {
@@ -514,7 +567,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " helps",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 28
             }
         },
         {
@@ -526,7 +581,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " your",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 29
             }
         },
         {
@@ -538,7 +595,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " body",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 30
             }
         },
         {
@@ -550,7 +609,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " clock",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 31
             }
         },
         {
@@ -562,7 +623,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " stay",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 32
             }
         },
         {
@@ -574,7 +637,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " steady.\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 33
             }
         },
         {
@@ -586,7 +651,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 34
             }
         },
         {
@@ -598,7 +665,8 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-2",
                 "patches": [],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 35
             }
         },
         {
@@ -660,7 +728,8 @@
                         }
                     }
                 ],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 36
             }
         },
         {
@@ -674,7 +743,8 @@
                 "accepted": true,
                 "fallback_text": "",
                 "reason": null,
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 37
             }
         },
         {
@@ -685,7 +755,9 @@
                 "invocation_id": "id-2",
                 "type": "text_complete",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 38
             }
         },
         {
@@ -703,7 +775,9 @@
                     "cache_write_input_tokens": null,
                     "reasoning_tokens": null
                 },
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 39
             }
         }
     ],

@@ -12,6 +12,7 @@ final readonly class VisualDataset
 
     /**
      * @param  list<array{day: string, value: int|float|null}>  $rows  one row per day, oldest first, with null for a day without a reading
+     * @param  array{min: float, max: float}|null  $valueRange  the values this unit can hold, when a goal or range in another unit would be easy to mistake for it
      */
     public function __construct(
         public string $label,
@@ -19,6 +20,7 @@ final readonly class VisualDataset
         public string $unit,
         public array $rows,
         public string $dayBoundary = self::UTC_DAYS,
+        public ?array $valueRange = null,
     ) {}
 
     public function describe(string $handle): string

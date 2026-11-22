@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\CreatePendingChatStreamTurn;
 use App\Ai\Agents\AgentRunner;
 use App\Ai\Agents\HealthSpecialist;
 use App\Enums\SettingKey;
@@ -65,6 +66,8 @@ it('streams, replays and saves a reply with its visuals in the order Altani wrot
     $assistant = History::query()->where('conversation_id', $conversation->id)->where('role', MessageRole::Assistant->value)->sole();
 
     expect(json_encode($broadcast))->toBe(json_encode(array_column($stored, 'data')))
+        ->and(array_map(fn (array $payload): array => [$payload['conversation_id'], $payload['sequence']], $broadcast))
+        ->toBe(array_map(fn (stdClass $event): array => [$conversation->id, $event->sequence], $stored))
         ->and(array_map(fn (array $payload): int => mb_strlen((string) json_encode((string) json_encode($payload))), $broadcast))->each->toBeLessThanOrEqual(8_000)
         ->and(array_map(fn (stdClass $end): string => $end->data->accepted ? 'accepted' : $end->data->reason, $ends))->toBe($outcomes)
         ->and(array_column(array_filter($message->parts, fn (stdClass $part): bool => $part->type === 'data-spec'), 'type'))->toHaveCount(count(array_keys($outcomes, 'accepted', true)))
@@ -323,6 +326,29 @@ it('lets Altani bind only data fetched in the same reply, for a client that draw
         ->and(json_encode($fetched->steps))->toContain('Datasets for visuals:\\n- step_count: Steps, daily total in steps, 2026-11-22 to 2026-11-22, 1 day, 0 without a reading')
         ->and(json_encode($fetched->steps, JSON_UNESCAPED_UNICODE))->toContain('[visual]\\nSteps\\n- Sun Nov 22, 2026: 4,300 steps')
         ->and(json_encode($proseOnly->steps))->toContain('You walked 4,300 steps.')->not->toContain('Datasets for visuals');
+});
+
+it('finishes a prose reply that was queued before chat visuals existed', function (): void {
+    $user = User::factory()->create(['locale' => 'en']);
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $turn = resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'When should I walk?', [], 'web');
+    AgentRunner::fake(['Walk after lunch.'])->preventStrayPrompts();
+
+    $properties = new ProcessChatStream(
+        userId: $user->id,
+        conversationId: $conversation->id,
+        modelName: 'gpt-test',
+        channel: 'web',
+        streamId: $turn->streamId,
+        userMessageId: $turn->userMessageId,
+        assistantMessageId: $turn->assistantMessageId,
+    )->__serialize();
+    unset($properties['catalogVersion']);
+    $queuedByThePreviousRelease = 'O:'.mb_strlen(ProcessChatStream::class).':"'.ProcessChatStream::class.'"'.mb_substr(serialize($properties), 1);
+
+    dispatch_sync(unserialize($queuedByThePreviousRelease));
+
+    expect(History::query()->whereKey($turn->assistantMessageId)->sole()->content)->toBe('Walk after lunch.');
 });
 
 function fakeChatVisualsRedis(): void

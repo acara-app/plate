@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\ApplyJsonPatch;
 use App\Data\VisualDataset;
+use App\Enums\GlucoseUnit;
 use App\Services\ReplyComposer;
 use App\Services\TurnDataRegistry;
 
@@ -124,6 +125,31 @@ it('accepts follow-up chips and keeps them out of the text later turns read', fu
     expect(end($events))->toMatchArray(['type' => 'visual_end', 'accepted' => true, 'fallback_text' => ''])
         ->and(resolve(ReplyComposer::class, replyComposerOptions())->contextText("Enjoy your walk.\n{$chips}"))->toBe("Enjoy your walk.\n");
 });
+
+it('withholds a glucose chart whose target range is in another unit than its data', function (string $unit, string $outcome): void {
+    $datasets = resolve(TurnDataRegistry::class);
+    $events = $datasets->collect(function () use ($datasets, $unit): array {
+        $datasets->register('bloodGlucose', new VisualDataset(
+            label: 'Blood Glucose',
+            measure: 'daily average',
+            unit: $unit,
+            rows: [['day' => '2026-11-17', 'value' => $unit === 'mg/dL' ? 126 : 7], ['day' => '2026-11-18', 'value' => $unit === 'mg/dL' ? 108 : 6]],
+            valueRange: GlucoseUnit::from($unit)->validationRange(),
+        ));
+
+        return composeReply(implode("\n", [
+            '```spec',
+            '{"op":"add","path":"/root","value":"glucose"}',
+            '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L","range":{"low":3.9,"high":10}},"children":[]}}',
+            '```',
+        ]));
+    });
+
+    expect(end($events)['accepted'] ? end($events)['fallback_text'] : end($events)['reason'])->toBe($outcome);
+})->with([
+    'a range typed in mmol/L over mg/dL readings' => ['mg/dL', 'invalid_range'],
+    "a range in the readings' own unit" => ['mmol/L', "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC."],
+]);
 
 it('closes a visual Altani forgot to fence off and drops one cut off by a stop', function (): void {
     $visual = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}";

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Data\VisualDataset;
+use App\Enums\GlucoseUnit;
 use App\Enums\HealthAggregationFunction;
 use App\Models\HealthDailyAggregate;
 use App\Services\TurnDataRegistry;
@@ -15,6 +16,10 @@ use Illuminate\Support\Collection;
 
 final readonly class RegisterDailyHealthDatasets
 {
+    private const string GLUCOSE = 'bloodGlucose';
+
+    private const string EVENT_UNIT = 'event';
+
     public function __construct(
         private TurnDataRegistry $datasets,
         private VisualCatalog $catalog,
@@ -23,7 +28,7 @@ final readonly class RegisterDailyHealthDatasets
     /**
      * @param  Collection<int, HealthDailyAggregate>  $aggregates
      */
-    public function handle(Collection $aggregates, CarbonInterface $from, CarbonInterface $to): void
+    public function handle(Collection $aggregates, CarbonInterface $from, CarbonInterface $to, GlucoseUnit $glucoseUnit): void
     {
         if (! $this->datasets->isCollecting()) {
             return;
@@ -39,7 +44,7 @@ final readonly class RegisterDailyHealthDatasets
         }
 
         foreach ($aggregates->groupBy('type_identifier') as $type => $typeAggregates) {
-            $dataset = $this->dataset($typeAggregates, $days);
+            $dataset = $this->dataset($typeAggregates, $days, $glucoseUnit);
 
             if ($dataset instanceof VisualDataset) {
                 $this->datasets->register((string) $type, $dataset);
@@ -51,7 +56,7 @@ final readonly class RegisterDailyHealthDatasets
      * @param  Collection<int, HealthDailyAggregate>  $aggregates
      * @param  list<string>  $days
      */
-    private function dataset(Collection $aggregates, array $days): ?VisualDataset
+    private function dataset(Collection $aggregates, array $days, GlucoseUnit $glucoseUnit): ?VisualDataset
     {
         $first = $aggregates->first();
 
@@ -61,25 +66,32 @@ final readonly class RegisterDailyHealthDatasets
 
         $descriptor = $first->descriptor();
         $unit = $first->unit ?? $descriptor->displayUnit;
+
+        if (! $descriptor->isKnown() || in_array($unit, ['', self::EVENT_UNIT], true)) {
+            return null;
+        }
+
+        $glucose = $first->type_identifier === self::GLUCOSE && $unit === GlucoseUnit::MgDl->value;
         $values = [];
 
         foreach ($aggregates as $aggregate) {
-            $value = $aggregate->primaryValue();
+            $value = $descriptor->isEvent() ? $aggregate->value_sum : $aggregate->primaryValue();
 
             if ($value !== null) {
-                $values[($aggregate->local_date ?? $aggregate->date)->toDateString()] = $this->number($value);
+                $values[($aggregate->local_date ?? $aggregate->date)->toDateString()] = $this->number($glucose ? $glucoseUnit->fromMgDl($value) : $value);
             }
         }
 
-        if ($values === [] || ! $descriptor->isKnown() || $unit === '') {
+        if ($values === []) {
             return null;
         }
 
         return new VisualDataset(
             label: $descriptor->label,
-            measure: $this->measure($first->aggregation_function === null ? $descriptor->function : HealthAggregationFunction::tryFrom($first->aggregation_function)),
-            unit: $unit,
+            measure: $descriptor->isEvent() ? 'daily total' : $this->measure($first->aggregation_function === null ? $descriptor->function : HealthAggregationFunction::tryFrom($first->aggregation_function)),
+            unit: $glucose ? $glucoseUnit->value : $unit,
             rows: array_map(fn (string $day): array => ['day' => $day, 'value' => $values[$day] ?? null], $days),
+            valueRange: $glucose ? $glucoseUnit->validationRange() : null,
         );
     }
 
@@ -98,8 +110,7 @@ final readonly class RegisterDailyHealthDatasets
             HealthAggregationFunction::Min => 'daily lowest',
             HealthAggregationFunction::Max => 'daily highest',
             HealthAggregationFunction::Last => 'last reading of each day',
-            HealthAggregationFunction::Count => 'daily count',
-            HealthAggregationFunction::None, null => 'daily value',
+            HealthAggregationFunction::Count, HealthAggregationFunction::None, null => 'daily value',
         };
     }
 }

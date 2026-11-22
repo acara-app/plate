@@ -32,12 +32,16 @@ interface UseStreamRecoveryOptions {
     onFinishRef: React.RefObject<(() => void) | undefined>;
 }
 
+export type LiveEventDecision = 'apply' | 'duplicate' | 'gap';
+
 interface UseStreamRecoveryReturn {
     startReplayPolling: () => void;
     stopReplayPolling: () => void;
     finishStream: () => void;
     resumeOnMount: (forcePoll?: boolean) => Promise<void>;
     resetReplayState: () => void;
+    classifyLiveEvent: (raw: RawStreamEvent) => LiveEventDecision;
+    catchUp: () => Promise<void>;
 }
 
 export function useStreamRecovery({
@@ -49,6 +53,8 @@ export function useStreamRecovery({
     onFinishRef,
 }: UseStreamRecoveryOptions): UseStreamRecoveryReturn {
     const lastSequenceRef = useRef(NO_SEQUENCE_CONSUMED);
+    const catchUpRef = useRef<Promise<void> | null>(null);
+    const catchUpAgainRef = useRef(false);
     const replayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const attemptsRef = useRef(0);
     const idleResponsesRef = useRef(0);
@@ -71,20 +77,13 @@ export function useStreamRecovery({
 
     const finishStream = useCallback(() => {
         stopReplayPolling();
-        resetReplayState();
         dispatch({ type: 'FINISHED' });
 
         if (streamActiveRef.current) {
             streamActiveRef.current = false;
             onFinishRef.current?.();
         }
-    }, [
-        dispatch,
-        stopReplayPolling,
-        resetReplayState,
-        streamActiveRef,
-        onFinishRef,
-    ]);
+    }, [dispatch, stopReplayPolling, streamActiveRef, onFinishRef]);
 
     const replayEvents = useCallback(
         async (
@@ -177,6 +176,53 @@ export function useStreamRecovery({
         }, EVENT_REPLAY_INTERVAL);
     }, [replayEvents, stopReplayPolling]);
 
+    const catchUp = useCallback((): Promise<void> => {
+        catchUpAgainRef.current = true;
+
+        if (catchUpRef.current === null) {
+            catchUpRef.current = (async () => {
+                while (catchUpAgainRef.current) {
+                    catchUpAgainRef.current = false;
+                    await replayEvents();
+                }
+            })().finally(() => {
+                catchUpRef.current = null;
+            });
+        }
+
+        return catchUpRef.current;
+    }, [replayEvents]);
+
+    const classifyLiveEvent = useCallback(
+        (raw: RawStreamEvent): LiveEventDecision => {
+            const sequence = raw.sequence;
+
+            if (typeof sequence !== 'number') {
+                return 'apply';
+            }
+
+            if (
+                typeof raw.id === 'string' &&
+                seenEventIdsRef.current.has(raw.id)
+            ) {
+                return 'duplicate';
+            }
+
+            if (sequence === 0) {
+                resetReplayState();
+            } else if (sequence <= lastSequenceRef.current) {
+                return 'duplicate';
+            } else if (sequence > lastSequenceRef.current + 1) {
+                return 'gap';
+            }
+
+            lastSequenceRef.current = sequence;
+
+            return 'apply';
+        },
+        [seenEventIdsRef, resetReplayState],
+    );
+
     const resumeOnMount = useCallback(
         async (forcePoll = false) => {
             const streaming = await replayEvents({ requireStreaming: true });
@@ -198,5 +244,7 @@ export function useStreamRecovery({
         finishStream,
         resumeOnMount,
         resetReplayState,
+        classifyLiveEvent,
+        catchUp,
     };
 }

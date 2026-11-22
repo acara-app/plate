@@ -78,7 +78,7 @@ export function buildAcaraChatPrompt(formatZodType: FormatZodType): string {
         '- Chart a dataset by binding it, never by copying its values: set data to {"$state":"/data/<handle>"}, xKey to "day" and yKey to "value". Plate fills in the rows, the unit and the day boundary.',
         ...BOUND_CHART_EXAMPLE,
         '- Bind only a handle listed in a tool result of this reply. Handles from earlier replies no longer exist, so fetch the data again.',
-        "- Write a goal or a target range in the dataset's unit.",
+        "- Write a goal or a target range in the dataset's unit: glucose in mmol/L takes a range such as 3.9–10, and glucose in mg/dL one such as 70–180.",
         '- Never add /state/data yourself.',
         '',
         'COMPONENTS',
