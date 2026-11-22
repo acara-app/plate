@@ -110,41 +110,35 @@ it("reports workout minutes, dose counts and glucose in the person's unit, and c
     UserProfile::factory()->for($user)->create(['units_preference' => GlucoseUnit::MmolL]);
     $this->actingAs($user);
     $day = CarbonImmutable::parse('2026-11-18');
-
-    foreach ([[8, 30], [18, 30]] as [$hour, $minutes]) {
-        HealthSyncSample::factory()->for($user)->create(['type_identifier' => 'workouts', 'value' => $minutes, 'unit' => 'min', 'measured_at' => $day->setTime($hour, 0)]);
-    }
-
-    foreach ([9, 21] as $hour) {
-        HealthSyncSample::factory()->for($user)->create(['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime($hour, 0)]);
-    }
-
-    foreach ([[7, 90], [12, 108], [19, 180]] as [$hour, $reading]) {
-        HealthSyncSample::factory()->for($user)->bloodGlucose()->create(['value' => $reading, 'measured_at' => $day->setTime($hour, 0)]);
-    }
-
-    HealthSyncSample::factory()->for($user)->create(['type_identifier' => 'menstrualFlow', 'value' => 2, 'unit' => 'event', 'measured_at' => $day->setTime(9, 0)]);
+    HealthSyncSample::factory()->for($user)->createMany([
+        ['type_identifier' => 'workouts', 'value' => 30, 'unit' => 'min', 'measured_at' => $day->setTime(8, 0)],
+        ['type_identifier' => 'workouts', 'value' => 30, 'unit' => 'min', 'measured_at' => $day->setTime(18, 0)],
+        ['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime(9, 0)],
+        ['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime(21, 0)],
+        ['type_identifier' => 'menstrualFlow', 'value' => 2, 'unit' => 'event', 'measured_at' => $day->setTime(9, 0)],
+    ]);
+    HealthSyncSample::factory()->for($user)->bloodGlucose()->createMany([
+        ['value' => 90, 'measured_at' => $day->setTime(7, 0)],
+        ['value' => 108, 'measured_at' => $day->setTime(12, 0)],
+        ['value' => 180, 'measured_at' => $day->setTime(19, 0)],
+    ]);
     resolve(AggregateHealthDailySamplesAction::class)->handle($user, $day);
-
     $datasets = resolve(TurnDataRegistry::class);
-    [$summaries, $collected] = $datasets->collect(function () use ($datasets): array {
+
+    [$summaries, $charted] = $datasets->collect(function () use ($datasets): array {
         $summary = json_decode((string) $this->tool->handle(new Request(['type' => 'all', 'days' => 1, 'date' => '2026-11-18'])), true);
 
         return [array_column($summary['summaries'], null, 'type'), $datasets->datasets()];
     });
-    ksort($collected);
 
-    expect(array_map(fn (VisualDataset $dataset): array => [$dataset->measure, $dataset->unit, $dataset->rows[0]['value']], $collected))->toBe([
+    expect(array_map(fn (VisualDataset $dataset): array => [$dataset->measure, $dataset->unit, $dataset->rows[0]['value']], $charted))->toEqual([
         'blood_glucose' => ['daily average', 'mmol/L', 7],
         'medication_dose_event' => ['daily total', 'dose', 2],
         'workouts' => ['daily total', 'min', 60],
-    ])
-        ->and(array_intersect_key($summaries['workouts'], array_flip(['unit', 'total', 'count', 'primary_value'])))
-        ->toBe(['unit' => 'min', 'total' => 60, 'count' => 2, 'primary_value' => 60])
-        ->and(array_intersect_key($summaries['medicationDoseEvent'], array_flip(['unit', 'count', 'primary_value'])))
-        ->toBe(['unit' => 'dose', 'count' => 2, 'primary_value' => 2])
-        ->and(array_intersect_key($summaries['bloodGlucose'], array_flip(['unit', 'avg', 'min', 'max', 'primary_value'])))
-        ->toBe(['unit' => 'mmol/L', 'avg' => 7, 'min' => 5, 'max' => 10, 'primary_value' => 7]);
+    ]);
+    expect($summaries['workouts'])->toMatchArray(['unit' => 'min', 'total' => 60, 'count' => 2, 'primary_value' => 60]);
+    expect($summaries['medicationDoseEvent'])->toMatchArray(['unit' => 'dose', 'count' => 2, 'primary_value' => 2]);
+    expect($summaries['bloodGlucose'])->toMatchArray(['unit' => 'mmol/L', 'avg' => 7, 'min' => 5, 'max' => 10, 'primary_value' => 7]);
 });
 
 it('returns heart rate with avg min max from aggregates', function (): void {

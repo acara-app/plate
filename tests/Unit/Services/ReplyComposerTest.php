@@ -126,33 +126,24 @@ it('accepts follow-up chips and keeps them out of the text later turns read', fu
         ->and(resolve(ReplyComposer::class, replyComposerOptions())->contextText("Enjoy your walk.\n{$chips}"))->toBe("Enjoy your walk.\n");
 });
 
-it("withholds a bound glucose chart whose goal or target range is not a plain number in its data's unit", function (string $unit, string $limits, string $outcome): void {
-    $datasets = resolve(TurnDataRegistry::class);
-    $events = $datasets->collect(function () use ($datasets, $unit, $limits): array {
-        $datasets->register('bloodGlucose', new VisualDataset(
-            label: 'Blood Glucose',
-            measure: 'daily average',
-            unit: $unit,
-            rows: [['day' => '2026-11-17', 'value' => $unit === 'mg/dL' ? 126 : 7], ['day' => '2026-11-18', 'value' => $unit === 'mg/dL' ? 108 : 6]],
-            valueRange: GlucoseUnit::from($unit)->validationRange(),
-        ));
+it("withholds a bound glucose chart whose goal or target range is not a plain number in its data's unit", function (GlucoseUnit $unit, string $limits): void {
+    $events = withGlucose($unit, fn (): array => composeReply(glucoseChart($limits)));
 
-        return composeReply(implode("\n", [
-            '```spec',
-            '{"op":"add","path":"/root","value":"glucose"}',
-            '{"op":"add","path":"/state/ui","value":{"goal":180,"target":{"low":70,"high":180}}}',
-            '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L",'.$limits.'},"children":[]}}',
-            '```',
-        ]));
-    });
-
-    expect(end($events)['accepted'] ? end($events)['fallback_text'] : end($events)['reason'])->toBe($outcome);
+    expect(end($events))->toMatchArray(['accepted' => false, 'reason' => 'invalid_range']);
 })->with([
-    'a range typed in mmol/L over mg/dL readings' => ['mg/dL', '"range":{"low":3.9,"high":10}', 'invalid_range'],
-    'a goal read from local state' => ['mmol/L', '"goal":{"$state":"/ui/goal"}', 'invalid_range'],
-    'a range read from local state' => ['mmol/L', '"range":{"$state":"/ui/target"}', 'invalid_range'],
-    "a range in the readings' own unit" => ['mmol/L', '"range":{"low":3.9,"high":10}', "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC."],
+    'a range typed in mmol/L over mg/dL readings' => [GlucoseUnit::MgDl, '"range":{"low":3.9,"high":10}'],
+    'a goal read from local state' => [GlucoseUnit::MmolL, '"goal":{"$state":"/ui/goal"}'],
+    'a range read from local state' => [GlucoseUnit::MmolL, '"range":{"$state":"/ui/target"}'],
 ]);
+
+it("draws a bound glucose chart whose target range is in its data's unit", function (): void {
+    $events = withGlucose(GlucoseUnit::MmolL, fn (): array => composeReply(glucoseChart('"range":{"low":3.9,"high":10}')));
+
+    expect(end($events))->toMatchArray([
+        'accepted' => true,
+        'fallback_text' => "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC.",
+    ]);
+});
 
 it('binds a dataset only as the whole data of a chart', function (string $element): void {
     $events = withSteps(['2026-11-16' => 4200, '2026-11-17' => 5100], fn (): array => composeReply(implode("\n", [
@@ -287,6 +278,41 @@ function withSteps(array $steps, Closure $compose): mixed
 
         return $compose();
     });
+}
+
+/**
+ * @template TResult
+ *
+ * @param  Closure(): TResult  $compose
+ * @return TResult
+ */
+function withGlucose(GlucoseUnit $unit, Closure $compose): mixed
+{
+    $datasets = resolve(TurnDataRegistry::class);
+    $readings = $unit === GlucoseUnit::MgDl ? [126, 108] : [7, 6];
+
+    return $datasets->collect(function () use ($datasets, $unit, $readings, $compose): mixed {
+        $datasets->register('bloodGlucose', new VisualDataset(
+            label: 'Blood Glucose',
+            measure: 'daily average',
+            unit: $unit->value,
+            rows: [['day' => '2026-11-17', 'value' => $readings[0]], ['day' => '2026-11-18', 'value' => $readings[1]]],
+            valueRange: $unit->validationRange(),
+        ));
+
+        return $compose();
+    });
+}
+
+function glucoseChart(string $limits): string
+{
+    return implode("\n", [
+        '```spec',
+        '{"op":"add","path":"/root","value":"glucose"}',
+        '{"op":"add","path":"/state/ui","value":{"goal":180,"target":{"low":70,"high":180}}}',
+        '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L",'.$limits.'},"children":[]}}',
+        '```',
+    ]);
 }
 
 function paragraphs(int $count): string
