@@ -14,7 +14,9 @@
                 "provider": "openai",
                 "model": "model",
                 "timestamp": 0,
-                "metadata": null
+                "metadata": null,
+                "conversation_id": "conversation",
+                "sequence": 0
             }
         },
         {
@@ -25,7 +27,9 @@
                 "invocation_id": "id-2",
                 "type": "text_start",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 1
             }
         },
         {
@@ -37,7 +41,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Here",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 2
             }
         },
         {
@@ -49,7 +55,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " is",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 3
             }
         },
         {
@@ -61,7 +69,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " a",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 4
             }
         },
         {
@@ -73,7 +83,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " quick",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 5
             }
         },
         {
@@ -85,7 +97,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " comparison.\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 6
             }
         },
         {
@@ -97,7 +111,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 7
             }
         },
         {
@@ -109,7 +125,8 @@
                 "conversation_id": "conversation",
                 "visual_id": "assistant-message-1",
                 "patches": [],
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 8
             }
         },
         {
@@ -123,7 +140,8 @@
                 "accepted": false,
                 "fallback_text": "",
                 "reason": "unknown_component",
-                "timestamp": 0
+                "timestamp": 0,
+                "sequence": 9
             }
         },
         {
@@ -135,7 +153,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "\n",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 10
             }
         },
         {
@@ -147,7 +167,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": "Oatmeal",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 11
             }
         },
         {
@@ -159,7 +181,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " usually",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 12
             }
         },
         {
@@ -171,7 +195,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " raises",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 13
             }
         },
         {
@@ -183,7 +209,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " blood",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 14
             }
         },
         {
@@ -195,7 +223,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " sugar",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 15
             }
         },
         {
@@ -207,7 +237,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " more",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 16
             }
         },
         {
@@ -219,7 +251,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " gently",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 17
             }
         },
         {
@@ -231,7 +265,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " than",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 18
             }
         },
         {
@@ -243,7 +279,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " white",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 19
             }
         },
         {
@@ -255,7 +293,9 @@
                 "type": "text_delta",
                 "message_id": "id-4",
                 "delta": " rice.",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 20
             }
         },
         {
@@ -266,7 +306,9 @@
                 "invocation_id": "id-2",
                 "type": "text_complete",
                 "message_id": "id-4",
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 21
             }
         },
         {
@@ -284,7 +326,9 @@
                     "cache_write_input_tokens": null,
                     "reasoning_tokens": null
                 },
-                "timestamp": 0
+                "timestamp": 0,
+                "conversation_id": "conversation",
+                "sequence": 22
             }
         }
     ],

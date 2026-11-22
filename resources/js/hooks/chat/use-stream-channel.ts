@@ -7,6 +7,7 @@ import {
     type RawStreamEvent,
     type StreamTracking,
 } from './process-event';
+import type { LiveEventDecision } from './use-stream-recovery';
 
 const STREAM_EVENTS = [
     '.stream_start',
@@ -25,17 +26,24 @@ const STREAM_EVENTS = [
     '.visual_end',
 ];
 
-interface RetryingPayload {
+interface LifecyclePayload {
+    conversationId?: string;
+}
+
+interface RetryingPayload extends LifecyclePayload {
     attempt?: number;
     maxAttempts?: number;
 }
 
-interface ChatErrorPayload {
+interface ChatErrorPayload extends LifecyclePayload {
     message?: string;
 }
 
+interface StreamEndPayload extends RawStreamEvent, LifecyclePayload {}
+
 interface UseStreamChannelOptions {
     userId: number;
+    conversationId: string;
     status: ChatStatus;
     dispatch: React.Dispatch<ChatAction>;
     seenEventIdsRef: React.RefObject<Set<string>>;
@@ -45,6 +53,8 @@ interface UseStreamChannelOptions {
     stopReplayPolling: () => void;
     finishStream: () => void;
     resetReplayState: () => void;
+    classifyLiveEvent: (raw: RawStreamEvent) => LiveEventDecision;
+    catchUp: () => Promise<void>;
 }
 
 interface UseStreamChannelReturn {
@@ -53,6 +63,7 @@ interface UseStreamChannelReturn {
 
 export function useStreamChannel({
     userId,
+    conversationId,
     status,
     dispatch,
     seenEventIdsRef,
@@ -62,6 +73,8 @@ export function useStreamChannel({
     stopReplayPolling,
     finishStream,
     resetReplayState,
+    classifyLiveEvent,
+    catchUp,
 }: UseStreamChannelOptions): UseStreamChannelReturn {
     const channelName = `chat.${userId}`;
     const connectionStatus = useSsrSafeConnectionStatus();
@@ -72,6 +85,22 @@ export function useStreamChannel({
         channelName,
         STREAM_EVENTS,
         (raw) => {
+            if (raw.conversation_id !== conversationId) {
+                return;
+            }
+
+            const decision = classifyLiveEvent(raw);
+
+            if (decision === 'gap') {
+                void catchUp();
+
+                return;
+            }
+
+            if (decision === 'duplicate') {
+                return;
+            }
+
             stopReplayPolling();
 
             if (raw.type === 'stream_start') {
@@ -86,6 +115,9 @@ export function useStreamChannel({
             );
         },
         [
+            conversationId,
+            classifyLiveEvent,
+            catchUp,
             stopReplayPolling,
             streamActiveRef,
             dispatch,
@@ -94,21 +126,29 @@ export function useStreamChannel({
         ],
     );
 
-    useEcho(
+    useEcho<LifecyclePayload>(
         channelName,
         '.processing',
-        () => {
+        (event) => {
+            if (event.conversationId !== conversationId) {
+                return;
+            }
+
             stopReplayPolling();
             streamActiveRef.current = true;
             dispatch({ type: 'PROCESSING' });
         },
-        [stopReplayPolling, streamActiveRef, dispatch],
+        [conversationId, stopReplayPolling, streamActiveRef, dispatch],
     );
 
     useEcho<RetryingPayload>(
         channelName,
         '.retrying',
         (event) => {
+            if (event.conversationId !== conversationId) {
+                return;
+            }
+
             resetReplayState();
             dispatch({
                 type: 'RETRYING',
@@ -116,29 +156,50 @@ export function useStreamChannel({
                 maxAttempts: event.maxAttempts ?? 3,
             });
         },
-        [resetReplayState, dispatch],
+        [conversationId, resetReplayState, dispatch],
     );
 
-    useEcho(
+    useEcho<StreamEndPayload>(
         channelName,
         '.stream_end',
-        () => {
-            finishStream();
+        (event) => {
+            if (
+                (event.conversation_id ?? event.conversationId) !==
+                conversationId
+            ) {
+                return;
+            }
+
+            const decision = classifyLiveEvent(event);
+
+            if (decision === 'gap') {
+                void catchUp().then(finishStream);
+
+                return;
+            }
+
+            if (decision === 'apply') {
+                finishStream();
+            }
         },
-        [finishStream],
+        [conversationId, classifyLiveEvent, catchUp, finishStream],
     );
 
     useEcho<ChatErrorPayload>(
         channelName,
         '.error',
         (event) => {
+            if (event.conversationId !== conversationId) {
+                return;
+            }
+
             stopReplayPolling();
             dispatch({
                 type: 'FAILED',
                 message: event.message ?? 'Failed to process message.',
             });
         },
-        [stopReplayPolling, dispatch],
+        [conversationId, stopReplayPolling, dispatch],
     );
 
     useEffect(() => {
