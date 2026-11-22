@@ -3,8 +3,10 @@
 declare(strict_types=1);
 
 use App\Ai\Tools\GetHealthData;
+use App\Enums\GlucoseUnit;
 use App\Models\HealthSyncSample;
 use App\Models\User;
+use App\Models\UserProfile;
 use Laravel\Ai\Tools\Request;
 use Tests\Helpers\TestJsonSchema;
 
@@ -240,6 +242,20 @@ it('includes metadata in records', function (): void {
 
     expect($json['records'][0]['metadata'])->toBe(['glucose_reading_type' => 'fasting']);
 });
+
+it("reports glucose readings in the person's unit", function (GlucoseUnit $unit, float $reading): void {
+    $user = User::factory()->create();
+    UserProfile::factory()->for($user)->create(['units_preference' => $unit]);
+    $this->actingAs($user);
+    HealthSyncSample::factory()->for($user)->bloodGlucose()->create(['value' => 126, 'measured_at' => now()]);
+
+    $record = json_decode((string) $this->tool->handle(new Request(['type' => 'glucose'])), true)['records'][0];
+
+    expect([(float) $record['value'], $record['unit']])->toBe([$reading, $unit->value]);
+})->with([
+    'mmol/L' => [GlucoseUnit::MmolL, 7.0],
+    'mg/dL' => [GlucoseUnit::MgDl, 126.0],
+]);
 
 it('includes data_availability with recent sync data when entries exist outside queried range', function (): void {
     $user = User::factory()->create();
