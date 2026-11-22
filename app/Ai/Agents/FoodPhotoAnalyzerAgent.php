@@ -156,13 +156,12 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            provider: $model->provider,
-            model: $model->model,
+            provider: $model->providers(),
         );
 
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
-        $data['analyzer_version'] = self::version($model->model);
+        $data['analyzer_version'] = self::version($response->meta->model ?? $model->model);
 
         return FoodAnalysisData::from($data);
     }
