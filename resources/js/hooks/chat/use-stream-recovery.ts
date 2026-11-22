@@ -185,13 +185,17 @@ export function useStreamRecovery({
                     catchUpAgainRef.current = false;
                     await replayEvents();
                 }
+
+                if (streamActiveRef.current) {
+                    startReplayPolling();
+                }
             })().finally(() => {
                 catchUpRef.current = null;
             });
         }
 
         return catchUpRef.current;
-    }, [replayEvents]);
+    }, [replayEvents, startReplayPolling, streamActiveRef]);
 
     const classifyLiveEvent = useCallback(
         (raw: RawStreamEvent): LiveEventDecision => {

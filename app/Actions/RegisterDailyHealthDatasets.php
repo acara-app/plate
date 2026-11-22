@@ -18,8 +18,6 @@ final readonly class RegisterDailyHealthDatasets
 {
     private const string GLUCOSE = 'bloodGlucose';
 
-    private const string EVENT_UNIT = 'event';
-
     public function __construct(
         private TurnDataRegistry $datasets,
         private VisualCatalog $catalog,
@@ -67,7 +65,7 @@ final readonly class RegisterDailyHealthDatasets
         $descriptor = $first->descriptor();
         $unit = $first->unit ?? $descriptor->displayUnit;
 
-        if (! $descriptor->isKnown() || in_array($unit, ['', self::EVENT_UNIT], true)) {
+        if (! $descriptor->isKnown() || in_array($unit, ['', HealthDailyAggregate::OCCURRENCE_UNIT], true)) {
             return null;
         }
 
@@ -75,7 +73,7 @@ final readonly class RegisterDailyHealthDatasets
         $values = [];
 
         foreach ($aggregates as $aggregate) {
-            $value = $descriptor->isEvent() ? $aggregate->value_sum : $aggregate->primaryValue();
+            $value = $aggregate->primaryValue();
 
             if ($value !== null) {
                 $values[($aggregate->local_date ?? $aggregate->date)->toDateString()] = $this->number($glucose ? $glucoseUnit->fromMgDl($value) : $value);

@@ -85,6 +85,14 @@ export function useStreamChannel({
         channelName,
         STREAM_EVENTS,
         (raw) => {
+            if (raw.conversation_id === undefined) {
+                if (status === 'streaming' || status === 'submitted') {
+                    startReplayPolling();
+                }
+
+                return;
+            }
+
             if (raw.conversation_id !== conversationId) {
                 return;
             }
@@ -116,8 +124,10 @@ export function useStreamChannel({
         },
         [
             conversationId,
+            status,
             classifyLiveEvent,
             catchUp,
+            startReplayPolling,
             stopReplayPolling,
             streamActiveRef,
             dispatch,
@@ -134,11 +144,10 @@ export function useStreamChannel({
                 return;
             }
 
-            stopReplayPolling();
             streamActiveRef.current = true;
             dispatch({ type: 'PROCESSING' });
         },
-        [conversationId, stopReplayPolling, streamActiveRef, dispatch],
+        [conversationId, streamActiveRef, dispatch],
     );
 
     useEcho<RetryingPayload>(
@@ -178,9 +187,7 @@ export function useStreamChannel({
                 return;
             }
 
-            if (decision === 'apply') {
-                finishStream();
-            }
+            finishStream();
         },
         [conversationId, classifyLiveEvent, catchUp, finishStream],
     );

@@ -8,7 +8,6 @@ use App\Actions\RegisterDailyHealthDatasets;
 use App\Ai\Attributes\AiToolSensitivity;
 use App\Enums\DataSensitivity;
 use App\Enums\GlucoseUnit;
-use App\Enums\HealthAggregationFunction;
 use App\Enums\HealthSyncType;
 use App\Models\HealthDailyAggregate;
 use App\Models\HealthSyncSample;
@@ -73,7 +72,7 @@ final readonly class GetHealthSummary implements Tool
         $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate) use ($glucoseUnit): array {
             $inPersonUnit = $aggregate->type_identifier === 'bloodGlucose' && $aggregate->unit === GlucoseUnit::MgDl->value;
             $reading = fn (?float $value): float => $inPersonUnit ? $glucoseUnit->fromMgDl(round((float) $value, 1)) : round((float) $value, 1);
-            $primaryValue = $this->primaryValue($aggregate);
+            $primaryValue = $aggregate->primaryValue();
 
             return [
                 'date' => $aggregate->local_date?->toDateString() ?? $aggregate->date->toDateString(),
@@ -135,28 +134,5 @@ final readonly class GetHealthSummary implements Tool
             ->all();
 
         return $matched !== [] ? $matched : [$type];
-    }
-
-    private function primaryValue(HealthDailyAggregate $aggregate): ?float
-    {
-        $aggregationFunction = $aggregate->aggregation_function !== null
-            ? HealthAggregationFunction::tryFrom($aggregate->aggregation_function)
-            : null;
-
-        $value = match ($aggregationFunction) {
-            HealthAggregationFunction::Sum => $aggregate->value_sum,
-            HealthAggregationFunction::Avg, HealthAggregationFunction::WeightedAvg => $aggregate->value_avg,
-            HealthAggregationFunction::Min => $aggregate->value_min,
-            HealthAggregationFunction::Max => $aggregate->value_max,
-            HealthAggregationFunction::Last => $aggregate->value_last,
-            HealthAggregationFunction::Count => (float) $aggregate->value_count,
-            HealthAggregationFunction::None, null => $aggregate->primaryValue(),
-        };
-
-        if ($value === null) {
-            return null;
-        }
-
-        return round((float) $value, 1);
     }
 }
