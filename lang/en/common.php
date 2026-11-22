@@ -1166,6 +1166,8 @@ return [
             'goal' => 'Goal {{value}}',
             'target_range' => 'Target range {{low}}–{{high}}',
             'point' => '{{label}}: {{value}}',
+            'suggestions' => 'Suggested next steps',
+            'new_tab' => '(opens in a new tab)',
         ],
         'empty' => [
             'greeting' => 'Hi {{name}}, what would you like to work on?',

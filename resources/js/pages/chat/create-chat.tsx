@@ -8,6 +8,10 @@ import { BiometricsReviewBanner } from '@/components/biometrics-review-banner';
 import { extractApprovalPayload } from '@/components/chat/approval-part';
 import { currentDayPart, DAYLIGHT } from '@/components/chat/day-part';
 import { ChatStarters } from '@/components/chat/starters';
+import {
+    VisualSessionContext,
+    type VisualSession,
+} from '@/components/chat/visuals/visual-session';
 import { GLASS } from '@/components/glass';
 import {
     DropdownMenu,
@@ -30,6 +34,7 @@ import chat from '@/routes/chat';
 import type { AiAllowance } from '@/types';
 import type { ChatPageProps, ChatStatus, UIMessage } from '@/types/chat';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { createStateStore, type StateStore } from '@json-render/react';
 import type { FileUIPart } from 'ai';
 import {
     ArrowDown,
@@ -375,6 +380,48 @@ export default function CreateChat() {
         }
     }, [sendMessage]);
 
+    const latestSubmit = useRef(handleSubmit);
+    const visualSendLock = useRef(false);
+    const visualStores = useRef(new Map<string, StateStore>());
+    const isVisualBusy = isStreaming || isSubmitting;
+
+    useEffect(() => {
+        latestSubmit.current = handleSubmit;
+    });
+
+    useEffect(() => {
+        if (!isVisualBusy) {
+            visualSendLock.current = false;
+        }
+    }, [isVisualBusy]);
+
+    const visualSession = useMemo<VisualSession>(
+        () => ({
+            busy: isVisualBusy,
+            sendMessage: (text) => {
+                if (visualSendLock.current) {
+                    return;
+                }
+
+                visualSendLock.current = true;
+                latestSubmit.current(text);
+            },
+            store: (visualId, initialState) => {
+                const existing = visualStores.current.get(visualId);
+
+                if (existing) {
+                    return existing;
+                }
+
+                const store = createStateStore(initialState);
+                visualStores.current.set(visualId, store);
+
+                return store;
+            },
+        }),
+        [isVisualBusy],
+    );
+
     const [composerHasOwnText, setComposerHasOwnText] = useState(
         () => !shouldAutoStartInitialPrompt && normalizedInitialPrompt !== '',
     );
@@ -569,24 +616,26 @@ export default function CreateChat() {
                             )}
                         >
                             <h1 className="sr-only">{t('chat.page_title')}</h1>
-                            <ChatMessages
-                                messages={messages}
-                                status={status}
-                                retentionHours={temporaryRetentionHours}
-                                stoppedMessageIds={stoppedMessageIds}
-                                isSubmitting={showWorkingIndicator}
-                                onApprovalDecision={submitApprovalDecisions}
-                                welcomeStarters={
-                                    showStarters && (
-                                        <ChatStarters
-                                            variant="grid"
-                                            dayPart={dayPart}
-                                            onPick={handleStarterPick}
-                                            className="mt-6 hidden @min-[40rem]:grid"
-                                        />
-                                    )
-                                }
-                            />
+                            <VisualSessionContext value={visualSession}>
+                                <ChatMessages
+                                    messages={messages}
+                                    status={status}
+                                    retentionHours={temporaryRetentionHours}
+                                    stoppedMessageIds={stoppedMessageIds}
+                                    isSubmitting={showWorkingIndicator}
+                                    onApprovalDecision={submitApprovalDecisions}
+                                    welcomeStarters={
+                                        showStarters && (
+                                            <ChatStarters
+                                                variant="grid"
+                                                dayPart={dayPart}
+                                                onPick={handleStarterPick}
+                                                className="mt-6 hidden @min-[40rem]:grid"
+                                            />
+                                        )
+                                    }
+                                />
+                            </VisualSessionContext>
                             {!usageLimitTrigger && (
                                 <ChatErrorNotice
                                     error={error}

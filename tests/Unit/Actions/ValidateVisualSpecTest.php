@@ -13,16 +13,24 @@ it('accepts every catalog example and rejects a link that is not https', functio
     $validator = resolve(ValidateVisualSpec::class);
 
     foreach (get_object_vars($catalog->components) as $type => $component) {
-        $element = (object) ['type' => $type, 'props' => $component->example, 'children' => $component->acceptsChildren ? ['child'] : []];
+        $element = (object) ['type' => $type, 'props' => clone $component->example, 'children' => $component->acceptsChildren ? ['child'] : []];
+        $state = new stdClass;
 
         if ($type === 'Button') {
             $element->on = (object) ['press' => (object) ['action' => 'sendMessage', 'params' => (object) ['text' => 'Plan my lunch']]];
         }
 
+        foreach (['Segmented' => 'value', 'Checklist' => 'checked'] as $boundType => $prop) {
+            if ($type === $boundType) {
+                $state->{$prop} = $element->props->{$prop};
+                $element->props->{$prop} = (object) ['$bindState' => "/ui/{$prop}"];
+            }
+        }
+
         $spec = (object) ['root' => 'element', 'elements' => (object) [
             'element' => $element,
             'child' => (object) ['type' => 'Text', 'props' => (object) ['text' => 'Inside'], 'children' => []],
-        ]];
+        ], 'state' => (object) ['ui' => $state]];
 
         expect($validator->handle($spec, 1)->elements->element->type)->toBe($type);
     }
@@ -77,8 +85,20 @@ it('rejects a visual with a stable reason', function (string $spec, string $reas
     'unknown action' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":{"action":"deleteRecords","params":{}}}}}}', 'unknown_action'],
     'state write outside ui' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":{"action":"setState","params":{"statePath":"/data/steps","value":1}}}}}}', 'invalid_action'],
     'uneven comparison' => ['{"root":"a","elements":{"a":{"type":"Comparison","props":{"columns":["Oats","Rice"],"rows":[{"label":"Fiber","values":[4,1,2]}]},"children":[]}}}', 'invalid_comparison'],
-    'segment outside its options' => ['{"root":"a","elements":{"a":{"type":"Segmented","props":{"options":[{"label":"Steps","value":"steps"},{"label":"Sleep","value":"sleep"}],"value":"water"},"children":[]}}}', 'invalid_segmented'],
-    'duplicate checklist ids' => ['{"root":"a","elements":{"a":{"type":"Checklist","props":{"items":[{"id":"oats","label":"Oats"},{"id":"oats","label":"More oats"}],"checked":[]},"children":[]}}}', 'invalid_checklist'],
+    'segment outside its options' => ['{"root":"a","elements":{"a":{"type":"Segmented","props":{"options":[{"label":"Steps","value":"steps"},{"label":"Sleep","value":"sleep"}],"value":{"$bindState":"/ui/metric"}},"children":[]}},"state":{"ui":{"metric":"water"}}}', 'invalid_segmented'],
+    'a segmented control with nothing to switch' => ['{"root":"a","elements":{"a":{"type":"Segmented","props":{"options":[{"label":"Steps","value":"steps"},{"label":"Sleep","value":"sleep"}],"value":"steps"},"children":[]}}}', 'invalid_segmented'],
+    'duplicate checklist ids' => ['{"root":"a","elements":{"a":{"type":"Checklist","props":{"items":[{"id":"oats","label":"Oats"},{"id":"oats","label":"More oats"}],"checked":{"$bindState":"/ui/done"}},"children":[]}},"state":{"ui":{"done":[]}}}', 'invalid_checklist'],
+    'a checklist that cannot be ticked' => ['{"root":"a","elements":{"a":{"type":"Checklist","props":{"items":[{"id":"oats","label":"Oats"}],"checked":[]},"children":[]}}}', 'invalid_checklist'],
+    'a binding to an empty path' => ['{"root":"a","elements":{"a":{"type":"Checklist","props":{"items":[{"id":"oats","label":"Oats"}],"checked":{"$bindState":"/ui/"}},"children":[]}},"state":{"ui":{"":[]}}}', 'unresolved_reference'],
+    'a press with no actions' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":[]}}}}', 'missing_action'],
+    'a press that does more than its action' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":{"action":"sendMessage","params":{"text":"Hi"},"onSuccess":{"set":{"/data/steps":[]}}}}}}}', 'unsupported_field'],
+    'an action param read from state' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Read"},"children":[],"on":{"press":{"action":"openLink","params":{"url":{"$state":"/ui/link"}}}}}},"state":{"ui":{"link":"https://example.com"}}}', 'unsupported_expression'],
+    'a state write into a prototype' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Go"},"children":[],"on":{"press":{"action":"setState","params":{"statePath":"/ui/__proto__/polluted","value":1}}}}}}', 'invalid_action'],
+    'a state path longer than 512 bytes' => [fn (): string => json_encode(['root' => 'a', 'elements' => ['a' => ['type' => 'Button', 'props' => ['label' => 'Go'], 'children' => [], 'on' => ['press' => ['action' => 'setState', 'params' => ['statePath' => '/ui/'.str_repeat('а', 300), 'value' => 1]]]]]], JSON_THROW_ON_ERROR), 'invalid_action'],
+    'a link without a host' => ['{"root":"a","elements":{"a":{"type":"Button","props":{"label":"Read"},"children":[],"on":{"press":{"action":"openLink","params":{"url":"https://"}}}}}}', 'invalid_action'],
+    'a chip link with credentials' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Read","action":{"action":"openLink","params":{"url":"https://user:secret@example.com"}}}]},"children":[]}}}', 'invalid_action'],
+    'a chip action read from state' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Ask","action":{"action":"sendMessage","params":{"text":{"$state":"/ui/question"}}}}]},"children":[]}},"state":{"ui":{"question":"How did I sleep?"}}}', 'unsupported_expression'],
+    'a chip action that does more than its action' => ['{"root":"a","elements":{"a":{"type":"SuggestionChips","props":{"items":[{"label":"Ask","action":{"action":"sendMessage","params":{"text":"Hi"},"onSuccess":{"set":{"/data/steps":[]}}}}]},"children":[]}}}', 'invalid_props'],
     'chart row without a label' => ['{"root":"a","elements":{"a":{"type":"BarChart","props":{"title":"Steps","data":[{"day":3,"steps":10}],"xKey":"day","yKey":"steps","unit":"steps"},"children":[]}}}', 'invalid_chart_axis'],
     'inverted range' => ['{"root":"a","elements":{"a":{"type":"LineChart","props":{"title":"Sleep","data":[],"xKey":"day","yKey":"hours","unit":"h","range":{"low":9,"high":7}},"children":[]}}}', 'invalid_range'],
     'too many elements' => [fn (): string => visualWithTexts(129), 'too_many_elements'],

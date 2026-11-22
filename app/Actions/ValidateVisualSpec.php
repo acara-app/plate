@@ -15,6 +15,21 @@ final readonly class ValidateVisualSpec
 
     private const string DATA_PREFIX = '/data/';
 
+    private const int MAX_PATH_BYTES = 512;
+
+    /**
+     * @var list<string>
+     */
+    private const array UNSAFE_PATH_SEGMENTS = ['__proto__', 'constructor', 'prototype'];
+
+    /**
+     * @var array<string, array{prop: string, reason: string}>
+     */
+    private const array BOUND_PROPS = [
+        'Segmented' => ['prop' => 'value', 'reason' => 'invalid_segmented'],
+        'Checklist' => ['prop' => 'checked', 'reason' => 'invalid_checklist'],
+    ];
+
     /**
      * @var list<string>
      */
@@ -132,6 +147,8 @@ final readonly class ValidateVisualSpec
         throw_if($children !== [] && ! $component['acceptsChildren'], InvalidVisualSpecException::class, 'children_not_allowed');
 
         $props = $this->props($element->props ?? new stdClass, $component['props']);
+        $this->assertBound($type, $props);
+        $this->assertLiteralChipActions($type, $props);
         $resolved = $this->resolve($props, $state);
         $this->assertMatches($resolved, $component['props'], 'invalid_props');
         $this->assertComponentRules($type, $resolved);
@@ -146,7 +163,7 @@ final readonly class ValidateVisualSpec
             $sanitized->visible = $element->visible;
         }
 
-        $on = $this->events($type, $element->on ?? null, $state, $catalogVersion);
+        $on = $this->events($type, $element->on ?? null, $catalogVersion);
 
         if ($on instanceof stdClass) {
             $sanitized->on = $on;
@@ -199,7 +216,9 @@ final readonly class ValidateVisualSpec
         if ($pointer !== null) {
             $readsData = array_key_exists('$state', $fields) && is_string($pointer) && str_starts_with($pointer, self::DATA_PREFIX);
 
-            throw_if(count($fields) !== 1 || ! is_string($pointer) || (! $readsData && ! str_starts_with($pointer, self::LOCAL_STATE_PREFIX)), InvalidVisualSpecException::class, 'unresolved_reference');
+            $writes = array_key_exists('$bindState', $fields);
+
+            throw_if(count($fields) !== 1 || ! is_string($pointer) || ($writes && ! $this->isLocalPath($pointer)) || (! $readsData && ! str_starts_with($pointer, self::LOCAL_STATE_PREFIX)), InvalidVisualSpecException::class, 'unresolved_reference');
 
             return $this->stateValue($state, $pointer);
         }
@@ -291,6 +310,7 @@ final readonly class ValidateVisualSpec
             'Comparison' => $this->hasEvenRows($props) ? null : 'invalid_comparison',
             'Segmented' => $this->hasSelectableOptions($props) ? null : 'invalid_segmented',
             'Checklist' => $this->hasUniqueIds($props->items ?? []) ? null : 'invalid_checklist',
+            'SuggestionChips' => $this->hasSafeLinks($props->items ?? []) ? null : 'invalid_action',
             'BarChart', 'LineChart' => match (true) {
                 ! $this->hasChartAxis($props) => 'invalid_chart_axis',
                 ! $this->hasOrderedRange($props) => 'invalid_range',
@@ -325,6 +345,20 @@ final readonly class ValidateVisualSpec
         );
 
         return count($values) === count(array_unique($values, SORT_REGULAR)) && in_array($props->value ?? null, $values, true);
+    }
+
+    private function hasSafeLinks(mixed $items): bool
+    {
+        foreach (is_array($items) ? $items : [] as $item) {
+            $action = $item instanceof stdClass ? $item->action ?? null : null;
+            $params = $action instanceof stdClass ? $action->params ?? null : null;
+
+            if ($params instanceof stdClass && ($action->action ?? null) === 'openLink' && ! $this->isSafeLink($params->url ?? null)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function hasUniqueIds(mixed $items): bool
@@ -386,7 +420,83 @@ final readonly class ValidateVisualSpec
         throw_if(! is_string($path) || ! str_starts_with($path, self::LOCAL_STATE_PREFIX) || array_diff(array_keys($fields), self::CONDITION_OPERATORS) !== [], InvalidVisualSpecException::class, 'unsupported_expression');
     }
 
-    private function events(string $type, mixed $on, stdClass $state, int $catalogVersion): ?stdClass
+    private function assertBound(string $type, stdClass $props): void
+    {
+        $bound = self::BOUND_PROPS[$type] ?? null;
+
+        if ($bound === null) {
+            return;
+        }
+
+        $binding = $props->{$bound['prop']} ?? null;
+
+        throw_unless($binding instanceof stdClass && array_keys(get_object_vars($binding)) === ['$bindState'], InvalidVisualSpecException::class, $bound['reason']);
+    }
+
+    private function assertLiteralChipActions(string $type, stdClass $props): void
+    {
+        if ($type !== 'SuggestionChips') {
+            return;
+        }
+
+        foreach (is_array($props->items ?? null) ? $props->items : [] as $item) {
+            throw_if($item instanceof stdClass && $this->hasReference($item->action ?? null), InvalidVisualSpecException::class, 'unsupported_expression');
+        }
+    }
+
+    private function assertSafeAction(string $action, mixed $params): void
+    {
+        $safe = match ($action) {
+            'openLink' => $params instanceof stdClass && $this->isSafeLink($params->url ?? null),
+            'setState', 'pushState', 'removeState' => $params instanceof stdClass
+                && $this->isLocalPath($params->statePath ?? null)
+                && (! property_exists($params, 'clearStatePath') || $params->clearStatePath === null || $this->isLocalPath($params->clearStatePath)),
+            default => true,
+        };
+
+        throw_unless($safe, InvalidVisualSpecException::class, 'invalid_action');
+    }
+
+    private function hasReference(mixed $value): bool
+    {
+        if (is_array($value)) {
+            return array_any($value, $this->hasReference(...));
+        }
+
+        if (! $value instanceof stdClass) {
+            return false;
+        }
+
+        return array_any(get_object_vars($value), fn ($item, $name): bool => str_starts_with((string) $name, '$') || $this->hasReference($item));
+    }
+
+    private function isLocalPath(mixed $path): bool
+    {
+        if (! is_string($path) || ! str_starts_with($path, self::LOCAL_STATE_PREFIX) || mb_strlen($path, '8bit') > self::MAX_PATH_BYTES) {
+            return false;
+        }
+
+        $segments = array_map(
+            fn (string $segment): string => str_replace(['~1', '~0'], ['/', '~'], $segment),
+            explode('/', mb_substr($path, 1)),
+        );
+
+        return count($segments) <= $this->catalog->limits()['depth']
+            && array_filter($segments, fn (string $segment): bool => $segment === '' || in_array($segment, self::UNSAFE_PATH_SEGMENTS, true)) === [];
+    }
+
+    private function isSafeLink(mixed $url): bool
+    {
+        $parts = is_string($url) ? parse_url($url) : false;
+
+        return is_array($parts)
+            && mb_strtolower($parts['scheme'] ?? '') === 'https'
+            && ($parts['host'] ?? '') !== ''
+            && ! isset($parts['user'])
+            && ! isset($parts['pass']);
+    }
+
+    private function events(string $type, mixed $on, int $catalogVersion): ?stdClass
     {
         if ($type !== 'Button') {
             throw_if($on !== null, InvalidVisualSpecException::class, 'unsupported_field');
@@ -396,13 +506,24 @@ final readonly class ValidateVisualSpec
 
         throw_if(! $on instanceof stdClass || ($on->press ?? null) === null || array_diff(array_keys(get_object_vars($on)), ['press']) !== [], InvalidVisualSpecException::class, 'missing_action');
 
-        foreach (is_array($on->press) ? $on->press : [$on->press] as $binding) {
+        $bindings = is_array($on->press) ? $on->press : [$on->press];
+
+        throw_if($bindings === [], InvalidVisualSpecException::class, 'missing_action');
+
+        foreach ($bindings as $binding) {
             $action = $binding instanceof stdClass ? $binding->action ?? null : null;
             $schema = is_string($action) ? $this->catalog->actionParams($action, $catalogVersion) : null;
 
-            throw_if(! $binding instanceof stdClass || ! $schema instanceof stdClass, InvalidVisualSpecException::class, 'unknown_action');
+            throw_if(! $binding instanceof stdClass || ! is_string($action) || ! $schema instanceof stdClass, InvalidVisualSpecException::class, 'unknown_action');
 
-            $this->assertMatches($this->resolve($binding->params ?? new stdClass, $state), $schema, 'invalid_action');
+            throw_if(array_diff(array_keys(get_object_vars($binding)), ['action', 'params']) !== [], InvalidVisualSpecException::class, 'unsupported_field');
+
+            $params = $binding->params ?? new stdClass;
+
+            throw_if($this->hasReference($params), InvalidVisualSpecException::class, 'unsupported_expression');
+
+            $this->assertMatches($params, $schema, 'invalid_action');
+            $this->assertSafeAction($action, $params);
         }
 
         return $on;
