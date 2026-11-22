@@ -25,7 +25,7 @@ use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(35000)]
-#[Timeout(60)]
+#[Timeout(30)]
 final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageToUser, HasProviderOptions, HasStructuredOutput
 {
     use HasUsageUser;
@@ -156,13 +156,12 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            provider: $model->provider,
-            model: $model->model,
+            provider: $model->providers(),
         );
 
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
-        $data['analyzer_version'] = self::version($model->model);
+        $data['analyzer_version'] = self::version($response->meta->model ?? $model->model);
 
         return FoodAnalysisData::from($data);
     }
