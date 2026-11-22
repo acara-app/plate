@@ -232,7 +232,7 @@ it('finishes a prose reply that was queued before chat visuals existed', functio
 
 function scriptedReply(string $scenario): string
 {
-    return mb_rtrim(File::get(base_path("tests/Fixtures/chat-visual-replies/{$scenario}.md")), "\n");
+    return mb_rtrim(File::get(base_path("tests/Fixtures/chat-visual-replies/{$scenario}.txt")), "\n");
 }
 
 function walkReply(): string
