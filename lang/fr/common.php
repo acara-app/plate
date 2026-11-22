@@ -728,8 +728,8 @@ return [
             'spotting' => 'Repérage de chaque aliment…',
             'portions' => 'Estimation des portions…',
             'macros' => 'Calcul des calories et des macros…',
-            'usual' => 'La plupart des repas prennent 5 à 15 secondes.',
-            'slow' => 'C’est un peu plus long que d’habitude. Encore quelques secondes.',
+            'usual' => 'Patientez pendant que nous analysons votre assiette.',
+            'slow' => 'Les assiettes bien remplies prennent un peu plus de temps.',
             'keep_open' => 'L’analyse continue. Gardez cette page ouverte, votre repas sera enregistré.',
         ],
         'camera' => [

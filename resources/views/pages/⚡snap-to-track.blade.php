@@ -650,9 +650,9 @@ class extends Component
                             <div role="status">
                                 <h2 class="text-2xl font-bold tracking-tight">Analyzing your meal</h2>
                                 <p
-                                    x-text="seconds < 15 ? 'Most meals take 5–15 seconds.' : (seconds < 45 ? 'Taking a little longer than usual. Busy plates need a few extra seconds.' : 'Still working on it. You can leave this page — come back in this browser and your result will be waiting.')"
+                                    x-text="seconds < 30 ? 'Hang tight while we read your plate.' : (seconds < 45 ? 'Busy plates take a little longer.' : 'Still working on it. You can leave this page — come back in this browser and your result will be waiting.')"
                                     class="mt-1.5 text-[15px] leading-relaxed text-white/70"
-                                >Most meals take 5–15 seconds.</p>
+                                >Hang tight while we read your plate.</p>
                             </div>
                             <ol class="grid gap-3.5">
                                 @foreach (['Photo received', 'Spotting each food', 'Estimating portion sizes', 'Calculating calories & macros'] as $stepLabel)
@@ -966,7 +966,7 @@ class extends Component
                                 </button>
 
                                 <p wire:loading wire:target="analyze" class="text-center text-sm text-white/60">
-                                    This usually takes 5–15 seconds. Hang tight.
+                                    Hang tight while we read your plate.
                                 </p>
                             @endif
                         </div>
@@ -1018,7 +1018,7 @@ class extends Component
                     <h2 id="what-heading" class="text-xl font-semibold tracking-tight">What is Snap to Track?</h2>
                     <p class="mt-4 max-w-4xl text-2xl leading-snug font-semibold tracking-tight text-pretty sm:text-4xl sm:leading-[1.2]">
                         <strong class="font-semibold">Snap to Track</strong> is a free AI food photo analyzer that estimates calories and macros (protein, carbs, and fat) for every food in your meal.
-                        <span class="text-neutral-500">Use it as a free meal scanner: upload one photo and get a per-item nutrition breakdown in about 20 seconds, no signup required.</span>
+                        <span class="text-neutral-500">Use it as a free meal scanner: upload one photo and get a per-item nutrition breakdown, with no typing and no signup.</span>
                     </p>
                 </section>
 

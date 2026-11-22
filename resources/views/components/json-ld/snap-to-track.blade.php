@@ -42,7 +42,6 @@ $faqPage = [
     "@@type": "HowTo",
     "name": "How to count calories and macros from a food photo",
     "description": "A 3-step guide to estimating calories, protein, carbs, and fat for a meal using an AI food photo analyzer.",
-    "totalTime": "PT15S",
     "supply": [
         {"@@type": "HowToSupply", "name": "A meal you want to analyze"},
         {"@@type": "HowToSupply", "name": "A phone or computer with a camera"}
@@ -69,7 +68,7 @@ $faqPage = [
             "@@type": "HowToStep",
             "position": 3,
             "name": "Get an instant macro breakdown",
-            "text": "In about 20 seconds you receive total calories, protein, carbs, and fat for the meal plus a per-item breakdown and a confidence score.",
+            "text": "You receive total calories, protein, carbs, and fat for the meal plus a per-item breakdown and a confidence score.",
             "url": "{{ $currentUrl }}#how-it-works"
         }
     ]

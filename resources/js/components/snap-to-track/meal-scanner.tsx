@@ -142,7 +142,7 @@ function AnalysisStatus({
             ? 1
             : 2;
     const stageName = ANALYSIS_STAGES[stage] ?? 'sending';
-    const pace = seconds < 15 ? 'usual' : seconds < 45 ? 'slow' : 'keep_open';
+    const pace = seconds < 30 ? 'usual' : seconds < 45 ? 'slow' : 'keep_open';
 
     return (
         <div className="flex h-full flex-col items-center justify-center gap-2.5 px-2 text-center">

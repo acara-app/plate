@@ -727,8 +727,8 @@ return [
             'spotting' => 'Spotting each food…',
             'portions' => 'Estimating portion sizes…',
             'macros' => 'Calculating calories and macros…',
-            'usual' => 'Most meals take 5–15 seconds.',
-            'slow' => 'Taking a little longer than usual. Busy plates need a few extra seconds.',
+            'usual' => 'Hang tight while we read your plate.',
+            'slow' => 'Busy plates take a little longer.',
             'keep_open' => 'Still working on it. Keep this page open — your meal saves as soon as it’s ready.',
         ],
         'camera' => [
