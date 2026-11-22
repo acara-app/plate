@@ -74,7 +74,7 @@ it('names each switched view with the option that shows it', function (): void {
             'routine' => ['type' => 'Card', 'props' => ['title' => 'Wind-down routine'], 'children' => ['switch', 'weeknight', 'weekend']],
             'switch' => ['type' => 'Segmented', 'props' => ['options' => [['label' => 'Weeknights', 'value' => 'weeknight'], ['label' => 'Weekends', 'value' => 'weekend']], 'value' => ['$bindState' => '/ui/night']], 'children' => []],
             'weeknight' => ['type' => 'Steps', 'props' => ['items' => [['title' => 'Dim the lights']]], 'children' => [], 'visible' => ['$state' => '/ui/night', 'eq' => 'weeknight']],
-            'weekend' => ['type' => 'Steps', 'props' => ['items' => [['title' => 'Take a warm shower']]], 'children' => [], 'visible' => ['$state' => '/ui/night', 'eq' => 'weekend']],
+            'weekend' => ['type' => 'Steps', 'props' => ['items' => [['title' => 'Take a warm shower']]], 'children' => [], 'visible' => ['eq' => 'weekend', '$state' => '/ui/night']],
         ],
         'state' => ['ui' => ['night' => 'weeknight']],
     ];

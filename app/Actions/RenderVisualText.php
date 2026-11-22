@@ -114,7 +114,7 @@ final readonly class RenderVisualText
      */
     private function variantLabel(mixed $condition, array $visual): ?string
     {
-        if (! is_array($condition) || array_keys($condition) !== ['$state', 'eq'] || ! is_string($condition['$state']) || ! is_string($condition['eq'])) {
+        if (! is_array($condition) || count($condition) !== 2 || ! is_string($condition['$state'] ?? null) || ! is_string($condition['eq'] ?? null)) {
             return null;
         }
 
