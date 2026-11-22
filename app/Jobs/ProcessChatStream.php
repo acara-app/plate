@@ -31,6 +31,7 @@ use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Decision;
 use Laravel\Ai\Approvals\Decisions;
 use Laravel\Ai\Files\Base64Image;
+use ReflectionMethod;
 use Throwable;
 
 #[MaxExceptions(3)]
@@ -38,7 +39,9 @@ use Throwable;
 #[Tries(ProcessChatStream::TRIES)]
 final class ProcessChatStream implements ShouldQueue
 {
-    use Queueable;
+    use Queueable {
+        __unserialize as private restoreQueuedProperties;
+    }
 
     public const int TRIES = 3;
 
@@ -59,6 +62,22 @@ final class ProcessChatStream implements ShouldQueue
         public ?array $agentModels = null,
         public ?int $catalogVersion = null,
     ) {}
+
+    /**
+     * @param  array<string, mixed>  $values
+     */
+    public function __unserialize(array $values): void
+    {
+        $defaults = [];
+
+        foreach (new ReflectionMethod(self::class, '__construct')->getParameters() as $parameter) {
+            if ($parameter->isPromoted() && $parameter->isDefaultValueAvailable()) {
+                $defaults[$parameter->getName()] = $parameter->getDefaultValue();
+            }
+        }
+
+        $this->restoreQueuedProperties([...$defaults, ...$values]);
+    }
 
     /**
      * @return list<int>

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\CreatePendingChatStreamTurn;
 use App\Ai\Agents\AgentRunner;
 use App\Enums\SettingKey;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -234,6 +235,29 @@ it('shows a later turn the earlier visual as its text rendering', function (): v
         ->first(fn (object $message): bool => $message instanceof AssistantMessage);
 
     expect($turn->content)->toBe('Here you go.'."\n".ReplyComposer::contextMarker('Walk after lunch.').'Enjoy it.');
+});
+
+it('finishes a prose reply that was queued before chat visuals existed', function (): void {
+    $user = User::factory()->create(['locale' => 'en']);
+    $conversation = Conversation::factory()->forUser($user)->create();
+    $turn = resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'When should I walk?', [], 'web');
+    AgentRunner::fake(['Walk after lunch.'])->preventStrayPrompts();
+
+    $properties = new ProcessChatStream(
+        userId: $user->id,
+        conversationId: $conversation->id,
+        modelName: 'gpt-test',
+        channel: 'web',
+        streamId: $turn->streamId,
+        userMessageId: $turn->userMessageId,
+        assistantMessageId: $turn->assistantMessageId,
+    )->__serialize();
+    unset($properties['catalogVersion']);
+    $queuedByThePreviousRelease = 'O:'.mb_strlen(ProcessChatStream::class).':"'.ProcessChatStream::class.'"'.mb_substr(serialize($properties), 1);
+
+    dispatch_sync(unserialize($queuedByThePreviousRelease));
+
+    expect(History::query()->whereKey($turn->assistantMessageId)->sole()->content)->toBe('Walk after lunch.');
 });
 
 function fakeChatVisualsRedis(): void
