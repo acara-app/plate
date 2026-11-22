@@ -432,6 +432,11 @@
             </div>
         </div>
     </div>
+    <div class="mx-auto max-w-4xl px-6 pb-16">
+        <x-snap-promo heading="Got a whole plate, not a single food?" :location="$currentCategory ? 'food_category' : 'food_index'">
+            This database covers one food at a time. For a full plate, snap a photo and our <x-snap-link :location="$currentCategory ? 'food_category' : 'food_index'">free AI calorie counter</x-snap-link> estimates every food on it, with the calories, carbs, protein, and fat.
+        </x-snap-promo>
+    </div>
     <div class="bg-slate-50 dark:bg-slate-900 py-12 border-t border-slate-200 dark:border-slate-800"
         aria-labelledby="gi-guide-title">
         <div class="mx-auto max-w-4xl px-6">

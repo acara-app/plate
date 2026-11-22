@@ -143,7 +143,7 @@
                 <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</div>
                 <h3 class="mt-2 text-lg font-semibold text-slate-900">Track & Tweak</h3>
                 <p class="mt-2 text-sm text-slate-600">
-                    Log meals through easy chat (Web or <a href="{{ route('telegram-health-logging') }}" class="text-emerald-600 hover:underline">Telegram</a>). See <a href="{{ route('spike-calculator') }}" class="text-emerald-600 hover:underline">glucose predictions</a> and adjust as you go.
+                    Log meals through easy chat (Web or <a href="{{ route('telegram-health-logging') }}" class="text-emerald-600 hover:underline">Telegram</a>), or snap a photo with our <x-snap-link location="meal_planner_steps" class="text-emerald-600">AI meal scanner</x-snap-link>. See <a href="{{ route('spike-calculator') }}" class="text-emerald-600 hover:underline">glucose predictions</a> and adjust as you go.
                 </p>
             </div>
         </div>
@@ -495,6 +495,10 @@
             </a>
         </div>
     </section>
+
+    <x-snap-promo class="mb-16" heading="Check a real meal against your plan" location="meal_planner">
+        Ate something off-plan? No need to count it by hand. Snap the plate and our <x-snap-link location="meal_planner">calorie and macro counter</x-snap-link> estimates the calories, carbs, protein, and fat for each food.
+    </x-snap-promo>
 
     {{-- Unique Features --}}
     <section class="mb-16">

@@ -371,7 +371,7 @@ class extends Component
                     <div class="font-bold text-5xl italic leading-none text-[#C4623A]">A</div>
                     <h3 class="mt-4 font-bold text-xl leading-tight tracking-[-0.01em] text-[#1A1814]">You name the food</h3>
                     <p class="speakable-how-it-works mt-3 text-sm leading-relaxed text-[#3D3833]">
-                        "Two slices of pizza," "a banana with peanut butter"—plain English works. Our free tool parses portion and ingredients, then weighs carbs, fiber, protein, and fat to predict how quickly your body will digest it.
+                        "Two slices of pizza," "a banana with peanut butter"—plain English works. Our free tool parses portion and ingredients, then weighs carbs, fiber, protein, and fat to predict how quickly your body will digest it. Not sure what's on the plate? Try our <x-snap-link location="spike_calculator_how_it_works">AI food scanner</x-snap-link>.
                     </p>
                 </article>
                 <article class="border-b border-[#D9CFBC] px-2 pt-8 pb-10 sm:border-b-0 sm:px-7">
@@ -399,6 +399,12 @@ class extends Component
                 </p>
             </aside>
         </section>
+
+        <div class="mx-auto mt-24 max-w-7xl lg:px-8">
+            <x-snap-promo heading="Don't know what's on your plate? Snap it." location="spike_calculator">
+                Not every plate comes with a label. Snap it instead and <x-snap-link location="spike_calculator">count carbs from a photo</x-snap-link>, then check each food's spike right here.
+            </x-snap-promo>
+        </div>
 
         {{-- FAQ --}}
         <section class="mx-auto mt-24 max-w-7xl lg:px-8" aria-labelledby="faq-heading">

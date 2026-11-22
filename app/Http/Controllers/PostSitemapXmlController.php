@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Content;
-use App\Utilities\LanguageUtil;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\Response;
 use Spatie\Sitemap\Sitemap;
@@ -13,24 +13,31 @@ use Spatie\Sitemap\Tags\Url;
 
 final class PostSitemapXmlController
 {
+    private const array LOCALES = ['en', 'mn'];
+
+    private const string TEMPLATE_UPDATED = '2026-11-22';
+
     public function post(): Response
     {
         $posts = Content::query()
             ->published()
             ->post()
-            ->with(['translations' => fn (Relation $query) => $query->where('is_published', true)])
+            ->whereIn('locale', self::LOCALES)
+            ->with(['translations' => fn (Relation $query) => $query->where('is_published', true)->whereIn('locale', self::LOCALES)])
             ->orderByDesc('created_at')
             ->get();
 
+        $templateUpdated = CarbonImmutable::parse(self::TEMPLATE_UPDATED);
+
         $sitemap = Sitemap::create();
 
-        foreach (LanguageUtil::keys() as $locale) {
+        foreach (self::LOCALES as $locale) {
             $indexUrl = $locale === 'en' ? route('post.index') : route('post.locale.index', ['locale' => $locale]);
             $url = Url::create($indexUrl)
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_WEEKLY)
                 ->setPriority(0.8);
 
-            foreach (LanguageUtil::keys() as $altLocale) {
+            foreach (self::LOCALES as $altLocale) {
                 $altUrl = $altLocale === 'en' ? route('post.index') : route('post.locale.index', ['locale' => $altLocale]);
                 $url->addAlternate($altUrl, $altLocale);
             }
@@ -47,7 +54,7 @@ final class PostSitemapXmlController
                 : route('post.locale.show', ['locale' => $locale, 'slug' => $post->slug]);
 
             $url = Url::create($postUrl)
-                ->setLastModificationDate($post->updated_at)
+                ->setLastModificationDate($post->updated_at->max($templateUpdated))
                 ->setChangeFrequency(Url::CHANGE_FREQUENCY_MONTHLY)
                 ->setPriority(0.7);
 
@@ -70,6 +77,7 @@ final class PostSitemapXmlController
                     ->published()
                     ->where('slug', $post->slug)
                     ->where('locale', '!=', $post->locale)
+                    ->whereIn('locale', self::LOCALES)
                     ->get();
             }
 

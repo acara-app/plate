@@ -339,6 +339,14 @@
             </div>
         </section>
 
+        <section class="bg-white pb-16 sm:pb-24">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <x-snap-promo heading="A photo calorie counter your clients can try free" location="for_dietitians">
+                    Clients who skip food logs can still snap their meals. Our <x-snap-link location="for_dietitians">photo calorie counter app</x-snap-link> runs in any phone browser and estimates the calories, carbs, protein, and fat for each food.
+                </x-snap-promo>
+            </div>
+        </section>
+
         {{-- How It Works Section --}}
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -731,7 +739,7 @@
         <section class="border-t border-slate-200 py-12 bg-slate-50">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <h3 class="text-sm font-semibold text-slate-900 uppercase tracking-wide mb-6">Related Tools & Resources</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                     <a href="{{ route('meal-planner') }}" class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
                         <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -763,6 +771,18 @@
                         <div>
                             <span class="font-medium text-slate-900 group-hover:text-blue-700">All Tools</span>
                             <p class="text-xs text-slate-500">Full tool directory</p>
+                        </div>
+                    </a>
+                    <a href="{{ route('snap-to-track') }}" data-umami-event="snap_to_track_cta_click" data-umami-event-location="for_dietitians_tools" class="group flex items-center gap-3 rounded-lg border border-slate-200 bg-white p-4 transition-all hover:border-emerald-300 hover:bg-emerald-50">
+                        <span class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 group-hover:bg-emerald-200">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                                <circle cx="12" cy="12" r="4" />
+                            </svg>
+                        </span>
+                        <div>
+                            <span class="font-medium text-slate-900 group-hover:text-emerald-700">Calorie and Macro Counter</span>
+                            <p class="text-xs text-slate-500">Estimate a meal from a photo</p>
                         </div>
                     </a>
                 </div>

@@ -109,6 +109,10 @@
                     AI processes this information to generate personalized meal plans complete with macro-balanced recipes, portion guidance, and automated grocery lists. Track progress through an integrated diabetes logbook, monitor glucose trends, and receive actionable insights to improve time-in-range.
                 </p>
 
+                <p>
+                    Snap to Track, our <x-snap-link location="about">free AI photo calorie counter</x-snap-link>, estimates the calories, carbs, protein, and fat in a meal from a single photo, and anyone can try it without an account.
+                </p>
+
                 <h2>Roadmap: Towards a Fully Agentic System</h2>
                 <p>
                     Health should be personal, flexible, and evidence-based. We are moving beyond simple tracking toward a proactive, autonomous system that adapts to your logged data.

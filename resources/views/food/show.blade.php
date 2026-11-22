@@ -375,6 +375,13 @@
                 </p>
             </div>
 
+            @php
+                $snapAnchors = ['photo calorie counter', 'food calorie calculator by photo', 'AI food scanner', 'free AI calorie counter', 'picture calorie counter', 'AI calorie estimator', 'macro scanner'];
+            @endphp
+            <x-snap-promo class="mb-10" :heading="'Having '.$displayName.' as part of a meal?'" location="food_show">
+                These numbers are per 100&nbsp;g, and your plate isn't. Snap your actual plate with our <x-snap-link location="food_show">{{ $snapAnchors[$content->id % count($snapAnchors)] }}</x-snap-link> and see the calories, carbs, protein, and fat for every food on it.
+            </x-snap-promo>
+
             {{-- Compare With Section (SEO Cross-Links) --}}
             @if(isset($comparisonLinks) && count($comparisonLinks) > 0)
             <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-6 mb-10">
@@ -445,7 +452,7 @@
                     More Diabetes Tools
                 </h2>
                 <div class="grid md:grid-cols-2 gap-4">
-                    <a href="{{ route('home') }}" class="group flex items-center p-4 bg-linear-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-lg hover:from-primary/10 hover:to-primary/15 dark:hover:from-primary/15 dark:hover:to-primary/25 transition-all border border-primary/20">
+                    <a href="{{ route('ai-nutritionist') }}" class="group flex items-center p-4 bg-linear-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-lg hover:from-primary/10 hover:to-primary/15 dark:hover:from-primary/15 dark:hover:to-primary/25 transition-all border border-primary/20">
                         <div class="shrink-0 w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mr-4">
                             <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -467,6 +474,18 @@
                             <p class="text-sm text-slate-500 dark:text-slate-400">Visualize your spikes. Predict your A1C. Export for your doctor.</p>
                         </div>
                     </a>
+                    <a href="{{ route('snap-to-track') }}" data-umami-event="snap_to_track_cta_click" data-umami-event-location="food_show_tools" class="group flex items-center p-4 md:col-span-2 bg-slate-50 dark:bg-slate-800 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                        <div class="shrink-0 w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-4">
+                            <svg class="size-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                                <circle cx="12" cy="12" r="4" stroke-width="2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">Count carbs from a photo</h3>
+                            <p class="text-sm text-slate-500 dark:text-slate-400">Snap your plate to see the carbs and calories in every food.</p>
+                        </div>
+                    </a>
                 </div>
             </div>
 
@@ -478,4 +497,6 @@
             </div>
         </article>
     </div>
+
+    <x-footer />
 </x-default-layout>

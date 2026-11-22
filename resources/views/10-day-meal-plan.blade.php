@@ -351,11 +351,12 @@
                     </svg>
                 </div>
                 <div class="flex-1 text-center sm:text-left">
-                    <h2 class="text-xl font-bold">Track Your Meals Instantly</h2>
-                    <p class="mt-1 text-slate-400">Snap a photo of your food and get nutrition facts immediately—no
-                        typing required.</p>
+                    <h2 class="text-xl font-bold">Swapped a meal?</h2>
+                    <p class="mt-1 text-slate-400">Check it with our <x-snap-link location="ten_day_meal_plan_promo" class="text-white">photo calorie counter</x-snap-link>: snap the plate and see the calories, carbs, protein, and fat, no typing required.</p>
                 </div>
                 <a href="{{ route('snap-to-track') }}"
+                    data-umami-event="snap_to_track_cta_click"
+                    data-umami-event-location="ten_day_meal_plan_promo"
                     class="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg transition-all hover:bg-blue-500">
                     Try Snap to Track
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -474,7 +475,7 @@
                 </p>
                 <ul class="list-disc list-inside space-y-1 ml-4">
                     <li>Balanced macronutrients to stabilize blood sugar levels</li>
-                    <li>Portion control and consistent meal timing</li>
+                    <li>Portion control and consistent meal timing (a <x-snap-link location="ten_day_meal_plan_mnt">macro scanner</x-snap-link> helps you check portions)</li>
                     <li>High-fiber foods to improve glucose control</li>
                     <li>Lean proteins and healthy fats</li>
                     <li>Reduced refined carbohydrates and added sugars</li>

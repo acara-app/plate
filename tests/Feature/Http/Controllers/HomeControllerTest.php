@@ -26,7 +26,7 @@ it('passes featured foods to the view', function (): void {
     expect($featuredFoods)->toBeInstanceOf(Collection::class);
 });
 
-it('opens the in-app scanner from the hero and the scan card for accounts that can use the app', function (User $user): void {
+it('opens the in-app scanner from every Snap to Track link for accounts that can use the app', function (User $user): void {
     $this->actingAs($user);
 
     $response = $this->get(route('home'))
@@ -35,7 +35,7 @@ it('opens the in-app scanner from the hero and the scan card for accounts that c
         ->assertSee('snap_to_track_app_cta_click')
         ->assertDontSee('"snap_to_track_cta_click"', false);
 
-    expect(mb_substr_count((string) $response->getContent(), 'href="'.route('snap-to-track.index').'"'))->toBe(2);
+    expect(mb_substr_count((string) $response->getContent(), 'href="'.route('snap-to-track.index').'"'))->toBe(5);
 })->with([
     'verified account' => fn (): User => User::factory()->create(),
     'unverified subscriber' => fn (): User => User::factory()->unverified()

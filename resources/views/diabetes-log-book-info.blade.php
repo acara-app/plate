@@ -190,6 +190,10 @@
                     </div>
                 </div>
 
+                <x-snap-promo class="my-10" heading-tag="h3" heading="Try logging a meal with a photo" location="diabetes_log_book_info">
+                    Paper works best when you know the numbers. Snap your plate and our <x-snap-link location="diabetes_log_book_info">free AI calorie counter</x-snap-link> estimates the carbs, calories, protein, and fat to write down.
+                </x-snap-promo>
+
                 <h3>Why Upgrade to Digital?</h3>
                 <p>
                     Paper is great for recording history, but it can't help you predict the future. Here is why thousands of users are switching to the Acara Smart Tracker:
@@ -247,16 +251,21 @@
 
                 <div class="not-prose mt-16 border-t border-slate-200 pt-12 dark:border-slate-700">
                     <h2 class="text-center text-2xl font-bold text-slate-900 dark:text-white mb-8">More Tools to Lower Your Spikes</h2>
-                    <div class="grid gap-6 sm:grid-cols-2">
+                    <div class="grid gap-6 sm:grid-cols-3">
                         <a href="{{ route('spike-calculator') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-emerald-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-emerald-500">
                             <span class="mb-3 text-4xl">⚡️</span>
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white">Spike Calculator</h3>
                             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Calculate how specific foods will impact your glucose based on your carb ratio.</p>
                         </a>
-                        <a href="/" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-indigo-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-indigo-500">
+                        <a href="{{ route('ai-nutritionist') }}" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-indigo-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-indigo-500">
                             <span class="mb-3 text-4xl">🤖</span>
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white">AI Nutritionist</h3>
                             <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Get a personalized 7-day meal plan optimized for diabetes management and gut health.</p>
+                        </a>
+                        <a href="{{ route('snap-to-track') }}" data-umami-event="snap_to_track_cta_click" data-umami-event-location="diabetes_log_book_info_tools" class="group flex flex-col items-center rounded-xl bg-white p-6 text-center shadow-sm ring-1 ring-slate-200 transition-all hover:shadow-md hover:ring-emerald-500 dark:bg-slate-800 dark:ring-slate-700 dark:hover:ring-emerald-500">
+                            <span class="mb-3 text-4xl">📸</span>
+                            <h3 class="text-lg font-bold text-slate-900 dark:text-white">Count Carbs from a Photo</h3>
+                            <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">Snap your plate and see the carbs and calories in every food, free to try.</p>
                         </a>
                     </div>
                 </div>

@@ -74,6 +74,11 @@
                     The platform supports multiple restrictions simultaneously (vegan, gluten-free, allergies, etc.). Simply specify all your restrictions during onboarding, and the AI will generate meal plans that respect all of them while meeting your nutritional needs.
                 </p>
 
+                <h3>How do I estimate calories from a photo?</h3>
+                <p>
+                    Use our free tool to <x-snap-link location="support_faq">estimate calories from a photo</x-snap-link>: take or upload a picture of your meal, tap Analyze Food, and you get the calories, carbs, protein, fat, and fiber for each food. Your first scans need no signup.
+                </p>
+
                 <h3>How accurate is the nutrition data?</h3>
                 <p>
                     Meal plan and photo nutrition values are AI-generated estimates based on standard nutrition references such as USDA FoodData Central. They are not database lookups, and they come with real limitations. We explain exactly how that works — and where it fails — on our <a href="{{ route('ai-accuracy') }}">AI Accuracy &amp; Limitations</a> page.
