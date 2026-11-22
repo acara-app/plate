@@ -467,7 +467,7 @@ final readonly class ValidateVisualSpec
             return false;
         }
 
-        return array_any(get_object_vars($value), fn ($item, $name): bool => str_starts_with((string) $name, '$') || $this->hasReference($item));
+        return array_any(get_object_vars($value), fn (mixed $item, int|string $name): bool => str_starts_with((string) $name, '$') || $this->hasReference($item));
     }
 
     private function isLocalPath(mixed $path): bool
