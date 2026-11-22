@@ -8,6 +8,8 @@ final class AiTransparency
 {
     public const string LAST_REVIEWED = '2026-11-09';
 
+    public const string SNAP_TO_TRACK_UPDATED = '2026-11-22';
+
     /**
      * @return list<array{q: string, a: string}>
      */
@@ -35,8 +37,20 @@ final class AiTransparency
                 'a' => "Yes. Snap to Track is an AI food analyzer and photo calorie counter that runs in your phone's browser, so there is no app to download. It is free to try: your first scans need no signup and no card. Use it as a meal scanner for any plate, then create a free account when you want to save meals to your food log.",
             ],
             [
+                'q' => 'Is there a free AI calorie counter?',
+                'a' => 'Yes. Snap to Track is an AI calorie counter you can try for free: take a photo of your meal and it estimates the calories in each food, along with protein, carbs, fat, and fiber. Your first scans need no signup and no card, and a free account lets you save meals to your food log.',
+            ],
+            [
+                'q' => 'Can AI identify food from a picture?',
+                'a' => 'Yes, for most everyday meals. The scanner looks at your picture, names each food it can see, and estimates how much of it is on the plate. Clear pictures taken from above in good light work best. Foods hidden under sauce or mixed into a dish are harder to spot, so treat the result as a starting point and adjust any portion after you save the meal.',
+            ],
+            [
+                'q' => 'Does it count macros too?',
+                'a' => 'Yes. Every scan estimates protein, carbs, fat, and fiber alongside calories, for each food and for the whole meal, so it works as a photo macro counter as well as a calorie counter.',
+            ],
+            [
                 'q' => 'How do I use Snap to Track?',
-                'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. In about 5–15 seconds you get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.',
+                'a' => 'Open this page on your phone or laptop, tap the upload area to take a new photo or pick one from your gallery, then tap Analyze Food. You get a per-item breakdown of calories, protein, carbs, and fat plus meal totals. No signup is required to try it; create a free account to save and track meals over time.',
             ],
             [
                 'q' => 'Can Acara remember meals I scan?',
