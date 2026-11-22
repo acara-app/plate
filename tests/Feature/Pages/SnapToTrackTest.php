@@ -109,7 +109,9 @@ it('renders the snap to track page', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertStatus(200)
         ->assertSee('Snap to Track')
-        ->assertSee('Track calories & macros instantly with AI');
+        ->assertSee('Free AI photo calorie & macro counter')
+        ->assertSee('An AI food scanner for every plate')
+        ->assertSee('A free photo calorie counter app, without the download');
 });
 
 it('fills the whole phone screen while other tool pages keep their layout', function (): void {
@@ -510,7 +512,7 @@ it('shows faq section', function (): void {
 it('renders the seo definition block', function (): void {
     Livewire::test('pages::snap-to-track')
         ->assertSee('What is Snap to Track?')
-        ->assertSee('is a free AI food photo analyzer that estimates calories, protein, carbs, and fat');
+        ->assertSee('is a free AI food photo analyzer that estimates calories and macros (protein, carbs, and fat)');
 });
 
 it('renders authority and freshness signals', function (): void {

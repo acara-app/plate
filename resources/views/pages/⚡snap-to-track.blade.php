@@ -572,11 +572,12 @@ class extends Component
     <div class="{{ $gutter }} pt-1 pb-12 sm:pt-8 sm:pb-20 lg:pt-12 lg:pb-28">
         <div class="mx-auto grid max-w-6xl gap-5 lg:grid-cols-[minmax(0,1fr)_28rem] lg:items-center lg:gap-20">
             <div class="mx-auto w-full max-w-md lg:mx-0 lg:max-w-none">
-                <h1 class="text-[2.5rem] leading-none font-extrabold tracking-[-0.04em] text-balance sm:text-6xl lg:text-[5.75rem] lg:leading-[0.95]">
-                    Snap to Track
+                <h1 class="text-balance">
+                    <span class="block text-[2.5rem] leading-none font-extrabold tracking-[-0.04em] sm:text-6xl lg:text-[5.75rem] lg:leading-[0.95]">Snap to Track</span>
+                    <span class="mt-2 block text-lg leading-snug font-semibold tracking-tight sm:mt-4 sm:text-2xl lg:text-3xl">Free AI photo calorie &amp; macro counter</span>
                 </h1>
-                <p class="speakable-intro mt-3 text-[15px] leading-snug text-pretty text-white/70 sm:mt-5 sm:text-lg sm:leading-relaxed lg:max-w-md lg:text-xl">
-                    Track calories &amp; macros instantly with AI. A&nbsp;free photo calorie counter for any meal — no signup required.
+                <p class="speakable-intro mt-2 text-[15px] leading-snug text-pretty text-white/70 sm:mt-3 sm:text-lg sm:leading-relaxed lg:max-w-md lg:text-xl">
+                    Take a photo of any meal and see the calories, protein, carbs, and fat for each food on your plate. No app to download, no signup.
                 </p>
             </div>
 
@@ -1008,16 +1009,16 @@ class extends Component
                         <p><strong class="font-semibold text-neutral-700">Disclaimer:</strong> These are AI estimates. Actual nutrition depends on how the food was made.</p>
                         <p>
                             AI vision analysis. Informed by standard nutrition references.
-                            <time datetime="{{ now()->toDateString() }}">Last updated: {{ now()->format('F Y') }}</time>
+                            <time datetime="{{ App\Services\AiTransparency::SNAP_TO_TRACK_UPDATED }}">Last updated: {{ \Illuminate\Support\Carbon::parse(App\Services\AiTransparency::SNAP_TO_TRACK_UPDATED)->format('F Y') }}</time>
                         </p>
                     </div>
                 </div>
 
                 <section aria-labelledby="what-heading" class="speakable-definition">
-                    <h2 id="what-heading" class="sr-only">What is Snap to Track?</h2>
-                    <p class="max-w-4xl text-2xl leading-snug font-semibold tracking-tight text-pretty sm:text-4xl sm:leading-[1.2]">
-                        <strong class="font-semibold">Snap to Track</strong> is a free AI food photo analyzer that estimates calories, protein, carbs, and fat for every ingredient in your meal.
-                        <span class="text-neutral-500">Use it as a free meal scanner: upload one photo, get a per-item nutrition breakdown in about 5–15 seconds — no signup required.</span>
+                    <h2 id="what-heading" class="text-xl font-semibold tracking-tight">What is Snap to Track?</h2>
+                    <p class="mt-4 max-w-4xl text-2xl leading-snug font-semibold tracking-tight text-pretty sm:text-4xl sm:leading-[1.2]">
+                        <strong class="font-semibold">Snap to Track</strong> is a free AI food photo analyzer that estimates calories and macros (protein, carbs, and fat) for every food in your meal.
+                        <span class="text-neutral-500">Use it as a free meal scanner: upload one photo and get a per-item nutrition breakdown in about 20 seconds, no signup required.</span>
                     </p>
                 </section>
 
@@ -1074,6 +1075,44 @@ class extends Component
                             </div>
                         </li>
                     </ol>
+                </section>
+
+                <section aria-labelledby="scanner-heading">
+                    <h2 id="scanner-heading" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">An AI food scanner for every plate</h2>
+                    <p class="mt-3 max-w-2xl text-lg leading-relaxed text-pretty text-neutral-600">
+                        Breakfast, a takeout box, a mixed bowl: snap it and the scanner picks out each food in the picture and estimates how much of it is there.
+                    </p>
+                    <ul class="mt-8 grid gap-4 md:grid-cols-3">
+                        <li class="rounded-3xl bg-neutral-100 p-6 sm:p-7">
+                            <h3 class="text-lg font-semibold tracking-tight">Every food, not just the plate</h3>
+                            <p class="mt-2 text-base leading-relaxed text-neutral-600">Each food is listed with its estimated portion, and the meal gets calories, protein, carbs, fat, and fiber.</p>
+                        </li>
+                        <li class="rounded-3xl bg-neutral-100 p-6 sm:p-7">
+                            <h3 class="text-lg font-semibold tracking-tight">Home cooking to snacks</h3>
+                            <p class="mt-2 text-base leading-relaxed text-neutral-600">Restaurant plates, packaged snacks, and drinks work too. Sauces and cooking oil are the hardest to see, so treat every number as an estimate.</p>
+                        </li>
+                        <li class="rounded-3xl bg-neutral-100 p-6 sm:p-7">
+                            <h3 class="text-lg font-semibold tracking-tight">Count carbs from a photo</h3>
+                            <p class="mt-2 text-base leading-relaxed text-neutral-600">
+                                Watching your blood sugar? Start from the carbs, look up foods in the
+                                <a href="{{ route('food.index') }}" class="font-medium text-foreground underline underline-offset-4">diabetic food database</a>,
+                                and see how a meal may hit you with the
+                                <a href="{{ route('spike-calculator') }}" class="font-medium text-foreground underline underline-offset-4">glucose spike calculator</a>.
+                            </p>
+                        </li>
+                    </ul>
+                </section>
+
+                <section aria-labelledby="app-heading" class="grid gap-6 lg:grid-cols-[1fr_1fr] lg:gap-16">
+                    <h2 id="app-heading" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">A free photo calorie counter app, without the download</h2>
+                    <div class="flex flex-col gap-4 text-lg leading-relaxed text-pretty text-neutral-600">
+                        <p>Snap to Track runs in your phone's browser on iPhone and Android, so there's nothing to install before your first scan.</p>
+                        <p>
+                            Want it one tap away?
+                            <a href="{{ route('install-app') }}" class="font-medium text-foreground underline underline-offset-4">Add Acara Plate to your home screen</a>,
+                            then create a free account when you're ready to save meals to your food log.
+                        </p>
+                    </div>
                 </section>
 
                 <section class="rounded-[2rem] bg-neutral-100 p-7 sm:p-12">

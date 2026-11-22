@@ -69,7 +69,7 @@ $faqPage = [
             "@@type": "HowToStep",
             "position": 3,
             "name": "Get an instant macro breakdown",
-            "text": "In about 5–15 seconds you receive total calories, protein, carbs, and fat for the meal plus a per-item breakdown and a confidence score.",
+            "text": "In about 20 seconds you receive total calories, protein, carbs, and fat for the meal plus a per-item breakdown and a confidence score.",
             "url": "{{ $currentUrl }}#how-it-works"
         }
     ]
@@ -80,7 +80,7 @@ $faqPage = [
     "@@context": "https://schema.org",
     "@@type": "WebApplication",
     "name": "Snap to Track - AI Food Photo Analyzer",
-    "alternateName": ["Photo Calorie Counter", "AI Food Analyzer", "Free Meal Scanner"],
+    "alternateName": ["Photo Calorie Counter", "AI Food Analyzer", "AI Food Scanner", "Photo Macro Counter", "Free Meal Scanner"],
     "description": "Free AI food photo analyzer. Upload a photo of any meal to instantly estimate calories, protein, carbs, and fat per ingredient using AI vision analysis informed by standard nutrition references. No signup required.",
     "url": "{{ $currentUrl }}",
     "applicationCategory": "HealthApplication",
@@ -88,7 +88,7 @@ $faqPage = [
     "operatingSystem": "Any",
     "browserRequirements": "Requires JavaScript and a modern browser",
     "datePublished": "2025-08-15",
-    "dateModified": "{{ now()->toDateString() }}",
+    "dateModified": "{{ App\Services\AiTransparency::SNAP_TO_TRACK_UPDATED }}",
     "inLanguage": "en",
     "isAccessibleForFree": true,
     "offers": {
@@ -100,8 +100,11 @@ $faqPage = [
         "AI-powered food recognition from a photo",
         "Per-ingredient calorie and macro breakdown",
         "Total calories, protein, carbs, and fat per meal",
+        "Estimated portion for each food item",
+        "Fiber alongside calories, protein, carbs, and fat",
         "Confidence score for each analysis",
         "Nutrition estimates informed by standard references",
+        "Runs in any phone browser, no app download",
         "No signup required to try"
     ],
     "creator": {
