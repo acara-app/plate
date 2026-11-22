@@ -59,6 +59,8 @@ it('streams, replays and saves a reply with its visuals in the order Altani wrot
     $assistant = History::query()->where('conversation_id', $conversation->id)->where('role', MessageRole::Assistant->value)->sole();
 
     expect(json_encode($broadcast))->toBe(json_encode(array_column($stored, 'data')))
+        ->and(array_map(fn (array $payload): array => [$payload['conversation_id'], $payload['sequence']], $broadcast))
+        ->toBe(array_map(fn (stdClass $event): array => [$conversation->id, $event->sequence], $stored))
         ->and(array_map(fn (array $payload): int => mb_strlen((string) json_encode((string) json_encode($payload))), $broadcast))->each->toBeLessThanOrEqual(8_000)
         ->and(array_map(fn (stdClass $end): string => $end->data->accepted ? 'accepted' : $end->data->reason, $ends))->toBe($outcomes)
         ->and(array_column(array_filter($message->parts, fn (stdClass $part): bool => $part->type === 'data-spec'), 'type'))->toHaveCount(count(array_keys($outcomes, 'accepted', true)))

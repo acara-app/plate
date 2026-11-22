@@ -1,3 +1,4 @@
+import { ACARA_CHAT_CATALOG } from '@/components/chat/visuals/catalog-handshake';
 import { decide } from '@/routes/approvals';
 import { stream } from '@/routes/chat';
 import { stop as stopStream } from '@/routes/chat/stream';
@@ -73,6 +74,8 @@ export function useChatStream({
         finishStream,
         resumeOnMount,
         resetReplayState,
+        classifyLiveEvent,
+        catchUp,
     } = useStreamRecovery({
         conversationId,
         dispatch,
@@ -84,6 +87,7 @@ export function useChatStream({
 
     const { isConnected } = useStreamChannel({
         userId,
+        conversationId,
         status: state.status,
         dispatch,
         seenEventIdsRef,
@@ -93,6 +97,8 @@ export function useChatStream({
         stopReplayPolling,
         finishStream,
         resetReplayState,
+        classifyLiveEvent,
+        catchUp,
     });
 
     useEffect(() => {
@@ -132,7 +138,10 @@ export function useChatStream({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
-                body: JSON.stringify({ messages: [{ role: 'user', parts }] }),
+                body: JSON.stringify({
+                    messages: [{ role: 'user', parts }],
+                    catalog: ACARA_CHAT_CATALOG,
+                }),
             })
                 .then(async (response) => {
                     if (response.status === 402) {

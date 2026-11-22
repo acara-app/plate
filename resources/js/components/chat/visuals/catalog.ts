@@ -1,8 +1,9 @@
 import { defineCatalog } from '@json-render/core';
 import { schema } from '@json-render/react/schema';
 import { z } from 'zod';
+import { ACARA_CHAT_CATALOG } from './catalog-handshake';
 
-export const ACARA_CHAT_CATALOG = { name: 'acara-chat', version: 1 } as const;
+export { ACARA_CHAT_CATALOG };
 
 export const VISUAL_LIMITS = {
     bytes: 131072,

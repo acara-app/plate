@@ -7,7 +7,9 @@ import type {
     ProviderToolKind,
     ReasoningData,
     ToolCallData,
+    VisualPartData,
 } from '@/types/chat';
+import { applySpecPatch, type JsonPatch } from '@json-render/core';
 import type { UIMessage } from 'ai';
 
 export type { ChatStatus } from '@/types/chat';
@@ -62,6 +64,13 @@ export type ChatAction =
           result: unknown;
           successful: boolean;
           error: string | null;
+      }
+    | { type: 'VISUAL_PATCH'; visualId: string; patches: JsonPatch[] }
+    | {
+          type: 'VISUAL_END';
+          visualId: string;
+          accepted: boolean;
+          fallbackText: string;
       }
     | { type: 'ADD_PROVIDER_TOOL'; itemId: string; toolType: string }
     | { type: 'UPDATE_PROVIDER_TOOL'; itemId: string }
@@ -148,6 +157,59 @@ function upsertDataPart<T>(
     } as UIMessage['parts'][number];
 
     return { ...message, parts: updated };
+}
+
+function patchedVisual(
+    visual: VisualPartData,
+    patches: JsonPatch[],
+): VisualPartData {
+    if (patches.length === 0) {
+        return visual;
+    }
+
+    const spec = structuredClone(visual.spec);
+
+    for (const patch of structuredClone(patches)) {
+        applySpecPatch(spec, patch);
+    }
+
+    return { ...visual, spec };
+}
+
+function endVisual(
+    message: UIMessage,
+    visualId: string,
+    accepted: boolean,
+    fallbackText: string,
+): UIMessage {
+    if (accepted) {
+        return upsertDataPart<VisualPartData>(
+            message,
+            'data-spec',
+            visualId,
+            () => ({
+                id: visualId,
+                spec: { root: '', elements: {} },
+                fallback_text: fallbackText,
+                status: 'accepted',
+            }),
+            (data) => ({
+                ...data,
+                fallback_text: fallbackText,
+                status: 'accepted',
+            }),
+        );
+    }
+
+    const parts = (message.parts ?? []).filter(
+        (part) =>
+            part.type !== 'data-spec' ||
+            (part as { id?: string }).id !== visualId,
+    );
+
+    return parts.length === (message.parts ?? []).length
+        ? message
+        : { ...message, parts };
 }
 
 function deriveProviderToolKind(toolType: string): ProviderToolKind {
@@ -383,6 +445,42 @@ export function chatReducer(state: ChatState, action: ChatAction): ChatState {
                             status: action.successful ? 'complete' : 'error',
                             error: action.error,
                         }),
+                    ),
+                ),
+            };
+
+        case 'VISUAL_PATCH':
+            return {
+                ...state,
+                messages: updateLastAssistant(state.messages, (message) =>
+                    upsertDataPart<VisualPartData>(
+                        message,
+                        'data-spec',
+                        action.visualId,
+                        () =>
+                            patchedVisual(
+                                {
+                                    id: action.visualId,
+                                    spec: { root: '', elements: {} },
+                                    fallback_text: '',
+                                    status: 'pending',
+                                },
+                                action.patches,
+                            ),
+                        (data) => patchedVisual(data, action.patches),
+                    ),
+                ),
+            };
+
+        case 'VISUAL_END':
+            return {
+                ...state,
+                messages: updateLastAssistant(state.messages, (message) =>
+                    endVisual(
+                        message,
+                        action.visualId,
+                        action.accepted,
+                        action.fallbackText,
                     ),
                 ),
             };
