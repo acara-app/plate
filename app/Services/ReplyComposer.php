@@ -51,6 +51,11 @@ final class ReplyComposer
         private readonly string $visualIdPrefix,
     ) {}
 
+    public static function contextMarker(string $fallbackText): string
+    {
+        return "[visual]\n{$fallbackText}\n[/visual]\n";
+    }
+
     /**
      * @return list<TComposedEvent>
      */
@@ -71,17 +76,34 @@ final class ReplyComposer
     public function finish(): array
     {
         $line = $this->line;
+        $closedWithoutFence = $this->closedWithoutFence;
         $this->line = '';
+        $this->lineIsProse = false;
 
-        if ($this->visualId !== null) {
-            return $this->visualLine($line);
+        $events = match (true) {
+            $this->visualId !== null => $this->visualLine($line),
+            $line === '', mb_trim($line) === self::FENCE_OPEN, $closedWithoutFence && mb_trim($line) === self::FENCE_CLOSE => [],
+            default => [$this->text($line)],
+        };
+
+        $this->closedWithoutFence = false;
+
+        return $events;
+    }
+
+    public function contextText(string $text): string
+    {
+        $context = '';
+
+        foreach ([...$this->feed($text), ...$this->finish()] as $event) {
+            if ($event['type'] === 'text') {
+                $context .= $event['text'];
+            } elseif ($event['type'] === 'visual_end' && $event['accepted']) {
+                $context .= self::contextMarker($event['fallback_text']);
+            }
         }
 
-        $trimmed = mb_trim($line);
-
-        return $line === '' || $trimmed === self::FENCE_OPEN || ($this->closedWithoutFence && $trimmed === self::FENCE_CLOSE)
-            ? []
-            : [$this->text($line)];
+        return $context;
     }
 
     /**
@@ -209,11 +231,15 @@ final class ReplyComposer
         try {
             $spec = $this->validator->handle($this->document($lines), $this->catalogVersion);
             $patches = $this->releasePatches($visualId, $spec);
-            $fallback = $this->renderer->handle(
-                (array) json_decode((string) json_encode($spec), true),
-                $this->locale,
-                $this->timezone,
-            );
+            $end = [
+                'type' => 'visual_end',
+                'visual_id' => $visualId,
+                'accepted' => true,
+                'fallback_text' => $this->renderer->handle((array) json_decode((string) json_encode($spec), true), $this->locale, $this->timezone),
+                'reason' => null,
+            ];
+
+            throw_if($this->eventBytes($end) > self::EVENT_BUDGET_BYTES, InvalidVisualSpecException::class, 'too_large');
         } catch (InvalidVisualSpecException $invalidVisualSpecException) {
             return [$this->rejected($visualId, $invalidVisualSpecException->reason)];
         } catch (Throwable $throwable) {
@@ -222,10 +248,7 @@ final class ReplyComposer
             return [$this->rejected($visualId, 'unexpected_error')];
         }
 
-        return [
-            ...$patches,
-            ['type' => 'visual_end', 'visual_id' => $visualId, 'accepted' => true, 'fallback_text' => $fallback, 'reason' => null],
-        ];
+        return [...$patches, $end];
     }
 
     /**
@@ -290,7 +313,7 @@ final class ReplyComposer
     {
         $patch = ['op' => 'add', 'path' => $path, 'value' => $value];
 
-        if ($this->eventBytes($visualId, [$patch]) <= self::EVENT_BUDGET_BYTES) {
+        if ($this->eventBytes(['visual_id' => $visualId, 'patches' => [$patch]]) <= self::EVENT_BUDGET_BYTES) {
             return [$patch];
         }
 
@@ -327,7 +350,7 @@ final class ReplyComposer
         $current = [];
 
         foreach ($patches as $patch) {
-            if ($current !== [] && $this->eventBytes($visualId, [...$current, $patch]) > self::EVENT_BUDGET_BYTES) {
+            if ($current !== [] && $this->eventBytes(['visual_id' => $visualId, 'patches' => [...$current, $patch]]) > self::EVENT_BUDGET_BYTES) {
                 $events[] = ['type' => 'visual_patch', 'visual_id' => $visualId, 'patches' => $current];
                 $current = [];
             }
@@ -343,11 +366,11 @@ final class ReplyComposer
     }
 
     /**
-     * @param  list<TPatch>  $patches
+     * @param  array<string, mixed>  $event
      */
-    private function eventBytes(string $visualId, array $patches): int
+    private function eventBytes(array $event): int
     {
-        return mb_strlen((string) json_encode((string) json_encode(['visual_id' => $visualId, 'patches' => $patches])));
+        return mb_strlen((string) json_encode((string) json_encode($event)));
     }
 
     private function pointerSegment(string $key): string

@@ -14,6 +14,7 @@ use App\Services\Ai\ToolSensitivityReader;
 use App\Services\Billing\StripeBilling;
 use App\Services\Memory\NullMemoryPromptContext;
 use App\Services\ToolRegistry;
+use App\Services\VisualCatalog;
 use App\Utilities\EmergencyNumberUtil;
 use App\Utilities\LanguageUtil;
 use Laravel\Ai\Contracts\Agent;
@@ -30,6 +31,7 @@ final readonly class AgentBuilder
         private ToolSensitivityReader $toolSensitivity,
         private LoadsSkills $skillLoader,
         private StripeBilling $stripeBilling,
+        private VisualCatalog $visualCatalog,
     ) {}
 
     /**
@@ -62,6 +64,10 @@ final readonly class AgentBuilder
             'availableSkills' => $this->skillLoader->loadAll(),
             'billingEnabled' => $this->stripeBilling->isConfigured(),
         ])->render();
+
+        if ($request->catalogVersion !== null) {
+            $instructions .= PHP_EOL.PHP_EOL.$this->visualCatalog->prompt();
+        }
 
         $memories = $this->renderMemories($request, $user);
 

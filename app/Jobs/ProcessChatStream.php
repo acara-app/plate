@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Services\Ai\AgentModelContext;
 use App\Services\BroadcastConnector;
 use App\Services\ChatChannel;
+use App\Services\ReplyComposer;
 use App\Services\StreamAggregator;
 use App\Services\StreamEventStore;
 use App\Utilities\LanguageUtil;
@@ -30,6 +31,7 @@ use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Decision;
 use Laravel\Ai\Approvals\Decisions;
 use Laravel\Ai\Files\Base64Image;
+use ReflectionMethod;
 use Throwable;
 
 #[MaxExceptions(3)]
@@ -37,7 +39,9 @@ use Throwable;
 #[Tries(ProcessChatStream::TRIES)]
 final class ProcessChatStream implements ShouldQueue
 {
-    use Queueable;
+    use Queueable {
+        __unserialize as private restoreQueuedProperties;
+    }
 
     public const int TRIES = 3;
 
@@ -56,7 +60,24 @@ final class ProcessChatStream implements ShouldQueue
         public ?string $locale = null,
         public ?array $decisions = null,
         public ?array $agentModels = null,
+        public ?int $catalogVersion = null,
     ) {}
+
+    /**
+     * @param  array<string, mixed>  $values
+     */
+    public function __unserialize(array $values): void
+    {
+        $defaults = [];
+
+        foreach (new ReflectionMethod(self::class, '__construct')->getParameters() as $parameter) {
+            if ($parameter->isPromoted() && $parameter->isDefaultValueAvailable()) {
+                $defaults[$parameter->getName()] = $parameter->getDefaultValue();
+            }
+        }
+
+        $this->restoreQueuedProperties([...$defaults, ...$values]);
+    }
 
     /**
      * @return list<int>
@@ -142,6 +163,7 @@ final class ProcessChatStream implements ShouldQueue
                 conversationId: $this->conversationId,
                 streamId: $this->streamId,
                 model: $model,
+                catalogVersion: $this->catalogVersion,
             );
 
             $decisions = $this->approvalDecisions();
@@ -150,13 +172,14 @@ final class ProcessChatStream implements ShouldQueue
                 ? $agentRunner->resume($request, $user, $decisions)
                 : $agentRunner->run($request, $user);
 
-            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId);
+            $delivery = $connector->deliver($stream, $this->userId, $this->conversationId, $this->composer($user));
 
             $this->completePendingTurn(
                 complete: $complete,
                 user: $user,
                 delivery: $delivery,
                 status: $delivery->cancelled ? History::STREAM_STATUS_CANCELLED : History::STREAM_STATUS_COMPLETED,
+                contextComposer: $this->composer($user),
             );
 
             if ($delivery->cancelled) {
@@ -202,7 +225,7 @@ final class ProcessChatStream implements ShouldQueue
         return false;
     }
 
-    private function completePendingTurn(CompletePendingChatStreamTurn $complete, User $user, ChatStreamDelivery $delivery, string $status): void
+    private function completePendingTurn(CompletePendingChatStreamTurn $complete, User $user, ChatStreamDelivery $delivery, string $status, ?ReplyComposer $contextComposer = null): void
     {
         $complete->handle(
             conversationId: $this->conversationId,
@@ -213,8 +236,23 @@ final class ProcessChatStream implements ShouldQueue
             status: $status,
             steps: $delivery->steps,
             provider: $delivery->provider,
+            contextComposer: $contextComposer,
         );
         // @codeCoverageIgnoreEnd
+    }
+
+    private function composer(User $user): ?ReplyComposer
+    {
+        if ($this->catalogVersion === null) {
+            return null;
+        }
+
+        return resolve(ReplyComposer::class, [
+            'catalogVersion' => $this->catalogVersion,
+            'locale' => App::getLocale(),
+            'timezone' => $user->resolveTimezone(),
+            'visualIdPrefix' => $this->assistantMessageId,
+        ]);
     }
 
     private function approvalDecisions(): ?Decisions

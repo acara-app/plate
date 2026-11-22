@@ -1,0 +1,1110 @@
+{
+    "catalog": {
+        "name": "acara-chat",
+        "version": 1
+    },
+    "events": [
+        {
+            "sequence": 0,
+            "type": "stream_start",
+            "data": {
+                "id": "id-1",
+                "invocation_id": "id-2",
+                "type": "stream_start",
+                "provider": "openai",
+                "model": "model",
+                "timestamp": 0,
+                "metadata": null
+            }
+        },
+        {
+            "sequence": 1,
+            "type": "text_start",
+            "data": {
+                "id": "id-3",
+                "invocation_id": "id-2",
+                "type": "text_start",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 2,
+            "type": "text_delta",
+            "data": {
+                "id": "id-5.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Try",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 3,
+            "type": "text_delta",
+            "data": {
+                "id": "id-6.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " this",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 4,
+            "type": "text_delta",
+            "data": {
+                "id": "id-7.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " **20-minute",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 5,
+            "type": "text_delta",
+            "data": {
+                "id": "id-8.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " walk**",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 6,
+            "type": "text_delta",
+            "data": {
+                "id": "id-9.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " on",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 7,
+            "type": "text_delta",
+            "data": {
+                "id": "id-10.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 8,
+            "type": "text_delta",
+            "data": {
+                "id": "id-11.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " flat",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 9,
+            "type": "text_delta",
+            "data": {
+                "id": "id-12.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " route",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 10,
+            "type": "text_delta",
+            "data": {
+                "id": "id-13.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " or",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 11,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " treadmill:\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 12,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 13,
+            "type": "text_delta",
+            "data": {
+                "id": "id-14.3",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "Walk",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 14,
+            "type": "text_delta",
+            "data": {
+                "id": "id-15.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " easily",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 15,
+            "type": "text_delta",
+            "data": {
+                "id": "id-16.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " for",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 16,
+            "type": "text_delta",
+            "data": {
+                "id": "id-17.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " 4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 17,
+            "type": "text_delta",
+            "data": {
+                "id": "id-18.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " minutes",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 18,
+            "type": "text_delta",
+            "data": {
+                "id": "id-19.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " to",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 19,
+            "type": "text_delta",
+            "data": {
+                "id": "id-20.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " warm",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 20,
+            "type": "text_delta",
+            "data": {
+                "id": "id-21.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " up.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 21,
+            "type": "text_delta",
+            "data": {
+                "id": "id-22.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " Then",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 22,
+            "type": "text_delta",
+            "data": {
+                "id": "id-23.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " alternate",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 23,
+            "type": "text_delta",
+            "data": {
+                "id": "id-24.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " 1",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 24,
+            "type": "text_delta",
+            "data": {
+                "id": "id-25.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " minute",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 25,
+            "type": "text_delta",
+            "data": {
+                "id": "id-26.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " of",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 26,
+            "type": "text_delta",
+            "data": {
+                "id": "id-27.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " brisk",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 27,
+            "type": "text_delta",
+            "data": {
+                "id": "id-28.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " walking",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 28,
+            "type": "text_delta",
+            "data": {
+                "id": "id-29.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " with",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 29,
+            "type": "text_delta",
+            "data": {
+                "id": "id-30.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " 1",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 30,
+            "type": "text_delta",
+            "data": {
+                "id": "id-31.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " minute",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 31,
+            "type": "text_delta",
+            "data": {
+                "id": "id-32.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " at",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 32,
+            "type": "text_delta",
+            "data": {
+                "id": "id-33.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " an",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 33,
+            "type": "text_delta",
+            "data": {
+                "id": "id-34.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " easy",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 34,
+            "type": "text_delta",
+            "data": {
+                "id": "id-35.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " pace,",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 35,
+            "type": "text_delta",
+            "data": {
+                "id": "id-36.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " repeating",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 36,
+            "type": "text_delta",
+            "data": {
+                "id": "id-37.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 37,
+            "type": "text_delta",
+            "data": {
+                "id": "id-38.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " pair",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 38,
+            "type": "text_delta",
+            "data": {
+                "id": "id-39.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " six",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 39,
+            "type": "text_delta",
+            "data": {
+                "id": "id-40.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " times.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 40,
+            "type": "text_delta",
+            "data": {
+                "id": "id-41.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " Finish",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 41,
+            "type": "text_delta",
+            "data": {
+                "id": "id-42.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " with",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 42,
+            "type": "text_delta",
+            "data": {
+                "id": "id-43.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " 4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 43,
+            "type": "text_delta",
+            "data": {
+                "id": "id-44.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " minutes",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 44,
+            "type": "text_delta",
+            "data": {
+                "id": "id-45.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " of",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 45,
+            "type": "text_delta",
+            "data": {
+                "id": "id-46.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " easy",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 46,
+            "type": "text_delta",
+            "data": {
+                "id": "id-47.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " walking",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 47,
+            "type": "text_delta",
+            "data": {
+                "id": "id-48.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " to",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 48,
+            "type": "text_delta",
+            "data": {
+                "id": "id-49.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " cool",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 49,
+            "type": "text_delta",
+            "data": {
+                "id": "id-50.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " down.\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 50,
+            "type": "text_delta",
+            "data": {
+                "id": "id-50.2",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 51,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-50.3",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 52,
+            "type": "visual_patch",
+            "data": {
+                "id": "id-51.1",
+                "type": "visual_patch",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "patches": [
+                    {
+                        "op": "add",
+                        "path": "/root",
+                        "value": "walk"
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements",
+                        "value": {}
+                    },
+                    {
+                        "op": "add",
+                        "path": "/elements/walk",
+                        "value": {
+                            "type": "Steps",
+                            "props": {
+                                "items": [
+                                    {
+                                        "title": "Warm up",
+                                        "detail": "Walk at an easy pace.",
+                                        "duration": "4 minutes"
+                                    },
+                                    {
+                                        "title": "Alternate brisk and easy walking",
+                                        "detail": "Walk briskly for 1 minute, then easily for 1 minute. Repeat six times.",
+                                        "duration": "12 minutes"
+                                    },
+                                    {
+                                        "title": "Cool down",
+                                        "detail": "Slow to an easy pace.",
+                                        "duration": "4 minutes"
+                                    }
+                                ]
+                            },
+                            "children": []
+                        }
+                    }
+                ],
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 53,
+            "type": "visual_end",
+            "data": {
+                "id": "id-51.2",
+                "type": "visual_end",
+                "conversation_id": "conversation",
+                "visual_id": "assistant-message-1",
+                "accepted": true,
+                "fallback_text": "1. Warm up (4 minutes) — Walk at an easy pace.\n2. Alternate brisk and easy walking (12 minutes) — Walk briskly for 1 minute, then easily for 1 minute. Repeat six times.\n3. Cool down (4 minutes) — Slow to an easy pace.",
+                "reason": null,
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 54,
+            "type": "text_delta",
+            "data": {
+                "id": "id-51.3",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "\n",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 55,
+            "type": "text_delta",
+            "data": {
+                "id": "id-51.4",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": "During",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 56,
+            "type": "text_delta",
+            "data": {
+                "id": "id-52.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " the",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 57,
+            "type": "text_delta",
+            "data": {
+                "id": "id-53.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " brisk",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 58,
+            "type": "text_delta",
+            "data": {
+                "id": "id-54.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " intervals,",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 59,
+            "type": "text_delta",
+            "data": {
+                "id": "id-55.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " aim",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 60,
+            "type": "text_delta",
+            "data": {
+                "id": "id-56.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " for",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 61,
+            "type": "text_delta",
+            "data": {
+                "id": "id-57.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " a",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 62,
+            "type": "text_delta",
+            "data": {
+                "id": "id-58.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " pace",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 63,
+            "type": "text_delta",
+            "data": {
+                "id": "id-59.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " where",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 64,
+            "type": "text_delta",
+            "data": {
+                "id": "id-60.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " you",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 65,
+            "type": "text_delta",
+            "data": {
+                "id": "id-61.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " can",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 66,
+            "type": "text_delta",
+            "data": {
+                "id": "id-62.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " still",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 67,
+            "type": "text_delta",
+            "data": {
+                "id": "id-63.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " talk.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 68,
+            "type": "text_delta",
+            "data": {
+                "id": "id-64.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " Slow",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 69,
+            "type": "text_delta",
+            "data": {
+                "id": "id-65.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " down",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 70,
+            "type": "text_delta",
+            "data": {
+                "id": "id-66.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " if",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 71,
+            "type": "text_delta",
+            "data": {
+                "id": "id-67.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " needed,",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 72,
+            "type": "text_delta",
+            "data": {
+                "id": "id-68.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " and",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 73,
+            "type": "text_delta",
+            "data": {
+                "id": "id-69.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " stop",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 74,
+            "type": "text_delta",
+            "data": {
+                "id": "id-70.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " if",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 75,
+            "type": "text_delta",
+            "data": {
+                "id": "id-71.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " you",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 76,
+            "type": "text_delta",
+            "data": {
+                "id": "id-72.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " feel",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 77,
+            "type": "text_delta",
+            "data": {
+                "id": "id-73.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " dizzy",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 78,
+            "type": "text_delta",
+            "data": {
+                "id": "id-74.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " or",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 79,
+            "type": "text_delta",
+            "data": {
+                "id": "id-75.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " have",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 80,
+            "type": "text_delta",
+            "data": {
+                "id": "id-76.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " chest",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 81,
+            "type": "text_delta",
+            "data": {
+                "id": "id-77.1",
+                "invocation_id": "id-2",
+                "type": "text_delta",
+                "message_id": "id-4",
+                "delta": " pain.",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 82,
+            "type": "text_complete",
+            "data": {
+                "id": "id-78",
+                "invocation_id": "id-2",
+                "type": "text_complete",
+                "message_id": "id-4",
+                "timestamp": 0
+            }
+        },
+        {
+            "sequence": 83,
+            "type": "stream_end",
+            "data": {
+                "id": "id-79",
+                "invocation_id": "id-2",
+                "type": "stream_end",
+                "reason": "stop",
+                "usage": {
+                    "input_tokens": 0,
+                    "output_tokens": 0,
+                    "cache_read_input_tokens": null,
+                    "cache_write_input_tokens": null,
+                    "reasoning_tokens": null
+                },
+                "timestamp": 0
+            }
+        }
+    ],
+    "message": {
+        "id": "assistant-message",
+        "role": "assistant",
+        "parts": [
+            {
+                "type": "text",
+                "text": "Try this **20-minute walk** on a flat route or treadmill:\n\nWalk easily for 4 minutes to warm up. Then alternate 1 minute of brisk walking with 1 minute at an easy pace, repeating the pair six times. Finish with 4 minutes of easy walking to cool down.\n\n"
+            },
+            {
+                "type": "data-spec",
+                "data": {
+                    "id": "assistant-message-1",
+                    "spec": {
+                        "root": "walk",
+                        "elements": {
+                            "walk": {
+                                "type": "Steps",
+                                "props": {
+                                    "items": [
+                                        {
+                                            "title": "Warm up",
+                                            "detail": "Walk at an easy pace.",
+                                            "duration": "4 minutes"
+                                        },
+                                        {
+                                            "title": "Alternate brisk and easy walking",
+                                            "detail": "Walk briskly for 1 minute, then easily for 1 minute. Repeat six times.",
+                                            "duration": "12 minutes"
+                                        },
+                                        {
+                                            "title": "Cool down",
+                                            "detail": "Slow to an easy pace.",
+                                            "duration": "4 minutes"
+                                        }
+                                    ]
+                                },
+                                "children": []
+                            }
+                        }
+                    },
+                    "fallback_text": "1. Warm up (4 minutes) — Walk at an easy pace.\n2. Alternate brisk and easy walking (12 minutes) — Walk briskly for 1 minute, then easily for 1 minute. Repeat six times.\n3. Cool down (4 minutes) — Slow to an easy pace."
+                }
+            },
+            {
+                "type": "text",
+                "text": "\nDuring the brisk intervals, aim for a pace where you can still talk. Slow down if needed, and stop if you feel dizzy or have chest pain."
+            }
+        ]
+    }
+}

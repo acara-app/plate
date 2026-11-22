@@ -21,6 +21,7 @@ final readonly class ResumeChatStream
         private StreamEventStore $events,
         private CreatePendingChatStreamTurn $pendingTurn,
         private RecordApprovalDecisions $recordApprovalDecisions,
+        private ResolveVisualCatalogVersion $resolveCatalogVersion,
     ) {}
 
     /**
@@ -42,7 +43,8 @@ final readonly class ResumeChatStream
 
         $this->events->clear($conversation->id);
 
-        $turn = $this->pendingTurn->forResume($conversation, $user, $channel, $modelName->model);
+        $catalogVersion = $this->resolveCatalogVersion->handle($paused?->catalogVersion());
+        $turn = $this->pendingTurn->forResume($conversation, $user, $channel, $modelName->model, $catalogVersion);
 
         dispatch(new ProcessChatStream(
             userId: $user->id,
@@ -55,6 +57,7 @@ final readonly class ResumeChatStream
             locale: $locale,
             decisions: $recorded->toQueuePayload(),
             agentModels: [AgentRunner::class => $modelName->toSelection()],
+            catalogVersion: $catalogVersion,
         ));
 
         return new ApprovalDecisionResult(turn: $turn, awaiting: []);

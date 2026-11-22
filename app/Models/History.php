@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Laravel\Ai\Approvals\PendingApproval;
 use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Messages\MessageRole;
+use stdClass;
 
 /**
  * @property string $id
@@ -203,6 +204,36 @@ final class History extends Model
         $status = $this->chatStreamMeta()['status'] ?? null;
 
         return is_string($status) ? $status : null;
+    }
+
+    public function catalogVersion(): ?int
+    {
+        $version = $this->chatStreamMeta()['catalog_version'] ?? null;
+
+        return is_int($version) ? $version : null;
+    }
+
+    /**
+     * @return list<array{type: 'text', text: string}|array{type: 'data-spec', data: array{id: string, spec: stdClass, fallback_text: string}}>
+     */
+    public function replyParts(): array
+    {
+        $stored = $this->chatStreamMeta()['parts'] ?? [];
+        $parts = [];
+
+        foreach (is_array($stored) ? $stored : [] as $part) {
+            $part = is_array($part) ? $part : [];
+            $data = is_array($part['data'] ?? null) ? $part['data'] : [];
+            $spec = is_string($data['spec'] ?? null) ? json_decode($data['spec']) : null;
+
+            if (($part['type'] ?? null) === 'text' && is_string($part['text'] ?? null)) {
+                $parts[] = ['type' => 'text', 'text' => $part['text']];
+            } elseif (($part['type'] ?? null) === 'data-spec' && $spec instanceof stdClass && is_string($data['id'] ?? null) && is_string($data['fallback_text'] ?? null)) {
+                $parts[] = ['type' => 'data-spec', 'data' => ['id' => $data['id'], 'spec' => $spec, 'fallback_text' => $data['fallback_text']]];
+            }
+        }
+
+        return $parts;
     }
 
     public function belongsToChatStream(string $streamId): bool

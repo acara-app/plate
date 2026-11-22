@@ -39,7 +39,7 @@ it('keeps prose and a visual in the order Altani wrote them', function (): void 
 });
 
 it('passes a prose-only reply through unchanged', function (): void {
-    $reply = "No visual here.\n```python\nprint('hi')\n```\nUse `inline code` freely.\n    An indented line";
+    $reply = "No visual here.\nUse `inline code` freely.\n    An indented line\n```python\nprint('hi')\n```";
     $events = composeReply($reply);
 
     expect(composedText($events))->toBe($reply)
@@ -58,7 +58,19 @@ it('withholds a visual it cannot accept and keeps the prose', function (string $
     'an unknown component' => ["```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Chart\",\"props\":{},\"children\":[]}}\n```\n", 'unknown_component'],
     'a seventh visual' => [fn (): string => str_repeat("```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}\n```\n", 7), 'too_many_visuals'],
     'more patches than the iOS app applies' => [fn (): string => yearCharts(6), 'too_large'],
+    'a text rendering too long for one event' => [fn (): string => yearCharts(1), 'too_large'],
 ]);
+
+it('starts every text block at the beginning of a line', function (): void {
+    $visual = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}\n```\n";
+    $composer = resolve(ReplyComposer::class, replyComposerOptions());
+    $events = [...$composer->feed('Let me check.'), ...$composer->finish(), ...$composer->feed($visual.'Done.'), ...$composer->finish()];
+    $steps = resolve(ReplyComposer::class, replyComposerOptions());
+
+    expect(eventOrder($events))->toBe(['text', 'placeholder', 'visual_patch', 'visual_end', 'text'])
+        ->and(composedText($events))->toBe('Let me check.Done.')
+        ->and([$steps->contextText('Let me check.'), $steps->contextText($visual.'Done.')])->toBe(['Let me check.', ReplyComposer::contextMarker('Hi').'Done.']);
+});
 
 it('closes a visual Altani forgot to fence off and drops one cut off by a stop', function (): void {
     $visual = "```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"a\"}\n{\"op\":\"add\",\"path\":\"/elements/a\",\"value\":{\"type\":\"Text\",\"props\":{\"text\":\"Hi\"},\"children\":[]}}";
@@ -83,15 +95,15 @@ it('closes a visual Altani forgot to fence off and drops one cut off by a stop',
 });
 
 it('streams a large visual in events that fit the broadcast limit', function (): void {
-    $week = array_map(fn (int $day): array => ['day' => now()->startOfYear()->addDays($day)->toDateString(), 'steps' => $day * 37], range(0, 365));
-    $chart = ['type' => 'BarChart', 'props' => ['title' => 'Daily steps', 'data' => $week, 'xKey' => 'day', 'yKey' => 'steps', 'unit' => 'steps'], 'children' => []];
+    $days = array_map(fn (int $day): array => ['day' => now()->startOfYear()->addDays($day)->toDateString(), 'steps' => $day * 37], range(0, 179));
+    $chart = ['type' => 'BarChart', 'props' => ['title' => 'Daily steps', 'data' => $days, 'xKey' => 'day', 'yKey' => 'steps', 'unit' => 'steps'], 'children' => []];
     $events = composeReply("```spec\n{\"op\":\"add\",\"path\":\"/root\",\"value\":\"chart\"}\n".json_encode(['op' => 'add', 'path' => '/elements/chart', 'value' => $chart])."\n```\n", 512);
     $releases = array_values(array_filter($events, fn (array $event): bool => $event['type'] === 'visual_patch' && $event['patches'] !== []));
 
     expect(count($releases))->toBeGreaterThan(1)
-        ->and(array_map(fn (array $event): int => mb_strlen((string) json_encode((string) json_encode(['visual_id' => $event['visual_id'], 'patches' => $event['patches']]))), $releases))
+        ->and(array_map(fn (array $event): int => mb_strlen((string) json_encode((string) json_encode($event))), $events))
         ->each->toBeLessThanOrEqual(ReplyComposer::EVENT_BUDGET_BYTES)
-        ->and(reassemble(array_merge(...array_column($releases, 'patches')))->elements->chart->props->data)->toHaveCount(366)
+        ->and(reassemble(array_merge(...array_column($releases, 'patches')))->elements->chart->props->data)->toHaveCount(180)
         ->and(end($events))->toMatchArray(['type' => 'visual_end', 'accepted' => true]);
 });
 

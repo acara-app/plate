@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Actions\ApplyJsonPatch;
 use App\Data\ChatStreamResult;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Str;
@@ -24,8 +25,12 @@ use Laravel\Ai\Streaming\Events\TextStart;
 use Laravel\Ai\Streaming\Events\ToolApprovalRequest;
 use Laravel\Ai\Streaming\Events\ToolCall;
 use Laravel\Ai\Streaming\Events\ToolResult;
+use stdClass;
 
 /**
+ * @phpstan-import-type TReplyPart from ChatStreamResult
+ * @phpstan-import-type TVisualOutcome from ChatStreamResult
+ *
  * @phpstan-type TNormalizedEvent array{type: string, delta?: string|null, tool_call?: array<string, mixed>, tool_result?: array<string, mixed>, citation?: array<string, mixed>, usage?: array<string, mixed>, approvals?: list<array{id: string, tool: string, arguments: array<string, mixed>, reason: string|null}>, ...<string, mixed>}
  */
 final readonly class StreamAggregator
@@ -43,6 +48,8 @@ final readonly class StreamAggregator
     private const int MAX_BROADCAST_BYTES = 8_000;
 
     private const int TRUNCATED_PREVIEW_BYTES = 1_500;
+
+    public function __construct(private ApplyJsonPatch $patcher) {}
 
     /**
      * @param  TNormalizedEvent  $payload
@@ -256,13 +263,10 @@ final readonly class StreamAggregator
      */
     public function aggregateNormalized(array $events): ChatStreamResult
     {
-        $text = implode('', array_map(
-            fn (array $event): string => $event['delta'] ?? '',
-            $this->ofType($events, 'text_delta'),
-        ));
+        $reply = $this->reply($events);
 
         return new ChatStreamResult(
-            text: $text,
+            text: $reply['text'],
             toolCalls: $this->toolCalls($events),
             toolResults: $this->toolResults($events),
             providerTools: $this->providerTools($events),
@@ -270,7 +274,92 @@ final readonly class StreamAggregator
             errors: $this->errors($events),
             usage: $this->usage($events),
             pendingApprovals: $this->pendingApprovals($events),
+            parts: $reply['parts'],
+            visuals: $reply['visuals'],
         );
+    }
+
+    /**
+     * @param  list<TNormalizedEvent>  $events
+     * @return array{text: string, parts: list<TReplyPart>, visuals: list<TVisualOutcome>}
+     */
+    private function reply(array $events): array
+    {
+        $text = '';
+        $prose = '';
+        $parts = [];
+        $visuals = [];
+        $patches = [];
+
+        foreach ($events as $event) {
+            if ($event['type'] === 'text_delta') {
+                $text .= $event['delta'] ?? '';
+                $prose .= $event['delta'] ?? '';
+            }
+
+            $visualId = $event['visual_id'] ?? null;
+
+            if (! is_string($visualId)) {
+                continue;
+            }
+
+            if ($event['type'] === 'visual_patch' && is_array($event['patches'] ?? null)) {
+                $patches[$visualId] = [...$patches[$visualId] ?? [], ...array_values($event['patches'])];
+            }
+
+            if ($event['type'] !== 'visual_end') {
+                continue;
+            }
+
+            $accepted = ($event['accepted'] ?? false) === true;
+            $reason = $event['reason'] ?? null;
+            $visuals[] = ['id' => $visualId, 'accepted' => $accepted, 'reason' => is_string($reason) ? $reason : null];
+
+            if (! $accepted) {
+                continue;
+            }
+
+            $fallbackText = is_string($event['fallback_text'] ?? null) ? $event['fallback_text'] : '';
+            $text .= $fallbackText.PHP_EOL;
+            $parts = [...$parts, ...$this->proseParts($prose)];
+            $prose = '';
+            $parts[] = ['type' => 'data-spec', 'data' => [
+                'id' => $visualId,
+                'spec' => $this->spec($patches[$visualId] ?? []),
+                'fallback_text' => $fallbackText,
+            ]];
+        }
+
+        return [
+            'text' => $text,
+            'parts' => $parts === [] ? [] : [...$parts, ...$this->proseParts($prose)],
+            'visuals' => $visuals,
+        ];
+    }
+
+    /**
+     * @return list<array{type: 'text', text: string}>
+     */
+    private function proseParts(string $prose): array
+    {
+        return mb_trim($prose) === '' ? [] : [['type' => 'text', 'text' => $prose]];
+    }
+
+    /**
+     * @param  list<mixed>  $patches
+     */
+    private function spec(array $patches): string
+    {
+        $spec = new stdClass;
+        $operations = json_decode((string) json_encode($patches));
+
+        foreach (is_array($operations) ? $operations : [] as $operation) {
+            if ($operation instanceof stdClass) {
+                $spec = $this->patcher->handle($spec, $operation);
+            }
+        }
+
+        return (string) json_encode($spec, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     }
 
     /**

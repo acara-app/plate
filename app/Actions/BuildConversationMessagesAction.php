@@ -37,7 +37,8 @@ final readonly class BuildConversationMessagesAction
      */
     private function buildParts(History $message): array
     {
-        $textPart = ['type' => 'text', 'text' => $message->content];
+        $replyParts = $message->replyParts();
+        $textParts = $replyParts === [] ? [['type' => 'text', 'text' => $message->content]] : $replyParts;
 
         $attachmentParts = collect($message->attachments ?? [])
             ->map(function (array $attachment): array {
@@ -52,7 +53,7 @@ final readonly class BuildConversationMessagesAction
             ->values()
             ->all();
 
-        return [$textPart, ...$attachmentParts, ...$this->approvalParts($message)];
+        return [...$textParts, ...$attachmentParts, ...$this->approvalParts($message)];
     }
 
     /**

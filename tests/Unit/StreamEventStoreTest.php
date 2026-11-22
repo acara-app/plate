@@ -94,3 +94,30 @@ it('marks completed streams without deleting replay events', function (): void {
 
     expect(resolve(StreamEventStore::class)->isStreaming('conversation-1'))->toBeFalse();
 });
+
+it('replays a visual patch with its empty objects intact', function (): void {
+    $stored = [];
+    $connection = Mockery::mock(Connection::class);
+
+    Redis::shouldReceive('connection')->andReturn($connection);
+
+    $connection->shouldReceive('zadd')->andReturnUsing(function (string $key, array $payload) use (&$stored): int {
+        $stored = array_keys($payload);
+
+        return 1;
+    });
+    $connection->shouldReceive('expire');
+    $connection->shouldReceive('zrangebyscore')->andReturnUsing(function () use (&$stored): array {
+        return $stored;
+    });
+
+    $store = resolve(StreamEventStore::class);
+    $store->append('conversation-1', [
+        'type' => 'visual_patch',
+        'visual_id' => 'reply-1',
+        'patches' => [['op' => 'add', 'path' => '/elements', 'value' => new stdClass]],
+    ], 0);
+
+    expect(json_encode($store->eventsAfter('conversation-1', -1)[0]['data'], JSON_UNESCAPED_SLASHES))
+        ->toBe('{"type":"visual_patch","visual_id":"reply-1","patches":[{"op":"add","path":"/elements","value":{}}]}');
+});

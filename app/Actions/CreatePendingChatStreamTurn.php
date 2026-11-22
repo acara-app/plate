@@ -30,8 +30,9 @@ final readonly class CreatePendingChatStreamTurn
         array $attachments,
         string $channel,
         ?string $model = null,
+        ?int $catalogVersion = null,
     ): ChatStreamTurn {
-        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel, $model): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $prompt, $attachments, $channel, $model, $catalogVersion): ChatStreamTurn {
             $streamId = (string) Str::uuid7();
             $userMessageId = (string) Str::uuid7();
             $now = now();
@@ -56,7 +57,7 @@ final readonly class CreatePendingChatStreamTurn
                 'updated_at' => $now,
             ]);
 
-            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $userMessageId, $now);
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $catalogVersion, $userMessageId, $now);
 
             $conversation->forceFill(['updated_at' => $now])->save();
 
@@ -73,14 +74,15 @@ final readonly class CreatePendingChatStreamTurn
         User $user,
         string $channel,
         ?string $model = null,
+        ?int $catalogVersion = null,
     ): ChatStreamTurn {
-        return DB::transaction(function () use ($conversation, $user, $channel, $model): ChatStreamTurn {
+        return DB::transaction(function () use ($conversation, $user, $channel, $model, $catalogVersion): ChatStreamTurn {
             $streamId = (string) Str::uuid7();
             $now = now();
 
             $conversation = $this->lockConversation($conversation, $user);
 
-            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, null, $now);
+            $assistantMessageId = $this->createAssistantPlaceholder($conversation, $user, $streamId, $channel, $model, $catalogVersion, null, $now);
 
             $conversation->forceFill(['updated_at' => $now])->save();
 
@@ -107,6 +109,7 @@ final readonly class CreatePendingChatStreamTurn
         string $streamId,
         string $channel,
         ?string $model,
+        ?int $catalogVersion,
         ?string $userMessageId,
         CarbonInterface $now,
     ): string {
@@ -125,6 +128,7 @@ final readonly class CreatePendingChatStreamTurn
                 'channel' => $channel,
                 'model' => $model,
                 'user_message_id' => $userMessageId,
+                'catalog_version' => $catalogVersion,
             ], fn (mixed $value): bool => $value !== null)),
             'created_at' => $now,
             'updated_at' => $now,

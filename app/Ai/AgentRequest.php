@@ -19,6 +19,7 @@ final readonly class AgentRequest
         public ?string $conversationId = null,
         public ?string $streamId = null,
         public ?AgentModelData $model = null,
+        public ?int $catalogVersion = null,
     ) {}
 
     public function hasImages(): bool

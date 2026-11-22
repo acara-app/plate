@@ -6,23 +6,22 @@ namespace App\Services;
 
 use stdClass;
 
-final readonly class VisualCatalog
+final class VisualCatalog
 {
-    private stdClass $catalog;
+    public const string NAME = 'acara-chat';
 
-    public function __construct()
+    private const string GENERATED_PATH = 'js/components/chat/visuals/generated/';
+
+    private ?stdClass $catalog = null;
+
+    public function prompt(): string
     {
-        $catalog = json_decode(
-            (string) file_get_contents(resource_path('js/components/chat/visuals/generated/acara-chat.json')),
-            flags: JSON_THROW_ON_ERROR,
-        );
-
-        $this->catalog = $catalog instanceof stdClass ? $catalog : new stdClass;
+        return mb_trim((string) file_get_contents(resource_path(self::GENERATED_PATH.self::NAME.'.prompt.md')));
     }
 
     public function version(): int
     {
-        $version = $this->catalog->version ?? null;
+        $version = $this->catalog()->version ?? null;
 
         return is_int($version) ? $version : 1;
     }
@@ -32,7 +31,7 @@ final readonly class VisualCatalog
      */
     public function limits(): array
     {
-        $limits = $this->catalog->limits ?? new stdClass;
+        $limits = $this->catalog()->limits ?? new stdClass;
 
         return [
             'bytes' => $this->limit($limits, 'bytes'),
@@ -71,11 +70,25 @@ final readonly class VisualCatalog
 
     private function entry(string $group, string $name, int $version): ?stdClass
     {
-        $entries = $this->catalog->{$group} ?? null;
+        $entries = $this->catalog()->{$group} ?? null;
         $entry = $entries instanceof stdClass ? $entries->{$name} ?? null : null;
         $introducedIn = $entry instanceof stdClass ? $entry->introducedIn ?? null : null;
 
         return is_int($introducedIn) && $introducedIn <= $version ? $entry : null;
+    }
+
+    private function catalog(): stdClass
+    {
+        if ($this->catalog instanceof stdClass) {
+            return $this->catalog;
+        }
+
+        $catalog = json_decode(
+            (string) file_get_contents(resource_path(self::GENERATED_PATH.self::NAME.'.json')),
+            flags: JSON_THROW_ON_ERROR,
+        );
+
+        return $this->catalog = $catalog instanceof stdClass ? $catalog : new stdClass;
     }
 
     private function limit(mixed $limits, string $key): int
