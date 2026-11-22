@@ -148,7 +148,7 @@ final readonly class ValidateVisualSpec
 
         $props = $this->props($element->props ?? new stdClass, $component['props']);
         $this->assertBound($type, $props);
-        $this->assertLiteralChipActions($type, $props);
+        $this->assertLiteralChips($type, $props);
         $resolved = $this->resolve($props, $state);
         $this->assertMatches($resolved, $component['props'], 'invalid_props');
         $this->assertComponentRules($type, $resolved);
@@ -433,15 +433,9 @@ final readonly class ValidateVisualSpec
         throw_unless($binding instanceof stdClass && array_keys(get_object_vars($binding)) === ['$bindState'], InvalidVisualSpecException::class, $bound['reason']);
     }
 
-    private function assertLiteralChipActions(string $type, stdClass $props): void
+    private function assertLiteralChips(string $type, stdClass $props): void
     {
-        if ($type !== 'SuggestionChips') {
-            return;
-        }
-
-        foreach (is_array($props->items ?? null) ? $props->items : [] as $item) {
-            throw_if($item instanceof stdClass && $this->hasReference($item->action ?? null), InvalidVisualSpecException::class, 'unsupported_expression');
-        }
+        throw_if($type === 'SuggestionChips' && $this->hasReference($props->items ?? null), InvalidVisualSpecException::class, 'unsupported_expression');
     }
 
     private function assertSafeAction(string $action, mixed $params): void

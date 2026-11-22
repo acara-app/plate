@@ -2,13 +2,11 @@ import ListHealthEntryController from '@/actions/App/Http/Controllers/HealthEntr
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import healthSync from '@/routes/health-sync';
 import { router } from '@inertiajs/react';
-import type { StateModel, StateStore } from '@json-render/react';
 import { createContext, useContext } from 'react';
 
 export interface VisualSession {
     busy: boolean;
     sendMessage: (text: string) => void;
-    store: (visualId: string, initialState: StateModel) => StateStore;
 }
 
 export const VisualSessionContext = createContext<VisualSession | null>(null);

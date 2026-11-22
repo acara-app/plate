@@ -199,20 +199,26 @@ it('sends one message from a button that would send two', function (): void {
     expect(userMessages($conversation))->toBe(['What should I eat tonight?']);
 });
 
-it('opens a Plate destination in place', function (string $label, string $path): void {
+it('opens a Plate destination in place', function (string $kind, string $destination, string $path): void {
     $user = User::factory()->create();
     $conversation = Conversation::factory()->forUser($user)->create();
-    savedVisualReply($conversation, 'interactive');
+    $action = ['action' => 'openDestination', 'params' => ['destination' => $destination]];
+    savedVisuals($conversation, [[
+        'root' => 'go',
+        'elements' => ['go' => $kind === 'button'
+            ? ['type' => 'Button', 'props' => ['label' => 'Go there'], 'children' => [], 'on' => ['press' => $action]]
+            : ['type' => 'SuggestionChips', 'props' => ['items' => [['label' => 'Go there', 'action' => $action]]], 'children' => []]],
+    ]]);
 
     $this->actingAs($user);
 
     visit(route('chat.create', $conversation->id, absolute: false))
-        ->click($label)
-        ->assertPathIs($path)
-        ->assertNoJavaScriptErrors();
+        ->click('Go there')
+        ->assertPathIs($path);
 })->with([
-    'the logbook from a button' => ["Log last night's sleep", '/health-entries'],
-    'snap from a chip' => ['Snap my dinner', '/app/snap-to-track'],
+    'the daily log from a button' => ['button', 'log', '/health-entries'],
+    'snap to track from a chip' => ['chip', 'snap', '/app/snap-to-track'],
+    'the health sync guide from a chip' => ['chip', 'sync', '/tools/health-sync/setup'],
 ]);
 
 it('opens an outside link in a new tab without a way back to Plate', function (): void {

@@ -34,7 +34,6 @@ import chat from '@/routes/chat';
 import type { AiAllowance } from '@/types';
 import type { ChatPageProps, ChatStatus, UIMessage } from '@/types/chat';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { createStateStore, type StateStore } from '@json-render/react';
 import type { FileUIPart } from 'ai';
 import {
     ArrowDown,
@@ -382,7 +381,6 @@ export default function CreateChat() {
 
     const latestSubmit = useRef(handleSubmit);
     const visualSendLock = useRef(false);
-    const visualStores = useRef(new Map<string, StateStore>());
     const isVisualBusy = isStreaming || isSubmitting;
 
     useEffect(() => {
@@ -405,18 +403,6 @@ export default function CreateChat() {
 
                 visualSendLock.current = true;
                 latestSubmit.current(text);
-            },
-            store: (visualId, initialState) => {
-                const existing = visualStores.current.get(visualId);
-
-                if (existing) {
-                    return existing;
-                }
-
-                const store = createStateStore(initialState);
-                visualStores.current.set(visualId, store);
-
-                return store;
             },
         }),
         [isVisualBusy],

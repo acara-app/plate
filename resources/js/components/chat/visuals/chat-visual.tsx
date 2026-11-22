@@ -69,7 +69,6 @@ export function ChatVisual({
             <ChatVisualRenderer
                 spec={visual.spec}
                 state={visual.spec.state}
-                store={session?.store(visual.id, visual.spec.state ?? {})}
                 onAction={onAction}
             />
         </figure>
