@@ -4,9 +4,16 @@ declare(strict_types=1);
 
 use App\Ai\Agents\FoodPhotoAnalyzerAgent;
 use App\Data\Billing\PhotoModel;
+use App\Listeners\LogAiProviderFailover;
+use GuzzleHttp\Psr7\Response as Psr7Response;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Log;
+use Laravel\Ai\Exceptions\RateLimitedException;
+use Laravel\Ai\Providers\Provider;
 use Spatie\LaravelData\Exceptions\CannotCreateData;
 
-covers(FoodPhotoAnalyzerAgent::class);
+covers(FoodPhotoAnalyzerAgent::class, PhotoModel::class, LogAiProviderFailover::class);
 
 beforeEach(function (): void {
     $this->agent = new FoodPhotoAnalyzerAgent;
@@ -160,4 +167,20 @@ it('uses the selected photo model without changing the shared default', function
     expect($result->analyzerVersion)->toContain('test-premium-model')
         ->and($agent->maxTokens())->toBe(35000);
     FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'test-premium-model');
+});
+
+it('fails over to the next model when the primary provider is unavailable', function (): void {
+    Log::spy();
+    $spendCap = new RequestException(new Response(new Psr7Response(429, [], json_encode([
+        'error' => ['message' => 'Your billing account has exceeded its monthly spending cap.'],
+    ]))));
+    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === 'gemini'
+        ? throw RateLimitedException::forProvider('gemini', 429, $spendCap)
+        : ['items' => [], 'total_calories' => 0, 'total_protein' => 0, 'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 0]);
+
+    $result = (new FoodPhotoAnalyzerAgent)->analyze('aW1hZ2U=', 'image/jpeg');
+
+    expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version('gpt-6.1-terra'));
+    Log::shouldHaveReceived('error')->once()->with('ai_provider_failed_over', Mockery::on(fn (array $context): bool => $context['provider'] === 'gemini'
+        && $context['reason'] === 'Your billing account has exceeded its monthly spending cap.'));
 });
