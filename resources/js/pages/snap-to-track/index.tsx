@@ -144,7 +144,7 @@ export default function SnapToTrackIndex({
                 <BiometricsReviewBanner className="mx-4 mt-4" />
                 <Head title={t('snap_to_track.title')} />
                 <section
-                    className="@container relative flex min-h-0 flex-1 flex-col overflow-hidden"
+                    className="@container relative flex min-h-0 flex-1 flex-col overflow-clip"
                     onDragEnter={handleDragEnter}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
