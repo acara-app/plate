@@ -466,7 +466,7 @@ export default function CreateChat() {
                 <LifecycleBanner className="mx-4 mt-4" />
                 <BiometricsReviewBanner className="mx-4 mt-4" />
                 <Head title="Chat" />
-                <section className="@container relative flex min-h-0 flex-1 flex-col overflow-hidden">
+                <section className="@container relative flex min-h-0 flex-1 flex-col overflow-clip">
                     <div
                         aria-hidden="true"
                         className={cn(
