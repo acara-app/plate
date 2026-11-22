@@ -1167,6 +1167,7 @@ return [
             'target_range' => 'Target range {{low}}–{{high}}',
             'point' => '{{label}}: {{value}}',
             'suggestions' => 'Suggested next steps',
+            'choices' => 'Options',
             'new_tab' => '(opens in a new tab)',
         ],
         'empty' => [

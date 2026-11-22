@@ -1,10 +1,8 @@
 import { cn } from '@/lib/utils';
 import type { VisualPartData } from '@/types/chat';
-import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { VISUAL_SURFACE } from './components/layout';
 import { canRenderVisual, ChatVisualRenderer } from './render';
-import { runVisualAction, useVisualSession } from './visual-session';
 
 const BARE_ROOTS: ReadonlySet<string> = new Set(['Button', 'SuggestionChips']);
 
@@ -16,17 +14,6 @@ export function ChatVisual({
     isStreaming: boolean;
 }) {
     const { t } = useTranslation('common');
-    const session = useVisualSession();
-    const latestSession = useRef(session);
-    const onAction = useCallback(
-        (name: string, params?: Record<string, unknown>) =>
-            runVisualAction(latestSession.current, name, params),
-        [],
-    );
-
-    useEffect(() => {
-        latestSession.current = session;
-    }, [session]);
 
     if (visual.status === 'pending') {
         return isStreaming ? (
@@ -66,11 +53,7 @@ export function ChatVisual({
                 surfaced && VISUAL_SURFACE,
             )}
         >
-            <ChatVisualRenderer
-                spec={visual.spec}
-                state={visual.spec.state}
-                onAction={onAction}
-            />
+            <ChatVisualRenderer spec={visual.spec} state={visual.spec.state} />
         </figure>
     );
 }

@@ -1,4 +1,4 @@
-import type { ActionBinding, Spec } from '@json-render/core';
+import type { Spec } from '@json-render/core';
 import { createRenderer } from '@json-render/react';
 import { acaraChatCatalog, acaraChatComponents } from './catalog';
 import { SuggestionChips, VisualButton } from './components/actions';
@@ -10,16 +10,7 @@ import { List, ListItem, Steps } from './components/list';
 import { Metric, Progress } from './components/metric';
 import { MacroBreakdown, RiskMeter } from './components/nutrition';
 import { Badge, Callout, Heading, Text } from './components/text';
-
-function pressBindings(
-    binding: ActionBinding | ActionBinding[] | undefined,
-): ActionBinding[] {
-    if (binding === undefined) {
-        return [];
-    }
-
-    return Array.isArray(binding) ? binding : [binding];
-}
+import { hasAllowedActions } from './visual-actions';
 
 export const ChatVisualRenderer = createRenderer(acaraChatCatalog, {
     Card: ({ element, children }) => (
@@ -59,12 +50,8 @@ export const ChatVisualRenderer = createRenderer(acaraChatCatalog, {
     Checklist: ({ element, bindings }) => (
         <Checklist props={element.props} bindings={bindings} />
     ),
-    Button: ({ element, emit }) => (
-        <VisualButton
-            label={element.props.label}
-            bindings={pressBindings(element.on?.press)}
-            onPress={() => emit('press')}
-        />
+    Button: ({ element }) => (
+        <VisualButton label={element.props.label} on={element.on} />
     ),
     SuggestionChips: ({ element }) => <SuggestionChips props={element.props} />,
 });
@@ -76,6 +63,7 @@ export function canRenderVisual(spec: Spec): boolean {
         elements[spec.root] !== undefined &&
         Object.values(elements).every((element) =>
             Object.hasOwn(acaraChatComponents, element.type),
-        )
+        ) &&
+        hasAllowedActions(spec)
     );
 }

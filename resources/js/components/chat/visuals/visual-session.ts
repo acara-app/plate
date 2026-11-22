@@ -25,7 +25,7 @@ export function canSend(session: VisualSession | null): boolean {
     return session !== null && !session.busy;
 }
 
-function safeLink(value: unknown): string | null {
+export function safeLink(value: unknown): string | null {
     if (typeof value !== 'string') {
         return null;
     }

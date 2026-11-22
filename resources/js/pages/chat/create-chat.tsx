@@ -381,7 +381,7 @@ export default function CreateChat() {
 
     const latestSubmit = useRef(handleSubmit);
     const visualSendLock = useRef(false);
-    const isVisualBusy = isStreaming || isSubmitting;
+    const isVisualBusy = isStreaming || isSubmitting || isResuming;
 
     useEffect(() => {
         latestSubmit.current = handleSubmit;

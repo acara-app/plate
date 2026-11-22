@@ -1,12 +1,14 @@
 import { cn } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useId } from 'react';
 import type { ViewProps } from './props';
 import { GAPS, hasChildren, tint, visualIcon } from './style';
 
 export const VISUAL_SURFACE = 'rounded-3xl bg-muted/60 p-5 dark:bg-muted/50';
 
 const CardDepth = createContext(0);
+
+export const CardTitleId = createContext<string | null>(null);
 
 const ALIGN = {
     start: 'items-start',
@@ -23,6 +25,9 @@ const COLUMNS: Record<number, string> = {
 
 export function Card({ props, children }: ViewProps<'Card'>) {
     const depth = useContext(CardDepth);
+    const outerTitleId = useContext(CardTitleId);
+    const ownTitleId = useId();
+    const titleId = props.title ? ownTitleId : outerTitleId;
     const Icon = visualIcon(props.icon);
     const accent = tint(props.tint ?? props.icon);
     const Title = depth === 0 ? 'h3' : 'h4';
@@ -49,6 +54,7 @@ export function Card({ props, children }: ViewProps<'Card'>) {
                     <div className="min-w-0">
                         {props.title && (
                             <Title
+                                id={ownTitleId}
                                 className={cn(
                                     'font-semibold tracking-tight text-balance text-foreground',
                                     depth === 0 ? 'text-base' : 'text-[15px]',
@@ -66,7 +72,9 @@ export function Card({ props, children }: ViewProps<'Card'>) {
                 </header>
             )}
             {hasChildren(children) && (
-                <CardDepth value={depth + 1}>{children}</CardDepth>
+                <CardDepth value={depth + 1}>
+                    <CardTitleId value={titleId}>{children}</CardTitleId>
+                </CardDepth>
             )}
         </section>
     );

@@ -1153,6 +1153,7 @@ return [
             'target_range' => 'Зорилтот хүрээ {{low}}–{{high}}',
             'point' => '{{label}}: {{value}}',
             'suggestions' => 'Санал болгох дараагийн алхмууд',
+            'choices' => 'Сонголтууд',
             'new_tab' => '(шинэ табад нээгдэнэ)',
         ],
         'empty' => [

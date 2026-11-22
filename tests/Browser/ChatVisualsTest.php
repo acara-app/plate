@@ -485,6 +485,120 @@ it('finishes a reply that a backfill caught up', function (bool $liveEndArrives)
     'when the live stream goes quiet' => false,
 ]);
 
+it('shows a saved visual as text when its button breaks the current rules', function (array $binding): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    History::factory()->forConversation($conversation)->assistantMessage()->create([
+        'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => [['type' => 'data-spec', 'data' => [
+            'id' => 'visual-0',
+            'fallback_text' => 'Steps this week',
+            'spec' => json_encode([
+                'root' => 'card',
+                'elements' => [
+                    'card' => ['type' => 'Card', 'props' => ['title' => 'Steps this week'], 'children' => ['more']],
+                    'more' => visualButton('Show more', $binding),
+                ],
+                'state' => ['ui' => ['view' => 'week', 'note' => 'Show my month']],
+            ]),
+        ]]]]),
+    ]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Steps this week')
+        ->assertCount('figure[data-test="chat-visual"]', 0)
+        ->assertDontSee('Show more')
+        ->assertNoJavaScriptErrors();
+})->with([
+    'a write after the action' => [['action' => 'setState', 'params' => ['statePath' => '/ui/view', 'value' => 'month'], 'onSuccess' => ['set' => ['/data/step_count' => []]]]],
+    'a message read from state' => [['action' => 'sendMessage', 'params' => ['text' => ['$state' => '/ui/note']]]],
+]);
+
+it('keeps sending chips unavailable while a queued reply resumes', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisualReply($conversation, 'interactive');
+    resolve(CreatePendingChatStreamTurn::class)->handle($conversation, $user, 'Hello', [], 'web', catalogVersion: 1);
+    $this->app->instance(StreamEventStore::class, new class extends StreamEventStore
+    {
+        public function __construct() {}
+
+        public function eventsAfter(string $conversationId, int $afterSequence): array
+        {
+            return [];
+        }
+
+        public function isStreaming(string $conversationId): bool
+        {
+            return false;
+        }
+    });
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertSee('Make it shorter')
+        ->wait(1)
+        ->assertAttribute('[aria-label="Suggested next steps"] li:first-child button', 'aria-disabled', 'true')
+        ->assertNoJavaScriptErrors();
+});
+
+it("keeps a button's writes inside the visual's own state", function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisuals($conversation, [[
+        'root' => 'card',
+        'elements' => [
+            'card' => ['type' => 'Card', 'props' => ['title' => 'Your week'], 'children' => ['everyDay', 'farAhead', 'reset', 'jump', 'replace', 'remove', 'add']],
+            'everyDay' => ['type' => 'Text', 'props' => ['text' => 'Showing every day'], 'children' => [], 'visible' => ['$state' => '/ui/filter', 'eq' => null]],
+            'farAhead' => ['type' => 'Text', 'props' => ['text' => 'Written far past the list'], 'children' => [], 'visible' => ['$state' => '/ui/items/5000', 'eq' => 'x']],
+            'reset' => visualButton('Clear the filter', ['action' => 'setState', 'params' => ['statePath' => '/ui/filter', 'value' => null]]),
+            'jump' => visualButton('Write far ahead', ['action' => 'setState', 'params' => ['statePath' => '/ui/items/5000', 'value' => 'x']]),
+            'replace' => visualButton('Replace the list', ['action' => 'setState', 'params' => ['statePath' => '/ui/items', 'value' => 'none']]),
+            'remove' => visualButton('Remove the first', ['action' => 'removeState', 'params' => ['statePath' => '/ui/items', 'index' => 0]]),
+            'add' => visualButton('Add one', ['action' => 'pushState', 'params' => ['statePath' => '/ui/items', 'value' => 'b']]),
+        ],
+        'state' => ['ui' => ['filter' => 'steps', 'items' => ['a']]],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->assertDontSee('Showing every day')
+        ->click('Clear the filter')
+        ->assertSee('Showing every day')
+        ->click('Write far ahead')
+        ->assertDontSee('Written far past the list')
+        ->click('Replace the list')
+        ->click('Remove the first')
+        ->click('Add one')
+        ->wait(0.5)
+        ->assertNoJavaScriptErrors();
+});
+
+it('fits a segmented control in a narrow card and names it after the card', function (): void {
+    $user = User::factory()->create();
+    $conversation = Conversation::factory()->forUser($user)->create();
+    savedVisuals($conversation, [[
+        'root' => 'card',
+        'elements' => [
+            'card' => ['type' => 'Card', 'props' => ['title' => 'Eating pattern'], 'children' => ['pattern']],
+            'pattern' => ['type' => 'Segmented', 'props' => ['options' => [['label' => 'Mediterranean', 'value' => 'med'], ['label' => 'Vegetarian', 'value' => 'veg'], ['label' => 'Pescatarian', 'value' => 'fish']], 'value' => ['$bindState' => '/ui/pattern']], 'children' => []],
+        ],
+        'state' => ['ui' => ['pattern' => 'med']],
+    ]]);
+
+    $this->actingAs($user);
+
+    visit(route('chat.create', $conversation->id, absolute: false))
+        ->resize(320, 720)
+        ->assertSee('Pescatarian')
+        ->assertScript("(() => { const group = document.querySelector('[role=\"radiogroup\"]').getBoundingClientRect(); return Array.from(document.querySelectorAll('[role=\"radiogroup\"] label')).every((label) => label.getBoundingClientRect().right <= group.right + 0.5); })()", true)
+        ->assertScript("document.getElementById(document.querySelector('[role=\"radiogroup\"]').getAttribute('aria-labelledby'))?.textContent.trim()", 'Eating pattern')
+        ->assertNoJavaScriptErrors();
+});
+
 /**
  * @return list<stdClass>
  */
@@ -541,6 +655,15 @@ function savedVisualReply(Conversation $conversation, string $scenario, ?Closure
     History::factory()->forConversation($conversation)->assistantMessage()->create([
         'meta' => History::streamMeta('stream-1', History::STREAM_STATUS_COMPLETED, ['parts' => $parts]),
     ]);
+}
+
+/**
+ * @param  array<string, mixed>  $binding
+ * @return array<string, mixed>
+ */
+function visualButton(string $label, array $binding): array
+{
+    return ['type' => 'Button', 'props' => ['label' => $label], 'children' => [], 'on' => ['press' => $binding]];
 }
 
 function savedVisuals(Conversation $conversation, array $specs): void

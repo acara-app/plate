@@ -1,7 +1,8 @@
 import { cn } from '@/lib/utils';
-import type { ActionBinding } from '@json-render/core';
+import { useStateStore } from '@json-render/react';
 import { ArrowRight, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { pressActions, runPress } from '../visual-actions';
 import { canSend, runVisualAction, useVisualSession } from '../visual-session';
 import type { ViewProps } from './props';
 
@@ -25,17 +26,10 @@ function Trailing({ action }: { action: string }) {
     ) : null;
 }
 
-export function VisualButton({
-    label,
-    bindings,
-    onPress,
-}: {
-    label: string;
-    bindings: ActionBinding[];
-    onPress: () => void;
-}) {
+export function VisualButton({ label, on }: { label: string; on: unknown }) {
     const session = useVisualSession();
-    const actions = bindings.map((binding) => binding.action);
+    const store = useStateStore();
+    const actions = pressActions(on);
     const unavailable = actions.includes('sendMessage') && !canSend(session);
 
     return (
@@ -44,7 +38,7 @@ export function VisualButton({
             aria-disabled={unavailable || undefined}
             onClick={() => {
                 if (!unavailable) {
-                    onPress();
+                    runPress(on, store, session);
                 }
             }}
             className={cn(
