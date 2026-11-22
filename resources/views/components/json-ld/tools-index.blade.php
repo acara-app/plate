@@ -36,8 +36,8 @@
             {
                 "@@type": "ListItem",
                 "position": 2,
-                "name": "Food Photo Analyzer",
-                "description": "Snap a photo of your meal and get instant macro breakdown",
+                "name": "Photo Calorie Counter",
+                "description": "AI food scanner: snap a meal to estimate calories, carbs, protein, and fat for every food",
                 "url": "{{ route('snap-to-track') }}"
             },
             {

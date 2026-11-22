@@ -100,6 +100,10 @@
                     </div>
                 </div>
             </div>
+
+            <x-snap-promo class="mt-12" heading="Not sure what to write in the Meal column?" location="diabetes_log_book">
+                <x-snap-link location="diabetes_log_book">Take a picture of your plate</x-snap-link> and get the carbs and calories to note down, food by food.
+            </x-snap-promo>
         </div>
 
         {{-- Print-only content --}}

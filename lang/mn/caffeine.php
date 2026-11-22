@@ -113,5 +113,6 @@ return [
     'footer_tool_meal_planner' => 'Хоолны меню',
     'footer_tool_ask_ai' => 'AI-аас асуух',
     'footer_tool_usda_calculator' => 'USDA-гийн шинэ хоолны пирамид',
+    'footer_tool_snap_to_track' => 'Зургаар илчлэг тоолох',
     'footer_tool_ai_nutritionist' => 'AI хоол зүйч',
 ];

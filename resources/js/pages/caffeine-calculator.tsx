@@ -10,6 +10,7 @@ import {
     mealPlanner,
     privacy,
     register,
+    snapToTrack,
     terms,
     usdaServingsCalculator,
 } from '@/routes';
@@ -1517,6 +1518,7 @@ function CaffeineFooter() {
             label: t('footer_tool_usda_calculator'),
             href: usdaServingsCalculator.url(),
         },
+        { label: t('footer_tool_snap_to_track'), href: snapToTrack.url() },
     ];
 
     return (

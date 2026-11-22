@@ -54,8 +54,8 @@ class extends Component
                 ],
             ],
             [
-                'name' => 'Food Photo Analyzer',
-                'description' => 'Snap a photo of your meal and get instant macro breakdown with AI-powered nutrition analysis.',
+                'name' => 'Photo Calorie Counter',
+                'description' => 'AI food scanner: snap a meal and get the calories, carbs, protein, and fat for every food on the plate.',
                 'icon' => '📸',
                 'route' => route('snap-to-track'),
                 'badge' => 'AI Powered',
@@ -249,6 +249,12 @@ class extends Component
                 </p>
             </div>
         </section>
+
+        <div class="mx-auto mt-16 max-w-7xl lg:px-8">
+            <x-snap-promo heading="Start with your plate" location="tools_index">
+                Most of these tools work better when you know what you ate. Snap a photo and our <x-snap-link location="tools_index">AI meal scanner</x-snap-link> lists every food with its calories, carbs, protein, and fat.
+            </x-snap-promo>
+        </div>
 
         {{-- CTA: Personalized meal plan --}}
         <section class="mx-auto mt-16 max-w-7xl lg:px-8">

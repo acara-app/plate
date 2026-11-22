@@ -302,6 +302,12 @@ class extends Component
             </blockquote>
         </section>
 
+        <div class="mx-auto mt-16 max-w-7xl lg:px-8">
+            <x-snap-promo heading="Send a meal photo instead" location="telegram_health_logging">
+                Once your account is linked, send the bot a photo of your meal and it works out what's on the plate and logs it for you. Not linked yet? Snap to Track can <x-snap-link location="telegram_health_logging">identify food from an image</x-snap-link> right in your browser.
+            </x-snap-promo>
+        </div>
+
         {{-- Available Commands --}}
         <section class="mx-auto mt-24 max-w-7xl lg:px-8">
             <div class="grid gap-10 sm:grid-cols-[1fr_2fr] sm:gap-14">

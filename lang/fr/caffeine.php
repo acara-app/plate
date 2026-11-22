@@ -112,5 +112,6 @@ return [
     'footer_tool_meal_planner' => 'Planificateur de repas',
     'footer_tool_ask_ai' => 'Demander à l\'IA',
     'footer_tool_usda_calculator' => 'Calculateur USDA des portions quotidiennes',
+    'footer_tool_snap_to_track' => 'Compteur de calories par photo',
     'footer_tool_ai_nutritionist' => 'Nutritionniste IA',
 ];

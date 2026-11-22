@@ -113,5 +113,6 @@ return [
     'footer_tool_meal_planner' => 'Meal Planner',
     'footer_tool_ask_ai' => 'Ask AI',
     'footer_tool_usda_calculator' => 'USDA Daily Servings Calculator',
+    'footer_tool_snap_to_track' => 'Photo Calorie Counter',
     'footer_tool_ai_nutritionist' => 'AI Nutritionist',
 ];
