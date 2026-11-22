@@ -286,11 +286,8 @@ export function runPress(
                 const list = store.get(statePath);
 
                 if (
-                    (list === undefined ||
-                        list === null ||
-                        Array.isArray(list)) &&
                     writeLocalState(store, statePath, [
-                        ...(list ?? []),
+                        ...(Array.isArray(list) ? list : []),
                         value,
                     ]) &&
                     typeof clearStatePath === 'string'
