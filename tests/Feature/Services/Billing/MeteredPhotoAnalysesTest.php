@@ -72,7 +72,7 @@ it("runs a paying member's scans on the shared photo model without a scan allowa
 
 it("stops a paying member's scan once their plan limit is reached", function (): void {
     $member = payingPhotoMember();
-    AiUsage::factory()->for($member)->create(['cost' => 0.60]);
+    AiUsage::factory()->for($member)->create(['cost' => 0.80]);
 
     expect(fn (): FoodAnalysisData => resolve(ManagesPhotoAnalyses::class)->analyze(
         photoScanFor($member),

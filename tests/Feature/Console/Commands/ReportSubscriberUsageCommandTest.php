@@ -41,8 +41,8 @@ it('reports paid subscribers with their AI allowance usage, photo scans and new 
         ->expectsTable(
             ['User', 'Plan', 'Since', 'AI allowance used', 'Scans today', 'Scans 7d'],
             [
-                [$starter->id, 'Starter', now()->subDays(2)->toDateString(), '$0.12 / $0.50 (24%)', 2, 3],
-                [$snapPro->id, 'Snap Pro', now()->subDays(10)->toDateString(), '$0.00 / $5.00 (0%)', 0, 0],
+                [$starter->id, 'Starter', now()->subDays(2)->toDateString(), '$0.12 / $0.75 (16%)', 2, 3],
+                [$snapPro->id, 'Snap Pro', now()->subDays(10)->toDateString(), '$0.00 / $7.50 (0%)', 0, 0],
             ],
         )
         ->expectsTable(
