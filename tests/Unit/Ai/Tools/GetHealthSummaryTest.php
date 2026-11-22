@@ -105,7 +105,7 @@ it('offers each metric it returns as a daily dataset only while a reply collects
         ]);
 });
 
-it("reports workouts as minutes and glucose in the person's unit, and charts no event that is not a measurement", function (): void {
+it("reports workout minutes, dose counts and glucose in the person's unit, and charts no event that is not a measurement", function (): void {
     $user = User::factory()->create();
     UserProfile::factory()->for($user)->create(['units_preference' => GlucoseUnit::MmolL]);
     $this->actingAs($user);
@@ -113,6 +113,10 @@ it("reports workouts as minutes and glucose in the person's unit, and charts no 
 
     foreach ([[8, 30], [18, 30]] as [$hour, $minutes]) {
         HealthSyncSample::factory()->for($user)->create(['type_identifier' => 'workouts', 'value' => $minutes, 'unit' => 'min', 'measured_at' => $day->setTime($hour, 0)]);
+    }
+
+    foreach ([9, 21] as $hour) {
+        HealthSyncSample::factory()->for($user)->create(['type_identifier' => 'medicationDoseEvent', 'value' => 2, 'unit' => 'tablet', 'measured_at' => $day->setTime($hour, 0)]);
     }
 
     foreach ([[7, 90], [12, 108], [19, 180]] as [$hour, $reading]) {
@@ -132,10 +136,13 @@ it("reports workouts as minutes and glucose in the person's unit, and charts no 
 
     expect(array_map(fn (VisualDataset $dataset): array => [$dataset->measure, $dataset->unit, $dataset->rows[0]['value']], $collected))->toBe([
         'blood_glucose' => ['daily average', 'mmol/L', 7],
+        'medication_dose_event' => ['daily total', 'dose', 2],
         'workouts' => ['daily total', 'min', 60],
     ])
         ->and(array_intersect_key($summaries['workouts'], array_flip(['unit', 'total', 'count', 'primary_value'])))
         ->toBe(['unit' => 'min', 'total' => 60, 'count' => 2, 'primary_value' => 60])
+        ->and(array_intersect_key($summaries['medicationDoseEvent'], array_flip(['unit', 'count', 'primary_value'])))
+        ->toBe(['unit' => 'dose', 'count' => 2, 'primary_value' => 2])
         ->and(array_intersect_key($summaries['bloodGlucose'], array_flip(['unit', 'avg', 'min', 'max', 'primary_value'])))
         ->toBe(['unit' => 'mmol/L', 'avg' => 7, 'min' => 5, 'max' => 10, 'primary_value' => 7]);
 });

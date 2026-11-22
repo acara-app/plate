@@ -51,6 +51,8 @@ final class HealthDailyAggregate extends Model
 
     public const string OCCURRENCE_UNIT = 'event';
 
+    private const string DURATION_UNIT = 'min';
+
     protected $guarded = [];
 
     /**
@@ -98,7 +100,7 @@ final class HealthDailyAggregate extends Model
     {
         $descriptor = $this->descriptor();
 
-        if ($descriptor->isEvent() && ($this->unit ?? $descriptor->displayUnit) !== self::OCCURRENCE_UNIT) {
+        if ($descriptor->isEvent() && ($this->unit ?? $descriptor->displayUnit) === self::DURATION_UNIT) {
             return $this->value_sum;
         }
 
