@@ -26,7 +26,7 @@ return [
     'photo_analysis' => [
         'provider' => 'gemini',
         'model' => 'gemini-3.8-flash',
-        'fallback' => [
+        'failover' => [
             'provider' => 'openai',
             'model' => 'gpt-6.1-terra',
         ],

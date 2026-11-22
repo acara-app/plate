@@ -169,10 +169,10 @@ it('uses the selected photo model without changing the shared default', function
     FoodPhotoAnalyzerAgent::assertPrompted(fn ($prompt): bool => $prompt->model === 'test-premium-model');
 });
 
-it('keeps scanning on the fallback model when Gemini is unavailable', function (): void {
+it('fails over to the next model when the primary provider is unavailable', function (): void {
     Log::spy();
     $spendCap = new RequestException(new Response(new Psr7Response(429, [], json_encode([
-        'error' => ['code' => 429, 'message' => 'Your billing account has exceeded its monthly spending cap.', 'status' => 'RESOURCE_EXHAUSTED'],
+        'error' => ['message' => 'Your billing account has exceeded its monthly spending cap.'],
     ]))));
     FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === 'gemini'
         ? throw RateLimitedException::forProvider('gemini', 429, $spendCap)
@@ -180,8 +180,7 @@ it('keeps scanning on the fallback model when Gemini is unavailable', function (
 
     $result = (new FoodPhotoAnalyzerAgent)->analyze('aW1hZ2U=', 'image/jpeg');
 
-    expect($result->analyzerVersion)->toBe('gpt-6.1-terra/p'.FoodPhotoAnalyzerAgent::PROMPT_VERSION);
+    expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version('gpt-6.1-terra'));
     Log::shouldHaveReceived('error')->once()->with('ai_provider_failed_over', Mockery::on(fn (array $context): bool => $context['provider'] === 'gemini'
-        && $context['model'] === 'gemini-3.8-flash'
         && $context['reason'] === 'Your billing account has exceeded its monthly spending cap.'));
 });

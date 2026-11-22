@@ -25,7 +25,7 @@ use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[MaxTokens(35000)]
-#[Timeout(60)]
+#[Timeout(30)]
 final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageToUser, HasProviderOptions, HasStructuredOutput
 {
     use HasUsageUser;
