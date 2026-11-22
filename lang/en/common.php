@@ -1385,7 +1385,6 @@ return [
                 'Use your personalised calorie and macro goals',
             ],
             'cta' => 'Keep tracking with {{name}} — {{price}}/month',
-            'short_cta' => 'Or keep tracking with {{name}} · {{price}}/month',
             'terms' => 'Renews monthly until cancelled. Cancel through Billing settings. No overage charges.',
             'save_free' => 'Not now — save this meal free',
             'login' => 'Already have an account? Log in',

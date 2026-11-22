@@ -1,4 +1,4 @@
-@props(['allowance'])
+@props(['allowance', 'clearance' => 0])
 
 @php
     $offer = $allowance->canUpgrade ? $allowance->offer : null;
@@ -11,16 +11,16 @@
         aria-labelledby="result-offer-heading"
         x-data
         x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed('result')"
-        class="flex flex-col gap-5 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-border/60 sm:p-6"
+        class="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5 sm:p-6"
     >
         <div class="flex flex-col gap-2">
             @if ($allowance->exhausted)
-                <p class="self-start rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
+                <p class="self-start rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
             @elseif ($freeScansLeft !== null)
-                <p class="self-start rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">{!! e(strtr(__('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $freeScansLeft])) !!}</p>
+                <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{!! e(strtr(__('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $freeScansLeft])) !!}</p>
             @endif
-            <h2 id="result-offer-heading" class="text-2xl font-semibold tracking-tight">{{ __('common.photo_plans.offer.heading') }}</h2>
-            <p class="text-sm text-muted-foreground">
+            <h2 id="result-offer-heading" class="text-2xl font-semibold tracking-tight text-balance">{{ __('common.photo_plans.offer.heading') }}</h2>
+            <p class="text-sm leading-relaxed text-muted-foreground">
                 @if ($allowance->exhausted)
                     {{ __('common.photo_plans.offer.save_note') }}
                 @endif
@@ -39,9 +39,13 @@
             @endforeach
         </ul>
 
-        <div {{ $attributes->class(['flex flex-col gap-2']) }}>
+        <div
+            x-intersect:enter.margin.0.0.-{{ $clearance }}px.0="actionsOnScreen.offer = true"
+            x-intersect:leave.margin.0.0.-{{ $clearance }}px.0="actionsOnScreen.offer = false"
+            class="flex flex-col gap-2"
+        >
             <x-snap-result.button
-                class="whitespace-normal"
+                variant="plan"
                 wire:click="upgrade('result')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade"
@@ -49,18 +53,14 @@
             >
                 {!! e(strtr(__('common.photo_plans.offer.cta'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
             </x-snap-result.button>
-            <p class="text-center text-xs text-muted-foreground">{{ __('common.photo_plans.offer.terms') }}</p>
-        </div>
-
-
-        <div class="flex justify-center border-t border-border/60 pt-4 text-sm">
+            <p class="text-center text-xs leading-relaxed text-muted-foreground">{{ __('common.photo_plans.offer.terms') }}</p>
             <button
                 type="button"
                 wire:click="save('register')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade"
                 x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result' })"
-                class="min-h-11 rounded-md px-2 font-medium underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
+                class="inline-flex min-h-11 touch-manipulation items-center justify-center self-center rounded-full px-3 text-sm font-medium transition duration-150 ease-out outline-none select-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
             >
                 {{ __('common.photo_plans.offer.save_free') }}
             </button>

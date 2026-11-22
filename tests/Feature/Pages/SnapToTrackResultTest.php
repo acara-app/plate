@@ -152,7 +152,7 @@ it('shows an unknown fiber estimate as missing rather than zero', function (): v
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder(['Fiber', '—', '/28 g', 'Your meal']);
+        ->assertSeeInOrder(['Fiber', '—', '/ 28 g', 'Your meal']);
 });
 
 it('offers the plan and its price after the meal and its Save action', function (): void {
@@ -169,7 +169,8 @@ it('offers the plan and its price after the meal and its Save action', function 
             'Keep tracking with Starter — US$2.99/month',
             'Renews monthly until cancelled. Cancel through Billing settings.',
             'Not now — save this meal free',
-            'Or keep tracking with Starter · US$2.99/month',
+            'Save this meal free',
+            'No card required. No automatic subscription.',
         ]);
 });
 

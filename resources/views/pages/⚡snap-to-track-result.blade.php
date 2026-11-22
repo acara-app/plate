@@ -21,7 +21,7 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.mini-app', ['metaDescription' => 'Your Snap to Track meal breakdown, shown the way it looks in your Acara Plate food log.'])]
+#[Layout('layouts.mini-app', ['bodyClass' => 'bg-muted text-foreground', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'themeColor' => '#f5f5f5', 'metaDescription' => 'Your Snap to Track meal breakdown, shown the way it looks in your Acara Plate food log.'])]
 #[Title('Your meal | Snap to Track')]
 class extends Component
 {
@@ -150,16 +150,22 @@ class extends Component
 
 @php
     $amount = static fn (float|int|null $value): string => rtrim(rtrim(number_format((float) $value, 1), '0'), '.');
+    $kcal = static fn (float|int|null $value): string => number_format(round((float) $value));
     $photoAllowance = $this->photoAllowance;
     $goals = $this->goals;
+    $gutter = 'pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]';
+    $press = 'touch-manipulation select-none transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
+    $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
+    $link = 'inline-flex min-h-11 items-center gap-1 rounded-full text-sm font-medium text-primary disabled:pointer-events-none disabled:opacity-50 '.$press.' '.$ring;
+    $card = 'rounded-[1.75rem] bg-card';
 @endphp
 
-<div class="min-h-[100dvh] bg-background text-foreground">
-    <header class="sticky top-0 z-30 border-b border-border/60 bg-background/90 backdrop-blur">
-        <div class="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3 px-4 sm:px-6">
-            <a href="{{ route('home') }}" aria-label="Acara Plate home" class="inline-flex min-h-11 items-center gap-2 rounded-md outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                <span aria-hidden="true" class="flex size-8 items-center justify-center rounded-md bg-emerald-50 text-lg ring-1 ring-emerald-200">🍓</span>
-                <span class="text-sm font-semibold">Acara Plate</span>
+<div class="min-h-svh bg-muted text-foreground [-webkit-tap-highlight-color:transparent] [-webkit-text-size-adjust:100%]">
+    <header class="{{ $gutter }} pt-[env(safe-area-inset-top)]">
+        <div class="mx-auto flex h-14 w-full max-w-2xl items-center justify-between gap-3">
+            <a href="{{ route('home') }}" aria-label="Acara Plate home" class="-ml-2 inline-flex min-h-11 items-center gap-2 rounded-full px-2 {{ $press }} {{ $ring }}">
+                <span aria-hidden="true" class="text-xl leading-none">🍓</span>
+                <span class="text-[17px] font-bold tracking-tight">Acara Plate</span>
             </a>
             @if ($analysis !== null && ! auth()->check())
                 <button
@@ -167,7 +173,7 @@ class extends Component
                     wire:click="save('login')"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade"
-                    class="inline-flex h-10 items-center justify-center rounded-full px-4 text-sm font-medium outline-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
+                    class="-mr-3 inline-flex min-h-11 items-center justify-center rounded-full px-3 text-[15px] font-medium text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50 {{ $press }} {{ $ring }}"
                 >
                     Log in
                 </button>
@@ -176,10 +182,10 @@ class extends Component
     </header>
 
     @if ($analysis === null)
-        <div x-data x-init="window.acaraForgetSnapPhoto?.()" class="mx-auto w-full max-w-2xl px-4 pt-6 pb-16 sm:px-6">
-            <section class="flex flex-col gap-4 rounded-3xl bg-card p-6 shadow-xs ring-1 ring-border/60">
+        <div x-data x-init="window.acaraForgetSnapPhoto?.()" class="{{ $gutter }} pt-2 pb-16 sm:pt-4">
+            <section class="{{ $card }} mx-auto flex w-full max-w-2xl flex-col gap-4 p-6">
                 <h1 class="text-xl font-semibold tracking-tight">This meal preview is no longer available</h1>
-                <p class="text-sm text-muted-foreground">
+                <p class="text-sm leading-relaxed text-muted-foreground">
                     {{ $unavailableReason === 'consumed'
                         ? 'This meal has already been saved to a food log.'
                         : 'Meal previews expire 60 minutes after analysis to protect your privacy. Analyze another photo to pick up where you left off.' }}
@@ -200,6 +206,8 @@ class extends Component
                 ['label' => 'Fiber', 'value' => $analysis['total_fiber'] ?? null, 'goal' => $goals->fiber, 'icon' => 'salad', 'tile' => 'bg-green-100', 'iconColor' => 'text-green-600', 'text' => 'text-green-700', 'ring' => 'stroke-green-500'],
             ];
             $barOffer = $photoAllowance->canUpgrade ? $photoAllowance->offer : null;
+            $barClearance = $barOffer ? 208 : 96;
+            $tile = 'flex min-h-16 min-w-0 flex-1 items-center gap-3 rounded-[1.25rem] px-3.5 text-left '.$press.' '.$ring;
         @endphp
 
         <div
@@ -207,6 +215,7 @@ class extends Component
                 at: new Date(@js($analyzedAt ?? now()->toIso8601String())),
                 photo: window.acaraRecallSnapPhoto?.(@js($analysisRequestId)) ?? null,
                 actionsOnScreen: { meal: true, offer: false },
+                plan: 'free',
                 get mealType() {
                     const hour = this.at.getHours();
 
@@ -237,130 +246,134 @@ class extends Component
                 isFuture(day) {
                     return day > this.at && ! this.isToday(day);
                 },
+                jumpTo(id) {
+                    document.getElementById(id)?.scrollIntoView({
+                        block: 'start',
+                        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+                    });
+                },
             }"
             x-init="window.acaraTrackOnce?.('snap_to_track_result_viewed', { source: 'public_snap_to_track' }, @js($analysisRequestId ?? 'restored'))"
-            class="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6 px-4 pt-4 pb-40 sm:px-6 sm:pt-6 md:pb-16"
+            class="{{ $gutter }} pt-2 pb-[calc(env(safe-area-inset-bottom)+6.5rem)] sm:pt-4"
         >
-            <h1 class="sr-only">Your meal preview</h1>
-            <div class="flex flex-wrap items-center justify-between gap-x-3">
-                <p class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                    <x-snap-result.icon name="sparkles" class="size-3.5" />
-                    Preview · not saved yet
-                </p>
-                <a href="#meal-result" class="inline-flex min-h-11 items-center gap-1 rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                    See your meal
-                    <x-snap-result.icon name="chevron-down" class="size-4" />
-                </a>
-            </div>
+            <div class="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6">
+                <h1 class="sr-only">Your meal preview</h1>
+                <div class="flex flex-wrap items-center justify-between gap-x-3">
+                    <p class="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">
+                        <x-snap-result.icon name="sparkles" class="size-3.5" />
+                        Preview · not saved yet
+                    </p>
+                    <a href="#meal-result" x-on:click.prevent="jumpTo('meal-result')" class="{{ $link }}">
+                        See your meal
+                        <x-snap-result.icon name="chevron-down" class="size-4" />
+                    </a>
+                </div>
 
-            <nav aria-label="Choose a day" class="flex min-w-0 flex-col gap-1">
-                <ol class="grid w-full grid-cols-7 py-2">
-                    <template x-for="day in week" :key="day.toDateString()">
-                        <li class="flex justify-center">
-                            <span
-                                class="flex flex-col items-center gap-1 py-1"
-                                :class="isFuture(day) && 'opacity-40'"
-                                :aria-current="isToday(day) ? 'date' : null"
-                            >
+                <nav aria-label="Choose a day" class="flex min-w-0 flex-col">
+                    <ol class="grid w-full grid-cols-7">
+                        <template x-for="day in week" :key="day.toDateString()">
+                            <li class="flex justify-center">
                                 <span
-                                    class="flex size-11 items-center justify-center rounded-full text-lg font-semibold tabular-nums"
-                                    :class="isToday(day) ? 'bg-primary text-primary-foreground shadow-[0_0_16px_rgba(16,185,129,0.35)]' : ''"
-                                    x-text="day.getDate()"
-                                ></span>
-                                <span
-                                    class="text-xs capitalize"
-                                    :class="isToday(day) ? 'font-medium text-primary' : 'text-muted-foreground'"
-                                    x-text="day.toLocaleDateString('en', { weekday: 'short' })"
-                                ></span>
-                                <span aria-hidden="true" class="size-1.5 rounded-full" :class="isToday(day) ? 'bg-primary' : 'bg-transparent'"></span>
-                            </span>
-                        </li>
-                    </template>
-                </ol>
-            </nav>
+                                    class="flex flex-col items-center gap-1"
+                                    :class="isFuture(day) && 'opacity-40'"
+                                    :aria-current="isToday(day) ? 'date' : null"
+                                >
+                                    <span
+                                        class="flex size-11 items-center justify-center rounded-full text-lg font-semibold tabular-nums"
+                                        :class="isToday(day) ? 'bg-primary text-primary-foreground shadow-[0_0_16px_rgba(16,185,129,0.35)]' : ''"
+                                        x-text="day.getDate()"
+                                    ></span>
+                                    <span
+                                        class="text-xs capitalize"
+                                        :class="isToday(day) ? 'font-medium text-primary' : 'text-muted-foreground'"
+                                        x-text="day.toLocaleDateString('en', { weekday: 'short' })"
+                                    ></span>
+                                </span>
+                            </li>
+                        </template>
+                    </ol>
+                </nav>
 
-            <div class="flex flex-col gap-2">
-                <section aria-labelledby="calorie-goal-heading" class="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-xs ring-1 ring-border/60 sm:p-6">
-                    <div class="flex items-center justify-between gap-4">
+                <div class="flex flex-col gap-2.5">
+                    <section aria-labelledby="calorie-goal-heading" class="{{ $card }} flex items-center justify-between gap-4 p-5 sm:p-6">
                         <div class="flex min-w-0 flex-col gap-1">
                             <h2 id="calorie-goal-heading" class="text-sm text-muted-foreground">Daily calories</h2>
-                            <p class="flex flex-wrap items-baseline gap-x-1">
-                                <span class="text-5xl font-bold tracking-tight tabular-nums">{{ $amount($analysis['total_calories']) }}</span>
-                                <span class="text-lg text-muted-foreground tabular-nums">/{{ number_format($goals->calories) }} kcal</span>
+                            <p class="flex flex-wrap items-baseline gap-x-1.5">
+                                <span class="text-5xl font-bold tracking-tight tabular-nums">{{ $kcal($analysis['total_calories']) }}</span>
+                                <span class="text-base text-muted-foreground tabular-nums">/ {{ number_format($goals->calories) }} kcal</span>
                             </p>
                         </div>
-                        <x-snap-result.progress-ring :value="$analysis['total_calories'] / $goals->calories" :size="88" :stroke="10" />
-                    </div>
+                        <x-snap-result.progress-ring :value="$analysis['total_calories'] / $goals->calories" :size="88" :stroke="10">
+                            <span class="text-sm font-semibold tabular-nums">{{ round($analysis['total_calories'] / $goals->calories * 100) }}%</span>
+                        </x-snap-result.progress-ring>
+                    </section>
+                    <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ number_format($goals->calories) }} kcal and the macro targets are a general reference, not goals calculated for you. Create a free account to set your own.</p>
+                </div>
+
+                <section aria-labelledby="macro-goals-heading" class="flex flex-col gap-3">
+                    <h2 id="macro-goals-heading" class="px-1 text-xl font-semibold tracking-tight">Macronutrients</h2>
+                    <ul class="grid grid-cols-2 gap-2.5">
+                        @foreach ($macros as $macro)
+                            @php
+                                $eaten = $macro['value'] === null ? null : (float) $macro['value'];
+                            @endphp
+                            <li class="{{ $card }} flex min-w-0 flex-col gap-4 p-4">
+                                <div class="flex items-start justify-between gap-2">
+                                    <span class="truncate pt-1 text-sm text-muted-foreground">{{ $macro['label'] }}</span>
+                                    <x-snap-result.progress-ring :value="($eaten ?? 0) / $macro['goal']" :indicator="$macro['ring']">
+                                        <x-snap-result.icon :name="$macro['icon']" class="size-5 {{ $macro['iconColor'] }}" />
+                                    </x-snap-result.progress-ring>
+                                </div>
+                                <div class="flex items-end justify-between gap-2">
+                                    <p class="flex min-w-0 flex-wrap items-baseline gap-x-1">
+                                        <span class="text-3xl font-bold tracking-tight tabular-nums">{{ $eaten === null ? '—' : $amount($eaten) }}</span>
+                                        <span class="text-sm text-muted-foreground tabular-nums">/ {{ $macro['goal'] }} g</span>
+                                    </p>
+                                    @if ($eaten !== null)
+                                        <span class="shrink-0 pb-0.5 text-sm font-semibold tabular-nums {{ $macro['text'] }}">{{ round($eaten / $macro['goal'] * 100) }}%</span>
+                                    @endif
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
                 </section>
-                <p class="px-1 text-xs text-muted-foreground">{{ number_format($goals->calories) }} kcal and the macro targets are a general reference, not goals calculated for you. Create a free account to set your own.</p>
-            </div>
 
-            <section aria-labelledby="macro-goals-heading" class="flex flex-col gap-3">
-                <h2 id="macro-goals-heading" class="text-xl font-semibold tracking-tight">Macronutrients</h2>
-                <ul class="grid grid-cols-2 gap-3">
-                    @foreach ($macros as $macro)
-                        @php
-                            $eaten = $macro['value'] === null ? null : (float) $macro['value'];
-                        @endphp
-                        <li class="flex min-w-0 flex-col gap-4 rounded-3xl bg-card p-4 shadow-xs ring-1 ring-border/60">
-                            <div class="flex items-start justify-between gap-2">
-                                <span class="truncate pt-1 text-sm text-muted-foreground">{{ $macro['label'] }}</span>
-                                <x-snap-result.progress-ring :value="($eaten ?? 0) / $macro['goal']" :indicator="$macro['ring']">
-                                    <x-snap-result.icon :name="$macro['icon']" class="size-5 {{ $macro['iconColor'] }}" />
-                                </x-snap-result.progress-ring>
+                <section id="meal-result" aria-labelledby="meal-result-heading" class="flex scroll-mt-4 flex-col gap-3">
+                    <h2 id="meal-result-heading" class="px-1 text-xl font-semibold tracking-tight">Your meal</h2>
+                    <article class="{{ $card }} flex flex-col gap-5 p-4 sm:p-5">
+                        <div class="flex items-center gap-4">
+                            <div class="relative size-24 shrink-0 overflow-hidden rounded-[1.25rem] sm:size-28">
+                                <template x-if="photo">
+                                    <img :src="photo" alt="Your meal photo" class="absolute inset-0 size-full object-cover">
+                                </template>
+                                <template x-if="! photo">
+                                    <span
+                                        aria-hidden="true"
+                                        class="flex size-full items-center justify-center"
+                                        :class="{ 'bg-orange-100': mealType === 'breakfast', 'bg-cyan-100': mealType === 'lunch', 'bg-indigo-100': mealType === 'dinner', 'bg-emerald-100': mealType === 'snack' }"
+                                    >
+                                        <x-snap-result.icon name="coffee" class="size-8 text-orange-700" x-show="mealType === 'breakfast'" />
+                                        <x-snap-result.icon name="sun-medium" class="size-8 text-cyan-700" x-show="mealType === 'lunch'" />
+                                        <x-snap-result.icon name="moon" class="size-8 text-indigo-700" x-show="mealType === 'dinner'" />
+                                        <x-snap-result.icon name="apple" class="size-8 text-emerald-700" x-show="mealType === 'snack'" />
+                                    </span>
+                                </template>
                             </div>
-                            <div class="flex items-end justify-between gap-2">
-                                <p class="flex min-w-0 flex-wrap items-baseline gap-x-0.5">
-                                    <span class="text-3xl font-bold tracking-tight tabular-nums">{{ $eaten === null ? '—' : $amount($eaten) }}</span>
-                                    <span class="text-sm text-muted-foreground tabular-nums">/{{ $macro['goal'] }} g</span>
+                            <div class="flex min-w-0 flex-1 flex-col gap-1.5">
+                                <h3 class="line-clamp-2 leading-snug font-semibold break-words">{{ $title }}</h3>
+                                <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
+                                    <span class="text-lg font-semibold text-primary tabular-nums">{{ $kcal($analysis['total_calories']) }} kcal</span>
+                                    <span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">AI estimate</span>
                                 </p>
-                                @if ($eaten !== null)
-                                    <span class="shrink-0 text-sm font-semibold tabular-nums {{ $macro['text'] }}">{{ round($eaten / $macro['goal'] * 100) }}%</span>
-                                @endif
+                                <time class="text-xs text-muted-foreground tabular-nums" :datetime="at.toISOString()" x-text="time"></time>
                             </div>
-                        </li>
-                    @endforeach
-                </ul>
-            </section>
+                        </div>
 
-            <section id="meal-result" aria-labelledby="meal-result-heading" class="flex scroll-mt-20 flex-col gap-3">
-                <h2 id="meal-result-heading" class="text-xl font-semibold tracking-tight">Your meal</h2>
-                <article class="flex flex-col overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-primary/30">
-                    <div class="flex min-h-28">
-                        <div class="relative w-28 shrink-0 overflow-hidden sm:w-32">
-                            <template x-if="photo">
-                                <img :src="photo" alt="Your meal photo" class="absolute inset-0 size-full object-cover">
-                            </template>
-                            <template x-if="! photo">
-                                <span
-                                    aria-hidden="true"
-                                    class="flex size-full items-center justify-center"
-                                    :class="{ 'bg-orange-100': mealType === 'breakfast', 'bg-cyan-100': mealType === 'lunch', 'bg-indigo-100': mealType === 'dinner', 'bg-emerald-100': mealType === 'snack' }"
-                                >
-                                    <x-snap-result.icon name="coffee" class="size-8 text-orange-700" x-show="mealType === 'breakfast'" />
-                                    <x-snap-result.icon name="sun-medium" class="size-8 text-cyan-700" x-show="mealType === 'lunch'" />
-                                    <x-snap-result.icon name="moon" class="size-8 text-indigo-700" x-show="mealType === 'dinner'" />
-                                    <x-snap-result.icon name="apple" class="size-8 text-emerald-700" x-show="mealType === 'snack'" />
-                                </span>
-                            </template>
-                        </div>
-                        <div class="flex min-w-0 flex-1 flex-col justify-center gap-1.5 p-4">
-                            <div class="flex min-w-0 items-baseline gap-2">
-                                <h3 class="line-clamp-2 min-w-0 flex-1 leading-snug font-semibold break-words">{{ $title }}</h3>
-                                <time class="shrink-0 text-xs text-muted-foreground tabular-nums" :datetime="at.toISOString()" x-text="time"></time>
-                            </div>
-                            <p class="flex flex-wrap items-center gap-x-2 gap-y-1">
-                                <span class="text-lg font-semibold text-primary tabular-nums">{{ $amount($analysis['total_calories']) }} kcal</span>
-                                <span class="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">AI estimate</span>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="flex flex-col gap-1 border-t border-border/60 px-4 pt-3 pb-1">
                         <dl class="grid grid-cols-4 gap-2">
                             @foreach ($macros as $macro)
                                 <div class="flex min-w-0 flex-col gap-1">
-                                    <dt class="flex min-w-0 flex-col items-start gap-1 text-xs text-muted-foreground">
-                                        <span aria-hidden="true" class="flex size-7 items-center justify-center rounded-lg {{ $macro['tile'] }}">
+                                    <dt class="flex min-w-0 flex-col items-start gap-1.5 text-xs text-muted-foreground">
+                                        <span aria-hidden="true" class="flex size-8 items-center justify-center rounded-xl {{ $macro['tile'] }}">
                                             <x-snap-result.icon :name="$macro['icon']" class="size-4 {{ $macro['iconColor'] }}" />
                                         </span>
                                         <span class="max-w-full truncate">{{ $macro['label'] }}</span>
@@ -369,109 +382,168 @@ class extends Component
                                 </div>
                             @endforeach
                         </dl>
-                        <a href="#ingredients" class="inline-flex min-h-11 items-center gap-1 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50">
-                            See ingredients and portions
-                            <x-snap-result.icon name="chevron-down" class="size-4" />
-                        </a>
-                    </div>
-                    <div class="flex flex-col gap-3 border-t border-border/60 bg-primary/5 p-4 sm:p-5">
-                        <p class="inline-flex items-center gap-2 self-start rounded-full bg-background px-3 py-1 text-xs font-medium ring-1 ring-border">
-                            <span aria-hidden="true" class="size-1.5 rounded-full bg-amber-500"></span>
-                            Preview · not saved yet
-                        </p>
-                        <x-snap-result.button
-                            x-intersect:enter.margin.-56px.0.-120px.0="actionsOnScreen.meal = true"
-                            x-intersect:leave.margin.-56px.0.-120px.0="actionsOnScreen.meal = false"
-                            wire:click="save('register')"
-                            wire:loading.attr="disabled"
-                            wire:target="save,upgrade"
-                            x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal' })"
-                        >
-                            Save this meal
-                        </x-snap-result.button>
-                        @auth
-                            <p class="text-sm text-muted-foreground">Saving is free. The meal goes straight into your food log, where you can adjust any portion.</p>
-                        @else
-                            <p class="text-sm text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
-                            <button
-                                type="button"
-                                wire:click="save('login')"
-                                wire:loading.attr="disabled"
-                                wire:target="save,upgrade"
-                                class="min-h-11 self-start rounded-md text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-                            >
-                                Already have an account? Log in
-                            </button>
-                        @endauth
-                    </div>
-                </article>
-            </section>
 
-            <section id="ingredients" aria-labelledby="ingredients-heading" class="flex scroll-mt-20 flex-col gap-3">
-                <h2 id="ingredients-heading" class="text-xl font-semibold tracking-tight">Ingredients and portions</h2>
-                <ul class="divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-xs ring-1 ring-border/60">
-                    @foreach ($analysis['items'] as $item)
-                        <li class="flex min-h-16 flex-col justify-center gap-1 px-5 py-3">
-                            <span class="flex min-w-0 flex-1 flex-col gap-0.5 sm:flex-row sm:items-center sm:gap-3">
-                                <span class="min-w-0 text-base break-words sm:flex-1 sm:truncate">{{ $item['name'] }}</span>
-                                <span class="flex min-w-0 gap-2 text-sm text-muted-foreground">
-                                    <span class="shrink-0 tabular-nums">{{ $amount($item['calories']) }} kcal</span>
+                        <div class="flex flex-col gap-2">
+                            <div
+                                x-intersect:enter.margin.0.0.-{{ $barClearance }}px.0="actionsOnScreen.meal = true"
+                                x-intersect:leave.margin.0.0.-{{ $barClearance }}px.0="actionsOnScreen.meal = false"
+                            >
+                                <x-snap-result.button
+                                    wire:click="save('register')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="save,upgrade"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal' })"
+                                >
+                                    Save this meal
+                                </x-snap-result.button>
+                            </div>
+                            @auth
+                                <p class="px-1 text-sm leading-relaxed text-muted-foreground">Saving is free. The meal goes straight into your food log, where you can adjust any portion.</p>
+                            @else
+                                <p class="px-1 text-sm leading-relaxed text-muted-foreground">Saving is free. Create an account or log in and the meal goes straight into your food log, where you can adjust any portion.</p>
+                            @endauth
+                            <div class="flex flex-wrap items-center justify-between gap-x-4">
+                                <a href="#ingredients" x-on:click.prevent="jumpTo('ingredients')" class="{{ $link }}">
+                                    See ingredients and portions
+                                    <x-snap-result.icon name="chevron-down" class="size-4" />
+                                </a>
+                                @guest
+                                    <button
+                                        type="button"
+                                        wire:click="save('login')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="save,upgrade"
+                                        class="{{ $link }}"
+                                    >
+                                        Already have an account? Log in
+                                    </button>
+                                @endguest
+                            </div>
+                        </div>
+                    </article>
+                </section>
+
+                <section id="ingredients" aria-labelledby="ingredients-heading" class="flex scroll-mt-4 flex-col gap-3">
+                    <h2 id="ingredients-heading" class="px-1 text-xl font-semibold tracking-tight">Ingredients and portions</h2>
+                    <ul class="{{ $card }} flex flex-col px-5 py-2">
+                        @foreach ($analysis['items'] as $item)
+                            <li class="flex items-baseline justify-between gap-4 py-3">
+                                <span class="flex min-w-0 flex-col gap-0.5">
+                                    <span class="text-base break-words">{{ $item['name'] }}</span>
                                     @if (filled($item['portion'] ?? null))
-                                        <span class="min-w-0 truncate text-muted-foreground/80 sm:max-w-40">{{ $item['portion'] }}</span>
+                                        <span class="text-sm text-muted-foreground">{{ $item['portion'] }}</span>
                                     @endif
                                 </span>
-                            </span>
-                        </li>
-                    @endforeach
-                </ul>
-                <p class="flex items-start gap-2 text-xs text-muted-foreground">
-                    <x-snap-result.icon name="sparkles" class="mt-0.5 size-3.5 shrink-0 text-primary" />
-                    <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion after saving.</span>
-                </p>
-            </section>
+                                <span class="shrink-0 text-sm font-medium text-muted-foreground tabular-nums">{{ $kcal($item['calories']) }} kcal</span>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="flex items-start gap-2 px-2 text-xs leading-relaxed text-muted-foreground">
+                        <x-snap-result.icon name="sparkles" class="mt-0.5 size-3.5 shrink-0 text-primary" />
+                        <span>Snap to Track · AI confidence: {{ $analysis['confidence'] }}%. Nutrition values are estimates, and you can adjust any portion after saving.</span>
+                    </p>
+                </section>
 
-            <x-snap-result.offer
-                :allowance="$photoAllowance"
-                x-intersect:enter.margin.-56px.0.-120px.0="actionsOnScreen.offer = true"
-                x-intersect:leave.margin.-56px.0.-120px.0="actionsOnScreen.offer = false"
-            />
+                <x-snap-result.offer :allowance="$photoAllowance" :clearance="$barClearance" />
 
-            <p class="text-xs text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
+                <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 
-            @unless ($photoAllowance->exhausted)
-                <x-snap-result.button variant="outline" :href="route('snap-to-track')">
-                    <x-snap-result.icon name="camera" />
-                    Analyze another photo
-                </x-snap-result.button>
-            @endunless
+                @unless ($photoAllowance->exhausted)
+                    <x-snap-result.button variant="plain" :href="route('snap-to-track')">
+                        <x-snap-result.icon name="camera" />
+                        Analyze another photo
+                    </x-snap-result.button>
+                @endunless
+            </div>
 
             <div
                 x-show="! actionsOnScreen.meal && ! actionsOnScreen.offer"
-                x-transition.opacity.duration.150ms
+                x-transition:enter="transition duration-300 ease-out motion-reduce:transition-none"
+                x-transition:enter-start="translate-y-full"
+                x-transition:enter-end="translate-y-0"
+                x-transition:leave="transition duration-200 ease-out motion-reduce:transition-none"
+                x-transition:leave-start="translate-y-0"
+                x-transition:leave-end="translate-y-full"
                 style="display: none;"
-                class="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-1 border-t border-border/60 bg-background/95 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur md:hidden"
+                class="fixed inset-x-0 bottom-0 z-30 md:pb-4"
             >
-                <x-snap-result.button
-                    wire:click="save('register')"
-                    wire:loading.attr="disabled"
-                    wire:target="save,upgrade"
-                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
-                >
-                    Save this meal free
-                </x-snap-result.button>
-                @if ($barOffer)
-                    <button
-                        type="button"
-                        x-intersect.once="$wire.offerViewed('result_bar')"
-                        wire:click="upgrade('result_bar')"
-                        wire:loading.attr="disabled"
-                        wire:target="save,upgrade"
-                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
-                        class="min-h-10 rounded-md px-2 text-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:opacity-50"
-                    >
-                        {!! e(strtr(__('common.photo_plans.offer.short_cta'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
-                    </button>
-                @endif
+                <div class="mx-auto flex w-full max-w-md flex-col gap-2.5 rounded-t-[1.75rem] bg-card pt-3 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:rounded-[1.75rem] md:shadow-[0_16px_48px_rgba(0,0,0,0.18)] md:ring-1 md:ring-foreground/10">
+                    @if ($barOffer)
+                        <div role="radiogroup" aria-label="How to keep this meal" class="flex gap-2">
+                            <button
+                                type="button"
+                                role="radio"
+                                x-ref="freePlan"
+                                x-bind:aria-checked="plan === 'free'"
+                                x-bind:tabindex="plan === 'free' ? 0 : -1"
+                                x-on:click="plan = 'free'"
+                                x-on:keydown.right.prevent="plan = 'paid'; $refs.paidPlan.focus()"
+                                x-on:keydown.left.prevent="plan = 'paid'; $refs.paidPlan.focus()"
+                                x-bind:class="plan === 'free' ? 'bg-primary/10 inset-ring-2 inset-ring-primary' : 'bg-muted'"
+                                class="{{ $tile }}"
+                            >
+                                <span aria-hidden="true" class="flex size-5 shrink-0 items-center justify-center rounded-full max-[359px]:hidden" x-bind:class="plan === 'free' ? 'bg-primary text-primary-foreground' : 'inset-ring-2 inset-ring-muted-foreground/40'">
+                                    <x-snap-result.icon name="check" class="size-3" stroke-width="3.5" x-show="plan === 'free'" />
+                                </span>
+                                <span class="flex min-w-0 flex-col">
+                                    <span class="truncate text-[15px] leading-tight font-semibold">{{ __('common.photo_plans.free.price') }}</span>
+                                    <span class="truncate text-xs leading-snug text-muted-foreground">Save this meal</span>
+                                </span>
+                            </button>
+                            <button
+                                type="button"
+                                role="radio"
+                                x-ref="paidPlan"
+                                x-intersect.once="$wire.offerViewed('result_bar')"
+                                x-bind:aria-checked="plan === 'paid'"
+                                x-bind:tabindex="plan === 'paid' ? 0 : -1"
+                                x-on:click="plan = 'paid'"
+                                x-on:keydown.right.prevent="plan = 'free'; $refs.freePlan.focus()"
+                                x-on:keydown.left.prevent="plan = 'free'; $refs.freePlan.focus()"
+                                x-bind:class="plan === 'paid' ? 'bg-foreground/5 inset-ring-2 inset-ring-foreground' : 'bg-muted'"
+                                class="{{ $tile }}"
+                            >
+                                <span aria-hidden="true" class="flex size-5 shrink-0 items-center justify-center rounded-full max-[359px]:hidden" x-bind:class="plan === 'paid' ? 'bg-foreground text-background' : 'inset-ring-2 inset-ring-muted-foreground/40'">
+                                    <x-snap-result.icon name="check" class="size-3" stroke-width="3.5" x-show="plan === 'paid'" style="display: none;" />
+                                </span>
+                                <span class="flex min-w-0 flex-col">
+                                    <span class="truncate text-[15px] leading-tight font-semibold">{{ $barOffer->name }}</span>
+                                    <span class="truncate text-xs leading-snug text-muted-foreground tabular-nums">{{ $barOffer->formattedPrice }}/month</span>
+                                </span>
+                            </button>
+                        </div>
+                    @endif
+
+                    <div class="flex flex-col gap-2">
+                        <x-snap-result.button
+                            x-show="plan === 'free'"
+                            wire:click="save('register')"
+                            wire:loading.attr="disabled"
+                            wire:target="save,upgrade"
+                            x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
+                        >
+                            Save this meal free
+                        </x-snap-result.button>
+                        @if ($barOffer)
+                            <x-snap-result.button
+                                variant="plan"
+                                size="sm"
+                                x-show="plan === 'paid'"
+                                style="display: none;"
+                                wire:click="upgrade('result_bar')"
+                                wire:loading.attr="disabled"
+                                wire:target="save,upgrade"
+                                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
+                            >
+                                {!! e(strtr(__('common.photo_plans.offer.cta'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                            </x-snap-result.button>
+                            <p class="flex min-h-8 items-center justify-center px-2 text-center text-[11px] leading-snug text-muted-foreground">
+                                <span x-show="plan === 'free'">{{ Arr::last(__('common.photo_plans.free.features')) }}</span>
+                                <span x-show="plan === 'paid'" style="display: none;">{{ __('common.photo_plans.offer.terms') }}</span>
+                            </p>
+                        @endif
+                    </div>
+                </div>
             </div>
         </div>
     @endif

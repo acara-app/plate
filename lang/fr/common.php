@@ -1386,7 +1386,6 @@ return [
                 'Utilisez vos objectifs personnalisés de calories et de macros',
             ],
             'cta' => 'Continuer avec {{name}} — {{price}}/mois',
-            'short_cta' => 'Ou continuer avec {{name}} · {{price}}/mois',
             'terms' => 'Renouvellement mensuel jusqu’à résiliation, depuis les paramètres de facturation. Aucun frais de dépassement.',
             'save_free' => 'Plus tard — enregistrer ce repas gratuitement',
             'login' => 'Déjà un compte ? Se connecter',
