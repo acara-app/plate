@@ -68,9 +68,9 @@ return [
 
     'ai_allowance' => [
         'free' => ['usd' => 0.50, 'resets' => 'monthly'],
-        'starter' => ['usd' => 0.50, 'resets' => 'daily'],
-        'snap' => ['usd' => 5.00, 'resets' => 'daily'],
-        'basic' => ['usd' => 5.00, 'resets' => 'daily'],
-        'plus' => ['usd' => 5.00, 'resets' => 'daily'],
+        'starter' => ['usd' => 0.75, 'resets' => 'daily'],
+        'snap' => ['usd' => 7.50, 'resets' => 'daily'],
+        'basic' => ['usd' => 7.50, 'resets' => 'daily'],
+        'plus' => ['usd' => 7.50, 'resets' => 'daily'],
     ],
 ];

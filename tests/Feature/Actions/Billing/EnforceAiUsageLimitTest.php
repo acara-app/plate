@@ -31,7 +31,7 @@ it('gives a Starter member a daily allowance that resets at midnight', function 
     $this->travelTo(CarbonImmutable::parse('2026-11-07 15:00:00', 'UTC'));
     $user = User::factory()->create();
     Subscription::factory()->for($user)->active()->withPrice('price_starter')->create();
-    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50, 'created_at' => now()->subDay()]);
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.75, 'created_at' => now()->subDay()]);
 
     $allowance = resolve(ResolveAiAllowance::class)->handle($user);
 
@@ -42,7 +42,7 @@ it('gives a Starter member a daily allowance that resets at midnight', function 
 
     resolve(EnforceAiUsageLimit::class)->handle($user);
 
-    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.50]);
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.75]);
 
     expect(function () use ($user): void {
         resolve(EnforceAiUsageLimit::class)->handle($user);

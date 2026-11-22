@@ -17,7 +17,7 @@ it("shows a paying member today's AI allowance", function (): void {
     sellPhotoPlans();
     $user = User::factory()->create(['stripe_id' => 'cus_test_latest']);
     Subscription::factory()->for($user)->active()->withPrice('price_starter')->create();
-    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.25]);
+    AiUsage::factory()->create(['user_id' => $user->id, 'cost' => 0.375]);
 
     $this->actingAs($user)
         ->get(route('billing.index'))
