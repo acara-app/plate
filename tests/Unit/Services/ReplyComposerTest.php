@@ -118,9 +118,9 @@ it('starts every text block at the beginning of a line', function (): void {
         ->and([$steps->contextText('Let me check.'), $steps->contextText($visual.'Done.')])->toBe(['Let me check.', ReplyComposer::contextMarker('Hi').'Done.']);
 });
 
-it('withholds a glucose chart whose target range is in another unit than its data', function (string $unit, string $outcome): void {
+it("withholds a bound glucose chart whose goal or target range is not a plain number in its data's unit", function (string $unit, string $limits, string $outcome): void {
     $datasets = resolve(TurnDataRegistry::class);
-    $events = $datasets->collect(function () use ($datasets, $unit): array {
+    $events = $datasets->collect(function () use ($datasets, $unit, $limits): array {
         $datasets->register('bloodGlucose', new VisualDataset(
             label: 'Blood Glucose',
             measure: 'daily average',
@@ -132,15 +132,32 @@ it('withholds a glucose chart whose target range is in another unit than its dat
         return composeReply(implode("\n", [
             '```spec',
             '{"op":"add","path":"/root","value":"glucose"}',
-            '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L","range":{"low":3.9,"high":10}},"children":[]}}',
+            '{"op":"add","path":"/state/ui","value":{"goal":180,"target":{"low":70,"high":180}}}',
+            '{"op":"add","path":"/elements/glucose","value":{"type":"LineChart","props":{"title":"Glucose","data":{"$state":"/data/blood_glucose"},"xKey":"day","yKey":"value","unit":"mmol/L",'.$limits.'},"children":[]}}',
             '```',
         ]));
     });
 
     expect(end($events)['accepted'] ? end($events)['fallback_text'] : end($events)['reason'])->toBe($outcome);
 })->with([
-    'a range typed in mmol/L over mg/dL readings' => ['mg/dL', 'invalid_range'],
-    "a range in the readings' own unit" => ['mmol/L', "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC."],
+    'a range typed in mmol/L over mg/dL readings' => ['mg/dL', '"range":{"low":3.9,"high":10}', 'invalid_range'],
+    'a goal read from local state' => ['mmol/L', '"goal":{"$state":"/ui/goal"}', 'invalid_range'],
+    'a range read from local state' => ['mmol/L', '"range":{"$state":"/ui/target"}', 'invalid_range'],
+    "a range in the readings' own unit" => ['mmol/L', '"range":{"low":3.9,"high":10}', "Glucose\n- Tue Nov 17, 2026: 7 mmol/L\n- Wed Nov 18, 2026: 6 mmol/L\nTarget range: 3.9–10 mmol/L\nEach day runs from midnight to midnight UTC."],
+]);
+
+it('binds a dataset only as the whole data of a chart', function (string $element): void {
+    $events = withSteps(['2026-11-16' => 4200, '2026-11-17' => 5100], fn (): array => composeReply(implode("\n", [
+        '```spec',
+        '{"op":"add","path":"/root","value":"a"}',
+        '{"op":"add","path":"/elements/a","value":'.$element.'}',
+        '```',
+    ])));
+
+    expect(end($events))->toMatchArray(['type' => 'visual_end', 'accepted' => false, 'reason' => 'unresolved_reference']);
+})->with([
+    'one day read into a Metric' => '{"type":"Metric","props":{"label":"Steps on Monday","value":{"$state":"/data/step_count/0/value"},"unit":"steps"},"children":[]}',
+    'one row bound as a chart' => '{"type":"BarChart","props":{"title":"Steps","data":{"$state":"/data/step_count/0"},"xKey":"day","yKey":"value","unit":"steps"},"children":[]}',
 ]);
 
 it('closes a visual Altani forgot to fence off and drops one cut off by a stop', function (): void {

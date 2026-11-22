@@ -18,6 +18,11 @@ final readonly class ValidateVisualSpec
     /**
      * @var list<string>
      */
+    private const array CHARTS = ['BarChart', 'LineChart'];
+
+    /**
+     * @var list<string>
+     */
     private const array ELEMENT_FIELDS = ['type', 'props', 'children', 'visible', 'on'];
 
     /**
@@ -132,7 +137,7 @@ final readonly class ValidateVisualSpec
         throw_if($children !== [] && ! $component['acceptsChildren'], InvalidVisualSpecException::class, 'children_not_allowed');
 
         $props = $this->props($element->props ?? new stdClass, $component['props']);
-        $resolved = $this->resolve($props, $state);
+        $resolved = $this->resolveProps($type, $props, $state);
         $this->assertMatches($resolved, $component['props'], 'invalid_props');
         $this->assertComponentRules($type, $resolved);
 
@@ -183,6 +188,26 @@ final readonly class ValidateVisualSpec
         return $sanitized;
     }
 
+    private function resolveProps(string $type, stdClass $props, stdClass $state): stdClass
+    {
+        $resolved = new stdClass;
+
+        foreach (get_object_vars($props) as $name => $value) {
+            $pointer = $name === 'data' && in_array($type, self::CHARTS, true) ? $this->datasetPointer($value) : null;
+            $resolved->{$name} = $pointer === null ? $this->resolve($value, $state) : $this->stateValue($state, $pointer);
+        }
+
+        return $resolved;
+    }
+
+    private function datasetPointer(mixed $value): ?string
+    {
+        $fields = $value instanceof stdClass ? get_object_vars($value) : [];
+        $pointer = array_keys($fields) === ['$state'] ? $fields['$state'] : null;
+
+        return is_string($pointer) && preg_match('#^'.self::DATA_PREFIX.'[^/]+$#', $pointer) === 1 ? $pointer : null;
+    }
+
     private function resolve(mixed $value, stdClass $state): mixed
     {
         if (is_array($value)) {
@@ -197,9 +222,7 @@ final readonly class ValidateVisualSpec
         $pointer = $fields['$state'] ?? $fields['$bindState'] ?? null;
 
         if ($pointer !== null) {
-            $readsData = array_key_exists('$state', $fields) && is_string($pointer) && str_starts_with($pointer, self::DATA_PREFIX);
-
-            throw_if(count($fields) !== 1 || ! is_string($pointer) || (! $readsData && ! str_starts_with($pointer, self::LOCAL_STATE_PREFIX)), InvalidVisualSpecException::class, 'unresolved_reference');
+            throw_if(count($fields) !== 1 || ! is_string($pointer) || ! str_starts_with($pointer, self::LOCAL_STATE_PREFIX), InvalidVisualSpecException::class, 'unresolved_reference');
 
             return $this->stateValue($state, $pointer);
         }
