@@ -115,7 +115,7 @@
                         <span class="mt-1 block text-[#C94F35]">Track your everyday health.</span>
                     </h1>
                     <p class="mx-auto mt-6 max-w-xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8 lg:mx-0">
-                        Estimate calories and macros from a photo. Keep meals, sleep, water, activity, and daily check-ins together in your personal health log.
+                        <a href="{{ route($canUseApp ? 'snap-to-track.index' : 'snap-to-track') }}" data-umami-event="{{ $canUseApp ? 'snap_to_track_app_cta_click' : 'snap_to_track_cta_click' }}" data-umami-event-location="home_hero_intro" class="font-semibold text-slate-900 underline decoration-[#FF6B4A]/50 decoration-2 underline-offset-4 hover:decoration-[#FF6B4A]">Estimate calories and macros from a photo</a>. Keep meals, sleep, water, activity, and daily check-ins together in your personal health log.
                     </p>
                     <div class="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:flex-wrap lg:justify-start">
                         <div class="flex flex-col items-stretch gap-3">
@@ -388,7 +388,7 @@
                                     </svg>
                                 </div>
                                 <h3 class="text-sm font-semibold text-slate-900 lg:text-base">Photo Food Logging</h3>
-                                <p class="mt-2 text-xs text-slate-600 lg:text-sm">Scan a meal, review the ingredients, and save it to your day</p>
+                                <p class="mt-2 text-xs text-slate-600 lg:text-sm"><a href="{{ route($canUseApp ? 'snap-to-track.index' : 'snap-to-track') }}" data-umami-event="{{ $canUseApp ? 'snap_to_track_app_cta_click' : 'snap_to_track_cta_click' }}" data-umami-event-location="home_features" class="font-semibold text-slate-900 underline decoration-[#FF6B4A]/50 decoration-2 underline-offset-4 hover:decoration-[#FF6B4A]">Scan food for calories</a>, review the ingredients, and save it to your day</p>
                             </div>
                         </div>
 
@@ -540,7 +540,7 @@
                             <div class="pt-2">
                                 <h3 class="text-base font-semibold text-slate-900 lg:text-lg">Scan</h3>
                                 <p class="mt-2 text-xs leading-relaxed text-slate-600 lg:text-sm">
-                                    Take or upload a meal photo in Snap to Track.
+                                    Take or upload a meal photo in <a href="{{ route($canUseApp ? 'snap-to-track.index' : 'snap-to-track') }}" data-umami-event="{{ $canUseApp ? 'snap_to_track_app_cta_click' : 'snap_to_track_cta_click' }}" data-umami-event-location="home_how_it_works" class="font-semibold text-slate-900 underline decoration-[#FF6B4A]/50 decoration-2 underline-offset-4 hover:decoration-[#FF6B4A]">Snap to Track</a>.
                                 </p>
                             </div>
                         </div>

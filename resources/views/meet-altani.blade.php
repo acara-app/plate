@@ -255,7 +255,7 @@
                             <span class="text-[#FF6B4A] text-xl font-bold block mb-2">03</span>
                             <h3 class="font-bold text-slate-900 text-lg mb-3">Natural Chat</h3>
                             <p class="text-slate-600 text-sm leading-relaxed">
-                                Just talk naturally. Say "I had a salad with chicken." Altani understands, logs the nutrition, and updates your insights right away.
+                                Just talk naturally. Say "I had a salad with chicken." Altani understands, logs the nutrition, and updates your insights right away. Prefer pictures? Try our <x-snap-link location="meet_altani_chat">picture calorie counter</x-snap-link>.
                             </p>
                         </div>
 
@@ -471,6 +471,44 @@
                         <p class="text-slate-600 leading-relaxed">
                             She doesn't just react. She thinks ahead. She spots patterns you might miss and suggests small changes that lead to big results over time.
                         </p>
+                    </div>
+                </div>
+
+                <div class="mt-24 lg:grid lg:grid-cols-2 gap-16 items-center">
+                    <div class="mb-10 lg:mb-0">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 mb-6">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z" />
+                                <circle cx="12" cy="12" r="4" />
+                            </svg>
+                        </div>
+                        <h2 class="font-display text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl mb-4">
+                            Take a picture<br>of your plate.
+                        </h2>
+                        <p class="text-lg text-slate-600 leading-relaxed mb-8">
+                            Not sure what's in your bowl? Snap it, and Snap to Track works out the <x-snap-link location="meet_altani_feature">calories from a picture</x-snap-link>, with the carbs, protein, and fat for every food on the plate.
+                        </p>
+                        <a
+                            href="{{ route('snap-to-track') }}"
+                            data-umami-event="snap_to_track_cta_click"
+                            data-umami-event-location="meet_altani_feature"
+                            class="inline-flex min-h-12 items-center gap-2 rounded-full bg-emerald-600 px-7 py-3 text-base font-semibold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500"
+                        >
+                            Scan your meal free
+                            <svg class="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                        </a>
+                    </div>
+                    <div class="relative">
+                        <div class="absolute -inset-4 bg-emerald-50 rounded-3xl transform rotate-2 -z-10"></div>
+                        <img
+                            src="{{ asset('health-log-hero-meal.webp') }}"
+                            width="1000"
+                            height="417"
+                            loading="lazy"
+                            decoding="async"
+                            alt="Example Snap to Track result: a chicken quinoa salad estimated at 606 kcal with protein, carbs, fat, and fiber"
+                            class="rounded-2xl shadow-xl w-full bg-white"
+                        >
                     </div>
                 </div>
              </div>

@@ -62,6 +62,10 @@
                     The full details live in our <a href="{{ route('privacy') }}">Privacy Policy</a>.
                 </p>
 
+                <p>
+                    Want to see how it handles your own food? Try the <x-snap-link location="ai_accuracy">calorie calculator from a picture</x-snap-link> on your next meal and compare it with what you know about the plate.
+                </p>
+
                 <div class="mt-8 p-6 bg-slate-50 dark:bg-slate-800 rounded-lg">
                     <h3>Our standing rule</h3>
                     <p>

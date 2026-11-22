@@ -319,6 +319,14 @@
             </div>
         </section>
 
+        <section class="bg-white pb-16 sm:pb-24">
+            <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+                <x-snap-promo heading="Fuel the plan: check your protein with a macro scanner" location="ai_personal_trainer">
+                    Training plans only work if you eat for them. Snap your post-workout meal and our <x-snap-link location="ai_personal_trainer">AI macro tracker</x-snap-link> estimates the protein, carbs, fat, and calories for each food.
+                </x-snap-promo>
+            </div>
+        </section>
+
         <section class="bg-slate-50 py-16 sm:py-24">
             <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-12">
