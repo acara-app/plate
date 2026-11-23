@@ -64,8 +64,8 @@
             {
                 "@@type": "ListItem",
                 "position": 6,
-                "name": "Caffeine Calculator",
-                "description": "Find how much caffeine is too much based on height and sensitivity",
+                "name": "Caffeine Intake Calculator",
+                "description": "Add up caffeine from your servings and compare it with separate EFSA single-dose and daily references.",
                 "url": "{{ route('caffeine-calculator') }}"
             },
             {
