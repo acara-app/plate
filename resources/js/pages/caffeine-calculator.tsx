@@ -1,4 +1,5 @@
 import AppLogoIcon from '@/components/app-logo-icon';
+import CaffeineIntakeCalculator from '@/components/caffeine-intake-calculator';
 import useSharedProps from '@/hooks/use-shared-props';
 import { cn } from '@/lib/utils';
 import {
@@ -16,7 +17,6 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const PAPER = 'bg-[#F2EBDD]';
-const PAPER_2 = 'bg-[#EBE2D0]';
 const INK = 'text-[#1A1814]';
 const INK_2 = 'text-[#3D3833]';
 const INK_3 = 'text-[#6E665C]';
@@ -65,8 +65,8 @@ const FAQ_KEYS = [
         answerKey: 'seo_faq_safe_amount_answer',
     },
     {
-        questionKey: 'seo_faq_availability_question',
-        answerKey: 'seo_faq_availability_answer',
+        questionKey: 'seo_faq_calculation_question',
+        answerKey: 'seo_faq_calculation_answer',
     },
     {
         questionKey: 'seo_faq_single_dose_question',
@@ -231,22 +231,7 @@ export default function CaffeineCalculator() {
                     </header>
 
                     <main>
-                        <aside
-                            aria-labelledby="caffeine-availability"
-                            className="mx-auto mt-8 max-w-7xl lg:px-8"
-                        >
-                            <div className={cn(PAPER_2, RULE, 'border p-6')}>
-                                <h2
-                                    id="caffeine-availability"
-                                    className="text-lg font-bold"
-                                >
-                                    {t('availability_title')}
-                                </h2>
-                                <p className={cn(INK_2, 'mt-2 text-sm')}>
-                                    {t('availability_body')}
-                                </p>
-                            </div>
-                        </aside>
+                        <CaffeineIntakeCalculator locale={locale} />
 
                         <CaffeineReferenceSection sources={sources} />
 

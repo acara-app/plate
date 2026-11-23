@@ -64,8 +64,8 @@
             {
                 "@@type": "ListItem",
                 "position": 6,
-                "name": "Caffeine Intake Guide",
-                "description": "See EFSA reference amounts for caffeine in a single dose and across the day.",
+                "name": "Caffeine Intake Calculator",
+                "description": "Add up caffeine from your servings and compare it with separate EFSA single-dose and daily references.",
                 "url": "{{ route('caffeine-calculator') }}"
             },
             {

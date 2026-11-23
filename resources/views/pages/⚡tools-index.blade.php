@@ -102,8 +102,8 @@ class extends Component
                 ],
             ],
             [
-                'name' => 'Caffeine Intake Guide',
-                'description' => 'See EFSA reference amounts for caffeine in a single dose and across the day.',
+                'name' => 'Caffeine Intake Calculator',
+                'description' => 'Add up caffeine from your servings and compare it with separate EFSA single-dose and daily references.',
                 'icon' => '☕',
                 'route' => route('caffeine-calculator'),
                 'badge' => 'New',
