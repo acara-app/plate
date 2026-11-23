@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Utilities\LanguageUtil;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -30,11 +29,6 @@ final readonly class CaffeineCalculatorController
                 'xDefaultUrl' => $this->getXDefaultUrl('caffeine-calculator'),
             ],
         ]);
-    }
-
-    public function plan(): JsonResponse
-    {
-        return response()->json(['error' => 'guidance_unavailable'], 503);
     }
 
     private function getXDefaultUrl(string $enRoute): string

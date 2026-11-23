@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use App\Ai\Agents\CaffeineGuidanceAgent;
 use App\Http\Controllers\CaffeineCalculatorController;
+use Illuminate\Support\Facades\Route;
 
 covers(CaffeineCalculatorController::class);
 
@@ -28,25 +28,12 @@ it('serves the public caffeine intake calculator with localized reference guidan
     'Mongolian' => ['mn', '/mn/tools/caffeine-calculator'],
 ]);
 
-it('withholds personalized results from direct or stale clients without prompting AI', function (array $payload): void {
-    CaffeineGuidanceAgent::fake();
+it('does not expose the retired caffeine assessment endpoint', function (): void {
+    expect(Route::has('caffeine-calculator.plan'))->toBeFalse();
 
-    $this->postJson(route('caffeine-calculator.plan'), $payload)
-        ->assertServiceUnavailable()
-        ->assertExactJson(['error' => 'guidance_unavailable']);
-
-    CaffeineGuidanceAgent::assertNeverPrompted();
-})->with([
-    'empty payload' => [[]],
-    'previously valid high-weight profile' => [[
+    $this->postJson('/tools/caffeine-calculator/plan', [
         'weight_kg' => 150,
         'sex' => 'female',
         'sensitivity' => 'low',
-    ]],
-    'previously valid caution context' => [[
-        'weight_kg' => 70,
-        'sex' => 'female',
-        'sensitivity' => 'normal',
-        'conditions' => ['pregnancy'],
-    ]],
-]);
+    ])->assertNotFound();
+});
