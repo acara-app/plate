@@ -34,7 +34,6 @@ final readonly class CaffeineCalculatorController
 
     public function plan(): JsonResponse
     {
-        // Keep the route for stale clients while personalized guidance is under review.
         return response()->json(['error' => 'guidance_unavailable'], 503);
     }
 
