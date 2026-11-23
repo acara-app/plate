@@ -4,16 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\BuildCaffeineGuidanceSpec;
-use App\Actions\ResolveCaffeineLimit;
-use App\Ai\Agents\CaffeineGuidanceAgent;
-use App\Http\Requests\CaffeineAssessmentRequest;
 use App\Utilities\LanguageUtil;
-use App\Utilities\LocalizedDate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,7 +20,6 @@ final readonly class CaffeineCalculatorController
         return Inertia::render('caffeine-calculator', [
             'locale' => $locale,
             'translations' => LanguageUtil::translations($locale),
-            'bedtimeLabels' => LocalizedDate::hours($locale),
             'seo' => [
                 'appName' => config()->string('app.name'),
                 'appUrl' => url('/'),
@@ -40,40 +32,10 @@ final readonly class CaffeineCalculatorController
         ]);
     }
 
-    public function plan(CaffeineAssessmentRequest $request): JsonResponse
+    public function plan(): JsonResponse
     {
-        $context = $request->context();
-        $locale = $request->locale();
-        app()->setLocale($locale);
-
-        $limit = resolve(ResolveCaffeineLimit::class)->handle(
-            weightKg: $request->weightKg(),
-            sex: $request->sex(),
-            sensitivity: $request->sensitivity(),
-            context: $context,
-            conditions: $request->conditions(),
-            bedtimeHour: $request->bedtimeHour(),
-        );
-
-        try {
-            $guidance = resolve(CaffeineGuidanceAgent::class)->forModelUser($request->user())->assess(
-                limit: $limit,
-                context: $context,
-                locale: $locale,
-            );
-        } catch (ValidationException $validationException) {
-            Log::warning('Caffeine guidance copy failed validation.', ['errors' => $validationException->errors()]);
-
-            return response()->json(['error' => 'guidance_unavailable'], 503);
-        }
-
-        $spec = resolve(BuildCaffeineGuidanceSpec::class)->handle($guidance, $limit, $locale);
-
-        return response()->json([
-            'summary' => $guidance->summary,
-            'limit' => $limit->toArray(),
-            'spec' => $spec,
-        ]);
+        // Keep the route for stale clients while personalized guidance is under review.
+        return response()->json(['error' => 'guidance_unavailable'], 503);
     }
 
     private function getXDefaultUrl(string $enRoute): string
