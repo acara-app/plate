@@ -102,8 +102,8 @@ class extends Component
                 ],
             ],
             [
-                'name' => 'Caffeine Calculator',
-                'description' => 'Find how much caffeine is too much based on height, sensitivity, and optional personal context.',
+                'name' => 'Caffeine Intake Calculator',
+                'description' => 'Add up caffeine from your servings and compare it with separate EFSA single-dose and daily references.',
                 'icon' => '☕',
                 'route' => route('caffeine-calculator'),
                 'badge' => 'New',
