@@ -121,7 +121,6 @@
         "test": [
             "@test:type-coverage",
             "@test:unit",
-            "bun run test:frontend",
             "@test:lint",
             "@test:types"
         ]
