@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
@@ -16,14 +17,14 @@ final readonly class CreateUser
     private const string FALLBACK_NAME = 'Friend';
 
     /**
-     * @param  array{email: string, name?: string|null}  $attributes
+     * @param  array{email: string, name?: string|null, email_verified_at?: CarbonInterface}  $attributes
      */
-    public function handle(array $attributes, #[SensitiveParameter] string $password): User
+    public function handle(array $attributes, #[SensitiveParameter] ?string $password): User
     {
         $user = User::query()->create([
             ...$attributes,
             'name' => $attributes['name'] ?? $this->nameFromEmail($attributes['email']),
-            'password' => Hash::make($password),
+            'password' => $password === null ? null : Hash::make($password),
         ]);
 
         event(new Registered($user));

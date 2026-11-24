@@ -9,6 +9,7 @@ use App\Enums\PhotoAnalysisStatus;
 use App\Enums\PhotoPlan;
 use App\Enums\SnapFunnelStage;
 use App\Models\PhotoAnalysisRequest;
+use App\Models\PlanPurchase;
 use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
 use App\Models\User;
@@ -72,8 +73,21 @@ final readonly class SnapFunnel
         });
     }
 
+    public function recordClaim(PlanPurchase $purchase, User $user, string $method): void
+    {
+        rescue(function () use ($purchase, $user, $method): void {
+            $journey = $purchase->snap_journey_id === null ? null : SnapJourney::query()->find($purchase->snap_journey_id);
+
+            if ($journey instanceof SnapJourney && $journey->user_id === null) {
+                $journey->update(['user_id' => $user->id, 'internal' => $journey->internal || $this->isStaff($user)]);
+            }
+
+            $this->write($journey?->id, SnapFunnelStage::PurchaseClaimed, SnapFunnelStage::PurchaseClaimed->value.":{$purchase->id}", ['method' => $method]);
+        });
+    }
+
     /** @return array<string, string> */
-    public function checkoutMetadata(User $user): array
+    public function checkoutMetadata(?User $user): array
     {
         return rescue(function () use ($user): array {
             $journey = $this->openJourney($user, $this->currentGuestHash());
@@ -93,13 +107,12 @@ final readonly class SnapFunnel
         }
 
         $customer = data_get($invoice, 'customer');
-
-        if (! is_string($customer) || ! User::query()->where('stripe_id', $customer)->exists()) {
-            return;
-        }
-
         $metadata = data_get($invoice, 'parent.subscription_details.metadata', data_get($invoice, 'subscription_details.metadata'));
         $metadata = is_array($metadata) ? $metadata : [];
+
+        if (! is_string($customer) || ! User::query()->where('stripe_id', $customer)->exists() && ! $this->isPlanPurchase($metadata)) {
+            return;
+        }
 
         $journeyId = $metadata['snap_journey'] ?? null;
         $journey = is_string($journeyId) && Str::isUuid($journeyId) ? SnapJourney::query()->find($journeyId) : null;
@@ -189,6 +202,14 @@ final readonly class SnapFunnel
         $guestId = PhotoAnalysisContext::guestId(request()) ?? session('snap_to_track.analysis_guest_id');
 
         return is_string($guestId) ? hash('sha256', $guestId) : null;
+    }
+
+    /** @param array<array-key, mixed> $metadata */
+    private function isPlanPurchase(array $metadata): bool
+    {
+        $purchaseId = $metadata['plan_purchase'] ?? null;
+
+        return is_string($purchaseId) && PlanPurchase::query()->whereKey($purchaseId)->exists();
     }
 
     private function isStaff(User $user): bool
