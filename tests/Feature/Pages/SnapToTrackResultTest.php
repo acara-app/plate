@@ -196,6 +196,7 @@ it('opens Stripe for a guest who chooses Starter', function (): void {
 
     expect($checkout->sessions[0]['price'])->toBe('price_starter')
         ->and($checkout->sessions[0]['metadata'])->toMatchArray(['product_name' => 'Starter', 'type' => 'starter'])
+        ->and($checkout->sessions[0]['submit_message'])->toContain('activation link')
         ->and(PlanPurchase::query()->sole()->placement)->toBe('result_bar');
 });
 

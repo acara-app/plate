@@ -12,7 +12,7 @@ use Stripe\Subscription;
 final class FakeGuestCheckout implements ManagesGuestCheckout
 {
     /**
-     * @var list<array{price: string, reference: string, success_url: string, cancel_url: string, metadata: array<string, string>}>
+     * @var list<array{price: string, reference: string, success_url: string, cancel_url: string, metadata: array<string, string>, submit_message: string}>
      */
     public array $sessions = [];
 
@@ -26,9 +26,9 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
         return $fake;
     }
 
-    public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata): GuestCheckoutSession
+    public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata, string $submitMessage): GuestCheckoutSession
     {
-        $this->sessions[] = ['price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata];
+        $this->sessions[] = ['price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata, 'submit_message' => $submitMessage];
         $id = 'cs_test_guest_'.count($this->sessions);
 
         return new GuestCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, CarbonImmutable::now()->addDay());

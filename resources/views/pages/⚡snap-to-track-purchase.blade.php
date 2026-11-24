@@ -153,7 +153,7 @@ class extends Component
                     </x-snap-result.button>
                 @endif
                 <p class="text-xs leading-relaxed text-muted-foreground">
-                    Wrong email? Write to <a href="mailto:support@acara.app?subject={{ rawurlencode('Starter activation '.$purchase->reference()) }}" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> and mention reference {{ $purchase->reference() }}.
+                    Can't find it? Check your spam folder. Wrong email? Write to <a href="mailto:support@acara.app?subject={{ rawurlencode('Starter activation '.$purchase->reference()) }}" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> and mention reference {{ $purchase->reference() }}.
                 </p>
             @elseif ($state === 'claimed')
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{{ $purchase->product->name }} is active</p>

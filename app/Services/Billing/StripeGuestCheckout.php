@@ -15,7 +15,7 @@ use Stripe\Subscription;
  */
 final readonly class StripeGuestCheckout implements ManagesGuestCheckout
 {
-    public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata): GuestCheckoutSession
+    public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata, string $submitMessage): GuestCheckoutSession
     {
         $checkout = Cashier::stripe()->checkout->sessions->create([
             'mode' => 'subscription',
@@ -25,6 +25,7 @@ final readonly class StripeGuestCheckout implements ManagesGuestCheckout
             'cancel_url' => $cancelUrl,
             'metadata' => $metadata,
             'subscription_data' => ['metadata' => $metadata],
+            'custom_text' => ['submit' => ['message' => $submitMessage]],
         ], ['idempotency_key' => 'plan-purchase:'.$reference]);
 
         return new GuestCheckoutSession($checkout->id, (string) $checkout->url, CarbonImmutable::createFromTimestamp($checkout->expires_at));

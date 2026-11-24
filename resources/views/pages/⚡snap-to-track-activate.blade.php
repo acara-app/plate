@@ -277,7 +277,7 @@ class extends Component
             @elseif ($state === 'expired')
                 @if ($linkResent)
                     <h1 class="text-2xl font-semibold tracking-tight">Check your inbox</h1>
-                    <p role="status" class="text-sm leading-relaxed text-muted-foreground">We sent a fresh link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>. It can take a minute to arrive.</p>
+                    <p role="status" class="text-sm leading-relaxed text-muted-foreground">We sent a fresh link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>. It can take a minute to arrive, so check your spam folder if it isn't in your inbox.</p>
                 @else
                     <h1 class="text-2xl font-semibold tracking-tight">This link has expired</h1>
                     <p class="text-sm leading-relaxed text-muted-foreground">

@@ -80,6 +80,7 @@ final readonly class StartGuestCheckout
             route('snap-to-track.purchase', ['checkout' => 'success']),
             route('snap-to-track.purchase', ['checkout' => 'cancelled']),
             array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $journeyId, 'name' => $type, 'type' => $type]),
+            "We'll email your activation link to the address above. Please make sure it's correct.",
         );
 
         $purchase->update([
