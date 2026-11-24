@@ -17,7 +17,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 
 - A journey is one guest browser's attempt, identified by a random journey ID. It starts with the first stage a guest reaches on the public tool: usually a selected photo, or the limit wall for a returning visitor whose free scans are used up. Journeys are only recorded while photo plans are on sale, so community installs record nothing.
 - The browser's existing `photo_guest` cookie links later stages to the journey. Only its SHA-256 hash is stored. Signing up or logging in attaches the account. Checkout sends the journey ID, never the cookie, to Stripe as subscription metadata (`snap_journey`), so the payment webhook can find the journey without a browser.
-- A guest can buy Starter without an account, from the result after a free scan or from the scan limit. The server first records a plan purchase, then opens Stripe Checkout with the purchase and journey IDs as subscription metadata (`plan_purchase`, `snap_journey`). Stripe collects the email. When Stripe confirms the first invoice, the purchase is marked paid and an activation link goes to the checkout email. Activating it creates or signs in to an account and attaches the plan, which links the journey to that account.
+- A guest can buy Starter without an account, from the result after a free scan or from the scan limit. The server first records a plan purchase, then opens Stripe Checkout with the purchase and journey IDs as subscription metadata (`plan_purchase`, `snap_journey`). Stripe collects the email. When Stripe confirms the first invoice, the purchase is marked paid and an activation link goes to the checkout email. The buyer can use the link on any device, or activate with a matching verified Gmail or Google Workspace account in the browser that started checkout. A successful claim attaches the plan and links the journey to the account.
 - The conversion window is 7 days from the journey's first stage (`snap.journey_days`). After that, the same browser starts a new journey. A first payment still counts when Stripe confirms it after the window, as long as its checkout was opened inside the window.
 - Each journey keeps:
   - the device (mobile or desktop) of the first page in the browser session;
@@ -45,7 +45,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment, and a payment doesn't need it. |
 | Checkout cancelled | `snap_to_track_checkout_cancelled` | The browser came back from Stripe through the cancel link. |
 | First payment | `snap_to_track_first_payment` | A signed Stripe webhook confirmed the paid invoice that created a subscription. |
-| Purchase claimed | `snap_to_track_purchase_claimed` | A guest purchase paid before sign-up was added to an account (`method`: `email_link`). |
+| Purchase claimed | `snap_to_track_purchase_claimed` | A guest purchase paid before sign-up was added to an account. The `method` is `email_link` or `google`. |
 
 `--definitions` prints the same list with each stage's de-duplication rule.
 
@@ -96,4 +96,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-24 guest checkout before sign-up, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-24 guest checkout before sign-up and Google activation option, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.

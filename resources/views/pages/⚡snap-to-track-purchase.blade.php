@@ -47,7 +47,10 @@ class extends Component
             $purchase->checkout_returned_at ??= now();
             $purchase->save();
             $funnel->record(SnapFunnelStage::CheckoutReturned, $purchase->id, ['entitlement' => $purchase->isPaid() ? 'active' : 'pending']);
-            $this->confirmUntil = now()->addMinute()->getTimestamp();
+        }
+
+        if ($this->hasPendingGoogleClaim() || request()->query('checkout') === 'success') {
+            $this->checkPaymentStatus();
         }
     }
 
@@ -67,7 +70,7 @@ class extends Component
             $purchase->isCancelled() => 'cancelled',
             $purchase->isClaimed() => 'claimed',
             $purchase->isPaid() => 'paid',
-            $purchase->checkout_returned_at !== null => 'confirming',
+            $purchase->checkout_returned_at !== null || $this->hasPendingGoogleClaim() => 'confirming',
             default => 'open',
         };
     }
@@ -93,8 +96,24 @@ class extends Component
 
     public function checkPaymentStatus(): void
     {
-        unset($this->purchase, $this->state);
         $this->confirmUntil = now()->addMinute()->getTimestamp();
+        $this->pollPaymentStatus();
+    }
+
+    public function pollPaymentStatus(): void
+    {
+        unset($this->purchase, $this->state);
+
+        if ($this->hasPendingGoogleClaim() && $this->state === 'paid') {
+            $this->redirect(route('snap-to-track.activate', ['method' => 'google']));
+        }
+    }
+
+    private function hasPendingGoogleClaim(): bool
+    {
+        return $this->purchaseId !== null
+            && $this->purchaseId === session('snap_to_track.purchase')
+            && $this->purchaseId === session('snap_to_track.google_claim.purchase');
     }
 
     public function resendLink(): void
@@ -144,7 +163,7 @@ class extends Component
         <section class="mx-auto flex w-full max-w-md flex-col gap-4 rounded-[1.75rem] bg-card p-6">
             @if ($state === 'confirming')
                 @if ($confirmUntil > now()->getTimestamp())
-                    <div wire:poll.3s class="flex flex-col gap-3">
+                    <div wire:poll.3s="pollPaymentStatus" class="flex flex-col gap-3">
                         <x-snap-result.icon name="loader" class="size-6 text-primary motion-safe:animate-spin" />
                         <h1 class="text-2xl font-semibold tracking-tight">Confirming your payment…</h1>
                         <p class="text-sm leading-relaxed text-muted-foreground">This usually takes a moment. Keep this page open and we will take you to the next step.</p>
@@ -160,9 +179,16 @@ class extends Component
                 @endif
             @elseif ($state === 'paid')
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">Payment received</p>
-                <h1 class="text-2xl font-semibold tracking-tight text-balance">You're in! Check your inbox</h1>
+                <h1 class="text-2xl font-semibold tracking-tight text-balance">Activate {{ $purchase->product->name }}</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    We sent your activation link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>. Open it on any device to start using {{ $purchase->product->name }}.
+                    Choose the Google account with the email you used at checkout.
+                </p>
+                @if (session('snap_to_track.google_error'))
+                    <p role="alert" class="text-sm text-destructive">{{ session('snap_to_track.google_error') }}</p>
+                @endif
+                <x-snap-result.button :href="route('snap-to-track.purchase.google')">Continue with Google</x-snap-result.button>
+                <p class="text-sm leading-relaxed text-muted-foreground">
+                    Check your inbox to activate by email. We sent a link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span> that you can open on any device.
                 </p>
                 @if ($linkResent)
                     <p role="status" class="text-sm font-medium text-primary">Sent. It can take a minute to arrive.</p>
