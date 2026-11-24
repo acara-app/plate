@@ -87,7 +87,8 @@ it('sends the buyer to support and keeps the purchase claimable when the account
     Livewire::test('pages::snap-to-track-activate')
         ->call('activate')
         ->assertSee("Let's sort this out together", false)
-        ->assertSee($explanation);
+        ->assertSee($explanation)
+        ->assertSeeHtml('Purchase%20reference%3A%20'.$purchase->reference());
 
     expect($purchase->refresh())
         ->claimed_at->toBeNull()
@@ -113,7 +114,9 @@ it('sends a fresh link when the old one has expired and retires the old one', fu
         ->assertSee('Check your inbox');
 
     $this->get(route('snap-to-track.activate.open', $token));
-    Livewire::test('pages::snap-to-track-activate')->assertSee('This link is no longer valid');
+    Livewire::test('pages::snap-to-track-activate')
+        ->assertSee('This link is no longer valid')
+        ->assertSeeHtml('subject=Starter%20activation%20link%20does%20not%20work');
 
     Notification::assertSentOnDemandTimes(PlanPurchaseClaimLinkNotification::class, 1);
 });
@@ -213,5 +216,8 @@ it('keeps checking for the payment when the buyer asks after the first minute', 
     $page = Livewire::test('pages::snap-to-track-purchase')->assertSee('Check payment status');
     $purchase->update(['paid_at' => now(), 'email' => 'buyer@example.com']);
 
-    $page->call('checkPaymentStatus')->assertSee('Check your inbox')->assertDontSee('Check payment status');
+    $page->call('checkPaymentStatus')
+        ->assertSee('Check your inbox')
+        ->assertDontSee('Check payment status')
+        ->assertSeeHtml('Purchase%20reference%3A%20'.$purchase->reference());
 });

@@ -209,7 +209,19 @@ class extends Component
     $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
     $legalLink = 'underline underline-offset-4 hover:text-foreground';
     $consent = 'flex items-start gap-4 rounded-3xl bg-muted p-4 touch-manipulation select-none transition duration-150 ease-out has-checked:bg-primary/10 active:scale-[0.985] motion-reduce:transition-none motion-reduce:active:scale-100';
-    $supportUrl = $purchase instanceof PlanPurchase ? 'mailto:support@acara.app?subject='.rawurlencode($plan.' activation '.$purchase->reference()) : 'mailto:support@acara.app';
+    $supportUrl = $purchase instanceof PlanPurchase && in_array($state, ['active_plan', 'other_customer'], true)
+        ? App\Utilities\SupportEmailLink::make($plan.' purchase needs help ('.$purchase->reference().')', [
+            $state === 'active_plan' ? 'I bought '.$plan.', but my account already has an active plan.' : 'I bought '.$plan.', but it could not be added to my account automatically.',
+            '',
+            'Purchase reference: '.$purchase->reference(),
+            'Account email: '.auth()->user()?->email,
+        ])
+        : App\Utilities\SupportEmailLink::make($plan.' activation link does not work', [
+            'My '.$plan.' activation link does not work.',
+            '',
+            ...($purchase instanceof PlanPurchase ? ['Purchase reference: '.$purchase->reference()] : []),
+            'Email I used at checkout: ',
+        ]);
 @endphp
 
 <div class="min-h-svh bg-muted text-foreground [-webkit-tap-highlight-color:transparent] [-webkit-text-size-adjust:100%]">
@@ -353,7 +365,7 @@ class extends Component
             @else
                 <h1 class="text-2xl font-semibold tracking-tight">This link is no longer valid</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    Activation links work once. Please use the newest email we sent you, or write to <a href="mailto:support@acara.app" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> if you need a hand.
+                    Activation links work once. Please use the newest email we sent you, or write to <a href="{{ $supportUrl }}" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> if you need a hand.
                 </p>
                 <x-snap-result.button variant="plain" class="bg-muted" :href="route('snap-to-track')">Back to Snap to Track</x-snap-result.button>
             @endif

@@ -120,6 +120,14 @@ class extends Component
         ? strtr(__('common.photo_plans.offer.get_plan'), ['{{name}}' => $purchase->product->name, '{{price}}' => $purchase->product->formatted_price])
         : null;
     $mealWaiting = is_string(session('snap_to_track.result.draft'));
+    $supportUrl = $purchase instanceof PlanPurchase
+        ? App\Utilities\SupportEmailLink::make('Wrong checkout email for '.$purchase->product->name.' ('.$purchase->reference().')', [
+            'I paid for '.$purchase->product->name.', but I entered the wrong email at checkout.',
+            '',
+            'Purchase reference: '.$purchase->reference(),
+            'Correct email: ',
+        ])
+        : null;
 @endphp
 
 <div class="min-h-svh bg-muted text-foreground [-webkit-tap-highlight-color:transparent] [-webkit-text-size-adjust:100%]">
@@ -164,7 +172,7 @@ class extends Component
                     </x-snap-result.button>
                 @endif
                 <p class="text-xs leading-relaxed text-muted-foreground">
-                    Can't find it? Check your spam folder. Wrong email? Write to <a href="mailto:support@acara.app?subject={{ rawurlencode('Starter activation '.$purchase->reference()) }}" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> and mention reference {{ $purchase->reference() }}.
+                    Can't find it? Check your spam folder. Wrong email? Write to <a href="{{ $supportUrl }}" class="font-medium text-primary underline underline-offset-4">support@acara.app</a> and mention reference {{ $purchase->reference() }}.
                 </p>
             @elseif ($state === 'claimed')
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{{ $purchase->product->name }} is active</p>
