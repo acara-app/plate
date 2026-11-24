@@ -124,7 +124,8 @@ class extends Component
             return;
         }
 
-        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name, clicked: true);
+        $freeScansUsed = $this->photoAllowance->freeScansUsed();
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name, $freeScansUsed, clicked: true);
         $guestId = $this->guestId();
 
         if (auth()->check() || $guestId === null) {
@@ -134,7 +135,7 @@ class extends Component
         }
 
         try {
-            $this->redirect($startCheckout->handle($guestId, $placement));
+            $this->redirect($startCheckout->handle($guestId, $placement, $freeScansUsed));
         } catch (Throwable $exception) {
             report($exception);
             $funnel->record(SnapFunnelStage::CheckoutFailed, "{$placement}:{$this->resultKey()}", ['reason' => 'error']);
@@ -162,7 +163,7 @@ class extends Component
         $offer = $this->offerForPlacement($placement);
 
         if ($offer !== null) {
-            $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name);
+            $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name, $this->photoAllowance->freeScansUsed());
         }
     }
 

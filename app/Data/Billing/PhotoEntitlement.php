@@ -39,4 +39,9 @@ final class PhotoEntitlement extends Data
     {
         return $this->exhausted;
     }
+
+    public function freeScansUsed(): ?int
+    {
+        return $this->mode === 'trial' ? $this->used : null;
+    }
 }
