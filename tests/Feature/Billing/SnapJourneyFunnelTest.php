@@ -14,6 +14,7 @@ use App\Enums\SnapFunnelStage;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
+use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
@@ -208,7 +209,8 @@ it('lets a guest buy Starter from the result and activate it from the emailed li
             SnapFunnelStage::FirstPayment->value => 1,
             SnapFunnelStage::PurchaseClaimed->value => 1,
         ])
-        ->and($report['payments'])->toMatchArray(['live' => 1, 'attributed' => 1]);
+        ->and($report['payments'])->toMatchArray(['live' => 1, 'attributed' => 1])
+        ->and(SnapAnalyticsEvent::query()->whereIn('name', [SnapFunnelStage::UpgradeClicked->value, SnapFunnelStage::CheckoutStarted->value])->pluck('properties')->pluck('free_scans_used')->all())->toBe([2, 2]);
 });
 
 it('shows an abandoned guest checkout from the limit wall without inventing a payment', function (): void {

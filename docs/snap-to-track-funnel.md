@@ -34,13 +34,13 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Analysis finished | `snap_to_track_analysis_succeeded` | The analysis found at least one food item. |
 | Analysis failed | `snap_to_track_analysis_failed` | The analysis ended without a usable result (`no_food`, `timeout`, `provider_error`, `start_failed`, …). Error state. |
 | Result viewed | `snap_to_track_result_viewed` | The guest result page showed an unexpired, unsaved meal. |
-| Offer viewed | `snap_to_track_offer_viewed` | A paid plan offer was on screen: `result`, `result_bar` (action bar) or `wall` (scan limit). Clicking it also counts as seeing it. |
+| Offer viewed | `snap_to_track_offer_viewed` | A paid plan offer was on screen: `result`, `result_bar` (action bar) or `wall` (scan limit). Clicking it also counts as seeing it. Guest offers record `free_scans_used`; on `result_bar`, `1` is the free-or-Starter choice after the first scan and `2` is the offer after both free scans. |
 | Save clicked | `snap_to_track_save_click` | The guest chose to save the meal: a Save button (`auth_path` `register`) or a Log in link, which also continues to saving (`login`). Recorded before the page navigates away. |
-| Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. |
+| Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. It carries the offer's `free_scans_used`. |
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
 | Checkout clicked | `snap_to_track_checkout_click` | The plan page asked a signed-in member's server to open a Stripe checkout. |
-| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. Guest checkouts also record the `placement` (`result`, `result_bar` or `wall`). A repeat click reopens the same session instead of creating another. |
+| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. Guest checkouts also record the `placement` (`result`, `result_bar` or `wall`) and the offer's `free_scans_used`. A repeat click reopens the same session instead of creating another. |
 | Checkout failed | `snap_to_track_checkout_failed` | The checkout could not open (`already_subscribed` or `error`). Error state. |
 | Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment, and a payment doesn't need it. |
 | Checkout cancelled | `snap_to_track_checkout_cancelled` | The browser came back from Stripe through the cancel link. |
@@ -96,4 +96,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-24 guest checkout before sign-up and Google activation option, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-24 guest checkout before sign-up and Google activation option, the 2026-11-24 free-scan count on guest offers and checkouts, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.

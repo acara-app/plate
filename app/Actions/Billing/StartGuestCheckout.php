@@ -31,7 +31,7 @@ final readonly class StartGuestCheckout
         private Session $session,
     ) {}
 
-    public function handle(string $guestId, string $placement): string
+    public function handle(string $guestId, string $placement, ?int $freeScansUsed = null): string
     {
         $guestHash = hash('sha256', $guestId);
         $lock = Cache::lock('guest-checkout:'.$guestHash, 15);
@@ -40,7 +40,7 @@ final readonly class StartGuestCheckout
         try {
             $latest = PlanPurchase::query()->where('guest_hash', $guestHash)->whereNull('cancelled_at')->latest('id')->first();
 
-            return $this->resume($latest) ?? $this->openSession($latest?->isOpeningCheckout() === true ? $latest : $this->createPurchase($guestHash, $placement));
+            return $this->resume($latest) ?? $this->openSession($latest?->isOpeningCheckout() === true ? $latest : $this->createPurchase($guestHash, $placement), $freeScansUsed);
         } finally {
             $lock->release();
         }
@@ -79,7 +79,7 @@ final readonly class StartGuestCheckout
         ]);
     }
 
-    private function openSession(PlanPurchase $purchase): string
+    private function openSession(PlanPurchase $purchase, ?int $freeScansUsed): string
     {
         $product = $purchase->product;
         $type = Str::slug($product->name);
@@ -108,6 +108,7 @@ final readonly class StartGuestCheckout
             'plan' => SnapFunnel::plan($product->name),
             'interval' => 'monthly',
             'placement' => $purchase->placement,
+            'free_scans_used' => $freeScansUsed,
         ]);
 
         return $session->url;
