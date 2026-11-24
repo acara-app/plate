@@ -48,44 +48,46 @@ final readonly class ClaimPlanPurchase
 
         $stripeSubscription = $this->checkout->subscription($subscriptionId);
 
-        if (in_array($stripeSubscription->status, [StripeSubscription::STATUS_CANCELED, StripeSubscription::STATUS_INCOMPLETE_EXPIRED], true)) {
-            $purchase->update(['cancelled_at' => now()]);
-
-            return PlanPurchaseClaim::Cancelled;
-        }
-
         $outcome = DB::transaction(function () use ($purchase, $user, $method, $customerId, $subscriptionId, $stripeSubscription): ?PlanPurchaseClaim {
             $account = User::query()->lockForUpdate()->findOrFail($user->id);
+            $lockedPurchase = PlanPurchase::query()->lockForUpdate()->findOrFail($purchase->id);
+
+            if ($lockedPurchase->isClaimed()) {
+                return $lockedPurchase->user_id === $account->id ? PlanPurchaseClaim::Claimed : PlanPurchaseClaim::ClaimedElsewhere;
+            }
+
+            if ($lockedPurchase->isCancelled()) {
+                return PlanPurchaseClaim::Cancelled;
+            }
+
+            if (in_array($stripeSubscription->status, [StripeSubscription::STATUS_CANCELED, StripeSubscription::STATUS_INCOMPLETE_EXPIRED], true)) {
+                $lockedPurchase->update(['cancelled_at' => now()]);
+
+                return PlanPurchaseClaim::Cancelled;
+            }
+
             $conflict = $this->conflict($account, $customerId, $subscriptionId);
 
             if ($conflict instanceof PlanPurchaseClaim) {
+                $lockedPurchase->update(['claim_conflict' => $conflict->value]);
+
                 return $conflict;
             }
 
-            $updated = PlanPurchase::query()->whereKey($purchase->id)->whereNull('claimed_at')->update([
+            $lockedPurchase->update([
                 'user_id' => $account->id,
                 'claimed_at' => now(),
                 'claim_method' => $method,
                 'claim_conflict' => null,
             ]);
 
-            if ($updated === 0) {
-                return null;
-            }
-
             $account->forceFill(['stripe_id' => $customerId])->save();
             $this->syncSubscription->handle($account, $stripeSubscription);
 
-            return PlanPurchaseClaim::Claimed;
+            return null;
         });
 
-        if ($outcome === null) {
-            return $purchase->refresh()->user_id === $user->id ? PlanPurchaseClaim::Claimed : PlanPurchaseClaim::ClaimedElsewhere;
-        }
-
-        if ($outcome->needsSupport()) {
-            $purchase->update(['claim_conflict' => $outcome->value]);
-
+        if ($outcome instanceof PlanPurchaseClaim) {
             return $outcome;
         }
 

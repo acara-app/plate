@@ -114,6 +114,26 @@ it('shows a purchase that Stripe cancelled before activation instead of activati
     Livewire::test('pages::snap-to-track-activate')->assertSee('This purchase was cancelled');
 });
 
+it('keeps Starter inactive when a cancellation is recorded during the claim', function (): void {
+    enableBilling();
+    $checkout = FakeGuestCheckout::install();
+    $member = User::factory()->create();
+    $purchase = PlanPurchase::factory()->paid($member->email)->create();
+    $checkout->beforeSubscription = function () use ($purchase): void {
+        sendSignedStripeWebhook(['id' => 'evt_cancel_during_claim', 'type' => 'customer.subscription.deleted', 'data' => ['object' => [
+            'id' => $purchase->stripe_subscription_id, 'customer' => $purchase->stripe_customer_id, 'status' => 'canceled',
+        ]]])->assertSuccessful();
+        expect($purchase->fresh()->isCancelled())->toBeTrue();
+    };
+
+    expect(resolve(ClaimPlanPurchase::class)->handle($purchase, $member, 'email_link'))->toBe(PlanPurchaseClaim::Cancelled)
+        ->and($purchase->refresh())->cancelled_at->not->toBeNull()
+        ->claimed_at->toBeNull()
+        ->user_id->toBeNull()
+        ->and($member->refresh()->stripe_id)->toBeNull()
+        ->and($member->subscriptions()->exists())->toBeFalse();
+});
+
 it('sends the slower of two claims for one account to support instead of replacing its Stripe customer', function (): void {
     $checkout = FakeGuestCheckout::install();
     $starter = sellPhotoPlans();
