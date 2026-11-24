@@ -54,11 +54,11 @@ it('reuses the first purchase, its Stripe key and its price when a slow checkout
         ->and(array_unique(array_column($checkout->sessions, 'price')))->toBe(['price_starter']);
 });
 
-it('opens checkout on the next tap after Stripe fails', function (int $status, int $retryAttempt): void {
+it('keeps the Stripe key when the first request is still in progress', function (): void {
     $checkout = FakeGuestCheckout::install();
     sellPhotoPlans();
     $guest = (string) Str::uuid();
-    $checkout->failNextWith = $status;
+    $checkout->failNextWith = 409;
 
     expect(function () use ($guest): void {
         resolve(StartGuestCheckout::class)->handle($guest, 'result');
@@ -68,11 +68,66 @@ it('opens checkout on the next tap after Stripe fails', function (int $status, i
     $purchase = PlanPurchase::query()->sole();
 
     expect($url)->toBe($purchase->checkout_url)
-        ->and(array_column($checkout->sessions, 'key'))->toBe(["plan-purchase:{$purchase->id}:1", "plan-purchase:{$purchase->id}:{$retryAttempt}"]);
-})->with([
-    'Stripe saved a server error under the key' => [500, 2],
-    'the first request was still in progress' => [409, 1],
-]);
+        ->and(array_column($checkout->sessions, 'key'))->toBe(["plan-purchase:{$purchase->id}:1", "plan-purchase:{$purchase->id}:1"]);
+});
+
+it('opens checkout with a new Stripe key only after a failed attempt has settled', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $guest = (string) Str::uuid();
+    $tap = function () use ($guest): void {
+        resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    };
+    $checkout->failNextWith = 500;
+
+    expect($tap)->toThrow(ApiErrorException::class);
+    expect($tap)->toThrow(ApiErrorException::class);
+    $this->travel(PlanPurchase::FAILED_CHECKOUT_SETTLE_MINUTES + 1)->minutes();
+    expect($tap)->toThrow(ApiErrorException::class);
+
+    $url = resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    $purchase = PlanPurchase::query()->sole();
+
+    expect($url)->toBe($purchase->checkout_url)
+        ->and(array_column($checkout->sessions, 'key'))->toBe([
+            "plan-purchase:{$purchase->id}:1",
+            "plan-purchase:{$purchase->id}:1",
+            "plan-purchase:{$purchase->id}:1",
+            "plan-purchase:{$purchase->id}:2",
+        ]);
+});
+
+it('finds the checkout Stripe finished after a server error instead of opening a second one', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $guest = (string) Str::uuid();
+    $checkout->failNextWith = 500;
+
+    expect(function () use ($guest): void {
+        resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    })->toThrow(ApiErrorException::class);
+    $checkout->finishFailedRequests();
+
+    expect(resolve(StartGuestCheckout::class)->handle($guest, 'result'))->toBe('https://checkout.stripe.com/c/pay/cs_test_guest_1')
+        ->and(array_unique(array_column($checkout->sessions, 'key')))->toHaveCount(1);
+});
+
+it('leaves a newer checkout attempt alone when a slower tap fails late', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $guest = (string) Str::uuid();
+    $tap = function () use ($guest): void {
+        resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    };
+    $checkout->failNextWith = 500;
+
+    expect($tap)->toThrow(ApiErrorException::class);
+    $this->travel(PlanPurchase::FAILED_CHECKOUT_SETTLE_MINUTES + 1)->minutes();
+    $checkout->beforeOpen = fn (): int => PlanPurchase::query()->increment('checkout_attempt');
+
+    expect($tap)->toThrow(ApiErrorException::class)
+        ->and(PlanPurchase::query()->sole()->checkout_attempt)->toBe(2);
+});
 
 it('continues with the checkout Stripe created before answering with a server error', function (): void {
     $checkout = FakeGuestCheckout::install();

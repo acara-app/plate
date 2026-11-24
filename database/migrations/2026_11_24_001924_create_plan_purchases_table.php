@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('guest_hash', 64)->index();
             $table->string('placement', 32);
             $table->unsignedTinyInteger('checkout_attempt')->default(1);
+            $table->timestamp('checkout_attempt_failed_at')->nullable();
             $table->string('stripe_checkout_session_id')->nullable()->unique();
             $table->text('checkout_url')->nullable();
             $table->timestamp('checkout_expires_at')->nullable();

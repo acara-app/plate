@@ -41,6 +41,11 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
      */
     private array $created = [];
 
+    /**
+     * @var array<string, GuestCheckoutSession>
+     */
+    private array $createdLater = [];
+
     public static function install(): self
     {
         $fake = new self;
@@ -81,6 +86,12 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
     public function findOpenSession(string $reference, CarbonInterface $createdSince): ?GuestCheckoutSession
     {
         return $this->created[$reference] ?? null;
+    }
+
+    public function finishFailedRequests(): void
+    {
+        $this->created = [...$this->created, ...$this->createdLater];
+        $this->createdLater = [];
     }
 
     public function subscription(string $subscriptionId): Subscription
@@ -128,6 +139,8 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
 
         if ($status === null || $this->failureCreatesSession) {
             $this->created[$reference] = $session;
+        } else {
+            $this->createdLater[$reference] = $session;
         }
 
         return $status === null ? $session : UnknownApiErrorException::factory('Something went wrong on our end.', $status);

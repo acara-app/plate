@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
  * @property string $guest_hash
  * @property string $placement
  * @property int $checkout_attempt
+ * @property CarbonInterface|null $checkout_attempt_failed_at
  * @property string|null $stripe_checkout_session_id
  * @property string|null $checkout_url
  * @property CarbonInterface|null $checkout_expires_at
@@ -53,6 +54,8 @@ final class PlanPurchase extends Model
     use MassPrunable;
 
     public const int CLAIM_LINK_MINUTES = 60;
+
+    public const int FAILED_CHECKOUT_SETTLE_MINUTES = 5;
 
     /**
      * @var list<string>
@@ -119,6 +122,11 @@ final class PlanPurchase extends Model
         return "plan-purchase:{$this->id}:{$this->checkout_attempt}";
     }
 
+    public function failedCheckoutAttemptHasSettled(): bool
+    {
+        return $this->checkout_attempt_failed_at?->isBefore(now()->subMinutes(self::FAILED_CHECKOUT_SETTLE_MINUTES)) === true;
+    }
+
     public function isOpeningCheckout(): bool
     {
         return ! $this->isPaid() && ! $this->isCancelled() && $this->stripe_checkout_session_id === null
@@ -178,6 +186,7 @@ final class PlanPurchase extends Model
         return [
             'subscription_product_id' => 'integer',
             'checkout_attempt' => 'integer',
+            'checkout_attempt_failed_at' => 'datetime',
             'user_id' => 'integer',
             'checkout_expires_at' => 'datetime',
             'checkout_returned_at' => 'datetime',

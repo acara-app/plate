@@ -13,6 +13,7 @@ use App\Models\SubscriptionProduct;
 use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\SnapFunnel;
 use Illuminate\Contracts\Session\Session;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -116,6 +117,8 @@ final readonly class StartGuestCheckout
     {
         throw_unless($exception instanceof IdempotencyException || $exception->getHttpStatus() >= 500, $exception);
 
+        $this->sameAttempt($purchase)->whereNull('checkout_attempt_failed_at')->update(['checkout_attempt_failed_at' => now()]);
+
         try {
             $session = $this->checkout->findOpenSession($purchase->id, $purchase->created_at);
         } catch (Throwable $throwable) {
@@ -128,8 +131,18 @@ final readonly class StartGuestCheckout
             return $session;
         }
 
-        $purchase->increment('checkout_attempt');
+        if ($purchase->failedCheckoutAttemptHasSettled()) {
+            $this->sameAttempt($purchase)->update(['checkout_attempt' => $purchase->checkout_attempt + 1, 'checkout_attempt_failed_at' => null]);
+        }
 
         throw $exception;
+    }
+
+    /**
+     * @return Builder<PlanPurchase>
+     */
+    private function sameAttempt(PlanPurchase $purchase): Builder
+    {
+        return PlanPurchase::query()->whereKey($purchase->id)->where('checkout_attempt', $purchase->checkout_attempt)->whereNull('stripe_checkout_session_id');
     }
 }
