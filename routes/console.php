@@ -8,6 +8,7 @@ use App\Console\Commands\AggregateHealthDailyCommand;
 use App\Console\Commands\ProcessGlucoseNotificationsCommand;
 use App\Console\Commands\PurgeDeletedUserDataCommand;
 use App\Console\Commands\PurgeExpiredConversationsCommand;
+use App\Console\Commands\SendPlanPurchaseClaimLinksCommand;
 use App\Models\PhotoAnalysisRequest;
 use App\Models\SnapPhotoRequest;
 use Illuminate\Support\Facades\Schedule;
@@ -21,6 +22,9 @@ Schedule::command(PurgeExpiredConversationsCommand::class)->hourly()->withoutOve
 Schedule::command(ProcessGlucoseNotificationsCommand::class)->dailyAt('08:00');
 
 Schedule::command(PurgeDeletedUserDataCommand::class)->daily();
+
+Schedule::command(SendPlanPurchaseClaimLinksCommand::class)->everyFiveMinutes()->withoutOverlapping();
+Schedule::command(SendPlanPurchaseClaimLinksCommand::class, ['--report'])->dailyAt('09:00');
 
 Schedule::command(AggregateHealthDailyCommand::class)->dailyAt('02:00');
 

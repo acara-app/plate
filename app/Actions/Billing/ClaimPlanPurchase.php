@@ -54,28 +54,42 @@ final readonly class ClaimPlanPurchase
             return PlanPurchaseClaim::Cancelled;
         }
 
-        $claimed = DB::transaction(function () use ($purchase, $user, $method, $customerId, $stripeSubscription): bool {
+        $outcome = DB::transaction(function () use ($purchase, $user, $method, $customerId, $subscriptionId, $stripeSubscription): ?PlanPurchaseClaim {
+            $account = User::query()->lockForUpdate()->findOrFail($user->id);
+            $conflict = $this->conflict($account, $customerId, $subscriptionId);
+
+            if ($conflict instanceof PlanPurchaseClaim) {
+                return $conflict;
+            }
+
             $updated = PlanPurchase::query()->whereKey($purchase->id)->whereNull('claimed_at')->update([
-                'user_id' => $user->id,
+                'user_id' => $account->id,
                 'claimed_at' => now(),
                 'claim_method' => $method,
                 'claim_conflict' => null,
             ]);
 
             if ($updated === 0) {
-                return false;
+                return null;
             }
 
-            $user->forceFill(['stripe_id' => $customerId])->save();
-            $this->syncSubscription->handle($user, $stripeSubscription);
+            $account->forceFill(['stripe_id' => $customerId])->save();
+            $this->syncSubscription->handle($account, $stripeSubscription);
 
-            return true;
+            return PlanPurchaseClaim::Claimed;
         });
 
-        if (! $claimed) {
+        if ($outcome === null) {
             return $purchase->refresh()->user_id === $user->id ? PlanPurchaseClaim::Claimed : PlanPurchaseClaim::ClaimedElsewhere;
         }
 
+        if ($outcome->needsSupport()) {
+            $purchase->update(['claim_conflict' => $outcome->value]);
+
+            return $outcome;
+        }
+
+        $user->refresh();
         $this->funnel->recordClaim($purchase, $user, $method);
 
         return PlanPurchaseClaim::Claimed;

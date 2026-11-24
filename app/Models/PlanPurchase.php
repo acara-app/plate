@@ -6,6 +6,7 @@ namespace App\Models;
 
 use Carbon\CarbonInterface;
 use Database\Factories\PlanPurchaseFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +32,7 @@ use Illuminate\Support\Str;
  * @property CarbonInterface|null $cancelled_at
  * @property string|null $claim_token_hash
  * @property CarbonInterface|null $claim_token_expires_at
+ * @property CarbonInterface|null $claim_link_sent_at
  * @property string|null $claim_conflict
  * @property int|null $user_id
  * @property CarbonInterface|null $claimed_at
@@ -161,7 +163,17 @@ final class PlanPurchase extends Model
             'paid_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'claim_token_expires_at' => 'datetime',
+            'claim_link_sent_at' => 'datetime',
             'claimed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @param  Builder<self>  $query
+     */
+    #[Scope]
+    protected function awaitingClaimLink(Builder $query): void
+    {
+        $query->whereNotNull('paid_at')->whereNull('claimed_at')->whereNull('cancelled_at')->whereNull('claim_link_sent_at');
     }
 }

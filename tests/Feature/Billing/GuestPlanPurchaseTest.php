@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\ClaimPlanPurchase;
 use App\Actions\Billing\StartGuestCheckout;
+use App\Enums\PlanPurchaseClaim;
 use App\Models\PlanPurchase;
 use App\Models\User;
 use App\Notifications\PlanPurchaseClaimLinkNotification;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription;
@@ -108,4 +111,37 @@ it('shows a purchase that Stripe cancelled before activation instead of activati
 
     $this->get(route('snap-to-track.activate.open', $token));
     Livewire::test('pages::snap-to-track-activate')->assertSee('This purchase was cancelled');
+});
+
+it('sends the slower of two claims for one account to support instead of replacing its Stripe customer', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    $starter = sellPhotoPlans();
+    $member = User::factory()->create(['email' => 'buyer@example.com']);
+    $first = PlanPurchase::factory()->paid('buyer@example.com')->create(['subscription_product_id' => $starter->id]);
+    $second = PlanPurchase::factory()->paid('buyer@example.com')->create(['subscription_product_id' => $starter->id]);
+    $checkout->beforeSubscription = fn (): PlanPurchaseClaim => resolve(ClaimPlanPurchase::class)->handle($second, $member, 'email_link');
+
+    expect(resolve(ClaimPlanPurchase::class)->handle($first, $member, 'email_link'))->toBe(PlanPurchaseClaim::ActivePlan)
+        ->and($member->refresh()->stripe_id)->toBe($second->stripe_customer_id)
+        ->and($member->subscriptions()->count())->toBe(1)
+        ->and($first->refresh())
+        ->claimed_at->toBeNull()
+        ->claim_conflict->toBe(PlanPurchaseClaim::ActivePlan->value);
+});
+
+it('emails a lost activation link once from the sweep and reports purchases still waiting', function (): void {
+    Notification::fake();
+    Exceptions::fake();
+    $starter = sellPhotoPlans();
+    $lost = PlanPurchase::factory()->paid()->create(['subscription_product_id' => $starter->id, 'paid_at' => now()->subMinutes(10)]);
+    $noEmail = PlanPurchase::factory()->paid()->create(['subscription_product_id' => $starter->id, 'email' => null, 'paid_at' => now()->subHours(2)]);
+
+    $this->artisan('plan-purchases:claim-links')->assertSuccessful();
+    $this->artisan('plan-purchases:claim-links')->assertSuccessful();
+    $this->artisan('plan-purchases:claim-links', ['--report' => true])->assertSuccessful();
+
+    Notification::assertSentOnDemandTimes(PlanPurchaseClaimLinkNotification::class, 1);
+    Exceptions::assertReported(fn (RuntimeException $exception): bool => str_contains($exception->getMessage(), $noEmail->reference())
+        && ! str_contains($exception->getMessage(), $lost->reference()));
+    expect($lost->refresh()->claim_link_sent_at)->not->toBeNull();
 });

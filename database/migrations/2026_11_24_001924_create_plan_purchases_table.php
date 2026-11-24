@@ -27,6 +27,7 @@ return new class extends Migration
             $table->timestamp('cancelled_at')->nullable();
             $table->string('claim_token_hash', 64)->nullable()->unique();
             $table->timestamp('claim_token_expires_at')->nullable();
+            $table->timestamp('claim_link_sent_at')->nullable();
             $table->string('claim_conflict', 32)->nullable();
             $table->foreignId('user_id')->nullable()->index()->constrained()->nullOnDelete();
             $table->timestamp('claimed_at')->nullable();

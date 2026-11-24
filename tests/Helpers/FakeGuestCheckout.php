@@ -7,6 +7,7 @@ namespace Tests\Helpers;
 use App\Contracts\Billing\ManagesGuestCheckout;
 use App\Data\Billing\GuestCheckoutSession;
 use Carbon\CarbonImmutable;
+use Closure;
 use Stripe\Subscription;
 
 final class FakeGuestCheckout implements ManagesGuestCheckout
@@ -17,6 +18,8 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
     public array $sessions = [];
 
     public string $subscriptionStatus = Subscription::STATUS_ACTIVE;
+
+    public ?Closure $beforeSubscription = null;
 
     public static function install(): self
     {
@@ -36,6 +39,13 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
 
     public function subscription(string $subscriptionId): Subscription
     {
+        $beforeSubscription = $this->beforeSubscription;
+        $this->beforeSubscription = null;
+
+        if ($beforeSubscription instanceof Closure) {
+            $beforeSubscription();
+        }
+
         return Subscription::constructFrom([
             'id' => $subscriptionId,
             'object' => 'subscription',
