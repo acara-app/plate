@@ -55,9 +55,9 @@ final readonly class SnapFunnel
         });
     }
 
-    public function recordOffer(string $key, string $placement, ?string $productName, bool $clicked = false): void
+    public function recordOffer(string $key, string $placement, ?string $productName, ?int $freeScansUsed, bool $clicked = false): void
     {
-        $offer = ['placement' => $placement, 'plan' => self::plan($productName)];
+        $offer = ['placement' => $placement, 'plan' => self::plan($productName), 'free_scans_used' => $freeScansUsed];
         $this->record(SnapFunnelStage::OfferViewed, $key, $offer);
 
         if ($clicked) {

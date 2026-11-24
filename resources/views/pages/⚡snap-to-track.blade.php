@@ -108,7 +108,8 @@ class extends Component
     {
         $placement = in_array($placement, ['wall', 'preview_upload'], true) ? $placement : 'wall';
         $offer = $this->photoAllowance->offer;
-        $this->funnel->recordOffer($placement, $placement, $offer?->name, clicked: true);
+        $freeScansUsed = $this->photoAllowance->freeScansUsed();
+        $this->funnel->recordOffer($placement, $placement, $offer?->name, $freeScansUsed, clicked: true);
 
         if (auth()->check()) {
             $this->redirect($prepareUpgrade->handle($offer));
@@ -117,7 +118,7 @@ class extends Component
         }
 
         try {
-            $this->redirect($startCheckout->handle($this->analysisGuestId(), $placement));
+            $this->redirect($startCheckout->handle($this->analysisGuestId(), $placement, $freeScansUsed));
         } catch (Throwable $exception) {
             report($exception);
             $this->funnel->record(SnapFunnelStage::CheckoutFailed, $placement, ['reason' => 'error']);
@@ -148,7 +149,7 @@ class extends Component
             return;
         }
 
-        $this->funnel->recordOffer($placement, $placement, $allowance->offer->name);
+        $this->funnel->recordOffer($placement, $placement, $allowance->offer->name, $allowance->freeScansUsed());
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
