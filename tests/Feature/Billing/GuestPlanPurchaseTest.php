@@ -258,3 +258,21 @@ it('keeps checking for the payment when the buyer asks after the first minute', 
         ->assertDontSee('Check payment status')
         ->assertSeeHtml('Purchase%20reference%3A%20'.$purchase->reference());
 });
+
+it('keeps the first password when another tab already saved one', function (): void {
+    $member = User::factory()->create(['password' => null])->fresh();
+    $purchase = PlanPurchase::factory()->claimed($member)->create();
+    session()->put('snap_to_track.claim', ['purchase' => $purchase->id, 'token_hash' => null]);
+    $this->actingAs($member);
+
+    $secondTab = Livewire::test('pages::snap-to-track-activate')->assertSee('Set a password');
+    User::query()->whereKey($member->id)->update(['password' => Hash::make('the first tab saved this one')]);
+
+    $secondTab->set('password', 'the second tab came in late')
+        ->call('setPassword')
+        ->assertSee('This account already has a password')
+        ->assertDontSee('Password saved.')
+        ->assertSet('password', '');
+
+    expect(Hash::check('the first tab saved this one', (string) User::query()->findOrFail($member->id)->password))->toBeTrue();
+});

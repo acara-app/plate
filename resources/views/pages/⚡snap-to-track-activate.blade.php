@@ -6,7 +6,7 @@ use App\Actions\Billing\ClaimPlanPurchase;
 use App\Actions\CreateUser;
 use App\Actions\RecordSignUpAgreements;
 use App\Actions\ResolvePendingMeal;
-use App\Actions\UpdateUserPassword;
+use App\Actions\SetFirstPassword;
 use App\Enums\PlanPurchaseClaim;
 use App\Jobs\SendPlanPurchaseClaimLink;
 use App\Models\PlanPurchase;
@@ -145,7 +145,7 @@ class extends Component
         }
     }
 
-    public function setPassword(UpdateUserPassword $updatePassword): void
+    public function setPassword(SetFirstPassword $setFirstPassword): void
     {
         $user = auth()->user();
 
@@ -155,10 +155,16 @@ class extends Component
 
         $this->validate(['password' => ['required', 'string', Password::defaults()]]);
 
-        $updatePassword->handle($user, $this->password);
-        Auth::login($user, remember: true);
-
+        $saved = $setFirstPassword->handle($user, $this->password);
         $this->password = '';
+
+        if (! $saved) {
+            $this->addError('password', 'This account already has a password. Use that one to log in on other devices.');
+
+            return;
+        }
+
+        Auth::login($user, remember: true);
         $this->passwordSaved = true;
         unset($this->canSetPassword);
     }
