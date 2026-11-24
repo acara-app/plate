@@ -88,8 +88,8 @@ function expectGooglePurchaseUnclaimed(PlanPurchase $purchase): void
 it('requires both agreements before activating Starter for a new Google buyer', function (): void {
     $this->get(route('snap-to-track.purchase'))->assertSee('Continue with Google')->assertSee('Resend the link');
     startPurchaseGoogleOAuth('Buyer@Gmail.com');
-    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.purchase');
-    $this->get(route('snap-to-track.purchase'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
+    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
+    $this->get(route('snap-to-track.purchase'))->assertOk()->assertSee('Resend the link');
 
     $form = Livewire::withQueryParams(['method' => 'google'])->test('pages::snap-to-track-activate')
         ->call('activate')->assertHasErrors(['acceptedDisclaimer', 'healthDataConsent'])
@@ -113,8 +113,7 @@ it('activates the session-bound purchase for the existing Google buyer', functio
     $other = PlanPurchase::factory()->paid($email)->create();
 
     startPurchaseGoogleOAuth($email, hostedDomain: $hostedDomain);
-    $this->get(route('auth.google.callback', ['purchase' => $other->id]))->assertRedirectToRoute('snap-to-track.purchase');
-    $this->get(route('snap-to-track.purchase'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
+    $this->get(route('auth.google.callback', ['purchase' => $other->id]))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
     $this->get(route('snap-to-track.activate', ['method' => 'google']))->assertRedirectToRoute('snap-to-track.index');
 
     expectGooglePurchaseClaimed($this->purchase, $member);
@@ -135,7 +134,7 @@ it('switches to the Google buyer without carrying over another signed-in account
     ]);
 
     startPurchaseGoogleOAuth();
-    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.purchase');
+    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
     $this->get(route('snap-to-track.activate', ['method' => 'google']))->assertRedirectToRoute('snap-to-track.index')
         ->assertSessionMissing('auth.password_confirmed_at')->assertSessionMissing('login.id')
         ->assertSessionMissing('snap_to_track.result.draft')->assertSessionHas('snap_to_track.purchase', $this->purchase->id);
@@ -174,17 +173,20 @@ it('keeps the original email link usable when Google cannot prove ownership', fu
     'a different linked Google account' => ['buyer@gmail.com', 'buyer@gmail.com', true, null, 'original-google-id', 'Google identity linked to this account does not match'],
 ]);
 
-it('returns to the same purchase when Google sign-in does not finish', function (bool $cancelled): void {
-    startPurchaseGoogleOAuth(failure: $cancelled ? null : new InvalidStateException());
+it('returns to the same purchase when Google sign-in does not finish', function (array $callbackQuery, ?Exception $failure): void {
+    startPurchaseGoogleOAuth(failure: $failure);
 
-    $this->get(route('auth.google.callback', $cancelled ? ['error' => 'access_denied'] : []))->assertRedirectToRoute('snap-to-track.purchase');
+    $this->get(route('auth.google.callback', $callbackQuery))->assertRedirectToRoute('snap-to-track.purchase');
     $this->get(route('snap-to-track.purchase'))->assertSee('Resend the link')->assertSeeHtml(route('snap-to-track.purchase.google'))
         ->assertSee('Google sign-in did not finish')->assertSee($this->purchase->reference());
 
     $this->assertGuest();
     expectGooglePurchaseUnclaimed($this->purchase);
     expect(User::query()->exists())->toBeFalse();
-})->with(['buyer cancels' => true, 'provider rejects callback' => false]);
+})->with([
+    'buyer cancels' => [['error' => 'access_denied'], null],
+    'provider rejects callback' => [[], new InvalidStateException()],
+]);
 
 it('completes a pending Google claim when polling sees the payment webhook', function (): void {
     Notification::fake();
@@ -192,7 +194,8 @@ it('completes a pending Google claim when polling sees the payment webhook', fun
     startPurchaseGoogleOAuth();
     $this->purchase->update(['paid_at' => null, 'stripe_customer_id' => null, 'stripe_subscription_id' => null, 'email' => null]);
 
-    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.purchase');
+    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
+    $this->get(route('snap-to-track.activate', ['method' => 'google']))->assertRedirectToRoute('snap-to-track.purchase');
     $page = Livewire::test('pages::snap-to-track-purchase')->assertSee('Confirming your payment');
     expectGooglePurchaseUnclaimed($this->purchase);
 
@@ -241,7 +244,7 @@ it('offers Google only for an eligible purchase', function (string $changedColum
 
 it('requires the same browser proof when a previously opened consent form is submitted', function (): void {
     startPurchaseGoogleOAuth();
-    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.purchase');
+    $this->get(route('auth.google.callback'))->assertRedirectToRoute('snap-to-track.activate', ['method' => 'google']);
     $form = Livewire::withQueryParams(['method' => 'google'])->test('pages::snap-to-track-activate')
         ->set('acceptedDisclaimer', true)->set('healthDataConsent', true);
 

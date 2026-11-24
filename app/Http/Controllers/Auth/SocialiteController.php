@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Socialite\AbstractUser;
+use Laravel\Socialite\Contracts\User as SocialiteUser;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\GoogleProvider;
 use Symfony\Component\HttpFoundation\RedirectResponse as SymfonyRedirectResponse;
@@ -53,9 +54,8 @@ final readonly class SocialiteController
             return $redirect;
         } catch (Throwable $throwable) {
             report($throwable);
-            $session->forget('state');
 
-            return $this->purchaseError('Google sign-in could not start. Try again or use your email link.');
+            return $this->purchaseError($request, 'Google sign-in could not start. Try again or use your email link.');
         }
     }
 
@@ -109,19 +109,10 @@ final readonly class SocialiteController
             return to_route('snap-to-track.purchase');
         }
 
-        if ($request->has('error')) {
-            $session->forget('state');
+        $googleUser = $request->has('error') ? null : rescue(fn (): SocialiteUser => Socialite::driver('google')->user());
 
-            return $this->purchaseError('Google sign-in did not finish. Try again or use your email link.');
-        }
-
-        try {
-            $googleUser = Socialite::driver('google')->user();
-        } catch (Throwable $throwable) {
-            report($throwable);
-            $session->forget('state');
-
-            return $this->purchaseError('Google sign-in did not finish. Try again or use your email link.');
+        if (! $googleUser instanceof SocialiteUser) {
+            return $this->purchaseError($request, 'Google sign-in did not finish. Try again or use your email link.');
         }
 
         $email = $googleUser->getEmail();
@@ -129,14 +120,14 @@ final readonly class SocialiteController
         $claims = $googleUser instanceof AbstractUser ? $googleUser->getRaw() : [];
 
         if (($claims['email_verified'] ?? false) !== true || ! is_string($email) || $email === '' || $subject === '') {
-            return $this->purchaseError('Google could not verify your email address. Use your email link to activate Starter.');
+            return $this->purchaseError($request, 'Google could not verify your email address. Use your email link to activate Starter.');
         }
 
         $domain = Str::lower(Str::afterLast($email, '@'));
         $hostedDomain = $claims['hd'] ?? null;
 
         if ($domain !== 'gmail.com' && (! is_string($hostedDomain) || $hostedDomain === '' || Str::lower($hostedDomain) !== $domain)) {
-            return $this->purchaseError('Google does not manage this email domain. Use your email link to activate Starter.');
+            return $this->purchaseError($request, 'Google does not manage this email domain. Use your email link to activate Starter.');
         }
 
         $session->put('snap_to_track.google_claim', [
@@ -146,11 +137,13 @@ final readonly class SocialiteController
             'name' => $googleUser->getName(),
         ]);
 
-        return to_route('snap-to-track.purchase');
+        return to_route('snap-to-track.activate', ['method' => 'google']);
     }
 
-    private function purchaseError(string $message): RedirectResponse
+    private function purchaseError(Request $request, string $message): RedirectResponse
     {
+        $request->session()->forget('state');
+
         return to_route('snap-to-track.purchase')->with('snap_to_track.google_error', $message);
     }
 }

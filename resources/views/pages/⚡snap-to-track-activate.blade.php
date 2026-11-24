@@ -53,7 +53,7 @@ class extends Component
     #[Locked]
     public bool $passwordSaved = false;
 
-    public function mount(): void
+    public function mount(ResolveGooglePurchaseAccount $resolveAccount, ClaimPlanPurchase $claimPurchase): void
     {
         if (request()->query('method') === 'google') {
             $this->googleClaim = true;
@@ -61,13 +61,13 @@ class extends Component
             $this->purchaseId = is_string($purchaseId) ? $purchaseId : null;
             $purchase = $this->purchase;
 
-            if (! $purchase instanceof PlanPurchase || ! $purchase->isPaid() || $purchase->isCancelled() || $purchase->isClaimed()) {
+            if (! $purchase instanceof PlanPurchase || $this->state !== 'new_account') {
                 $this->redirect(route('snap-to-track.purchase'));
 
                 return;
             }
 
-            $this->activateWithGoogle($purchase, acceptedAgreements: false);
+            $this->activateWithGoogle($resolveAccount, $claimPurchase, $purchase, acceptedAgreements: false);
 
             return;
         }
@@ -119,7 +119,7 @@ class extends Component
         return is_string($token) && $user instanceof User ? resolve(ResolvePendingMeal::class)->handle($token, $user)?->saveUrl : null;
     }
 
-    public function activate(ClaimPlanPurchase $claimPurchase, CreateUser $createUser, RecordSignUpAgreements $recordAgreements): void
+    public function activate(ClaimPlanPurchase $claimPurchase, CreateUser $createUser, RecordSignUpAgreements $recordAgreements, ResolveGooglePurchaseAccount $resolveAccount): void
     {
         $state = $this->state;
         $purchase = $this->purchase;
@@ -135,7 +135,7 @@ class extends Component
             );
 
             if ($this->googleClaim) {
-                $this->activateWithGoogle($purchase, acceptedAgreements: true);
+                $this->activateWithGoogle($resolveAccount, $claimPurchase, $purchase, acceptedAgreements: true);
 
                 return;
             }
@@ -157,97 +157,16 @@ class extends Component
             return;
         }
 
-        $this->claim($claimPurchase, $purchase, $user, 'email_link');
-    }
-
-    /** @return array{email: string, google_id: string, name: string|null}|null */
-    private function googleProof(): ?array
-    {
-        $proof = session('snap_to_track.google_claim');
-
-        if ($this->purchaseId === null || session('snap_to_track.purchase') !== $this->purchaseId
-            || ! is_array($proof) || ($proof['purchase'] ?? null) !== $this->purchaseId
-            || ! is_string($proof['email'] ?? null) || ! is_string($proof['google_id'] ?? null)) {
-            return null;
-        }
-
-        return ['email' => $proof['email'], 'google_id' => $proof['google_id'], 'name' => $proof['name'] ?? null];
-    }
-
-    private function activateWithGoogle(PlanPurchase $purchase, bool $acceptedAgreements): void
-    {
-        $proof = $this->googleProof();
-
-        if ($proof === null) {
-            $this->redirect(route('snap-to-track.purchase'));
-
-            return;
-        }
-
-        if ($purchase->email === null || Str::lower($proof['email']) !== Str::lower($purchase->email)) {
-            $this->returnToPurchase("That Google account doesn't match the email used at checkout.");
-
-            return;
-        }
-
         try {
-            $user = resolve(ResolveGooglePurchaseAccount::class)->handle($proof['email'], $proof['google_id'], $proof['name'], $acceptedAgreements);
-        } catch (AccountLinkException $exception) {
-            $this->returnToPurchase($exception->getMessage());
-
-            return;
+            $outcome = $claimPurchase->handle($purchase, $user, 'email_link');
         } catch (Throwable $exception) {
             report($exception);
-            $this->returnToPurchase('We could not activate your plan just now. Please try again.');
+            $this->addError('activate', 'We could not activate your plan just now. Please try again.');
 
             return;
         }
 
-        if ($user instanceof User) {
-            if (Auth::check() && Auth::id() !== $user->id) {
-                Auth::guard('web')->logoutCurrentDevice();
-                session()->invalidate();
-                session()->put('snap_to_track.purchase', $purchase->id);
-            }
-
-            Auth::login($user, remember: true);
-            $this->claim(resolve(ClaimPlanPurchase::class), $purchase, $user, 'google');
-        }
-    }
-
-    private function returnToPurchase(string $reason): void
-    {
-        session()->forget('snap_to_track.google_claim');
-        session()->flash('snap_to_track.google_error', $reason);
-        $this->redirect(route('snap-to-track.purchase'));
-    }
-
-    private function claim(ClaimPlanPurchase $claimPurchase, PlanPurchase $purchase, User $user, string $method): void
-    {
-        try {
-            $outcome = $claimPurchase->handle($purchase, $user, $method);
-        } catch (Throwable $exception) {
-            report($exception);
-
-            if ($this->googleClaim) {
-                $this->returnToPurchase('We could not activate your plan just now. Please try again.');
-            } else {
-                $this->addError('activate', 'We could not activate your plan just now. Please try again.');
-            }
-
-            return;
-        }
-
-        if ($this->googleClaim) {
-            session()->forget('snap_to_track.google_claim');
-        }
-
-        $this->outcome = $outcome->value;
-        unset($this->purchase, $this->state, $this->mealSaveUrl, $this->canSetPassword);
-
-        if ($outcome === PlanPurchaseClaim::Claimed && $this->mealSaveUrl === null && ! $this->canSetPassword) {
-            $this->redirect(route('snap-to-track.index'));
-        }
+        $this->applyOutcome($outcome);
     }
 
     public function setPassword(SetFirstPassword $setFirstPassword): void
@@ -302,6 +221,83 @@ class extends Component
         session()->put('snap_to_track.claim', $claim);
 
         $this->redirect(route('snap-to-track.activate'));
+    }
+
+    /** @return array{email: string, google_id: string, name: string|null}|null */
+    private function googleProof(): ?array
+    {
+        $proof = session('snap_to_track.google_claim');
+
+        if ($this->purchaseId === null || session('snap_to_track.purchase') !== $this->purchaseId
+            || ! is_array($proof) || ($proof['purchase'] ?? null) !== $this->purchaseId
+            || ! is_string($proof['email'] ?? null) || ! is_string($proof['google_id'] ?? null)) {
+            return null;
+        }
+
+        return ['email' => $proof['email'], 'google_id' => $proof['google_id'], 'name' => $proof['name'] ?? null];
+    }
+
+    private function activateWithGoogle(ResolveGooglePurchaseAccount $resolveAccount, ClaimPlanPurchase $claimPurchase, PlanPurchase $purchase, bool $acceptedAgreements): void
+    {
+        $proof = $this->googleProof();
+
+        if ($proof === null) {
+            $this->redirect(route('snap-to-track.purchase'));
+
+            return;
+        }
+
+        if ($purchase->email === null || Str::lower($proof['email']) !== Str::lower($purchase->email)) {
+            $this->returnToPurchase("That Google account doesn't match the email used at checkout.");
+
+            return;
+        }
+
+        try {
+            $user = $resolveAccount->handle($proof['email'], $proof['google_id'], $proof['name'], $acceptedAgreements);
+
+            if (! $user instanceof User) {
+                return;
+            }
+
+            if (Auth::check() && Auth::id() !== $user->id) {
+                Auth::guard('web')->logoutCurrentDevice();
+                session()->invalidate();
+                session()->put('snap_to_track.purchase', $purchase->id);
+            }
+
+            Auth::login($user, remember: true);
+            $outcome = $claimPurchase->handle($purchase, $user, 'google');
+        } catch (AccountLinkException $exception) {
+            $this->returnToPurchase($exception->getMessage());
+
+            return;
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->returnToPurchase('We could not activate your plan just now. Please try again.');
+
+            return;
+        }
+
+        session()->forget('snap_to_track.google_claim');
+        $this->applyOutcome($outcome);
+    }
+
+    private function returnToPurchase(string $reason): void
+    {
+        session()->forget('snap_to_track.google_claim');
+        session()->flash('snap_to_track.google_error', $reason);
+        $this->redirect(route('snap-to-track.purchase'));
+    }
+
+    private function applyOutcome(PlanPurchaseClaim $outcome): void
+    {
+        $this->outcome = $outcome->value;
+        unset($this->purchase, $this->state, $this->mealSaveUrl, $this->canSetPassword);
+
+        if ($outcome === PlanPurchaseClaim::Claimed && $this->mealSaveUrl === null && ! $this->canSetPassword) {
+            $this->redirect(route('snap-to-track.index'));
+        }
     }
 
     private function hasAccount(PlanPurchase $purchase): bool
