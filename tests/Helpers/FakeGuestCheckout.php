@@ -7,13 +7,17 @@ namespace Tests\Helpers;
 use App\Contracts\Billing\ManagesGuestCheckout;
 use App\Data\Billing\GuestCheckoutSession;
 use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Closure;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\IdempotencyException;
+use Stripe\Exception\UnknownApiErrorException;
 use Stripe\Subscription;
 
 final class FakeGuestCheckout implements ManagesGuestCheckout
 {
     /**
-     * @var list<array{price: string, reference: string, success_url: string, cancel_url: string, metadata: array<string, string>, submit_message: string}>
+     * @var list<array{key: string, price: string, reference: string, success_url: string, cancel_url: string, metadata: array<string, string>, submit_message: string}>
      */
     public array $sessions = [];
 
@@ -23,10 +27,19 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
 
     public ?Closure $beforeOpen = null;
 
+    public ?int $failNextWith = null;
+
+    public bool $failureCreatesSession = false;
+
+    /**
+     * @var array<string, array{request: array<string, mixed>, response: GuestCheckoutSession|ApiErrorException}>
+     */
+    private array $saved = [];
+
     /**
      * @var array<string, GuestCheckoutSession>
      */
-    private array $opened = [];
+    private array $created = [];
 
     public static function install(): self
     {
@@ -36,7 +49,7 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
         return $fake;
     }
 
-    public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata, string $submitMessage): GuestCheckoutSession
+    public function open(string $idempotencyKey, string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata, string $submitMessage): GuestCheckoutSession
     {
         $beforeOpen = $this->beforeOpen;
         $this->beforeOpen = null;
@@ -45,10 +58,29 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
             $beforeOpen();
         }
 
-        $this->sessions[] = ['price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata, 'submit_message' => $submitMessage];
-        $id = 'cs_test_guest_'.(count($this->opened) + 1);
+        $request = ['key' => $idempotencyKey, 'price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata, 'submit_message' => $submitMessage];
+        $this->sessions[] = $request;
 
-        return $this->opened[$reference] ??= new GuestCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, CarbonImmutable::now()->addDay());
+        if ($this->failNextWith === 409) {
+            $this->failNextWith = null;
+
+            throw UnknownApiErrorException::factory('Another request with this idempotency key is still in progress.', 409);
+        }
+
+        $saved = $this->saved[$idempotencyKey] ??= ['request' => $request, 'response' => $this->respond($reference)];
+
+        throw_if($saved['request'] !== $request, IdempotencyException::factory('Keys for idempotent requests can only be used with the same parameters they were first used with.', 400));
+
+        if ($saved['response'] instanceof ApiErrorException) {
+            throw $saved['response'];
+        }
+
+        return $saved['response'];
+    }
+
+    public function findOpenSession(string $reference, CarbonInterface $createdSince): ?GuestCheckoutSession
+    {
+        return $this->created[$reference] ?? null;
     }
 
     public function subscription(string $subscriptionId): Subscription
@@ -85,5 +117,19 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
         $session = end($this->sessions);
 
         return $session === false ? [] : $session['metadata'];
+    }
+
+    private function respond(string $reference): GuestCheckoutSession|ApiErrorException
+    {
+        $status = $this->failNextWith;
+        $this->failNextWith = null;
+        $id = 'cs_test_guest_'.(count($this->saved) + 1);
+        $session = new GuestCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, CarbonImmutable::now()->addDay());
+
+        if ($status === null || $this->failureCreatesSession) {
+            $this->created[$reference] = $session;
+        }
+
+        return $status === null ? $session : UnknownApiErrorException::factory('Something went wrong on our end.', $status);
     }
 }

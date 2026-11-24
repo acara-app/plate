@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Billing;
 
 use App\Contracts\Billing\ManagesGuestCheckout;
+use App\Data\Billing\GuestCheckoutSession;
 use App\Enums\PhotoPlan;
 use App\Enums\SnapFunnelStage;
 use App\Models\PlanPurchase;
@@ -16,6 +17,9 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Stripe\Exception\ApiErrorException;
+use Stripe\Exception\IdempotencyException;
+use Throwable;
 
 final readonly class StartGuestCheckout
 {
@@ -67,6 +71,7 @@ final readonly class StartGuestCheckout
 
         return PlanPurchase::query()->create([
             'subscription_product_id' => $product->id,
+            'stripe_price_id' => $product->stripe_price_id,
             'snap_journey_id' => $this->funnel->checkoutMetadata(null)['snap_journey'] ?? null,
             'guest_hash' => $guestHash,
             'placement' => $placement,
@@ -78,14 +83,19 @@ final readonly class StartGuestCheckout
         $product = $purchase->product;
         $type = Str::slug($product->name);
 
-        $session = $this->checkout->open(
-            (string) $product->stripe_price_id,
-            $purchase->id,
-            route('snap-to-track.purchase', ['checkout' => 'success']),
-            route('snap-to-track.purchase', ['checkout' => 'cancelled']),
-            array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $purchase->snap_journey_id, 'name' => $type, 'type' => $type]),
-            "We'll email your activation link to the address above. Please make sure it's correct.",
-        );
+        try {
+            $session = $this->checkout->open(
+                $purchase->checkoutIdempotencyKey(),
+                (string) $purchase->stripe_price_id,
+                $purchase->id,
+                route('snap-to-track.purchase', ['checkout' => 'success']),
+                route('snap-to-track.purchase', ['checkout' => 'cancelled']),
+                array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $purchase->snap_journey_id, 'name' => $type, 'type' => $type]),
+                "We'll email your activation link to the address above. Please make sure it's correct.",
+            );
+        } catch (ApiErrorException $apiErrorException) {
+            $session = $this->recover($purchase, $apiErrorException);
+        }
 
         $purchase->update([
             'stripe_checkout_session_id' => $session->id,
@@ -100,5 +110,26 @@ final readonly class StartGuestCheckout
         ]);
 
         return $session->url;
+    }
+
+    private function recover(PlanPurchase $purchase, ApiErrorException $exception): GuestCheckoutSession
+    {
+        throw_unless($exception instanceof IdempotencyException || $exception->getHttpStatus() >= 500, $exception);
+
+        try {
+            $session = $this->checkout->findOpenSession($purchase->id, $purchase->created_at);
+        } catch (Throwable $throwable) {
+            report($throwable);
+
+            throw $exception;
+        }
+
+        if ($session instanceof GuestCheckoutSession) {
+            return $session;
+        }
+
+        $purchase->increment('checkout_attempt');
+
+        throw $exception;
     }
 }

@@ -18,9 +18,11 @@ use Illuminate\Support\Str;
 /**
  * @property-read string $id
  * @property int $subscription_product_id
+ * @property string|null $stripe_price_id
  * @property string|null $snap_journey_id
  * @property string $guest_hash
  * @property string $placement
+ * @property int $checkout_attempt
  * @property string|null $stripe_checkout_session_id
  * @property string|null $checkout_url
  * @property CarbonInterface|null $checkout_expires_at
@@ -56,6 +58,13 @@ final class PlanPurchase extends Model
      * @var list<string>
      */
     protected $guarded = [];
+
+    /**
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'checkout_attempt' => 1,
+    ];
 
     public static function hashToken(string $token): string
     {
@@ -103,6 +112,11 @@ final class PlanPurchase extends Model
     {
         return ! $this->isPaid() && ! $this->isCancelled() && $this->checkout_url !== null
             && $this->checkout_expires_at?->isFuture() === true;
+    }
+
+    public function checkoutIdempotencyKey(): string
+    {
+        return "plan-purchase:{$this->id}:{$this->checkout_attempt}";
     }
 
     public function isOpeningCheckout(): bool
@@ -163,6 +177,7 @@ final class PlanPurchase extends Model
     {
         return [
             'subscription_product_id' => 'integer',
+            'checkout_attempt' => 'integer',
             'user_id' => 'integer',
             'checkout_expires_at' => 'datetime',
             'checkout_returned_at' => 'datetime',

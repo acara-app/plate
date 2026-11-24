@@ -24,6 +24,7 @@ final class PlanPurchaseFactory extends Factory
 
         return [
             'subscription_product_id' => SubscriptionProduct::factory(),
+            'stripe_price_id' => 'price_starter',
             'snap_journey_id' => null,
             'guest_hash' => hash('sha256', (string) Str::uuid()),
             'placement' => 'result',

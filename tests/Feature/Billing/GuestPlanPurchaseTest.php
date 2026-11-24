@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription;
 use Livewire\Livewire;
+use Stripe\Exception\ApiErrorException;
 use Tests\Helpers\FakeGuestCheckout;
 
 it('never opens a second checkout while one is open or waiting for Stripe', function (): void {
@@ -34,13 +35,14 @@ it('never opens a second checkout while one is open or waiting for Stripe', func
         ->and(PlanPurchase::query()->count())->toBe(1);
 });
 
-it('reuses the first purchase and its Stripe key when a slow checkout is tapped again', function (): void {
+it('reuses the first purchase, its Stripe key and its price when a slow checkout is tapped again', function (): void {
     $checkout = FakeGuestCheckout::install();
-    sellPhotoPlans();
+    $starter = sellPhotoPlans();
     $guest = (string) Str::uuid();
     $retry = null;
-    $checkout->beforeOpen = function () use ($guest, &$retry): void {
+    $checkout->beforeOpen = function () use ($guest, $starter, &$retry): void {
         $this->travel(16)->seconds();
+        $starter->update(['stripe_price_id' => 'price_starter_repriced']);
         $retry = resolve(StartGuestCheckout::class)->handle($guest, 'result');
     };
 
@@ -48,7 +50,42 @@ it('reuses the first purchase and its Stripe key when a slow checkout is tapped 
 
     expect($retry)->toBe($first)
         ->and(PlanPurchase::query()->count())->toBe(1)
-        ->and(array_unique(array_column($checkout->sessions, 'reference')))->toHaveCount(1);
+        ->and(array_unique(array_column($checkout->sessions, 'key')))->toHaveCount(1)
+        ->and(array_unique(array_column($checkout->sessions, 'price')))->toBe(['price_starter']);
+});
+
+it('opens checkout on the next tap after Stripe fails', function (int $status, int $retryAttempt): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $guest = (string) Str::uuid();
+    $checkout->failNextWith = $status;
+
+    expect(function () use ($guest): void {
+        resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    })->toThrow(ApiErrorException::class);
+
+    $url = resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    $purchase = PlanPurchase::query()->sole();
+
+    expect($url)->toBe($purchase->checkout_url)
+        ->and(array_column($checkout->sessions, 'key'))->toBe(["plan-purchase:{$purchase->id}:1", "plan-purchase:{$purchase->id}:{$retryAttempt}"]);
+})->with([
+    'Stripe saved a server error under the key' => [500, 2],
+    'the first request was still in progress' => [409, 1],
+]);
+
+it('continues with the checkout Stripe created before answering with a server error', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $checkout->failNextWith = 500;
+    $checkout->failureCreatesSession = true;
+
+    $url = resolve(StartGuestCheckout::class)->handle((string) Str::uuid(), 'result');
+
+    expect($url)->toBe('https://checkout.stripe.com/c/pay/cs_test_guest_1')
+        ->and(PlanPurchase::query()->sole())
+        ->checkout_url->toBe($url)
+        ->checkout_attempt->toBe(1);
 });
 
 it('adds Starter to an existing account after the buyer logs in and shows the same success again', function (): void {

@@ -13,9 +13,11 @@ return new class extends Migration
         Schema::create('plan_purchases', function (Blueprint $table): void {
             $table->ulid('id')->primary();
             $table->foreignId('subscription_product_id')->constrained()->cascadeOnDelete();
+            $table->string('stripe_price_id')->nullable();
             $table->foreignUuid('snap_journey_id')->nullable()->constrained()->nullOnDelete();
             $table->string('guest_hash', 64)->index();
             $table->string('placement', 32);
+            $table->unsignedTinyInteger('checkout_attempt')->default(1);
             $table->string('stripe_checkout_session_id')->nullable()->unique();
             $table->text('checkout_url')->nullable();
             $table->timestamp('checkout_expires_at')->nullable();
