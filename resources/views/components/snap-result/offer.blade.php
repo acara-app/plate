@@ -1,8 +1,7 @@
 @props(['allowance', 'clearance' => 0])
 
 @php
-    $offer = $allowance->canUpgrade ? $allowance->offer : null;
-    $freeScansLeft = $allowance->enabled && $allowance->mode === 'trial' && ! $allowance->exhausted ? $allowance->remaining : null;
+    $offer = $allowance->canUpgrade && $allowance->exhausted ? $allowance->offer : null;
     $variant = $allowance->variant ?? 'baseline';
 @endphp
 
@@ -14,16 +13,10 @@
         class="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5 sm:p-6"
     >
         <div class="flex flex-col gap-2">
-            @if ($allowance->exhausted)
-                <p class="self-start rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
-            @elseif ($freeScansLeft !== null)
-                <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">{!! e(strtr(__('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $freeScansLeft])) !!}</p>
-            @endif
+            <p class="self-start rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
             <h2 id="result-offer-heading" class="text-2xl font-semibold tracking-tight text-balance">{{ __('common.photo_plans.offer.heading') }}</h2>
             <p class="text-sm leading-relaxed text-muted-foreground">
-                @if ($allowance->exhausted)
-                    {{ __('common.photo_plans.offer.save_note') }}
-                @endif
+                {{ __('common.photo_plans.offer.save_note') }}
                 {!! e(strtr(__('common.photo_plans.offer.body'), ['@{{name}}' => $offer->name])) !!}
             </p>
         </div>
@@ -48,17 +41,23 @@
                 variant="plan"
                 wire:click="upgrade('result')"
                 wire:loading.attr="disabled"
-                wire:target="save,upgrade"
+                wire:target="save,upgrade,signInForPlan"
                 x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', variant: {{ Js::from($variant) }} })"
             >
-                {!! e(strtr(__('common.photo_plans.offer.cta'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
+                {!! e(strtr(__('common.photo_plans.offer.continue'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
             </x-snap-result.button>
-            <p class="text-center text-xs leading-relaxed text-muted-foreground">{{ __('common.photo_plans.offer.terms') }}</p>
+            @error('checkout')
+                <p role="alert" class="text-center text-sm text-destructive">{{ $message }}</p>
+            @enderror
+            <p class="text-center text-xs leading-relaxed text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+            @guest
+                <x-snap-result.member-sign-in class="py-1" />
+            @endguest
             <button
                 type="button"
                 wire:click="save('register')"
                 wire:loading.attr="disabled"
-                wire:target="save,upgrade"
+                wire:target="save,upgrade,signInForPlan"
                 x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result' })"
                 class="inline-flex min-h-11 touch-manipulation items-center justify-center self-center rounded-full px-3 text-sm font-medium transition duration-150 ease-out outline-none select-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
             >

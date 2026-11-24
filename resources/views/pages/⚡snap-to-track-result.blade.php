@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\StartGuestCheckout;
 use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RestoreAnalysisDraftAction;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
@@ -81,7 +82,7 @@ class extends Component
     #[Computed]
     public function photoAllowance(): PhotoEntitlement
     {
-        return resolve(ManagesPhotoAnalyses::class)->entitlement(auth()->user(), PhotoAnalysisContext::guestId(request()));
+        return resolve(ManagesPhotoAnalyses::class)->entitlement(auth()->user(), $this->guestId());
     }
 
     #[Computed]
@@ -113,25 +114,59 @@ class extends Component
         $this->redirect(route($intent));
     }
 
-    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, SnapFunnel $funnel, string $placement = 'result'): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, StartGuestCheckout $startCheckout, SnapFunnel $funnel, string $placement = 'result'): void
     {
         $placement = in_array($placement, ['result', 'result_bar'], true) ? $placement : 'result';
-        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $this->photoAllowance->offer?->name, clicked: true);
+        $offer = $this->photoAllowance->offer;
+        $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer?->name, clicked: true);
+        $guestId = $this->guestId();
 
-        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
+        if (auth()->check() || $guestId === null) {
+            $this->redirect($prepareUpgrade->handle($offer));
+
+            return;
+        }
+
+        try {
+            $this->redirect($startCheckout->handle($guestId, $placement));
+        } catch (Throwable $exception) {
+            report($exception);
+            $funnel->record(SnapFunnelStage::CheckoutFailed, "{$placement}:{$this->resultKey()}", ['reason' => 'error']);
+            $this->addError('checkout', 'We could not open checkout just now. Please try again.');
+        }
+    }
+
+    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade, string $via = 'login'): void
+    {
+        $offer = $this->photoAllowance->offer;
+
+        if (auth()->check() || $offer === null) {
+            return;
+        }
+
+        $prepareUpgrade->handle($offer);
+
+        $this->redirect(route('checkout.start', ['product' => $offer->productId, ...($via === 'google' ? ['via' => 'google'] : ['returning' => 1])]));
     }
 
     #[Async]
     #[Renderless]
     public function offerViewed(string $placement, SnapFunnel $funnel): void
     {
-        $offer = $this->photoAllowance->canUpgrade ? $this->photoAllowance->offer : null;
+        $offer = $this->photoAllowance->canUpgrade && $this->photoAllowance->exhausted ? $this->photoAllowance->offer : null;
 
         if ($this->draftToken === null || $offer === null || ! in_array($placement, ['result', 'result_bar'], true)) {
             return;
         }
 
         $funnel->recordOffer("{$placement}:{$this->resultKey()}", $placement, $offer->name);
+    }
+
+    private function guestId(): ?string
+    {
+        $guestId = PhotoAnalysisContext::guestId(request()) ?? session('snap_to_track.analysis_guest_id');
+
+        return is_string($guestId) ? $guestId : null;
     }
 
     private function resultKey(): string
@@ -172,7 +207,7 @@ class extends Component
                     type="button"
                     wire:click="save('login')"
                     wire:loading.attr="disabled"
-                    wire:target="save,upgrade"
+                    wire:target="save,upgrade,signInForPlan"
                     class="-mr-3 inline-flex min-h-11 items-center justify-center rounded-full px-3 text-[15px] font-medium text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50 {{ $press }} {{ $ring }}"
                 >
                     Log in
@@ -205,9 +240,9 @@ class extends Component
                 ['label' => 'Fat', 'value' => $analysis['total_fat'], 'goal' => $goals->fat, 'icon' => 'droplet', 'tile' => 'bg-orange-100', 'iconColor' => 'text-orange-500', 'text' => 'text-orange-700', 'ring' => 'stroke-orange-400'],
                 ['label' => 'Fiber', 'value' => $analysis['total_fiber'] ?? null, 'goal' => $goals->fiber, 'icon' => 'salad', 'tile' => 'bg-green-100', 'iconColor' => 'text-green-600', 'text' => 'text-green-700', 'ring' => 'stroke-green-500'],
             ];
-            $barOffer = $photoAllowance->canUpgrade ? $photoAllowance->offer : null;
+            $barOffer = $photoAllowance->canUpgrade && $photoAllowance->exhausted ? $photoAllowance->offer : null;
             $barClearance = $barOffer ? 208 : 96;
-            $tile = 'flex min-h-16 min-w-0 flex-1 items-center gap-3 rounded-[1.25rem] px-3.5 text-left '.$press.' '.$ring;
+            $freeScansLeft = $photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted ? $photoAllowance->remaining : null;
         @endphp
 
         <div
@@ -215,7 +250,6 @@ class extends Component
                 at: new Date(@js($analyzedAt ?? now()->toIso8601String())),
                 photo: window.acaraRecallSnapPhoto?.(@js($analysisRequestId)) ?? null,
                 actionsOnScreen: { meal: true, offer: false },
-                plan: 'free',
                 get mealType() {
                     const hour = this.at.getHours();
 
@@ -391,7 +425,7 @@ class extends Component
                                 <x-snap-result.button
                                     wire:click="save('register')"
                                     wire:loading.attr="disabled"
-                                    wire:target="save,upgrade"
+                                    wire:target="save,upgrade,signInForPlan"
                                     x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal' })"
                                 >
                                     Save this meal
@@ -412,7 +446,7 @@ class extends Component
                                         type="button"
                                         wire:click="save('login')"
                                         wire:loading.attr="disabled"
-                                        wire:target="save,upgrade"
+                                        wire:target="save,upgrade,signInForPlan"
                                         class="{{ $link }}"
                                     >
                                         Already have an account? Log in
@@ -449,10 +483,15 @@ class extends Component
                 <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 
                 @unless ($photoAllowance->exhausted)
-                    <x-snap-result.button variant="plain" :href="route('snap-to-track')">
-                        <x-snap-result.icon name="camera" />
-                        Analyze another photo
-                    </x-snap-result.button>
+                    <div class="flex flex-col gap-2">
+                        @if ($freeScansLeft !== null)
+                            <p class="px-1 text-center text-sm font-medium text-muted-foreground">{!! e(strtr(__('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $freeScansLeft])) !!}</p>
+                        @endif
+                        <x-snap-result.button variant="plain" :href="route('snap-to-track')">
+                            <x-snap-result.icon name="camera" />
+                            Analyze another photo
+                        </x-snap-result.button>
+                    </div>
                 @endunless
             </div>
 
@@ -468,79 +507,33 @@ class extends Component
                 class="fixed inset-x-0 bottom-0 z-30 md:pb-4"
             >
                 <div class="mx-auto flex w-full max-w-md flex-col gap-2.5 rounded-t-[1.75rem] bg-card pt-3 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:rounded-[1.75rem] md:shadow-[0_16px_48px_rgba(0,0,0,0.18)] md:ring-1 md:ring-foreground/10">
-                    @if ($barOffer)
-                        <div role="radiogroup" aria-label="How to keep this meal" class="flex gap-2">
-                            <button
-                                type="button"
-                                role="radio"
-                                x-ref="freePlan"
-                                x-bind:aria-checked="plan === 'free'"
-                                x-bind:tabindex="plan === 'free' ? 0 : -1"
-                                x-on:click="plan = 'free'"
-                                x-on:keydown.right.prevent="plan = 'paid'; $refs.paidPlan.focus()"
-                                x-on:keydown.left.prevent="plan = 'paid'; $refs.paidPlan.focus()"
-                                x-bind:class="plan === 'free' ? 'bg-primary/10 inset-ring-2 inset-ring-primary' : 'bg-muted'"
-                                class="{{ $tile }}"
-                            >
-                                <span aria-hidden="true" class="flex size-5 shrink-0 items-center justify-center rounded-full max-[359px]:hidden" x-bind:class="plan === 'free' ? 'bg-primary text-primary-foreground' : 'inset-ring-2 inset-ring-muted-foreground/40'">
-                                    <x-snap-result.icon name="check" class="size-3" stroke-width="3.5" x-show="plan === 'free'" />
-                                </span>
-                                <span class="flex min-w-0 flex-col">
-                                    <span class="truncate text-[15px] leading-tight font-semibold">{{ __('common.photo_plans.free.price') }}</span>
-                                    <span class="truncate text-xs leading-snug text-muted-foreground">Save this meal</span>
-                                </span>
-                            </button>
-                            <button
-                                type="button"
-                                role="radio"
-                                x-ref="paidPlan"
-                                x-intersect.once="$wire.offerViewed('result_bar')"
-                                x-bind:aria-checked="plan === 'paid'"
-                                x-bind:tabindex="plan === 'paid' ? 0 : -1"
-                                x-on:click="plan = 'paid'"
-                                x-on:keydown.right.prevent="plan = 'free'; $refs.freePlan.focus()"
-                                x-on:keydown.left.prevent="plan = 'free'; $refs.freePlan.focus()"
-                                x-bind:class="plan === 'paid' ? 'bg-foreground/5 inset-ring-2 inset-ring-foreground' : 'bg-muted'"
-                                class="{{ $tile }}"
-                            >
-                                <span aria-hidden="true" class="flex size-5 shrink-0 items-center justify-center rounded-full max-[359px]:hidden" x-bind:class="plan === 'paid' ? 'bg-foreground text-background' : 'inset-ring-2 inset-ring-muted-foreground/40'">
-                                    <x-snap-result.icon name="check" class="size-3" stroke-width="3.5" x-show="plan === 'paid'" style="display: none;" />
-                                </span>
-                                <span class="flex min-w-0 flex-col">
-                                    <span class="truncate text-[15px] leading-tight font-semibold">{{ $barOffer->name }}</span>
-                                    <span class="truncate text-xs leading-snug text-muted-foreground tabular-nums">{{ $barOffer->formattedPrice }}/month</span>
-                                </span>
-                            </button>
-                        </div>
-                    @endif
-
                     <div class="flex flex-col gap-2">
+                        @if ($barOffer)
+                            <x-snap-result.button
+                                variant="plan"
+                                size="sm"
+                                x-intersect.once="$wire.offerViewed('result_bar')"
+                                wire:click="upgrade('result_bar')"
+                                wire:loading.attr="disabled"
+                                wire:target="save,upgrade,signInForPlan"
+                                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
+                            >
+                                {!! e(strtr(__('common.photo_plans.offer.continue'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                            </x-snap-result.button>
+                        @endif
                         <x-snap-result.button
-                            x-show="plan === 'free'"
                             wire:click="save('register')"
                             wire:loading.attr="disabled"
-                            wire:target="save,upgrade"
+                            wire:target="save,upgrade,signInForPlan"
                             x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
                         >
                             Save this meal free
                         </x-snap-result.button>
                         @if ($barOffer)
-                            <x-snap-result.button
-                                variant="plan"
-                                size="sm"
-                                x-show="plan === 'paid'"
-                                style="display: none;"
-                                wire:click="upgrade('result_bar')"
-                                wire:loading.attr="disabled"
-                                wire:target="save,upgrade"
-                                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
-                            >
-                                {!! e(strtr(__('common.photo_plans.offer.cta'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
-                            </x-snap-result.button>
-                            <p class="flex min-h-8 items-center justify-center px-2 text-center text-[11px] leading-snug text-muted-foreground">
-                                <span x-show="plan === 'free'">{{ Arr::last(__('common.photo_plans.free.features')) }}</span>
-                                <span x-show="plan === 'paid'" style="display: none;">{{ __('common.photo_plans.offer.terms') }}</span>
-                            </p>
+                            @error('checkout')
+                                <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
+                            @enderror
+                            <p class="flex min-h-8 items-center justify-center px-2 text-center text-[11px] leading-snug text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
                         @endif
                     </div>
                 </div>

@@ -38,14 +38,21 @@
     @if ($allowance->canUpgrade && $allowance->offer && ($allowance->exhausted || $allowance->preview !== null))
         <p class="mt-3 text-[15px] leading-relaxed text-white/80">{!! e(strtr(__('common.photo_plans.offer.body'), ['@{{name}}' => $allowance->offer->name])) !!}</p>
         <div class="mt-5">
-            <button type="button" wire:click="upgrade(@js($placement))" wire:loading.attr="disabled" wire:target="upgrade" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') })" class="{{ $pill }} bg-primary py-3 text-emerald-950">
-                {!! e(strtr(__('common.photo_plans.offer.cta'), ['@{{name}}' => $allowance->offer->name, '@{{price}}' => $allowance->offer->formattedPrice])) !!}
+            <button type="button" wire:click="upgrade(@js($placement))" wire:loading.attr="disabled" wire:target="upgrade,signInForPlan" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') })" class="{{ $pill }} bg-primary py-3 text-emerald-950">
+                {!! e(strtr(__('common.photo_plans.offer.continue'), ['@{{name}}' => $allowance->offer->name, '@{{price}}' => $allowance->offer->formattedPrice])) !!}
             </button>
-            <p class="mt-3 text-sm leading-relaxed text-white/65">{{ __('common.photo_plans.offer.terms') }}</p>
+            @error('checkout')
+                <p role="alert" class="mt-3 text-sm text-rose-300">{{ $message }}</p>
+            @enderror
+            <p class="mt-3 text-sm leading-relaxed text-white/65">{{ __('common.photo_plans.offer.renewal') }}</p>
         </div>
     @endif
 
     @guest
-        <button type="button" wire:click="continueInApp('login')" class="mt-2 min-h-11 touch-manipulation rounded-full text-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-white/70">{{ __('common.photo_plans.offer.login') }}</button>
+        @if ($allowance->canUpgrade && $allowance->offer && $allowance->exhausted)
+            <x-snap-result.member-sign-in dark class="mt-5" />
+        @else
+            <button type="button" wire:click="continueInApp('login')" class="mt-2 min-h-11 touch-manipulation rounded-full text-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-white/70">{{ __('common.photo_plans.offer.login') }}</button>
+        @endif
     @endguest
 </article>

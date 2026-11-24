@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Actions\Billing\StartGuestCheckout;
 use App\Actions\FailPhotoAnalysis;
 use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RetryPhotoAnalysis;
@@ -103,12 +104,38 @@ class extends Component
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), $this->analysisGuestId());
     }
 
-    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, string $placement = 'wall'): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, StartGuestCheckout $startCheckout, string $placement = 'wall'): void
     {
         $placement = in_array($placement, ['wall', 'preview_upload'], true) ? $placement : 'wall';
-        $this->funnel->recordOffer($placement, $placement, $this->photoAllowance->offer?->name, clicked: true);
+        $offer = $this->photoAllowance->offer;
+        $this->funnel->recordOffer($placement, $placement, $offer?->name, clicked: true);
 
-        $this->redirect($prepareUpgrade->handle($this->photoAllowance->offer));
+        if (auth()->check()) {
+            $this->redirect($prepareUpgrade->handle($offer));
+
+            return;
+        }
+
+        try {
+            $this->redirect($startCheckout->handle($this->analysisGuestId(), $placement));
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->funnel->record(SnapFunnelStage::CheckoutFailed, $placement, ['reason' => 'error']);
+            $this->addError('checkout', 'We could not open checkout just now. Please try again.');
+        }
+    }
+
+    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade, string $via = 'login'): void
+    {
+        $offer = $this->photoAllowance->offer;
+
+        if (auth()->check() || $offer === null) {
+            return;
+        }
+
+        $prepareUpgrade->handle($offer);
+
+        $this->redirect(route('checkout.start', ['product' => $offer->productId, ...($via === 'google' ? ['via' => 'google'] : ['returning' => 1])]));
     }
 
     #[Async]

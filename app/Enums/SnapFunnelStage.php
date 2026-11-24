@@ -23,6 +23,7 @@ enum SnapFunnelStage: string
     case CheckoutReturned = 'snap_to_track_checkout_returned';
     case CheckoutCancelled = 'snap_to_track_checkout_cancelled';
     case FirstPayment = 'snap_to_track_first_payment';
+    case PurchaseClaimed = 'snap_to_track_purchase_claimed';
 
     public function label(): string
     {
@@ -44,6 +45,7 @@ enum SnapFunnelStage: string
             self::CheckoutReturned => 'Returned from checkout',
             self::CheckoutCancelled => 'Checkout cancelled',
             self::FirstPayment => 'First payment',
+            self::PurchaseClaimed => 'Purchase claimed',
         };
     }
 
@@ -62,11 +64,12 @@ enum SnapFunnelStage: string
             self::AuthCompleted => "The journey's browser finished sign-up or log-in (method). Once per account.",
             self::MealSaved => 'A meal from the public Snap to Track result was saved to the food log. Once per meal.',
             self::CheckoutClicked => 'The plan page asked the server to open a Stripe checkout (plan, interval). Every request counts as a raw event.',
-            self::CheckoutStarted => 'Stripe created the checkout session and the browser was sent to it (plan, interval). Once per checkout session; repeat clicks that reopen it add nothing.',
+            self::CheckoutStarted => 'Stripe created the checkout session and the browser was sent to it (plan, interval, placement for guests). Once per checkout session; repeat clicks that reopen it add nothing.',
             self::CheckoutFailed => 'The checkout could not open (reason). Error state.',
             self::CheckoutReturned => 'The browser came back to the success page (entitlement). Not proof of payment, and not needed for one. Once per checkout.',
             self::CheckoutCancelled => 'The browser came back from Stripe through the cancel link. Once per checkout.',
-            self::FirstPayment => "A signed Stripe webhook confirmed the paid invoice that created a Plate customer's subscription (plan, amount, live). Once per subscription; replays, renewals, trial starts and unpaid invoices never add another.",
+            self::FirstPayment => "A signed Stripe webhook confirmed the paid invoice that created a Plate customer's or a guest purchase's subscription (plan, amount, live). Once per subscription; replays, renewals, trial starts and unpaid invoices never add another.",
+            self::PurchaseClaimed => 'A guest purchase paid before sign-up was added to a Plate account (method). Once per purchase.',
         };
     }
 }

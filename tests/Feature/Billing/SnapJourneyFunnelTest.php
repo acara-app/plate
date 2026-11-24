@@ -17,11 +17,14 @@ use App\Models\PhotoAnalysisRequest;
 use App\Models\SnapJourney;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use App\Notifications\PlanPurchaseClaimLinkNotification;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Queue\TimeoutExceededException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -30,6 +33,7 @@ use Livewire\Livewire;
 use Mockery\MockInterface;
 use RyanChandler\LaravelCloudflareTurnstile\Contracts\ClientInterface;
 use RyanChandler\LaravelCloudflareTurnstile\Facades\Turnstile;
+use Tests\Helpers\FakeGuestCheckout;
 
 beforeEach(function (): void {
     RateLimiter::clear('snap-to-track:127.0.0.1');
@@ -103,9 +107,10 @@ function snapFunnelSteps(array $report, string $path): array
     return array_column($report['paths'][$path], 'journeys');
 }
 
-it('follows a guest from a selected photo to a payment confirmed after they leave Stripe without returning', function (): void {
+it('follows a member who signs in before paying from a selected photo to a payment confirmed after they leave Stripe', function (): void {
     $starter = sellPhotoPlans();
     $guest = (string) Str::uuid();
+    User::factory()->withoutTwoFactor()->create(['email' => 'snap-member@example.com']);
     session()->put('snap_to_track.analysis_guest_id', $guest);
     $this->withCookie('photo_guest', $guest)->withoutVite();
 
@@ -116,12 +121,15 @@ it('follows a guest from a selected photo to a payment confirmed after they leav
     app()->call([new ProcessPhotoAnalysis(PhotoAnalysisRequest::query()->sole()->id), 'handle']);
     $scanner->call('refreshAnalysis')->assertRedirect(route('snap-to-track.result'));
 
-    offerStarterInSnapJourney($starter, used: 1);
-    Livewire::test('pages::snap-to-track-result');
-    Livewire::test('pages::snap-to-track-result')->call('upgrade', 'result')->assertRedirect(route('checkout.start', $starter));
+    offerStarterInSnapJourney($starter, used: 2);
+    Livewire::test('pages::snap-to-track-result')
+        ->call('offerViewed', 'result')
+        ->call('signInForPlan', 'login')
+        ->assertRedirect(route('checkout.start', ['product' => $starter->id, 'returning' => 1]));
 
-    $this->post(route('register.store'), ['name' => 'Snap Guest', 'email' => 'snap-guest@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1', 'health_data_consent' => '1']);
-    Auth::user()->markEmailAsVerified();
+    $this->get(route('checkout.start', ['product' => $starter->id, 'returning' => 1]))->assertRedirect(route('login'));
+    $this->post(route('login.store'), ['email' => 'snap-member@example.com', 'password' => 'password'])
+        ->assertRedirect(route('checkout.subscription', absolute: false));
     $metadata = fakeSnapJourneyCheckout();
     $this->post(route('checkout.subscription.store'), ['product_id' => $starter->id, 'billing_interval' => 'monthly'])
         ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_snap');
@@ -147,7 +155,7 @@ it('follows a guest from a selected photo to a payment confirmed after they leav
         ->device->toBe('mobile')
         ->acquisition_source->toBe('newsletter')
         ->and(snapFunnelSteps($report, 'scan'))->toBe([1, 1, 1, 1])
-        ->and(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 1])
+        ->and(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1])
         ->and($report['raw_events'])->toMatchArray([
             SnapFunnelStage::ResultViewed->value => 1,
             SnapFunnelStage::FirstPayment->value => 1,
@@ -155,23 +163,69 @@ it('follows a guest from a selected photo to a payment confirmed after they leav
         ->and($report['payments'])->toMatchArray(['live' => 1, 'attributed' => 1, 'subscriptions' => 1, 'subscriptions_paid' => 1]);
 });
 
-it('shows an abandoned checkout from the limit wall without inventing a payment', function (): void {
+it('lets a guest buy Starter from the result and activate it from the emailed link', function (): void {
+    Notification::fake();
+    $checkout = FakeGuestCheckout::install();
+    $starter = sellPhotoPlans();
+    $draft = Str::random(64);
+    AnalysisDraft::factory()->create(['token_hash' => AnalysisDraft::hashToken($draft)]);
+    session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
+    session()->put('snap_to_track.result', ['draft' => $draft, 'request_id' => (string) Str::uuid()]);
+    offerStarterInSnapJourney($starter, used: 2);
+
+    Livewire::test('pages::snap-to-track-result')
+        ->call('upgrade', 'result')
+        ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
+    sendSignedStripeWebhook(paidGuestPurchaseWebhook($checkout->subscriptionMetadata()))->assertSuccessful();
+    sendSignedStripeWebhook(paidGuestPurchaseWebhook($checkout->subscriptionMetadata()))->assertSuccessful();
+
+    $link = null;
+    Notification::assertSentOnDemandTimes(PlanPurchaseClaimLinkNotification::class, 1);
+    Notification::assertSentOnDemand(PlanPurchaseClaimLinkNotification::class, function (PlanPurchaseClaimLinkNotification $notification, array $channels, AnonymousNotifiable $notifiable) use (&$link): bool {
+        $link = $notification->link;
+
+        return $notifiable->routes['mail'] === 'buyer@example.com';
+    });
+
+    $this->get($link)->assertRedirect(route('snap-to-track.activate'));
+    Livewire::test('pages::snap-to-track-activate')
+        ->set('acceptedDisclaimer', true)
+        ->set('healthDataConsent', true)
+        ->call('activate')
+        ->assertSee('Save this meal');
+
+    $buyer = User::query()->sole();
+    $report = snapFunnelReport();
+
+    expect($buyer)
+        ->email->toBe('buyer@example.com')
+        ->stripe_id->toBe('cus_guest')
+        ->and($buyer->hasVerifiedEmail())->toBeTrue()
+        ->and($buyer->hasActiveSubscription())->toBeTrue()
+        ->and(Auth::id())->toBe($buyer->id)
+        ->and(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1])
+        ->and($report['raw_events'])->toMatchArray([
+            SnapFunnelStage::FirstPayment->value => 1,
+            SnapFunnelStage::PurchaseClaimed->value => 1,
+        ])
+        ->and($report['payments'])->toMatchArray(['live' => 1, 'attributed' => 1]);
+});
+
+it('shows an abandoned guest checkout from the limit wall without inventing a payment', function (): void {
+    FakeGuestCheckout::install();
     $starter = sellPhotoPlans();
     $guest = (string) Str::uuid();
-    User::factory()->withoutTwoFactor()->create(['email' => 'returning@example.com']);
     session()->put('snap_to_track.analysis_guest_id', $guest);
     offerStarterInSnapJourney($starter, used: 2);
 
-    Livewire::test('pages::snap-to-track')->call('upgrade', 'wall');
+    Livewire::test('pages::snap-to-track')->call('upgrade', 'wall')->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
     $this->withCookie('photo_guest', $guest)->withoutVite()
-        ->post(route('login.store'), ['email' => 'returning@example.com', 'password' => 'password']);
-    fakeSnapJourneyCheckout();
-    $this->post(route('checkout.subscription.store'), ['product_id' => $starter->id, 'billing_interval' => 'monthly']);
-    $this->get(route('checkout.cancel'))->assertOk();
+        ->get(route('snap-to-track.purchase', ['checkout' => 'cancelled']))
+        ->assertSee('Your checkout is waiting');
 
     $report = snapFunnelReport(['--by' => 'placement']);
 
-    expect(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 1, 1, 1, 0])
+    expect(snapFunnelSteps($report, 'upgrade'))->toBe([1, 1, 0])
         ->and(array_keys($report['segments']))->toBe(['wall'])
         ->and(array_column($report['problems'], 'journeys', 'label'))->toMatchArray([
             'Checkout cancelled' => 1,

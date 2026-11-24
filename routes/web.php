@@ -33,6 +33,11 @@ Route::livewire('/tools', 'pages::tools-index')->name('tools.index');
 Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spike-calculator');
 Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track');
 Route::livewire('/tools/snap-to-track/result', 'pages::snap-to-track-result')->name('snap-to-track.result');
+Route::livewire('/tools/snap-to-track/purchase', 'pages::snap-to-track-purchase')->name('snap-to-track.purchase');
+Route::livewire('/tools/snap-to-track/activate', 'pages::snap-to-track-activate')->name('snap-to-track.activate');
+Route::get('/tools/snap-to-track/activate/{token}', Web\SnapToTrack\OpenPlanPurchaseClaimLinkController::class)
+    ->middleware('throttle:30,1')
+    ->name('snap-to-track.activate.open');
 Route::livewire('/tools/usda-daily-servings-calculator', 'pages::usda-daily-servings-calculator')->name('usda-servings-calculator');
 Route::livewire('/tools/telegram-health-logging', 'pages::telegram-health-logging')->name('telegram-health-logging');
 
