@@ -42,6 +42,7 @@ use Illuminate\Support\Str;
  * @property string|null $claim_method
  * @property-read SubscriptionProduct $product
  * @property-read User|null $user
+ * @property-read SnapJourney|null $journey
  * @property-read CarbonInterface $created_at
  * @property-read CarbonInterface $updated_at
  */
@@ -176,6 +177,14 @@ final class PlanPurchase extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<SnapJourney, $this>
+     */
+    public function journey(): BelongsTo
+    {
+        return $this->belongsTo(SnapJourney::class, 'snap_journey_id');
     }
 
     /**

@@ -11,7 +11,7 @@ php artisan snap:funnel-report --definitions          # what each stage means
 php artisan snap:funnel-report --json                 # everything, for further analysis
 ```
 
-Run it in production the same way as `billing:usage-report`. `--by` accepts `device`, `source`, `placement` or `plan`. Staff journeys and Stripe test-mode payments are left out unless you pass `--include-internal`.
+Run it in production the same way as `billing:usage-report`. `--by` accepts `device`, `source`, `placement` or `plan`. Staff journeys and Stripe test-mode payments are left out unless you pass `--include-internal`. Conversion and checkout placements only count journeys whose window has closed, so give them a longer period such as `--days=30`.
 
 ## Journeys
 
@@ -81,6 +81,18 @@ These are listed beside the funnel, not inside it:
 
 - First payments confirmed by Stripe in live mode are split into three groups: those from a Snap journey, those from a staff journey, and those with no Snap journey (for example, a checkout opened from inside the app outside any journey). Test-mode payments are counted on their own row.
 - The report compares these payments with the billing records: subscriptions created in the same period, how many of them have a confirmed first payment, and the Stripe status of the rest (for example, `incomplete`).
+
+## Conversion, placements and activation
+
+- **Conversion** looks at journeys whose window has closed and that reached a result. It shows how many of them have a confirmed live first payment. A payment confirmed after the window still counts when its checkout opened inside it. Each journey counts once, whether or not it clicked an offer or signed up. Staff journeys and journeys with a test-mode payment are left out.
+- **Checkout placement** uses the same journeys. It counts the checkouts they opened and their first payments by the checkout's `placement` and `free_scans_used`. For example, `result_bar · after 1 free scan` is the free-or-Starter choice after the first scan, and `result_bar · after 2 free scans` is the offer after both. A payment belongs to the last checkout its journey opened before it. A journey counts once per placement.
+  - Member checkouts from the plan page have no placement and show as `plan page`.
+  - `result_bar` checkouts without a free-scan count show as plain `result_bar`. These are checkouts recorded before the count was added on 2026-11-24, and checkouts continued from the purchase page.
+- **Guest purchases** covers plan purchases paid in the period. It counts those activated (by `email_link` or `google`), those cancelled before activation and those not activated yet.
+- **Open guest purchases now** lists every paid purchase that is neither activated nor cancelled, whatever its payment date. It shows how long each has waited for activation, and which ones were sent to support and why (`active_plan` or `other_customer`). A purchase waiting over 30 days has renewed without access.
+- Purchases from staff journeys and purchases whose first payment was in test mode are left out.
+
+`--json` returns these as `conversion`, `placements`, `purchases` and `open_purchases`.
 
 ## What Umami still shows
 

@@ -14,6 +14,7 @@ use App\Enums\SnapFunnelStage;
 use App\Jobs\ProcessPhotoAnalysis;
 use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
+use App\Models\PlanPurchase;
 use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
 use App\Models\SubscriptionProduct;
@@ -106,6 +107,23 @@ function snapFunnelReport(array $options = []): array
 function snapFunnelSteps(array $report, string $path): array
 {
     return array_column($report['paths'][$path], 'journeys');
+}
+
+function snapJourneyWithEvents(array $events, array $attributes = []): SnapJourney
+{
+    $journey = SnapJourney::factory()->create(['started_at' => now()->subDays(10), 'expires_at' => now()->subDays(3), ...$attributes]);
+
+    foreach ($events as $event) {
+        SnapAnalyticsEvent::factory()->create([
+            'journey_id' => $journey->id,
+            'event_key' => $event[0]->value.':'.Str::uuid(),
+            'name' => $event[0]->value,
+            'properties' => $event[1] ?? [],
+            'created_at' => $event[2] ?? $journey->started_at,
+        ]);
+    }
+
+    return $journey;
 }
 
 it('follows a member who signs in before paying from a selected photo to a payment confirmed after they leave Stripe', function (): void {
@@ -267,6 +285,47 @@ it('records the free save path from the guest result', function (): void {
     expect(snapFunnelSteps(snapFunnelReport(), 'save'))->toBe([1, 1, 0, 0]);
 });
 
+it('reports conversion and checkouts by placement only for journeys past their window', function (): void {
+    $result = [SnapFunnelStage::ResultViewed];
+    $paidLater = [SnapFunnelStage::FirstPayment, ['live' => true], now()->subDays(2)];
+    snapJourneyWithEvents([$result, [SnapFunnelStage::CheckoutStarted, ['placement' => 'result_bar', 'free_scans_used' => 1]], $paidLater]);
+    snapJourneyWithEvents([$result, [SnapFunnelStage::CheckoutStarted, ['placement' => 'result_bar', 'free_scans_used' => 2]]]);
+    snapJourneyWithEvents([$result, [SnapFunnelStage::CheckoutStarted, ['placement' => 'wall', 'free_scans_used' => 2]], $paidLater]);
+    snapJourneyWithEvents([$result, [SnapFunnelStage::CheckoutStarted, ['placement' => 'result', 'free_scans_used' => 2]], [SnapFunnelStage::FirstPayment, ['live' => false]]]);
+    snapJourneyWithEvents([$result, [SnapFunnelStage::FirstPayment, ['live' => true]]], ['internal' => true]);
+    snapJourneyWithEvents([$result, [SnapFunnelStage::FirstPayment, ['live' => true]]], ['started_at' => now()->subDay(), 'expires_at' => now()->addDays(6)]);
+
+    $report = snapFunnelReport(['--days' => 30]);
+
+    expect($report['conversion'])->toBe(['journeys' => 3, 'paid' => 2])
+        ->and($report['placements'])->toBe([
+            'result_bar · after 1 free scan' => ['checkouts' => 1, 'payments' => 1],
+            'result_bar · after 2 free scans' => ['checkouts' => 1, 'payments' => 0],
+            'wall · after 2 free scans' => ['checkouts' => 1, 'payments' => 1],
+        ]);
+    $this->artisan('snap:funnel-report', ['--days' => 30])->expectsOutputToContain('result_bar · after 1 free scan')->assertSuccessful();
+});
+
+it('reports activation of paid guest purchases and every purchase still open', function (): void {
+    PlanPurchase::factory()->claimed(User::factory()->create())->create();
+    PlanPurchase::factory()->claimed(User::factory()->create())->create(['claim_method' => 'google']);
+    PlanPurchase::factory()->paid()->create(['cancelled_at' => now()]);
+    PlanPurchase::factory()->paid()->create(['claim_conflict' => 'active_plan', 'paid_at' => now()->subDays(3)]);
+    PlanPurchase::factory()->paid()->create(['paid_at' => now()->subHours(2)]);
+    PlanPurchase::factory()->paid()->create(['paid_at' => now()->subDays(40)]);
+    PlanPurchase::factory()->paid()->create(['snap_journey_id' => SnapJourney::factory()->create(['internal' => true])]);
+    $testPurchase = PlanPurchase::factory()->paid()->create();
+    SnapAnalyticsEvent::factory()->create(['name' => SnapFunnelStage::FirstPayment->value, 'event_key' => SnapFunnelStage::FirstPayment->value.':'.$testPurchase->stripe_subscription_id, 'properties' => ['live' => false]]);
+
+    $report = snapFunnelReport(['--days' => 30]);
+
+    expect($report['purchases'])->toBe(['paid' => 5, 'claimed' => ['email_link' => 1, 'google' => 1], 'cancelled' => 1, 'open' => 2])
+        ->and($report['open_purchases'])->toBe([
+            'waiting' => ['under 1 hour' => 0, '1–24 hours' => 1, '1–7 days' => 0, '7–30 days' => 0, 'over 30 days' => 1],
+            'support' => ['active_plan' => 1],
+        ]);
+});
+
 it('leaves staff journeys out of the funnel unless asked', function (): void {
     sellPhotoPlans();
     config(['sponsors.admin_emails' => ['staff@example.com']]);
@@ -285,6 +344,7 @@ it('prints the funnel and the stage definitions', function (): void {
     $this->artisan('snap:funnel-report', ['--by' => 'device'])
         ->expectsOutputToContain('Upgrade path (from offer viewed)')
         ->expectsOutputToContain('Raw event (repeats included, not unique journeys)')
+        ->expectsOutputToContain('Open guest purchases now (any payment date)')
         ->expectsOutputToContain('2026-10-24: Umami events changed meaning')
         ->assertSuccessful();
 
