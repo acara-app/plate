@@ -17,6 +17,7 @@ it('starts checkout only when the guest confirms Starter in the first-scan sheet
     $starter = sellPhotoPlans();
     $checkout = FakeGuestCheckout::install();
     $checkout->failNextWith = 409;
+
     $allowance = $this->mock(ManagesPhotoAnalyses::class);
     $allowance->shouldReceive('enabled')->andReturn(true);
     $allowance->shouldReceive('entitlement')->andReturn(new PhotoEntitlement(

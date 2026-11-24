@@ -715,7 +715,7 @@ function stubSnapPhotoAllowance(int $used): void
     });
 }
 
-it('withholds the paid offer until both free scans are used', function (): void {
+it('offers Starter as a choice after the first scan and up front at the scan limit', function (): void {
     stubSnapPhotoAllowance(used: 0);
 
     Livewire::test('pages::snap-to-track')
@@ -731,7 +731,7 @@ it('withholds the paid offer until both free scans are used', function (): void 
 
     Livewire::test('pages::snap-to-track-result')
         ->assertSee('1 free scan remaining')
-        ->assertDontSee("Starter\u{00A0}· \$2.99/month");
+        ->assertSee('How to keep this meal');
 
     stubSnapPhotoAllowance(used: 2);
 
