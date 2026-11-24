@@ -92,6 +92,15 @@ function sendSignedStripeWebhook(array $payload): TestResponse
     ], content: $body);
 }
 
+function paidGuestPurchaseWebhook(array $metadata, string $email = 'Buyer@Example.com'): array
+{
+    return ['id' => 'evt_guest_purchase', 'type' => 'invoice.payment_succeeded', 'livemode' => true, 'data' => ['object' => [
+        'customer' => 'cus_guest', 'customer_email' => $email, 'status' => 'paid', 'amount_paid' => 299, 'currency' => 'usd',
+        'billing_reason' => 'subscription_create',
+        'parent' => ['subscription_details' => ['subscription' => 'sub_guest', 'metadata' => $metadata]],
+    ]]];
+}
+
 function disableBilling(): void
 {
     config(['cashier.secret' => null]);

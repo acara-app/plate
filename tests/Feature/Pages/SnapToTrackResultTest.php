@@ -8,11 +8,15 @@ use App\Data\Billing\PhotoEntitlement;
 use App\Data\Billing\PhotoModel;
 use App\Data\Billing\PhotoOffer;
 use App\Data\FoodAnalysisData;
+use App\Enums\SnapFunnelStage;
 use App\Models\AnalysisDraft;
 use App\Models\HealthSyncSample;
+use App\Models\PlanPurchase;
+use App\Models\SnapAnalyticsEvent;
 use App\Models\User;
 use Illuminate\Support\Str;
 use Livewire\Livewire;
+use Tests\Helpers\FakeGuestCheckout;
 
 function guestResultDraft(array $attributes = []): string
 {
@@ -123,6 +127,8 @@ it('lets a signed-in member save the meal only when they choose to', function ()
 });
 
 it('saves the meal once the visitor signs up or logs in', function (string $intent): void {
+    $checkout = FakeGuestCheckout::install();
+    stubResultPhotoAllowance(trialResultAllowance(used: 1));
     $token = guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
@@ -132,7 +138,8 @@ it('saves the meal once the visitor signs up or logs in', function (string $inte
     expect(session('url.intended'))->toBe(route('snap-to-track.save', ['draft' => $token], absolute: false))
         ->and(session('snap_to_track.auth_path'))->toBe($intent)
         ->and(session('snap_to_track.intent'))->toBe('save')
-        ->and(AnalysisDraft::query()->count())->toBe(1);
+        ->and(AnalysisDraft::query()->count())->toBe(1)
+        ->and($checkout->sessions)->toBeEmpty();
 })->with(['register', 'login']);
 
 it('saves the meal shown on the page even after another analysis replaces it', function (): void {
@@ -155,46 +162,101 @@ it('shows an unknown fiber estimate as missing rather than zero', function (): v
         ->assertSeeInOrder(['Fiber', '—', '/ 28 g', 'Your meal']);
 });
 
-it('offers the plan and its price after the meal and its Save action', function (): void {
-    stubResultPhotoAllowance(trialResultAllowance(used: 1, offer: new PhotoOffer(
-        productId: 7,
-        name: 'Starter',
-        formattedPrice: 'US$2.99',
-    )));
+it('offers Free and Starter after the first scan and counts only the visible sheet offer', function (): void {
+    sellPhotoPlans();
+    stubResultPhotoAllowance(trialResultAllowance(used: 1));
+    session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder([
-            'Save this meal',
-            'Keep tracking with Starter — US$2.99/month',
-            'Renews monthly until cancelled. Cancel through Billing settings.',
-            'Not now — save this meal free',
-            'Save this meal free',
-            'No card required. No automatic subscription.',
-        ]);
+        ->assertSeeInOrder(['Save this meal', '1 free scan remaining', 'Analyze another photo', 'How to keep this meal'])
+        ->assertSee('Save this meal free')
+        ->assertSee("Get Starter\u{00A0}· US\$2.99/month")
+        ->assertDontSee('This meal is still free to save.')
+        ->call('offerViewed', 'result')
+        ->call('offerViewed', 'result_bar')
+        ->call('offerViewed', 'result_bar');
+
+    $impression = SnapAnalyticsEvent::query()->where('name', SnapFunnelStage::OfferViewed->value)->sole();
+    expect($impression->properties)->toMatchArray(['placement' => 'result_bar', 'plan' => 'starter']);
+    $this->assertDatabaseMissing('snap_analytics_events', ['name' => SnapFunnelStage::UpgradeClicked->value]);
 });
 
-it('keeps saving free once the free scans are used up', function (): void {
-    stubResultPhotoAllowance(trialResultAllowance(used: 2));
+it('keeps the first scan free to save when Starter is unavailable', function (?PhotoOffer $offer): void {
+    sellPhotoPlans();
+    stubResultPhotoAllowance(trialResultAllowance(used: 1, offer: $offer));
+    session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
+    guestResultDraft();
+
+    Livewire::test('pages::snap-to-track-result')
+        ->assertSee('1 free scan remaining')
+        ->assertSee('Analyze another photo')
+        ->assertSee('Save this meal free')
+        ->assertDontSee('How to keep this meal')
+        ->assertDontSee('Get Starter')
+        ->call('offerViewed', 'result_bar');
+
+    $this->assertDatabaseMissing('snap_analytics_events', ['name' => SnapFunnelStage::OfferViewed->value]);
+})->with([
+    'no offer for this visitor' => [null],
+    'only Snap Pro offered' => [new PhotoOffer(productId: 8, name: 'Snap Pro', formattedPrice: 'US$9.00')],
+]);
+
+it('offers Starter with its price once both free scans are used, while saving stays free', function (): void {
+    stubResultPhotoAllowance(trialResultAllowance(used: 2, offer: new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: 'US$2.99')));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
         ->assertSee('This meal is still free to save.')
-        ->assertSee('Keep tracking with Starter — US$2.99/month')
+        ->assertSeeInOrder([
+            'Save this meal',
+            "Get Starter\u{00A0}· US\$2.99/month",
+            "No account needed. We'll email your activation link.",
+            'A fresh AI allowance every day.',
+            'Already have an account? Log in',
+            'Not now — save this meal free',
+            'Save this meal free',
+        ])
         ->assertDontSee('Analyze another photo');
 });
 
-it('sends the visitor to checkout when they upgrade', function (?PhotoOffer $offer, string $destination, array $parameters): void {
-    stubResultPhotoAllowance(trialResultAllowance(used: 2, offer: $offer));
+it('opens Stripe directly when a guest confirms Starter after a free scan', function (int $used): void {
+    $checkout = FakeGuestCheckout::install();
+    $starter = sellPhotoPlans();
+    stubResultPhotoAllowance(trialResultAllowance(used: $used, offer: new PhotoOffer(productId: $starter->id, name: 'Starter', formattedPrice: 'US$2.99')));
+    session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
+    guestResultDraft();
+
+    $result = Livewire::test('pages::snap-to-track-result')->assertNoRedirect();
+    expect($checkout->sessions)->toBeEmpty();
+
+    $result->call('upgrade', 'result_bar')
+        ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
+
+    expect($checkout->sessions[0]['price'])->toBe('price_starter')
+        ->and($checkout->sessions[0]['metadata'])->toMatchArray(['product_name' => 'Starter', 'type' => 'starter'])
+        ->and($checkout->sessions[0]['submit_message'])->toContain('activation link')
+        ->and(PlanPurchase::query()->sole()->placement)->toBe('result_bar');
+})->with(['first scan' => 1, 'last free scan' => 2]);
+
+it('lets a member log in before paying and keeps Starter selected', function (): void {
+    stubResultPhotoAllowance(trialResultAllowance(used: 2));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->call('upgrade')
-        ->assertRedirect(route($destination, $parameters));
+        ->call('signInForPlan')
+        ->assertRedirect(route('checkout.start', ['product' => 7, 'returning' => 1]));
 
-    expect(session('snap_to_track.intent'))->toBe('upgrade')
-        ->and(session('url.intended'))->toBe(route('checkout.subscription', absolute: false));
-})->with([
-    'offered plan' => [new PhotoOffer(productId: 7, name: 'Starter', formattedPrice: '$2.99'), 'checkout.start', ['product' => 7]],
-    'no plan offered' => [null, 'checkout.subscription', []],
-]);
+    expect(session('snap_to_track.intent'))->toBe('upgrade');
+});
+
+it('sends a signed-in member to the plan page when they upgrade', function (int $used): void {
+    $this->actingAs(User::factory()->create());
+    stubResultPhotoAllowance(trialResultAllowance(used: $used));
+    guestResultDraft();
+
+    Livewire::test('pages::snap-to-track-result')
+        ->assertDontSee('No account needed')
+        ->call('upgrade', 'result_bar')
+        ->assertRedirect(route('checkout.start', ['product' => 7]));
+})->with(['first scan' => 1, 'last free scan' => 2]);

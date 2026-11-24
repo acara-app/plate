@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Contracts\Billing\ManagesGuestCheckout;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
 use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\OffersSubscriptions;
@@ -26,6 +27,7 @@ use App\Services\Billing\MeteredPhotoAnalyses;
 use App\Services\Billing\NullPhotoPreview;
 use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\PhotoPlanOffers;
+use App\Services\Billing\StripeGuestCheckout;
 use App\Services\Billing\SubscriptionTierResolver;
 use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
@@ -63,6 +65,7 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(OffersSubscriptions::class, PhotoPlanOffers::class);
         $this->app->scoped(PhotoPlanCatalog::class);
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
+        $this->app->bind(ManagesGuestCheckout::class, StripeGuestCheckout::class);
         $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
         $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);

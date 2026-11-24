@@ -17,6 +17,7 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 
 - A journey is one guest browser's attempt, identified by a random journey ID. It starts with the first stage a guest reaches on the public tool: usually a selected photo, or the limit wall for a returning visitor whose free scans are used up. Journeys are only recorded while photo plans are on sale, so community installs record nothing.
 - The browser's existing `photo_guest` cookie links later stages to the journey. Only its SHA-256 hash is stored. Signing up or logging in attaches the account. Checkout sends the journey ID, never the cookie, to Stripe as subscription metadata (`snap_journey`), so the payment webhook can find the journey without a browser.
+- A guest can buy Starter without an account, from the result after a free scan or from the scan limit. The server first records a plan purchase, then opens Stripe Checkout with the purchase and journey IDs as subscription metadata (`plan_purchase`, `snap_journey`). Stripe collects the email. When Stripe confirms the first invoice, the purchase is marked paid and an activation link goes to the checkout email. Activating it creates or signs in to an account and attaches the plan, which links the journey to that account.
 - The conversion window is 7 days from the journey's first stage (`snap.journey_days`). After that, the same browser starts a new journey. A first payment still counts when Stripe confirms it after the window, as long as its checkout was opened inside the window.
 - Each journey keeps:
   - the device (mobile or desktop) of the first page in the browser session;
@@ -38,12 +39,13 @@ Run it in production the same way as `billing:usage-report`. `--by` accepts `dev
 | Upgrade clicked | `snap_to_track_upgrade_click` | The guest chose a paid plan from an offer, recorded before the page navigates away. |
 | Signed up or logged in | `snap_to_track_auth_completed` | The journey's browser finished sign-up or log-in (`method`: `register` or `login`). |
 | Meal saved | `snap_to_track_meal_logged` | A meal from the public result was saved to the food log. |
-| Checkout clicked | `snap_to_track_checkout_click` | The plan page asked the server to open a Stripe checkout. |
-| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. A repeat click for the same plan and interval reopens that session instead of creating another. |
+| Checkout clicked | `snap_to_track_checkout_click` | The plan page asked a signed-in member's server to open a Stripe checkout. |
+| Checkout opened | `snap_to_track_checkout_started` | Stripe created the checkout session and the browser was sent to it. Guest checkouts also record the `placement` (`result`, `result_bar` or `wall`). A repeat click reopens the same session instead of creating another. |
 | Checkout failed | `snap_to_track_checkout_failed` | The checkout could not open (`already_subscribed` or `error`). Error state. |
 | Returned from checkout | `snap_to_track_checkout_returned` | The browser came back to the success page. This is not proof of payment, and a payment doesn't need it. |
 | Checkout cancelled | `snap_to_track_checkout_cancelled` | The browser came back from Stripe through the cancel link. |
 | First payment | `snap_to_track_first_payment` | A signed Stripe webhook confirmed the paid invoice that created a subscription. |
+| Purchase claimed | `snap_to_track_purchase_claimed` | A guest purchase paid before sign-up was added to an account (`method`: `email_link`). |
 
 `--definitions` prints the same list with each stage's de-duplication rule.
 
@@ -51,16 +53,16 @@ The report counts three ordered paths:
 
 - **Scan:** Photo selected → Analysis requested → Result viewed → Offer viewed
 - **Save path:** Result viewed → Save clicked → Signed up or logged in → Meal saved
-- **Upgrade path:** Offer viewed → Upgrade clicked → Signed up or logged in → Checkout clicked → Checkout opened → First payment
+- **Upgrade path:** Offer viewed → Checkout opened → First payment
 
-A journey counts at a step only if it reached every earlier step of that path first, in order. "Signed up or logged in" also counts when the journey was already signed in before the previous step. "Returned from checkout" isn't a step: Stripe often confirms the payment before the browser comes back, and some buyers never come back. Returns appear under errors and pending states and in the raw totals.
+A journey counts at a step only if it reached every earlier step of that path first, in order. "Signed up or logged in" also counts when the journey was already signed in before the previous step. "Returned from checkout" isn't a step: Stripe often confirms the payment before the browser comes back, and some buyers never come back. Returns appear under errors and pending states and in the raw totals. The upgrade path covers both guest checkout and members who sign in first, so neither the offer click nor sign-up is a required step; both stay in the raw totals.
 
 ## De-duplication
 
 - Every event has a unique key built from its stage, its journey and the attempt it belongs to (an upload, an analysis request, a result, a checkout). Reloads, re-renders, double clicks and repeated success-page visits therefore write nothing new.
 - Funnel numbers count unique journeys. Raw event totals are listed separately and do include repeats, such as several uploads, a retried analysis or offers seen on two results.
 - First payments are counted once per Stripe subscription. Only signed `invoice.paid` and `invoice.payment_succeeded` webhooks count, and only for the invoice that created the subscription (`billing_reason` `subscription_create`) with `amount_paid` above zero. None of the following adds one: a renewal (including renewals of subscriptions that started before the ledger), a trial start, a failed or unpaid invoice, a webhook replay, a success-page visit or an entitlement change. A trial that converts later wouldn't be counted; no current plan has a trial.
-- Invoices for Stripe customers that don't belong to a Plate account are ignored.
+- Invoices for Stripe customers that don't belong to a Plate account are ignored, unless their subscription metadata names a plan purchase recorded by this app (a guest purchase that hasn't been claimed yet).
 - While `STRIPE_WEBHOOK_SECRET` is unset, Cashier skips signature checks, so no payment is recorded at all.
 
 ## Errors and pending states
@@ -94,4 +96,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-24 guest checkout before sign-up, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
