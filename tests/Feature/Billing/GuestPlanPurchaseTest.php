@@ -9,6 +9,7 @@ use App\Models\PlanPurchase;
 use App\Models\User;
 use App\Notifications\PlanPurchaseClaimLinkNotification;
 use Illuminate\Support\Facades\Exceptions;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription;
@@ -144,4 +145,36 @@ it('emails a lost activation link once from the sweep and reports purchases stil
     Exceptions::assertReported(fn (RuntimeException $exception): bool => str_contains($exception->getMessage(), $noEmail->reference())
         && ! str_contains($exception->getMessage(), $lost->reference()));
     expect($lost->refresh()->claim_link_sent_at)->not->toBeNull();
+});
+
+it('lets a buyer without a password add one once after activating', function (): void {
+    FakeGuestCheckout::install();
+    $starter = sellPhotoPlans();
+    $purchase = PlanPurchase::factory()->paid('new-buyer@example.com')->create(['subscription_product_id' => $starter->id]);
+    $this->get(route('snap-to-track.activate.open', $purchase->issueClaimToken()));
+
+    Livewire::test('pages::snap-to-track-activate')
+        ->set('acceptedDisclaimer', true)
+        ->set('healthDataConsent', true)
+        ->call('activate')
+        ->assertNoRedirect()
+        ->assertSee('Set a password')
+        ->set('password', 'a sunny walk to the market')
+        ->call('setPassword')
+        ->assertHasNoErrors()
+        ->assertSee('Password saved.')
+        ->set('password', 'a different sentence entirely')
+        ->call('setPassword');
+
+    expect(Hash::check('a sunny walk to the market', (string) User::query()->sole()->password))->toBeTrue();
+});
+
+it('keeps checking for the payment when the buyer asks after the first minute', function (): void {
+    $purchase = PlanPurchase::factory()->create(['checkout_returned_at' => now()]);
+    session()->put('snap_to_track.purchase', $purchase->id);
+
+    $page = Livewire::test('pages::snap-to-track-purchase')->assertSee('Check payment status');
+    $purchase->update(['paid_at' => now(), 'email' => 'buyer@example.com']);
+
+    $page->call('checkPaymentStatus')->assertSee('Check your inbox')->assertDontSee('Check payment status');
 });

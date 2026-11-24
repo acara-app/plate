@@ -124,7 +124,7 @@ it('follows a member who signs in before paying from a selected photo to a payme
     offerStarterInSnapJourney($starter, used: 2);
     Livewire::test('pages::snap-to-track-result')
         ->call('offerViewed', 'result')
-        ->call('signInForPlan', 'login')
+        ->call('signInForPlan')
         ->assertRedirect(route('checkout.start', ['product' => $starter->id, 'returning' => 1]));
 
     $this->get(route('checkout.start', ['product' => $starter->id, 'returning' => 1]))->assertRedirect(route('login'));

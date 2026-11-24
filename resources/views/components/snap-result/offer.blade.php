@@ -44,14 +44,28 @@
                 wire:target="save,upgrade,signInForPlan"
                 x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', variant: {{ Js::from($variant) }} })"
             >
-                {!! e(strtr(__('common.photo_plans.offer.continue'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
+                {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
             </x-snap-result.button>
             @error('checkout')
                 <p role="alert" class="text-center text-sm text-destructive">{{ $message }}</p>
             @enderror
-            <p class="text-center text-xs leading-relaxed text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+            <div class="flex flex-col gap-1 text-center leading-relaxed">
+                @guest
+                    <p class="text-sm font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
+                @endguest
+                <p class="text-xs text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+            </div>
             @guest
-                <x-snap-result.member-sign-in class="py-1" />
+                <button
+                    type="button"
+                    wire:click="signInForPlan"
+                    wire:loading.attr="disabled"
+                    wire:target="save,upgrade,signInForPlan"
+                    x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { source: 'public_snap_to_track', auth_path: 'login', intent: 'upgrade' })"
+                    class="inline-flex min-h-11 touch-manipulation items-center justify-center self-center rounded-full px-3 text-sm font-medium text-primary transition duration-150 ease-out outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
+                >
+                    {{ __('common.photo_plans.offer.login') }}
+                </button>
             @endguest
             <button
                 type="button"

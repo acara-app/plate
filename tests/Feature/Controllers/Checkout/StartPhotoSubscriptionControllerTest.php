@@ -35,17 +35,14 @@ it('brings the chosen plan and billing interval back after sign-up', function ()
             ->where('selectedInterval', 'yearly'));
 });
 
-it('sends a returning member to log in or to Google rather than sign up', function (array $parameters, string $destination): void {
+it('sends a returning member to log in rather than sign up', function (): void {
     offerAllSubscriptions();
     $product = SubscriptionProduct::factory()->create(['price' => 9, 'stripe_price_id' => 'price_test']);
 
-    $this->get(route('checkout.start', ['product' => $product, ...$parameters]))->assertRedirect(route($destination));
+    $this->get(route('checkout.start', ['product' => $product, 'returning' => 1]))->assertRedirect(route('login'));
 
     expect(session('url.intended'))->toBe(route('checkout.subscription', absolute: false));
-})->with([
-    'email' => [['returning' => 1], 'login'],
-    'google' => [['via' => 'google'], 'auth.google.redirect'],
-]);
+});
 
 it('refuses to start checkout for a plan that is not on offer', function (): void {
     $snapPro = SubscriptionProduct::query()->where('name', 'Snap Pro')->sole();

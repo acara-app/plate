@@ -163,7 +163,7 @@ it('keeps the first scan about the meal and its remaining free scan', function (
 
     Livewire::test('pages::snap-to-track-result')
         ->assertSeeInOrder(['Save this meal', '1 free scan remaining', 'Analyze another photo', 'Save this meal free'])
-        ->assertDontSee('Continue with Starter');
+        ->assertDontSee('Get Starter');
 });
 
 it('offers Starter with its price once both free scans are used, while saving stays free', function (): void {
@@ -174,9 +174,10 @@ it('offers Starter with its price once both free scans are used, while saving st
         ->assertSee('This meal is still free to save.')
         ->assertSeeInOrder([
             'Save this meal',
-            "Continue with Starter\u{00A0}· US\$2.99/month",
+            "Get Starter\u{00A0}· US\$2.99/month",
+            "No account needed. We'll email your activation link.",
             'A fresh AI allowance every day.',
-            'Continue with Google',
+            'Already have an account? Log in',
             'Not now — save this meal free',
             'Save this meal free',
         ])
@@ -200,19 +201,16 @@ it('opens Stripe for a guest who chooses Starter', function (): void {
         ->and(PlanPurchase::query()->sole()->placement)->toBe('result_bar');
 });
 
-it('lets a member sign in before paying and keeps Starter selected', function (string $via, array $parameters): void {
+it('lets a member log in before paying and keeps Starter selected', function (): void {
     stubResultPhotoAllowance(trialResultAllowance(used: 2));
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->call('signInForPlan', $via)
-        ->assertRedirect(route('checkout.start', ['product' => 7, ...$parameters]));
+        ->call('signInForPlan')
+        ->assertRedirect(route('checkout.start', ['product' => 7, 'returning' => 1]));
 
     expect(session('snap_to_track.intent'))->toBe('upgrade');
-})->with([
-    'google' => ['google', ['via' => 'google']],
-    'email' => ['login', ['returning' => 1]],
-]);
+});
 
 it('sends a signed-in member to the plan page when they upgrade', function (): void {
     $this->actingAs(User::factory()->create());
@@ -220,6 +218,7 @@ it('sends a signed-in member to the plan page when they upgrade', function (): v
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
+        ->assertDontSee('No account needed')
         ->call('upgrade')
         ->assertRedirect(route('checkout.start', ['product' => 7]));
 });

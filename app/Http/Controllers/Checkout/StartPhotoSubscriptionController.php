@@ -23,10 +23,6 @@ final readonly class StartPhotoSubscriptionController
 
         $request->session()->put('url.intended', route('checkout.subscription', absolute: false));
 
-        if ($request->query('via') === 'google') {
-            return to_route('auth.google.redirect');
-        }
-
         return to_route($request->boolean('returning') ? 'login' : 'register');
     }
 }

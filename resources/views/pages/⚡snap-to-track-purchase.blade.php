@@ -91,6 +91,12 @@ class extends Component
         }
     }
 
+    public function checkPaymentStatus(): void
+    {
+        unset($this->purchase, $this->state);
+        $this->confirmUntil = now()->addMinute()->getTimestamp();
+    }
+
     public function resendLink(): void
     {
         $purchase = $this->purchase;
@@ -111,7 +117,7 @@ class extends Component
     $press = 'touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
     $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
     $starterLabel = $purchase instanceof PlanPurchase
-        ? strtr(__('common.photo_plans.offer.continue'), ['{{name}}' => $purchase->product->name, '{{price}}' => $purchase->product->formatted_price])
+        ? strtr(__('common.photo_plans.offer.get_plan'), ['{{name}}' => $purchase->product->name, '{{price}}' => $purchase->product->formatted_price])
         : null;
     $mealWaiting = is_string(session('snap_to_track.result.draft'));
 @endphp
@@ -136,8 +142,13 @@ class extends Component
                         <p class="text-sm leading-relaxed text-muted-foreground">This usually takes a moment. Keep this page open and we will take you to the next step.</p>
                     </div>
                 @else
-                    <h1 class="text-2xl font-semibold tracking-tight">Stripe is still confirming your payment</h1>
-                    <p class="text-sm leading-relaxed text-muted-foreground">As soon as it is confirmed, we will email your activation link. It is safe to close this page.</p>
+                    <h1 class="text-2xl font-semibold tracking-tight">Still confirming your payment</h1>
+                    <p class="text-sm leading-relaxed text-muted-foreground">Stripe usually confirms in a moment. Your activation email arrives as soon as it does, so you can close this page.</p>
+                    <x-snap-result.button variant="plain" class="bg-muted" wire:click="checkPaymentStatus" wire:loading.attr="disabled" wire:target="checkPaymentStatus">
+                        <x-snap-result.icon name="rotate-ccw" wire:loading.remove wire:target="checkPaymentStatus" />
+                        <x-snap-result.icon name="loader" wire:loading wire:target="checkPaymentStatus" class="motion-safe:animate-spin" />
+                        Check payment status
+                    </x-snap-result.button>
                 @endif
             @elseif ($state === 'paid')
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">Payment received</p>

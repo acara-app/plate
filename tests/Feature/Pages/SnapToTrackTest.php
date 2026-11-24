@@ -738,8 +738,8 @@ it('withholds the paid offer until both free scans are used', function (): void 
     Livewire::test('pages::snap-to-track')
         ->assertSee('Scan limit reached')
         ->assertSee('Your free scans are complete.')
-        ->assertSee("Continue with Starter\u{00A0}· \$2.99/month")
-        ->assertSee('Continue with Google')
+        ->assertSee("Get Starter\u{00A0}· \$2.99/month")
+        ->assertSee('Already have an account? Log in')
         ->assertDontSee('Tap to take photo or upload');
 });
 

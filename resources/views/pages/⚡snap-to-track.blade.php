@@ -125,7 +125,7 @@ class extends Component
         }
     }
 
-    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade, string $via = 'login'): void
+    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
         $offer = $this->photoAllowance->offer;
 
@@ -135,7 +135,7 @@ class extends Component
 
         $prepareUpgrade->handle($offer);
 
-        $this->redirect(route('checkout.start', ['product' => $offer->productId, ...($via === 'google' ? ['via' => 'google'] : ['returning' => 1])]));
+        $this->redirect(route('checkout.start', ['product' => $offer->productId, 'returning' => 1]));
     }
 
     #[Async]

@@ -136,7 +136,7 @@ class extends Component
         }
     }
 
-    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade, string $via = 'login'): void
+    public function signInForPlan(PrepareSnapToTrackUpgrade $prepareUpgrade): void
     {
         $offer = $this->photoAllowance->offer;
 
@@ -146,7 +146,7 @@ class extends Component
 
         $prepareUpgrade->handle($offer);
 
-        $this->redirect(route('checkout.start', ['product' => $offer->productId, ...($via === 'google' ? ['via' => 'google'] : ['returning' => 1])]));
+        $this->redirect(route('checkout.start', ['product' => $offer->productId, 'returning' => 1]));
     }
 
     #[Async]
@@ -241,7 +241,7 @@ class extends Component
                 ['label' => 'Fiber', 'value' => $analysis['total_fiber'] ?? null, 'goal' => $goals->fiber, 'icon' => 'salad', 'tile' => 'bg-green-100', 'iconColor' => 'text-green-600', 'text' => 'text-green-700', 'ring' => 'stroke-green-500'],
             ];
             $barOffer = $photoAllowance->canUpgrade && $photoAllowance->exhausted ? $photoAllowance->offer : null;
-            $barClearance = $barOffer ? 208 : 96;
+            $barClearance = $barOffer ? 232 : 96;
             $freeScansLeft = $photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted ? $photoAllowance->remaining : null;
         @endphp
 
@@ -518,8 +518,17 @@ class extends Component
                                 wire:target="save,upgrade,signInForPlan"
                                 x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
                             >
-                                {!! e(strtr(__('common.photo_plans.offer.continue'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                                {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
                             </x-snap-result.button>
+                            @error('checkout')
+                                <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
+                            @enderror
+                            <div class="flex flex-col items-center gap-0.5 px-2 pb-1 text-center text-[11px] leading-snug">
+                                @guest
+                                    <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
+                                @endguest
+                                <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+                            </div>
                         @endif
                         <x-snap-result.button
                             wire:click="save('register')"
@@ -529,12 +538,6 @@ class extends Component
                         >
                             Save this meal free
                         </x-snap-result.button>
-                        @if ($barOffer)
-                            @error('checkout')
-                                <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
-                            @enderror
-                            <p class="flex min-h-8 items-center justify-center px-2 text-center text-[11px] leading-snug text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
-                        @endif
                     </div>
                 </div>
             </div>

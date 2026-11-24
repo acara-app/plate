@@ -6,6 +6,7 @@ use App\Actions\Billing\ClaimPlanPurchase;
 use App\Actions\CreateUser;
 use App\Actions\RecordSignUpAgreements;
 use App\Actions\ResolvePendingMeal;
+use App\Actions\UpdateUserPassword;
 use App\Enums\PlanPurchaseClaim;
 use App\Jobs\SendPlanPurchaseClaimLink;
 use App\Models\PlanPurchase;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Locked;
@@ -40,6 +42,11 @@ class extends Component
     public bool $acceptedDisclaimer = false;
 
     public bool $healthDataConsent = false;
+
+    public string $password = '';
+
+    #[Locked]
+    public bool $passwordSaved = false;
 
     public function mount(): void
     {
@@ -69,6 +76,15 @@ class extends Component
             $this->hasAccount($purchase) => 'log_in',
             default => 'new_account',
         };
+    }
+
+    #[Computed]
+    public function canSetPassword(): bool
+    {
+        $user = auth()->user();
+
+        return $user instanceof User && $this->purchase?->user_id === $user->id
+            && $user->password === null && $user->google_id === null && $user->apple_id === null;
     }
 
     #[Computed]
@@ -122,11 +138,29 @@ class extends Component
         }
 
         $this->outcome = $outcome->value;
-        unset($this->purchase, $this->state, $this->mealSaveUrl);
+        unset($this->purchase, $this->state, $this->mealSaveUrl, $this->canSetPassword);
 
-        if ($outcome === PlanPurchaseClaim::Claimed && $this->mealSaveUrl === null) {
+        if ($outcome === PlanPurchaseClaim::Claimed && $this->mealSaveUrl === null && ! $this->canSetPassword) {
             $this->redirect(route('snap-to-track.index'));
         }
+    }
+
+    public function setPassword(UpdateUserPassword $updatePassword): void
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User || ! $this->canSetPassword) {
+            return;
+        }
+
+        $this->validate(['password' => ['required', 'string', Password::defaults()]]);
+
+        $updatePassword->handle($user, $this->password);
+        Auth::login($user, remember: true);
+
+        $this->password = '';
+        $this->passwordSaved = true;
+        unset($this->canSetPassword);
     }
 
     public function resendLink(): void
@@ -224,7 +258,7 @@ class extends Component
                     @endif
                     <x-snap-result.button wire:click="activate" wire:loading.attr="disabled" wire:target="activate">Activate {{ $plan }}</x-snap-result.button>
                 </div>
-                <p class="text-xs leading-relaxed text-muted-foreground">No password needed. To sign in on another device later, use Continue with Google for a Google address, or set a password with Forgot password.</p>
+                <p class="text-xs leading-relaxed text-muted-foreground">No password needed now. You can set one after activating.</p>
             @elseif ($state === 'confirm')
                 <h1 class="text-2xl font-semibold tracking-tight">Add {{ $plan }} to your account</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
@@ -258,6 +292,37 @@ class extends Component
                         <x-snap-result.icon name="camera" />
                         Scan a meal
                     </x-snap-result.button>
+                @endif
+                @if ($passwordSaved)
+                    <p role="status" class="border-t border-muted pt-4 text-sm leading-relaxed text-muted-foreground">
+                        Password saved. Log in with <span class="font-medium wrap-anywhere text-foreground">{{ auth()->user()?->email }}</span> and this password on any device.
+                    </p>
+                @elseif ($this->canSetPassword)
+                    <div x-data="{ open: @js($errors->has('password')) }" class="flex flex-col gap-3 border-t border-muted pt-4">
+                        <p class="text-sm leading-relaxed text-muted-foreground">Want to log in on other devices? Add a password to your account.</p>
+                        <button type="button" x-show="! open" x-on:click="open = true; $nextTick(() => $refs.password.focus())" class="inline-flex min-h-11 items-center self-start rounded-full text-sm font-medium text-primary {{ $press }} {{ $ring }}">
+                            Set a password
+                        </button>
+                        <div x-show="open" @style(['display: none' => ! $errors->has('password')]) class="flex flex-col gap-2">
+                            <label for="new_password" class="text-sm font-medium">New password</label>
+                            <input
+                                id="new_password"
+                                x-ref="password"
+                                type="password"
+                                wire:model="password"
+                                autocomplete="new-password"
+                                enterkeyhint="done"
+                                wire:keydown.enter="setPassword"
+                                class="min-h-12 w-full rounded-2xl border border-input bg-background px-4 text-base outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                            />
+                            @error('password')
+                                <p role="alert" class="text-sm text-destructive">{{ $message }}</p>
+                            @else
+                                <p class="text-xs text-muted-foreground">At least 12 characters. A short sentence works well.</p>
+                            @enderror
+                            <x-snap-result.button variant="plain" class="mt-1 bg-muted" wire:click="setPassword" wire:loading.attr="disabled" wire:target="setPassword">Save password</x-snap-result.button>
+                        </div>
+                    </div>
                 @endif
             @elseif ($state === 'active_plan' || $state === 'other_customer')
                 <h1 class="text-2xl font-semibold tracking-tight">Let's sort this out together</h1>

@@ -28,7 +28,7 @@ final class PlanPurchaseClaimLinkNotification extends Notification
             ->line('Your payment went through. Tap the button to activate Starter and keep logging meals from photos.')
             ->action('Activate Starter', $this->link)
             ->line(sprintf('The link works once and expires in %d minutes. If it expires, open it anyway and we will send you a new one.', PlanPurchase::CLAIM_LINK_MINUTES))
-            ->line('To sign in on another device later, use Continue with Google for a Google address, or set a password with Forgot password.')
+            ->line('No password needed. After you activate, you can add one to log in on other devices.')
             ->line('Did not buy Starter? You can ignore this email.')
             ->salutation('— '.config()->string('app.name'));
     }
