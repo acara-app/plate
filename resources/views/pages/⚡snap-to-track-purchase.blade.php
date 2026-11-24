@@ -108,7 +108,7 @@ class extends Component
     $purchase = $this->purchase;
     $state = $this->state;
     $gutter = 'pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]';
-    $press = 'touch-manipulation select-none transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
+    $press = 'touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
     $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
     $starterLabel = $purchase instanceof PlanPurchase
         ? strtr(__('common.photo_plans.offer.continue'), ['{{name}}' => $purchase->product->name, '{{price}}' => $purchase->product->formatted_price])
@@ -143,7 +143,7 @@ class extends Component
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">Payment received</p>
                 <h1 class="text-2xl font-semibold tracking-tight text-balance">You're in! Check your inbox</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    We sent your activation link to <span class="font-medium text-foreground">{{ $purchase->maskedEmail() }}</span>. Open it on any device to start using {{ $purchase->product->name }}.
+                    We sent your activation link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>. Open it on any device to start using {{ $purchase->product->name }}.
                 </p>
                 @if ($linkResent)
                     <p role="status" class="text-sm font-medium text-primary">Sent. It can take a minute to arrive.</p>

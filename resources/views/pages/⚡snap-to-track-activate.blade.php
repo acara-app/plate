@@ -171,10 +171,10 @@ class extends Component
     $state = $this->state;
     $plan = $purchase?->product->name ?? 'Starter';
     $gutter = 'pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]';
-    $press = 'touch-manipulation select-none transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
+    $press = 'touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
     $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
     $legalLink = 'underline underline-offset-4 hover:text-foreground';
-    $consent = 'flex items-start gap-4 rounded-3xl bg-muted p-4 has-checked:bg-primary/10 '.$press;
+    $consent = 'flex items-start gap-4 rounded-3xl bg-muted p-4 touch-manipulation select-none transition duration-150 ease-out has-checked:bg-primary/10 active:scale-[0.985] motion-reduce:transition-none motion-reduce:active:scale-100';
     $supportUrl = $purchase instanceof PlanPurchase ? 'mailto:support@acara.app?subject='.rawurlencode($plan.' activation '.$purchase->reference()) : 'mailto:support@acara.app';
 @endphp
 
@@ -194,7 +194,7 @@ class extends Component
                 <p class="self-start rounded-full bg-primary/10 px-3 py-1.5 text-xs font-medium text-primary">Payment received</p>
                 <h1 class="text-2xl font-semibold tracking-tight">Activate {{ $plan }}</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    Your plan is paid. We'll set up your free Acara Plate account for <span class="font-medium text-foreground">{{ $purchase->email }}</span> so you can keep logging meals from photos.
+                    Your plan is paid. We'll set up your free Acara Plate account for <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->email }}</span> so you can keep logging meals from photos.
                 </p>
                 <div class="flex flex-col gap-3">
                     <label for="accepted_disclaimer" class="{{ $consent }}">
@@ -228,7 +228,7 @@ class extends Component
             @elseif ($state === 'confirm')
                 <h1 class="text-2xl font-semibold tracking-tight">Add {{ $plan }} to your account</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    {{ $plan }} will be added to <span class="font-medium text-foreground">{{ auth()->user()?->email }}</span>.
+                    {{ $plan }} will be added to <span class="font-medium wrap-anywhere text-foreground">{{ auth()->user()?->email }}</span>.
                 </p>
                 @error('activate')
                     <p role="alert" class="text-sm text-destructive">{{ $message }}</p>
@@ -240,7 +240,7 @@ class extends Component
             @elseif ($state === 'log_in')
                 <h1 class="text-2xl font-semibold tracking-tight">Log in to add {{ $plan }}</h1>
                 <p class="text-sm leading-relaxed text-muted-foreground">
-                    <span class="font-medium text-foreground">{{ $purchase->email }}</span> already has an Acara Plate account. Log in and we'll add {{ $plan }} to it.
+                    <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->email }}</span> already has an Acara Plate account. Log in and we'll add {{ $plan }} to it.
                 </p>
                 <x-snap-result.button wire:click="logIn">Log in</x-snap-result.button>
             @elseif ($state === 'claimed')
@@ -277,11 +277,11 @@ class extends Component
             @elseif ($state === 'expired')
                 @if ($linkResent)
                     <h1 class="text-2xl font-semibold tracking-tight">Check your inbox</h1>
-                    <p role="status" class="text-sm leading-relaxed text-muted-foreground">We sent a fresh link to <span class="font-medium text-foreground">{{ $purchase->maskedEmail() }}</span>. It can take a minute to arrive.</p>
+                    <p role="status" class="text-sm leading-relaxed text-muted-foreground">We sent a fresh link to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>. It can take a minute to arrive.</p>
                 @else
                     <h1 class="text-2xl font-semibold tracking-tight">This link has expired</h1>
                     <p class="text-sm leading-relaxed text-muted-foreground">
-                        For your security, activation links expire after {{ PlanPurchase::CLAIM_LINK_MINUTES }} minutes. We can send a fresh one to <span class="font-medium text-foreground">{{ $purchase->maskedEmail() }}</span>.
+                        For your security, activation links expire after {{ PlanPurchase::CLAIM_LINK_MINUTES }} minutes. We can send a fresh one to <span class="font-medium wrap-anywhere text-foreground">{{ $purchase->maskedEmail() }}</span>.
                     </p>
                     <x-snap-result.button wire:click="resendLink" wire:loading.attr="disabled" wire:target="resendLink">Email me a new link</x-snap-result.button>
                 @endif
