@@ -53,12 +53,19 @@ beforeEach(function (): void {
     });
 });
 
-it('redirects to Google OAuth page', function (): void {
-    $response = get(route('auth.google.redirect'));
+it('starts a normal Google login even after a purchase sign-in was abandoned', function (): void {
+    $response = $this->withSession(['snap_to_track.google_oauth_purchase' => 'abandoned-purchase'])
+        ->get(route('auth.google.redirect'));
 
-    $response->assertRedirect();
+    $response->assertRedirect()->assertSessionMissing('snap_to_track.google_oauth_purchase');
 
     expect($response->getTargetUrl())->toContain('accounts.google.com');
+})->group('oauth');
+
+it('keeps the signed-in account on an ordinary callback', function (): void {
+    $user = User::factory()->create();
+    $this->actingAs($user)->get(route('auth.google.callback'))->assertRedirectToRoute('dashboard');
+    $this->assertAuthenticatedAs($user);
 })->group('oauth');
 
 it('creates new user from Google OAuth callback with mocked provider', function (): void {
