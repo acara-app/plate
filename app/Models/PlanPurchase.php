@@ -105,6 +105,12 @@ final class PlanPurchase extends Model
             && $this->checkout_expires_at?->isFuture() === true;
     }
 
+    public function isOpeningCheckout(): bool
+    {
+        return ! $this->isPaid() && ! $this->isCancelled() && $this->stripe_checkout_session_id === null
+            && $this->created_at->isAfter(now()->subDay());
+    }
+
     public function isAwaitingPayment(): bool
     {
         return $this->checkout_returned_at !== null && $this->canReopenCheckout();

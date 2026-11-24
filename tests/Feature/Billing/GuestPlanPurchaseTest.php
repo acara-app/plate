@@ -34,6 +34,23 @@ it('never opens a second checkout while one is open or waiting for Stripe', func
         ->and(PlanPurchase::query()->count())->toBe(1);
 });
 
+it('reuses the first purchase and its Stripe key when a slow checkout is tapped again', function (): void {
+    $checkout = FakeGuestCheckout::install();
+    sellPhotoPlans();
+    $guest = (string) Str::uuid();
+    $retry = null;
+    $checkout->beforeOpen = function () use ($guest, &$retry): void {
+        $this->travel(16)->seconds();
+        $retry = resolve(StartGuestCheckout::class)->handle($guest, 'result');
+    };
+
+    $first = resolve(StartGuestCheckout::class)->handle($guest, 'result');
+
+    expect($retry)->toBe($first)
+        ->and(PlanPurchase::query()->count())->toBe(1)
+        ->and(array_unique(array_column($checkout->sessions, 'reference')))->toHaveCount(1);
+});
+
 it('adds Starter to an existing account after the buyer logs in and shows the same success again', function (): void {
     FakeGuestCheckout::install();
     $starter = sellPhotoPlans();

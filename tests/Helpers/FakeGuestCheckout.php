@@ -21,6 +21,13 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
 
     public ?Closure $beforeSubscription = null;
 
+    public ?Closure $beforeOpen = null;
+
+    /**
+     * @var array<string, GuestCheckoutSession>
+     */
+    private array $opened = [];
+
     public static function install(): self
     {
         $fake = new self;
@@ -31,10 +38,17 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
 
     public function open(string $priceId, string $reference, string $successUrl, string $cancelUrl, array $metadata, string $submitMessage): GuestCheckoutSession
     {
-        $this->sessions[] = ['price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata, 'submit_message' => $submitMessage];
-        $id = 'cs_test_guest_'.count($this->sessions);
+        $beforeOpen = $this->beforeOpen;
+        $this->beforeOpen = null;
 
-        return new GuestCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, CarbonImmutable::now()->addDay());
+        if ($beforeOpen instanceof Closure) {
+            $beforeOpen();
+        }
+
+        $this->sessions[] = ['price' => $priceId, 'reference' => $reference, 'success_url' => $successUrl, 'cancel_url' => $cancelUrl, 'metadata' => $metadata, 'submit_message' => $submitMessage];
+        $id = 'cs_test_guest_'.(count($this->opened) + 1);
+
+        return $this->opened[$reference] ??= new GuestCheckoutSession($id, 'https://checkout.stripe.com/c/pay/'.$id, CarbonImmutable::now()->addDay());
     }
 
     public function subscription(string $subscriptionId): Subscription

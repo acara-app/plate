@@ -33,16 +33,16 @@ final readonly class StartGuestCheckout
         $lock->block(10);
 
         try {
-            return $this->resume($guestHash) ?? $this->open($guestHash, $placement);
+            $latest = PlanPurchase::query()->where('guest_hash', $guestHash)->whereNull('cancelled_at')->latest('id')->first();
+
+            return $this->resume($latest) ?? $this->openSession($latest?->isOpeningCheckout() === true ? $latest : $this->createPurchase($guestHash, $placement));
         } finally {
             $lock->release();
         }
     }
 
-    private function resume(string $guestHash): ?string
+    private function resume(?PlanPurchase $latest): ?string
     {
-        $latest = PlanPurchase::query()->where('guest_hash', $guestHash)->whereNull('cancelled_at')->latest('id')->first();
-
         if (! $latest instanceof PlanPurchase) {
             return null;
         }
@@ -56,7 +56,7 @@ final readonly class StartGuestCheckout
         };
     }
 
-    private function open(string $guestHash, string $placement): string
+    private function createPurchase(string $guestHash, string $placement): PlanPurchase
     {
         $product = $this->catalog->product(PhotoPlan::Starter->productName());
         $limiter = 'guest-checkout:'.request()->ip();
@@ -65,13 +65,17 @@ final readonly class StartGuestCheckout
         throw_if(RateLimiter::tooManyAttempts($limiter, 10), RuntimeException::class, 'Too many guest checkouts.');
         RateLimiter::hit($limiter);
 
-        $journeyId = $this->funnel->checkoutMetadata(null)['snap_journey'] ?? null;
-        $purchase = PlanPurchase::query()->create([
+        return PlanPurchase::query()->create([
             'subscription_product_id' => $product->id,
-            'snap_journey_id' => $journeyId,
+            'snap_journey_id' => $this->funnel->checkoutMetadata(null)['snap_journey'] ?? null,
             'guest_hash' => $guestHash,
             'placement' => $placement,
         ]);
+    }
+
+    private function openSession(PlanPurchase $purchase): string
+    {
+        $product = $purchase->product;
         $type = Str::slug($product->name);
 
         $session = $this->checkout->open(
@@ -79,7 +83,7 @@ final readonly class StartGuestCheckout
             $purchase->id,
             route('snap-to-track.purchase', ['checkout' => 'success']),
             route('snap-to-track.purchase', ['checkout' => 'cancelled']),
-            array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $journeyId, 'name' => $type, 'type' => $type]),
+            array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $purchase->snap_journey_id, 'name' => $type, 'type' => $type]),
             "We'll email your activation link to the address above. Please make sure it's correct.",
         );
 
@@ -92,7 +96,7 @@ final readonly class StartGuestCheckout
         $this->funnel->record(SnapFunnelStage::CheckoutStarted, $purchase->id, [
             'plan' => SnapFunnel::plan($product->name),
             'interval' => 'monthly',
-            'placement' => $placement,
+            'placement' => $purchase->placement,
         ]);
 
         return $session->url;
