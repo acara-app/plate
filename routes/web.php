@@ -34,6 +34,8 @@ Route::livewire('/tools/spike-calculator', 'pages::spike-calculator')->name('spi
 Route::livewire('/tools/snap-to-track', 'pages::snap-to-track')->name('snap-to-track');
 Route::livewire('/tools/snap-to-track/result', 'pages::snap-to-track-result')->name('snap-to-track.result');
 Route::livewire('/tools/snap-to-track/purchase', 'pages::snap-to-track-purchase')->name('snap-to-track.purchase');
+Route::get('/tools/snap-to-track/purchase/google', [Web\Auth\SocialiteController::class, 'redirectForPurchase'])
+    ->name('snap-to-track.purchase.google');
 Route::livewire('/tools/snap-to-track/activate', 'pages::snap-to-track-activate')->name('snap-to-track.activate');
 Route::get('/tools/snap-to-track/activate/{token}', Web\SnapToTrack\OpenPlanPurchaseClaimLinkController::class)
     ->middleware('throttle:30,1')
@@ -231,6 +233,8 @@ Route::middleware('auth')->group(function (): void {
     })->name('billing.portal');
 });
 
+Route::get('/auth/google/callback', [Web\Auth\SocialiteController::class, 'callback'])->name('auth.google.callback');
+
 Route::middleware('guest')->group(function (): void {
     Route::get('register', [Web\UserController::class, 'create'])
         ->name('register');
@@ -253,7 +257,6 @@ Route::middleware('guest')->group(function (): void {
         ->name('login.store');
 
     Route::get('/auth/google/redirect', [Web\Auth\SocialiteController::class, 'redirect'])->name('auth.google.redirect');
-    Route::get('/auth/google/callback', [Web\Auth\SocialiteController::class, 'callback'])->name('auth.google.callback');
 });
 
 Route::middleware('auth')->group(function (): void {

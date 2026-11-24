@@ -17,7 +17,7 @@ final readonly class CreateUser
     private const string FALLBACK_NAME = 'Friend';
 
     /**
-     * @param  array{email: string, name?: string|null, email_verified_at?: CarbonInterface}  $attributes
+     * @param  array{email: string, name?: string|null, email_verified_at?: CarbonInterface, google_id?: string}  $attributes
      */
     public function handle(array $attributes, #[SensitiveParameter] ?string $password): User
     {
