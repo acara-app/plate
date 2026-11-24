@@ -6,6 +6,7 @@ namespace App\Actions\Billing;
 
 use App\Data\Billing\SnapFunnelReportData;
 use App\Enums\SnapFunnelStage;
+use App\Models\PlanPurchase;
 use App\Models\SnapAnalyticsEvent;
 use App\Models\SnapJourney;
 use Carbon\CarbonImmutable;
@@ -40,6 +41,9 @@ final readonly class BuildSnapFunnelReport
     /** @var list<string> */
     public const array SEGMENTS = ['device', 'source', 'placement', 'plan'];
 
+    /** @var array<string, int> */
+    private const array WAITING_HOURS = ['under 1 hour' => 1, '1–24 hours' => 24, '1–7 days' => 168, '7–30 days' => 720, 'over 30 days' => PHP_INT_MAX];
+
     /** @var list<string> */
     private const array HISTORY = [
         '2026-11-24: guest offer views, upgrade clicks and checkouts record free_scans_used, the free scans the guest had used when the offer showed. On result_bar, 1 is the free-or-Starter choice after the first scan and 2 is the offer after both free scans. Earlier result_bar events have no such property and cannot be split.',
@@ -72,6 +76,14 @@ final readonly class BuildSnapFunnelReport
                 ->toBase(),
         ]);
 
+        /** @var Collection<int, Collection<int, SnapAnalyticsEvent>> $matured */
+        $matured = $journeys
+            ->reject(fn (SnapJourney $journey): bool => $journey->expires_at->isFuture()
+                || (! $includeInternal && $journey->events->contains(fn (SnapAnalyticsEvent $event): bool => $this->isTestPayment($event))))
+            ->map(fn (SnapJourney $journey): Collection => $timelines->get($journey->id, collect()))
+            ->values()
+            ->toBase();
+
         $ledgerStart = SnapJourney::query()->min('started_at');
         $ledgerStartedAt = is_string($ledgerStart) ? CarbonImmutable::parse($ledgerStart) : null;
 
@@ -89,6 +101,10 @@ final readonly class BuildSnapFunnelReport
             problems: $this->problems($timelines->values()),
             rawEvents: $this->tally($timelines->flatMap(fn (Collection $events): array => $events->map(fn (SnapAnalyticsEvent $event): string => $event->name)->all())),
             payments: $this->payments($from, $to),
+            conversion: $this->conversion($matured),
+            placements: $this->placements($matured),
+            purchases: $this->purchases($from, $to, $includeInternal),
+            openPurchases: $this->openPurchases($to, $includeInternal),
             notes: [
                 $ledgerStartedAt instanceof CarbonImmutable
                     ? "{$ledgerStartedAt->toDateString()}: the journey ledger starts. Journeys and confirmed first payments before this date were never recorded and are not estimated."
@@ -234,10 +250,134 @@ final readonly class BuildSnapFunnelReport
     }
 
     /**
-     * @param  Collection<array-key, string>  $values
+     * @param  Collection<int, Collection<int, SnapAnalyticsEvent>>  $timelines
+     * @return array{journeys: int, paid: int}
+     */
+    private function conversion(Collection $timelines): array
+    {
+        $reachedResult = $timelines->filter(fn (Collection $events): bool => $this->has($events, SnapFunnelStage::ResultViewed));
+
+        return [
+            'journeys' => $reachedResult->count(),
+            'paid' => $reachedResult->filter(fn (Collection $events): bool => $this->has($events, SnapFunnelStage::FirstPayment))->count(),
+        ];
+    }
+
+    /**
+     * @param  Collection<int, Collection<int, SnapAnalyticsEvent>>  $timelines
+     * @return array<string, array{checkouts: int, payments: int}>
+     */
+    private function placements(Collection $timelines): array
+    {
+        $checkouts = $this->tally($timelines->flatMap(fn (Collection $events): array => $events
+            ->where('name', SnapFunnelStage::CheckoutStarted->value)
+            ->map(fn (SnapAnalyticsEvent $checkout): string => $this->placement($checkout))
+            ->unique()->values()->all()));
+        $payments = $this->tally($timelines->map(fn (Collection $events): ?string => $this->paidPlacement($events))->filter());
+        $placements = array_keys($checkouts + $payments);
+        sort($placements);
+
+        return array_combine($placements, array_map(fn (string $placement): array => [
+            'checkouts' => $checkouts[$placement] ?? 0,
+            'payments' => $payments[$placement] ?? 0,
+        ], $placements));
+    }
+
+    /** @param  Collection<int, SnapAnalyticsEvent>  $events */
+    private function paidPlacement(Collection $events): ?string
+    {
+        $payment = $events->firstWhere('name', SnapFunnelStage::FirstPayment->value);
+
+        if (! $payment instanceof SnapAnalyticsEvent) {
+            return null;
+        }
+
+        return $this->placement($events->last(fn (SnapAnalyticsEvent $event): bool => $event->name === SnapFunnelStage::CheckoutStarted->value
+            && $event->created_at->lessThanOrEqualTo($payment->created_at)));
+    }
+
+    private function placement(?SnapAnalyticsEvent $checkout): string
+    {
+        if (! $checkout instanceof SnapAnalyticsEvent) {
+            return 'unknown';
+        }
+
+        $placement = $this->property($checkout, 'placement') ?? 'plan page';
+        $freeScans = $checkout->properties['free_scans_used'] ?? null;
+
+        return is_int($freeScans) ? "{$placement} · after {$freeScans} free ".Str::plural('scan', $freeScans) : $placement;
+    }
+
+    /** @return array{paid: int, claimed: array<string, int>, cancelled: int, open: int} */
+    private function purchases(CarbonImmutable $from, CarbonImmutable $to, bool $includeInternal): array
+    {
+        $purchases = $this->paidPurchases(PlanPurchase::query()->whereBetween('paid_at', [$from, $to]), $includeInternal);
+        $claimed = $purchases->filter(fn (PlanPurchase $purchase): bool => $purchase->isClaimed());
+        $cancelled = $purchases->filter(fn (PlanPurchase $purchase): bool => ! $purchase->isClaimed() && $purchase->isCancelled());
+
+        return [
+            'paid' => $purchases->count(),
+            'claimed' => $this->tally($claimed->map(fn (PlanPurchase $purchase): string => $purchase->claim_method ?? 'unknown')),
+            'cancelled' => $cancelled->count(),
+            'open' => $purchases->count() - $claimed->count() - $cancelled->count(),
+        ];
+    }
+
+    /** @return array{waiting: array<string, int>, support: array<string, int>} */
+    private function openPurchases(CarbonImmutable $now, bool $includeInternal): array
+    {
+        $open = $this->paidPurchases(PlanPurchase::query()->whereNull('claimed_at')->whereNull('cancelled_at'), $includeInternal);
+        $support = $open->filter(fn (PlanPurchase $purchase): bool => $purchase->claim_conflict !== null);
+        $waiting = $open->filter(fn (PlanPurchase $purchase): bool => $purchase->claim_conflict === null);
+
+        return [
+            'waiting' => [
+                ...array_fill_keys(array_keys(self::WAITING_HOURS), 0),
+                ...$this->tally($waiting->map(fn (PlanPurchase $purchase): string => $this->waitingFor($purchase, $now))),
+            ],
+            'support' => $this->tally($support->map(fn (PlanPurchase $purchase): string => (string) $purchase->claim_conflict)),
+        ];
+    }
+
+    /**
+     * @param  Builder<PlanPurchase>  $query
+     * @return Collection<int, PlanPurchase>
+     */
+    private function paidPurchases(Builder $query, bool $includeInternal): Collection
+    {
+        $purchases = $query->with('journey')->whereNotNull('paid_at')->get()->toBase();
+
+        if ($includeInternal) {
+            return $purchases;
+        }
+
+        $testPayments = SnapAnalyticsEvent::query()
+            ->whereIn('event_key', $purchases->map(fn (PlanPurchase $purchase): string => $this->paymentKey($purchase)))
+            ->get()
+            ->filter(fn (SnapAnalyticsEvent $payment): bool => $this->isTestPayment($payment))
+            ->pluck('event_key');
+
+        return $purchases->reject(fn (PlanPurchase $purchase): bool => $purchase->journey?->internal === true
+            || $testPayments->contains($this->paymentKey($purchase)))->values();
+    }
+
+    private function paymentKey(PlanPurchase $purchase): string
+    {
+        return SnapFunnelStage::FirstPayment->value.':'.$purchase->stripe_subscription_id;
+    }
+
+    private function waitingFor(PlanPurchase $purchase, CarbonImmutable $now): string
+    {
+        $hours = $purchase->paid_at?->diffInHours($now) ?? 0;
+
+        return (string) array_key_first(array_filter(self::WAITING_HOURS, fn (int $limit): bool => $hours < $limit));
+    }
+
+    /**
+     * @param  iterable<string>  $values
      * @return array<string, int>
      */
-    private function tally(Collection $values): array
+    private function tally(iterable $values): array
     {
         $tally = [];
 

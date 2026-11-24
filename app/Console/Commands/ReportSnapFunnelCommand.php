@@ -71,12 +71,15 @@ final class ReportSnapFunnelCommand extends Command
             $this->renderSegments($report);
         }
 
+        $this->renderConversion($report);
+        $this->renderPlacements($report);
         $this->table(['Errors and pending', 'Journeys'], array_map(fn (array $row): array => [$row['label'], $row['journeys']], $report->problems));
         $this->table(
             ['Raw event (repeats included, not unique journeys)', 'Events'],
             array_map(fn (string $event, int $count): array => [$event, $count], array_keys($report->rawEvents), $report->rawEvents),
         );
         $this->renderPayments($report);
+        $this->renderPurchases($report);
 
         $this->line('Notes');
         foreach ($report->notes as $note) {
@@ -168,6 +171,61 @@ final class ReportSnapFunnelCommand extends Command
         }
 
         $this->table(['Payments in this period', 'Count'], $rows);
+    }
+
+    private function renderConversion(SnapFunnelReportData $report): void
+    {
+        $window = "{$report->windowDays}-day window";
+
+        if ($report->conversion['journeys'] === 0) {
+            $this->line("Conversion: no journey that reached a result has finished its {$window} yet. Use a longer --days, such as --days=30.");
+
+            return;
+        }
+
+        $this->table(["Conversion (journeys past the {$window})", 'Journeys'], [
+            ['Reached a result', $report->conversion['journeys']],
+            ['  paid', $report->conversion['paid']],
+            ['  conversion', $this->percent($report->conversion['paid'], $report->conversion['journeys'])],
+        ]);
+    }
+
+    private function renderPlacements(SnapFunnelReportData $report): void
+    {
+        if ($report->placements === []) {
+            return;
+        }
+
+        $this->table(["Checkout placement (journeys past the {$report->windowDays}-day window)", 'Checkouts opened', 'First payments', 'Paid'], array_map(
+            fn (string $placement, array $row): array => [$placement, $row['checkouts'], $row['payments'], $this->percent($row['payments'], $row['checkouts'])],
+            array_keys($report->placements),
+            $report->placements,
+        ));
+    }
+
+    private function renderPurchases(SnapFunnelReportData $report): void
+    {
+        $rows = [['Paid in this period', $report->purchases['paid']]];
+
+        foreach ($report->purchases['claimed'] as $method => $count) {
+            $rows[] = ["  activated · {$method}", $count];
+        }
+
+        $rows[] = ['  cancelled before activation', $report->purchases['cancelled']];
+        $rows[] = ['  not activated yet', $report->purchases['open']];
+        $this->table(['Guest purchases', 'Count'], $rows);
+
+        $open = [];
+
+        foreach ($report->openPurchases['waiting'] as $age => $count) {
+            $open[] = ["Waiting for activation · {$age}", $count];
+        }
+
+        foreach ($report->openPurchases['support'] as $reason => $count) {
+            $open[] = ["Sent to support · {$reason}", $count];
+        }
+
+        $this->table(['Open guest purchases now (any payment date)', 'Count'], $open);
     }
 
     private function percent(int $count, int $of): string
