@@ -71,8 +71,15 @@ final readonly class GetHealthSummary implements Tool
 
         $summaries = $aggregates->map(function (HealthDailyAggregate $aggregate) use ($glucoseUnit): array {
             $inPersonUnit = $aggregate->type_identifier === 'bloodGlucose' && $aggregate->unit === GlucoseUnit::MgDl->value;
-            $reading = fn (?float $value): float => $inPersonUnit ? $glucoseUnit->fromMgDl(round((float) $value, 1)) : round((float) $value, 1);
-            $primaryValue = $aggregate->primaryValue();
+            $reading = static function (?float $value) use ($inPersonUnit, $glucoseUnit): ?float {
+                if ($value === null) {
+                    return null;
+                }
+
+                $rounded = round($value, 1);
+
+                return $inPersonUnit ? $glucoseUnit->fromMgDl($rounded) : $rounded;
+            };
 
             return [
                 'date' => $aggregate->local_date?->toDateString() ?? $aggregate->date->toDateString(),
@@ -84,7 +91,7 @@ final readonly class GetHealthSummary implements Tool
                 'max' => $reading($aggregate->value_max),
                 'count' => (int) $aggregate->value_count,
                 'aggregation_function' => $aggregate->aggregation_function,
-                'primary_value' => $primaryValue === null ? null : $reading($primaryValue),
+                'primary_value' => $reading($aggregate->primaryValue()),
                 'canonical_unit' => $aggregate->canonical_unit,
                 'source_primary' => $aggregate->source_primary,
             ];

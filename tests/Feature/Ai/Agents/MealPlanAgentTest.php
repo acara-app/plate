@@ -9,14 +9,21 @@ use App\Enums\Sex;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
+use Laravel\Ai\Prompts\AgentPrompt;
 
 covers(MealPlanAgent::class);
 
-it('returns fluent interface when setting diet type', function (): void {
-    $action = resolve(MealPlanAgent::class);
-    $result = $action->withDietType(DietType::Mediterranean);
+it('gives the planner the guide for the selected diet', function (DietType $diet): void {
+    $targets = $diet->macroTargets();
 
-    expect($result)->toBeInstanceOf(MealPlanAgent::class);
+    expect(resolve(MealPlanAgent::class)->withDietType($diet)->instructions())
+        ->toContain('### Planning a day of meals')
+        ->toContain("Carbs {$targets['carbs']}% | Protein {$targets['protein']}% | Fat {$targets['fat']}%");
+})->with(DietType::cases());
+
+it('gives the Mediterranean planner its nutrient score card', function (): void {
+    expect(resolve(MealPlanAgent::class)->withDietType(DietType::Mediterranean)->instructions())
+        ->toContain('## The Mediterranean Diet Nutrient Score Card');
 });
 
 it('dispatches the initial meal plan job when handle is called', function (): void {
@@ -68,7 +75,7 @@ it('stores custom prompt in meal plan metadata when provided', function (): void
         ->and($mealPlan->metadata['custom_prompt'])->toBe('No spicy food please');
 });
 
-it('generates meals for a single day', function (): void {
+it('generates a DASH day with the selected diet targets even when the profile suggests another diet', function (): void {
     $user = User::factory()->create();
 
     $user->profile()->create([
@@ -101,10 +108,14 @@ it('generates meals for a single day', function (): void {
         ],
     ];
 
-    MealPlanAgent::fake([$mockResponse]);
+    MealPlanAgent::fake([$mockResponse])->preventStrayPrompts();
 
-    $action = resolve(MealPlanAgent::class);
+    $action = resolve(MealPlanAgent::class)->withDietType(DietType::Dash);
     $dayMeals = $action->generateForDay($user, 1, 7);
+
+    expect($action->instructions())->toContain('### Sodium Restrictions');
+    MealPlanAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('**Carbohydrates**: 52%')
+        && $prompt->contains('**Protein**: 18%') && $prompt->contains('**Fat**: 30%'));
 
     expect($dayMeals)
         ->meals->toHaveCount(1)

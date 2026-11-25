@@ -17,6 +17,10 @@ description: Implements a Paleo/ancestral diet eliminating grains, legumes, and 
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Apply Paleo ingredient exclusions to a farm-to-table menu of whole, single-ingredient foods. Grill or roast beef, game, or fish, and pair it with vegetables served raw or cooked. Use tubers or fruit for carbohydrates and sweetness. Check sauces and seasonings for gluten, soy, lactose, refined sugar, and processed oils. Use standard USDA reference values to check iron and vitamin B12 in the selected protein portions.
+
 ### Elimination List (Strict)
 
 ```

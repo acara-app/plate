@@ -17,6 +17,10 @@ description: Implements the Standard Balanced diet following USDA Dietary Guidel
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Apply a dietitian's MyPlate guidance to familiar dishes a home cook can prepare. Rotate the colors of the produce and the protein sources across the day. Choose simple methods such as grilling, steaming, or sautéing. Use standard serving sizes to check the day's calories against the energy target supplied for the plan.
+
 ### The MyPlate Method
 
 ```

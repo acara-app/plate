@@ -17,6 +17,10 @@ description: Implements the DASH (Dietary Approaches to Stop Hypertension) diet 
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Approach menu design from the perspectives of a hypertension dietitian and a chef specializing in low-sodium cooking. Build meals around produce such as spinach, bananas, and sweet potatoes. Include fruit and whole grains as carbohydrate sources. Check sodium in each ingredient, especially cured meats and canned soups. Season with citrus, vinegar, herbs, or spices, and use low-fat yogurt for creaminess. Check the day's calcium and magnesium totals alongside sodium and saturated fat.
+
 ### Sodium Restrictions
 
 ```

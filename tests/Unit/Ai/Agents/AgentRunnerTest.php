@@ -20,6 +20,9 @@ use App\Models\User;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\Message;
+use Laravel\Ai\Messages\ToolResultMessage;
+use Laravel\Ai\Responses\Data\ToolCall;
+use Laravel\Ai\Responses\Data\ToolResult;
 
 covers(AgentRunner::class);
 
@@ -55,6 +58,27 @@ describe('instructions', function (): void {
 });
 
 describe('tools', function (): void {
+    it('can load a skill after the model calls an unknown tool', function (): void {
+        $conversation = Conversation::factory()->forUser($this->user)->create();
+        AgentRunner::fake([
+            new ToolCall('first-call', 'unknown_tool', []),
+            new ToolCall('retry', 'LoadSkill', ['name' => 'nutrition-analyzer']),
+            'Review complete.',
+        ])->preventStrayPrompts();
+
+        $response = $this->agent->runSync(new AgentRequest(
+            message: 'Review my nutrition.',
+            conversationId: $conversation->id,
+        ), $this->user);
+
+        [$unknown, $loaded] = $response->toolResults->all();
+
+        expect($unknown->failed)->toBeTrue()
+            ->and($unknown->result)->toContain('LoadSkill')
+            ->and($loaded->result)->toContain('<skill_content name="nutrition-analyzer">')
+            ->and($response->text)->toBe('Review complete.');
+    });
+
     it('returns top-level tools plus specialist sub-agents', function (): void {
         $request = new AgentRequest(message: 'Hello', model: new AgentModelData('openai', 'gpt-5.4-mini'));
 
@@ -100,6 +124,33 @@ describe('tools', function (): void {
 });
 
 describe('messages', function (): void {
+    it('replays the latest eligible history rows with their tool results intact', function (int $limit, int $placeholders): void {
+        config(['altani.context.history_limit' => $limit]);
+
+        $conversation = Conversation::factory()->forUser($this->user)->create();
+        $history = History::factory()->forConversation($conversation);
+        $history->userMessage()->create(['content' => 'Review my nutrition.']);
+
+        $call = new ToolCall('skill-call', 'LoadSkill', ['name' => 'nutrition-analyzer']);
+        $result = new ToolResult($call->id, $call->name, $call->arguments, 'Nutrition guidance');
+
+        $history->assistantMessage()->create([
+            'steps' => [['content' => '', 'tool_calls' => [[...$call->toArray(), 'result' => $result->result]]]],
+        ]);
+        $history->pendingStream()->count($placeholders)->create();
+
+        $this->agent->run(new AgentRequest(message: 'Continue', conversationId: $conversation->id), $this->user);
+
+        expect($this->agent->messages())->toEqual($limit === 0 ? [] : [
+            new AssistantMessage('', collect([$call])),
+            new ToolResultMessage(collect([$result])),
+        ]);
+    })->with([
+        'no placeholders' => [1, 0],
+        'several pending streams' => [1, 3],
+        'disabled history' => [0, 0],
+    ]);
+
     it('returns empty messages when no conversation', function (): void {
         $request = new AgentRequest(message: 'Hello', model: new AgentModelData('openai', 'gpt-5.4-mini'));
 

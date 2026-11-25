@@ -17,6 +17,10 @@ description: Implements a lacto-ovo vegetarian diet excluding meat, poultry, and
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Use a dietitian's approach to protein quality when preparing bistro-style vegetarian meals. Use eggs, plain Greek yogurt, or paneer as a protein source. Add a generous variety of vegetables and use whole grains for texture. Check how much saturated fat the dairy contributes across the day when sizing cheese and yogurt portions.
+
 ### Protein Sources
 
 ```
