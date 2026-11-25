@@ -19,46 +19,33 @@ use App\Enums\MealType;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\MealPlan;
 use App\Models\User;
-use App\Services\ToolRegistry;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
-use Laravel\Ai\Attributes\MaxSteps;
+use Illuminate\Support\Facades\File;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasProviderOptions;
-use Laravel\Ai\Contracts\HasSkills;
 use Laravel\Ai\Contracts\HasStructuredOutput;
-use Laravel\Ai\Contracts\HasTools;
-use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
-use Laravel\Ai\Providers\Tools\ProviderTool;
-use Laravel\Ai\Responses\Data\ToolResult;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 use Laravel\Ai\Skills\Skill;
-use Laravel\Ai\ToolChoice;
-use RuntimeException;
 
-#[MaxSteps(3)]
 #[MaxTokens(64000)]
 #[Timeout(180)]
-#[ToolChoice(ToolChoice::tool, 'LoadSkill')]
-final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasSkills, HasStructuredOutput, HasTools
+final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput
 {
     use HasUsageUser;
     use Promptable;
     use ReasonsWithMediumEffort;
-
-    private const string MEDITERRANEAN_SCORE_CARD = 'references/med-diet-nutrient-score-card.md';
 
     private DietType $dietType = DietType::Balanced;
 
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
         private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
-        private readonly ToolRegistry $toolRegistry,
     ) {}
 
     public function withDietType(DietType $dietType): self
@@ -70,34 +57,16 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
 
     public function instructions(): string
     {
-        $name = $this->dietType->skillName();
+        $directory = resource_path('skills/diets/'.$this->dietType->skillName());
 
-        return <<<PROMPT
-            Create one day of meals for the selected diet. First call LoadSkill with name "{$name}" and omit the path to read its instructions.
-            Follow the guide and load any references it requires before choosing meals. Respect the user's allergies, medical restrictions and preferences.
-            Return the meals using the requested schema, with ingredient quantities, portions and estimated nutrition values.
-            PROMPT;
-    }
-
-    /** @return list<Skill> */
-    public function skills(): array
-    {
-        $name = $this->dietType->skillName();
-        $skill = Skill::fromDirectory(resource_path('skills/diets/'.$name));
-
-        if ($skill?->name !== $name || blank($skill->instructions)) {
-            throw new RuntimeException("Missing or invalid meal planning skill [{$name}].");
-        }
-
-        return [$skill];
-    }
-
-    /**
-     * @return array<int, Tool|ProviderTool>
-     */
-    public function tools(): array
-    {
-        return $this->toolRegistry->getSharedTools();
+        return implode("\n\n", [
+            <<<'PROMPT'
+                Create one day of meals for the selected diet by following the guide below. Respect the user's allergies, medical restrictions and preferences.
+                Return the meals using the requested schema, with ingredient quantities, portions and estimated nutrition values.
+                PROMPT,
+            Skill::fromDirectory($directory)?->instructions,
+            ...array_map(File::get(...), glob($directory.'/references/*.md') ?: []),
+        ]);
     }
 
     /**
@@ -179,28 +148,6 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
         /** @var StructuredAgentResponse $response */
         $response = $this->prompt($prompt);
 
-        $this->verifySkillReads($response);
-
         return DayMealsData::from($response->toArray());
-    }
-
-    private function verifySkillReads(StructuredAgentResponse $response): void
-    {
-        $name = $this->dietType->skillName();
-        $reads = $response->toolResults->filter(fn (ToolResult $result): bool => $result->name === 'LoadSkill'
-            && $result->successful()
-            && ($result->arguments['name'] ?? null) === $name);
-
-        if (! str_starts_with($reads->first()?->text() ?? '', "<skill_content name=\"{$name}\">")) {
-            throw new RuntimeException("Meal planner did not load the instructions for [{$name}].");
-        }
-
-        if ($this->dietType === DietType::Mediterranean) {
-            $scoreCard = $reads->firstWhere('arguments.path', self::MEDITERRANEAN_SCORE_CARD)?->text() ?? '';
-
-            if (blank($scoreCard) || str_starts_with($scoreCard, 'File [')) {
-                throw new RuntimeException('Meal planner did not load the Mediterranean nutrient score card.');
-            }
-        }
     }
 }

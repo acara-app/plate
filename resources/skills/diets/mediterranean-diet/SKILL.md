@@ -20,7 +20,7 @@ description: Implements the Mediterranean diet approach emphasizing high healthy
 
 Combine a Mediterranean dietitian's attention to nutrient density with a chef's choice of complementary ingredients. Start with one protein and one or two vegetables. For example, pair pan-seared scallops with roasted asparagus, or dress grilled artichokes with lemon, garlic, and olive oil.
 
-When generating a day of Mediterranean meals, call `LoadSkill` with `name` set to `mediterranean-diet` and `path` set to `references/med-diet-nutrient-score-card.md`. Use the card's serving sizes and fiber values to choose nutrient-dense ingredients and check fiber across the day. Use standard USDA reference values for olive oil, seasonings, and side ingredients the card does not cover. Account for their portions when checking the day's fat target.
+When generating a day of Mediterranean meals, use the nutrient score card in `references/med-diet-nutrient-score-card.md`. Use the card's serving sizes and fiber values to choose nutrient-dense ingredients and check fiber across the day. Use standard USDA reference values for olive oil, seasonings, and side ingredients the card does not cover. Account for their portions when checking the day's fat target.
 
 ### Fat Sources
 

@@ -3,45 +3,28 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanAgent;
-use App\Ai\Tools\StartMealPlanGeneration;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
-use Laravel\Ai\Gateway\TextGenerationOptions;
 use Laravel\Ai\Prompts\AgentPrompt;
-use Laravel\Ai\Responses\Data\ToolCall;
-use Laravel\Ai\ToolChoice;
-use Laravel\Ai\Tools\LoadSkill;
 
 covers(MealPlanAgent::class);
 
-it('can look up diet references without starting another plan while generating meals', function (): void {
-    $agent = resolve(MealPlanAgent::class);
-    $tools = array_map(get_class(...), LoadSkill::mergeInto($agent->tools(), $agent));
-    $options = TextGenerationOptions::forAgent($agent);
+it('gives the planner the guide for the selected diet', function (DietType $diet): void {
+    $targets = $diet->macroTargets();
 
-    expect($tools)->toContain(LoadSkill::class)->not->toContain(StartMealPlanGeneration::class);
-    expect($options->toolChoice?->mode)->toBe(ToolChoice::tool)
-        ->and($options->toolChoice?->toolName)->toBe('LoadSkill');
+    expect(resolve(MealPlanAgent::class)->withDietType($diet)->instructions())
+        ->toContain('### Planning a day of meals')
+        ->toContain("Carbs {$targets['carbs']}% | Protein {$targets['protein']}% | Fat {$targets['fat']}%");
+})->with(DietType::cases());
+
+it('gives the Mediterranean planner its nutrient score card', function (): void {
+    expect(resolve(MealPlanAgent::class)->withDietType(DietType::Mediterranean)->instructions())
+        ->toContain('## The Mediterranean Diet Nutrient Score Card');
 });
-
-it('offers only the skill for the selected diet', function (DietType $diet, string $name): void {
-    $planner = resolve(MealPlanAgent::class)->withDietType($diet);
-
-    expect(collect($planner->skills())->sole()->name)->toBe($name);
-})->with([
-    [DietType::Balanced, 'balanced-diet'],
-    [DietType::Dash, 'dash-diet'],
-    [DietType::Keto, 'ketogenic-diet'],
-    [DietType::LowCarb, 'low-carb-diet'],
-    [DietType::Mediterranean, 'mediterranean-diet'],
-    [DietType::Paleo, 'paleo-diet'],
-    [DietType::Vegan, 'vegan-diet'],
-    [DietType::Vegetarian, 'vegetarian-diet'],
-]);
 
 it('dispatches the initial meal plan job when handle is called', function (): void {
     Queue::fake();
@@ -125,15 +108,12 @@ it('generates a DASH day with the selected diet targets even when the profile su
         ],
     ];
 
-    MealPlanAgent::fake([
-        new ToolCall('read-dash', 'LoadSkill', ['name' => 'dash-diet']),
-        $mockResponse,
-    ])->preventStrayPrompts();
+    MealPlanAgent::fake([$mockResponse])->preventStrayPrompts();
 
     $action = resolve(MealPlanAgent::class)->withDietType(DietType::Dash);
     $dayMeals = $action->generateForDay($user, 1, 7);
 
-    expect($action->instructions())->toContain('dash-diet')->not->toContain('## Sodium Restrictions');
+    expect($action->instructions())->toContain('### Sodium Restrictions');
     MealPlanAgent::assertPrompted(fn (AgentPrompt $prompt): bool => $prompt->contains('**Carbohydrates**: 52%')
         && $prompt->contains('**Protein**: 18%') && $prompt->contains('**Fat**: 30%'));
 
