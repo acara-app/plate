@@ -25,8 +25,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.mini-app', ['bodyClass' => 'bg-muted text-foreground', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'themeColor' => '#f5f5f5', 'metaDescription' => 'Activate your Snap to Track Starter plan.'])]
-#[Title('Activate Starter | Snap to Track')]
+#[Layout('layouts.mini-app', ['bodyClass' => 'bg-muted text-foreground', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'themeColor' => '#f5f5f5', 'metaDescription' => 'Activate your Acara Plate plan.'])]
+#[Title('Activate your plan | Acara Plate')]
 class extends Component
 {
     #[Locked]

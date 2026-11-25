@@ -36,19 +36,25 @@ it('starts checkout only when the guest confirms Starter in the first-scan sheet
 
     $free = 'input[name="snap-result-plan"][value="free"]';
     $paid = 'input[name="snap-result-plan"][value="paid"]';
-    $paidButton = 'button:has-text("Get Starter")';
+    $paidButton = 'button:has-text("Continue to checkout")';
     $page = visit(route('snap-to-track.result', absolute: false))->resize(390, 844);
     $page->assertChecked($free)
         ->assertVisible('Save this meal free')
-        ->assertMissing($paidButton)
-        ->keys($free, 'ArrowRight')
+        ->assertSeeIn('a:has-text("Scan another meal")', '1 free scan remaining')
+        ->assertMissing($paidButton);
+
+    $page->keys($free, 'ArrowRight')
         ->assertChecked($paid)
         ->assertMissing('Save this meal free')
-        ->assertVisible($paidButton);
+        ->assertAttribute('a:has-text("Plan details")', 'href', route('checkout.subscription'));
     expect($checkout->sessions)->toBeEmpty();
 
     $page->click($paidButton)
-        ->assertSee('We could not open checkout just now. Please try again.')
-        ->assertNoJavaScriptErrors();
+        ->assertSeeIn('[role="alert"]', 'We could not open checkout just now. Please try again.');
     expect($checkout->sessions)->toHaveCount(1);
+
+    $page->keys($paid, 'ArrowLeft')
+        ->click('Scan another meal')
+        ->assertPathIs(route('snap-to-track', absolute: false))
+        ->assertNoJavaScriptErrors();
 });

@@ -28,7 +28,7 @@ final class SendPlanPurchaseClaimLink implements ShouldBeUnique, ShouldQueue
 
     public function handle(): void
     {
-        $purchase = PlanPurchase::query()->find($this->purchaseId);
+        $purchase = PlanPurchase::query()->with('product')->find($this->purchaseId);
 
         if (! $purchase instanceof PlanPurchase || $purchase->email === null || $purchase->isClaimed() || $purchase->isCancelled()) {
             return;
@@ -36,7 +36,7 @@ final class SendPlanPurchaseClaimLink implements ShouldBeUnique, ShouldQueue
 
         $link = route('snap-to-track.activate.open', ['token' => $purchase->issueClaimToken()]);
 
-        Notification::route('mail', $purchase->email)->notifyNow(new PlanPurchaseClaimLinkNotification($link));
+        Notification::route('mail', $purchase->email)->notifyNow(new PlanPurchaseClaimLinkNotification($link, $purchase->product->name));
 
         $purchase->forceFill(['claim_link_sent_at' => now()])->save();
     }

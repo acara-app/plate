@@ -6,6 +6,7 @@ use App\Http\Controllers\Checkout\CashierSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Tests\Helpers\FakeGuestCheckout;
 
 covers(CashierSubscriptionController::class);
 
@@ -36,19 +37,17 @@ it('validates product_id exists', function (): void {
     $response->assertSessionHasErrors('product_id');
 });
 
-it('validates billing_interval is required', function (): void {
-    $user = User::factory()->create();
-    $product = SubscriptionProduct::factory()->create();
+it('accepts an explicit monthly interval from older checkout clients', function (): void {
+    $product = sellPhotoPlans();
+    FakeGuestCheckout::install();
 
-    $response = $this->actingAs($user)
-        ->post(route('checkout.subscription.store'), [
-            'product_id' => $product->id,
-        ]);
-
-    $response->assertSessionHasErrors('billing_interval');
+    $this->post(route('checkout.subscription.store'), [
+        'product_id' => $product->id,
+        'billing_interval' => 'monthly',
+    ])->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
 });
 
-it('validates billing_interval is monthly or yearly', function (): void {
+it('rejects an invalid billing interval', function (): void {
     $user = User::factory()->create();
     $product = SubscriptionProduct::factory()->create();
 
