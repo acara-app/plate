@@ -44,17 +44,6 @@ Community-safe null implementations live in:
 - `app/Services/Memory/NullMemoryExtractionDispatcher.php`
 - `app/Services/Memory/NullConversationHistoryPuller.php`
 
-Default bindings for these memory contracts belong in `App\Providers\AppServiceProvider` using `bindIf()`. This lets the public app boot without `acara-core`, while the private package can override the bindings when installed. Plate-owned implementations, such as billing, use plain `bind()`.
-
-## Agent Skills
-
-Agent skills are public and live in Plate, not in `acara-core`:
-
-- Each skill is a folder `resources/skills/<name>/` with a `SKILL.md`: YAML frontmatter with `name` and `description`, then the instructions. Credit an adapted skill with `license` and `metadata.source` in its frontmatter and a `LICENSE.md` beside it.
-- `App\Ai\Agents\AgentRunner` implements the AI SDK's `HasSkills`. The SDK's `LoadSkill` tool lists each skill's name and description and loads a skill's instructions only when the model asks for them.
-- `LoadSkill` results are turn-scoped through `altani.context.turn_scoped_tools`, so a loaded skill is not replayed on later turns.
-- A skill's space-separated `allowed-tools` lists only tools `AgentRunner` calls itself, specialists included. The body may name a specialist's own tools, but tells the agent to ask that specialist for them. `tests/Unit/Ai/Skills/AgentSkillsTest.php` fails when a skill names a tool that does not exist.
-
 ## Private Implementation
 
 Real SaaS memory behavior belongs in `acara-app/acara-core`.
