@@ -19,6 +19,7 @@ use App\Services\Ai\PlateConversationStore;
 use App\Utilities\ConfigHelper;
 use Illuminate\Support\Facades\Context;
 use Laravel\Ai\Approvals\Decisions;
+use Laravel\Ai\Attributes\RepairToolCalls;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
@@ -34,6 +35,7 @@ use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
+#[RepairToolCalls]
 #[Timeout(120)]
 final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conversational, HasProviderOptions, HasSkills, HasTools
 {
@@ -124,17 +126,18 @@ final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conve
         }
 
         $streamId = $this->currentRequest->streamId;
+        $limit = max(0, $this->maxConversationMessages());
 
         $messages = History::query()
             ->select(['id', 'conversation_id', 'agent', 'role', 'content', 'steps', 'status', 'meta'])
             ->where('conversation_id', $this->currentRequest->conversationId)
             ->where('agent', self::class)
-            ->orderByDesc('id')
-            ->limit($this->maxConversationMessages() + 2)
-            ->get()
-            ->reverse()
+            ->lazyByIdDesc($limit + 2)
             ->reject(fn (History $message): bool => $message->isPendingStreamAssistant()
                 || ($streamId !== null && $message->belongsToChatStream($streamId)))
+            ->take($limit)
+            ->collect()
+            ->reverse()
             ->flatMap(fn (History $message): array => $this->toAiMessages($message))
             ->all();
 
