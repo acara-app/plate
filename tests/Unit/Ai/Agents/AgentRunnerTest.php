@@ -58,12 +58,11 @@ describe('instructions', function (): void {
 });
 
 describe('tools', function (): void {
-    it('can recover when a model calls the retired skill tool', function (): void {
+    it('can load a skill after the model calls an unknown tool', function (): void {
         $conversation = Conversation::factory()->forUser($this->user)->create();
-        $arguments = ['name' => 'nutrition-analyzer'];
         AgentRunner::fake([
-            new ToolCall('old-tool', 'activate_skill', $arguments),
-            new ToolCall('current-tool', 'LoadSkill', $arguments),
+            new ToolCall('first-call', 'unknown_tool', []),
+            new ToolCall('retry', 'LoadSkill', ['name' => 'nutrition-analyzer']),
             'Review complete.',
         ])->preventStrayPrompts();
 
@@ -72,10 +71,10 @@ describe('tools', function (): void {
             conversationId: $conversation->id,
         ), $this->user);
 
-        [$retired, $loaded] = $response->toolResults->all();
+        [$unknown, $loaded] = $response->toolResults->all();
 
-        expect($retired->failed)->toBeTrue()
-            ->and($retired->result)->toContain('LoadSkill')
+        expect($unknown->failed)->toBeTrue()
+            ->and($unknown->result)->toContain('LoadSkill')
             ->and($loaded->result)->toContain('<skill_content name="nutrition-analyzer">')
             ->and($response->text)->toBe('Review complete.');
     });
