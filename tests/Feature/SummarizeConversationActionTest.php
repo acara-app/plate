@@ -8,6 +8,8 @@ use App\Models\Conversation;
 use App\Models\ConversationSummary;
 use App\Models\History;
 use App\Models\User;
+use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\Http;
 
 covers(SummarizeConversationAction::class);
 
@@ -86,23 +88,45 @@ describe('shouldSummarize', function (): void {
 });
 
 describe('handle', function (): void {
-    it('creates a summary and marks messages', function (): void {
+    it('creates a summary and marks messages', function (?string $override, string $model, ?string $effort): void {
         $user = User::factory()->create();
         $conversation = createConversationWithMessages($user, 50);
 
-        $mockAgent = Mockery::mock(SummarizesConversation::class);
-        $mockAgent->shouldReceive('summarize')
-            ->once()
-            ->andReturn([
-                'summary' => 'The user discussed nutrition and meal planning.',
-                'topics' => ['nutrition', 'meal planning'],
-                'key_facts' => ['User prefers vegetarian meals'],
-                'unresolved_threads' => ['Weekly grocery list'],
-                'resolved_threads' => ['Daily calorie target set'],
-            ]);
+        config()->set([
+            'ai.providers.openai.key' => 'test-key',
+            'ai.providers.openai.url' => 'https://openai.test/v1',
+        ]);
+        if ($override !== null) {
+            config()->set('ai.providers.openai.models.text.cheapest', $override);
+        }
 
-        $action = new SummarizeConversationAction($mockAgent);
-        $summary = $action->handle($conversation);
+        $response = [
+            'summary' => 'The user discussed nutrition and meal planning.',
+            'topics' => ['nutrition', 'meal planning'],
+            'key_facts' => ['User prefers vegetarian meals'],
+            'unresolved_threads' => ['Weekly grocery list'],
+            'resolved_threads' => ['Daily calorie target set'],
+        ];
+
+        Http::fake([
+            'https://openai.test/v1/responses' => Http::response([
+                'id' => 'resp_summary',
+                'model' => $model,
+                'status' => 'completed',
+                'output' => [[
+                    'type' => 'message',
+                    'role' => 'assistant',
+                    'content' => [['type' => 'output_text', 'text' => json_encode($response, JSON_THROW_ON_ERROR)]],
+                ]],
+            ]),
+        ]);
+
+        $summary = resolve(SummarizeConversationAction::class)->handle($conversation);
+
+        Http::assertSent(fn (Request $request): bool => $request->url() === 'https://openai.test/v1/responses'
+            && $request['model'] === $model
+            && data_get($request->data(), 'reasoning.effort') === $effort
+            && data_get($request->data(), 'text.format.type') === 'json_schema');
 
         expect($summary)
             ->toBeInstanceOf(ConversationSummary::class)
@@ -120,7 +144,10 @@ describe('handle', function (): void {
             ->count();
 
         expect($summarizedCount)->toBe($summary->message_count);
-    });
+    })->with([
+        'Luna default' => [null, 'gpt-6-luna', 'low'],
+        'model override' => ['gpt-5-nano', 'gpt-5-nano', null],
+    ]);
 
     it('returns null when summarization is not needed', function (): void {
         $user = User::factory()->create();

@@ -13,14 +13,16 @@ use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[UseCheapestModel]
 #[MaxTokens(8000)]
 #[Timeout(30)]
-final class ConversationTitleGeneratorAgent implements Agent, BillsUsageToUser, GeneratesConversationTitle, HasStructuredOutput
+final class ConversationTitleGeneratorAgent implements Agent, BillsUsageToUser, GeneratesConversationTitle, HasProviderOptions, HasStructuredOutput
 {
     use HasUsageUser;
     use Promptable;
@@ -28,6 +30,18 @@ final class ConversationTitleGeneratorAgent implements Agent, BillsUsageToUser, 
     private string $language = 'English';
 
     private string $languageCode = 'en';
+
+    /** @return array<string, mixed> */
+    public function providerOptions(Lab|string $provider): array
+    {
+        $provider = $provider instanceof Lab ? $provider->value : $provider;
+
+        if ($provider !== Lab::OpenAI->value || config('ai.providers.openai.models.text.cheapest') !== 'gpt-6-luna') {
+            return [];
+        }
+
+        return ['reasoning' => ['effort' => 'none']];
+    }
 
     // @codeCoverageIgnoreStart
     public function instructions(): string

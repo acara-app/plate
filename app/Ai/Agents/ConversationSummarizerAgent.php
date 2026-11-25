@@ -15,19 +15,33 @@ use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Attributes\UseCheapestModel;
 use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
+use Laravel\Ai\Enums\Lab;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
 
 #[UseCheapestModel]
 #[MaxTokens(8000)]
 #[Timeout(90)]
-final class ConversationSummarizerAgent implements Agent, BillsUsageToUser, HasStructuredOutput, SummarizesConversation
+final class ConversationSummarizerAgent implements Agent, BillsUsageToUser, HasProviderOptions, HasStructuredOutput, SummarizesConversation
 {
     use HasUsageUser;
     use Promptable;
 
     private ?ConversationSummary $previousSummary = null;
+
+    /** @return array<string, mixed> */
+    public function providerOptions(Lab|string $provider): array
+    {
+        $provider = $provider instanceof Lab ? $provider->value : $provider;
+
+        if ($provider !== Lab::OpenAI->value || config('ai.providers.openai.models.text.cheapest') !== 'gpt-6-luna') {
+            return [];
+        }
+
+        return ['reasoning' => ['effort' => 'low']];
+    }
 
     public function instructions(): string
     {
