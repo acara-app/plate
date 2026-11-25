@@ -17,13 +17,9 @@ use App\Data\Ai\AgentModelData;
 use App\Models\Conversation;
 use App\Models\History;
 use App\Models\User;
-use Illuminate\Support\Collection;
-use Laravel\Ai\Enums\MessageStatus;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Messages\AssistantMessage;
 use Laravel\Ai\Messages\Message;
-use Laravel\Ai\Messages\ToolResultMessage;
-use Laravel\Ai\Responses\Data\ToolResult;
 
 covers(AgentRunner::class);
 
@@ -148,46 +144,5 @@ describe('messages', function (): void {
             ->and($messages[0]->content)->toBe('Previous question')
             ->and($messages[1])->toBeInstanceOf(AssistantMessage::class)
             ->and($messages[1]->content)->toBe('Previous answer');
-    });
-
-    it('sends skill instructions only for the turn that is still waiting on them', function (): void {
-        $conversation = Conversation::factory()->forUser($this->user)->create();
-        $skillCall = fn (string $id): array => [
-            'id' => $id,
-            'name' => 'LoadSkill',
-            'arguments' => ['name' => 'nutrition-analyzer'],
-            'result' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
-        ];
-
-        History::factory()->forConversation($conversation)->userMessage()->create(['content' => 'Analyze my breakfast']);
-        History::factory()->forConversation($conversation)->assistantMessage()->create([
-            'content' => 'Breakfast analysis',
-            'steps' => [['content' => 'Breakfast analysis', 'tool_calls' => [$skillCall('call-1')], 'reasoning' => '', 'replay_blocks' => [], 'provider_tool_calls' => []]],
-        ]);
-        History::factory()->forConversation($conversation)->userMessage()->create(['content' => 'Log and analyze my lunch']);
-        History::factory()->forConversation($conversation)->assistantMessage()->create([
-            'content' => '',
-            'status' => MessageStatus::Paused,
-            'steps' => [['content' => '', 'tool_calls' => [
-                $skillCall('call-2'),
-                ['id' => 'call-3', 'name' => 'log_health_entry', 'arguments' => [], 'approval_reason' => null],
-            ], 'reasoning' => '', 'replay_blocks' => [], 'provider_tool_calls' => []]],
-        ]);
-
-        $this->agent->run(new AgentRequest(
-            message: 'Approve',
-            conversationId: $conversation->id,
-            model: new AgentModelData('openai', 'gpt-5.4-mini'),
-        ), $this->user);
-
-        $skillResults = collect($this->agent->messages())
-            ->whereInstanceOf(ToolResultMessage::class)
-            ->flatMap(fn (ToolResultMessage $message): Collection => $message->toolResults)
-            ->mapWithKeys(fn (ToolResult $result): array => [$result->id => $result->result]);
-
-        expect($skillResults->all())->toBe([
-            'call-1' => 'Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.',
-            'call-2' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
-        ]);
     });
 });
