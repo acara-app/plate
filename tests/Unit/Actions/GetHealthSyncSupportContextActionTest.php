@@ -12,7 +12,7 @@ it('returns full context when topic is all', function (): void {
 
     expect($result)->toHaveKeys(['overview', 'setup', 'platform_support', 'privacy', 'troubleshooting', 'links'])
         ->and($result['overview']['app_name'])->toBe('Acara Health Sync')
-        ->and($result['links'])->toHaveKeys(['app_store_url', 'health_sync_url', 'setup_guide_url', 'install_app_url', 'support_email']);
+        ->and($result['links'])->toHaveKeys(['app_store_url', 'health_sync_url', 'setup_guide_url', 'install_app_url']);
 });
 
 it('returns full context by default', function (): void {

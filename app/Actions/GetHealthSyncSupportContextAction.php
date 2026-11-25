@@ -55,14 +55,13 @@ final readonly class GetHealthSyncSupportContextAction
                 'sign_in_fails' => 'Confirm the account credentials are correct and try signing in again from the iOS app.',
                 'no_data_showing' => 'Confirm Apple Health has data and HealthKit permissions are enabled in Acara Health Sync.',
                 'sync_fails' => 'Make sure the Plate instance is online, then try Sync Now in the app.',
-                'support' => 'Email support@acara.app for sign-in, syncing, or HealthKit permission help.',
+                'support' => route('support'),
             ],
             'links' => [
                 'app_store_url' => config()->string('plate.health_sync.app_store_url'),
                 'health_sync_url' => route('health-sync'),
                 'setup_guide_url' => route('health-sync.setup'),
                 'install_app_url' => route('install-app'),
-                'support_email' => 'support@acara.app',
             ],
         ];
 

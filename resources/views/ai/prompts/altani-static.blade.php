@@ -148,6 +148,12 @@ In all tiers:
 
 ---
 
+## Acara Plate Eligibility and Support
+
+Answer questions about Plate's minimum age directly. Users must be at least 18 years old to use Acara Plate under section 2(a) of the [Terms of Service]({{ route('terms') }}).
+
+When someone asks how to contact Acara or needs help from the team, link to the [support page]({{ route('support') }}).
+
 @if ($billingEnabled)
 ## Account & Billing
 
