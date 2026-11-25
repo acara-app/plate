@@ -13,14 +13,10 @@ use Laravel\Ai\Responses\Data\ToolResult;
 
 covers(CompactStaleToolResults::class);
 
-beforeEach(function (): void {
-    config(['altani.context.turn_scoped_tools' => ['activate_skill']]);
-});
-
-it('replaces earlier-turn skill instructions with a stub the model can act on', function (): void {
+it('replaces earlier-turn skill instructions with a stub the model can act on', function (string $tool, array $arguments): void {
     $question = new Message(MessageRole::User, 'Analyze my lunch');
-    $toolCalls = new AssistantMessage('', new Collection([new ToolCall('call-1', 'activate_skill', ['skillName' => 'nutrition-analyzer'])]));
-    $skillResult = new ToolResult('call-1', 'activate_skill', ['skillName' => 'nutrition-analyzer'], str_repeat('Weigh every ingredient. ', 1200), 'result-1');
+    $toolCalls = new AssistantMessage('', new Collection([new ToolCall('call-1', $tool, $arguments)]));
+    $skillResult = new ToolResult('call-1', $tool, $arguments, str_repeat('Weigh every ingredient. ', 1200), 'result-1');
 
     $messages = resolve(CompactStaleToolResults::class)->handle([
         $question,
@@ -34,9 +30,12 @@ it('replaces earlier-turn skill instructions with a stub the model can act on', 
         ->and($messages[1])->toBe($toolCalls)
         ->and($compacted->id)->toBe('call-1')
         ->and($compacted->resultId)->toBe('result-1')
-        ->and($compacted->arguments)->toBe(['skillName' => 'nutrition-analyzer'])
-        ->and($compacted->result)->toBe('Omitted to save context: this result is from an earlier turn. Call activate_skill again if you need it.');
-});
+        ->and($compacted->arguments)->toBe($arguments)
+        ->and($compacted->result)->toBe('Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.');
+})->with([
+    'LoadSkill' => ['LoadSkill', ['name' => 'nutrition-analyzer']],
+    'the retired activate_skill' => ['activate_skill', ['skillName' => 'nutrition-analyzer']],
+]);
 
 it('leaves other tools and unsuccessful skill calls untouched', function (ToolResult $result): void {
     $messages = resolve(CompactStaleToolResults::class)->handle([
@@ -51,7 +50,7 @@ it('leaves other tools and unsuccessful skill calls untouched', function (ToolRe
 ]);
 
 it('returns the history untouched when no tools are turn-scoped', function (): void {
-    config(['altani.context.turn_scoped_tools' => []]);
+    config(['altani.context.turn_scoped_tools' => [], 'altani.context.retired_tools' => []]);
 
     $history = [new ToolResultMessage(new Collection([new ToolResult('call-1', 'activate_skill', [], 'Full instructions')]))];
 

@@ -57,12 +57,6 @@ When relaying a specialist's answer about personal data, relay only what it repo
 
 ---
 
-@if ($availableSkills->isNotEmpty())
-@include('ai.prompts.partials.skills-registry')
-
----
-@endif
-
 @if ($memoryStorageEnabled)
 @include('ai.prompts.partials.memory-system')
 

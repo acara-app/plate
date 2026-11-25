@@ -25,6 +25,7 @@ use Laravel\Ai\Concerns\RemembersConversations;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\Conversational;
 use Laravel\Ai\Contracts\HasProviderOptions;
+use Laravel\Ai\Contracts\HasSkills;
 use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Enums\MessageStatus;
@@ -36,7 +37,7 @@ use Laravel\Ai\Responses\AgentResponse;
 use Laravel\Ai\Responses\StreamableAgentResponse;
 
 #[Timeout(120)]
-final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conversational, HasProviderOptions, HasTools
+final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conversational, HasProviderOptions, HasSkills, HasTools
 {
     use HasUsageUser;
     use Promptable, RemembersConversations;
@@ -168,6 +169,14 @@ final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conve
         // @codeCoverageIgnoreEnd
 
         return $this->agentBuilder->buildTools($this->currentRequest, $this->user);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function skills(): array
+    {
+        return [resource_path('skills')];
     }
 
     // @codeCoverageIgnoreStart

@@ -16,17 +16,17 @@ final readonly class CompactStaleToolResults
      */
     public function handle(array $messages): array
     {
-        $turnScopedTools = (array) config('altani.context.turn_scoped_tools', []);
+        $callAgain = $this->callAgainTools();
 
-        if ($turnScopedTools === []) {
+        if ($callAgain === []) {
             return $messages;
         }
 
         return array_map(
             fn (Message $message): Message => $message instanceof ToolResultMessage
                 ? new ToolResultMessage($message->toolResults->map(
-                    fn (ToolResult $result): ToolResult => $result->successful() && in_array($result->name, $turnScopedTools, true)
-                        ? $this->compacted($result)
+                    fn (ToolResult $result): ToolResult => $result->successful() && isset($callAgain[$result->name])
+                        ? $this->compacted($result, $callAgain[$result->name])
                         : $result,
                 ))
                 : $message,
@@ -34,13 +34,26 @@ final readonly class CompactStaleToolResults
         );
     }
 
-    private function compacted(ToolResult $result): ToolResult
+    /**
+     * @return array<string, string>
+     */
+    private function callAgainTools(): array
+    {
+        /** @var list<string> $turnScoped */
+        $turnScoped = (array) config('altani.context.turn_scoped_tools', []);
+        /** @var array<string, string> $retired */
+        $retired = (array) config('altani.context.retired_tools', []);
+
+        return [...array_combine($turnScoped, $turnScoped), ...$retired];
+    }
+
+    private function compacted(ToolResult $result, string $callAgain): ToolResult
     {
         return new ToolResult(
             id: $result->id,
             name: $result->name,
             arguments: $result->arguments,
-            result: "Omitted to save context: this result is from an earlier turn. Call {$result->name} again if you need it.",
+            result: "Omitted to save context: this result is from an earlier turn. Call {$callAgain} again if you need it.",
             resultId: $result->resultId,
         );
     }

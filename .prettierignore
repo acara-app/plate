@@ -1,3 +1,6 @@
 resources/js/components/ui/*
 resources/views/mail/*
 resources/js/components/chat/visuals/generated/*
+
+# Agent skills reach the model as written; Prettier's table padding would only add tokens
+resources/skills/
