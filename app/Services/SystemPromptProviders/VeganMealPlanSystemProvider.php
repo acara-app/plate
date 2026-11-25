@@ -34,8 +34,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 '2. DIETITIAN: Pair it with a Vitamin C source (Peppers, Citrus) to maximize Iron absorption.',
                 '3. CHEF: Use nuts/seeds for texture and essential fats.',
                 '4. NUTRITIONIST: Verify that the total protein count meets the daily requirement despite lower bioavailability.',
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "vegan", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Generate the structured plan using whole plant ingredients.',
+                '5. TEAM: Generate the structured plan using whole plant ingredients.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class VeganMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

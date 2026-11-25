@@ -264,23 +264,24 @@ it('returns primary value for each aggregation function', function (string $aggr
     'count' => ['count', 'value_count', 5.0],
 ]);
 
-it('delegates to model primaryValue when aggregation function is none', function (): void {
+it('reports the sample count without inventing measurements for an unrecognized metric', function (): void {
     $user = User::factory()->create();
     $this->actingAs($user);
     $day = CarbonImmutable::parse('2026-04-10');
 
-    HealthDailyAggregate::factory()->for($user)->stepCount(5000)->create([
-        'local_date' => $day,
-        'date' => $day,
-        'aggregation_function' => 'none',
+    HealthSyncSample::factory()->for($user)->create([
+        'type_identifier' => 'unrecognizedMetric',
+        'measured_at' => $day->setTime(12, 0),
     ]);
+    resolve(AggregateHealthDailySamplesAction::class)->handle($user, $day);
 
-    $request = new Request(['type' => 'stepCount', 'days' => 1, 'date' => $day->toDateString()]);
+    $request = new Request(['type' => 'unrecognizedMetric', 'days' => 1, 'date' => $day->toDateString()]);
     $result = $this->tool->handle($request);
     $json = json_decode((string) $result, true);
 
-    expect($json['summaries'])->toHaveCount(1)
-        ->and($json['summaries'][0]['aggregation_function'])->toBe('none');
+    $summary = $json['summaries'][0];
+    expect($summary)->toMatchArray(['aggregation_function' => 'none', 'count' => 1]);
+    expect([$summary['total'], $summary['avg'], $summary['min'], $summary['max'], $summary['primary_value']])->each->toBeNull();
 });
 
 it('delegates to model primaryValue when aggregation function is null', function (): void {

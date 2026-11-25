@@ -9,7 +9,6 @@ use App\Actions\CreateMealPlan;
 use App\Ai\Concerns\HasUsageUser;
 use App\Ai\Concerns\ReasonsWithMediumEffort;
 use App\Ai\MealPlanPromptBuilder;
-use App\Ai\Tools\StartMealPlanGeneration;
 use App\Contracts\Ai\BillsUsageToUser;
 use App\Contracts\Ai\GeneratesMealPlans;
 use App\Data\DayMealsData;
@@ -73,10 +72,7 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
      */
     public function tools(): array
     {
-        return [
-            ...$this->toolRegistry->resolve([StartMealPlanGeneration::class]),
-            ...$this->toolRegistry->getSharedTools(),
-        ];
+        return $this->toolRegistry->getSharedTools();
     }
 
     /**
