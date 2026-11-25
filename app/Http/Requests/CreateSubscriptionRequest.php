@@ -15,8 +15,8 @@ final class CreateSubscriptionRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'exists:subscription_products,id'],
-            'billing_interval' => ['required', 'in:monthly,yearly'],
+            'product_id' => ['bail', 'required', 'integer', 'exists:subscription_products,id'],
+            'billing_interval' => ['sometimes', 'in:monthly'],
         ];
     }
 }

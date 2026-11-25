@@ -264,6 +264,10 @@ class extends Component
             $showPlanChoices = $barOffer !== null && ! $photoAllowance->exhausted;
             $barClearance = $barOffer ? 232 : 96;
             $freeScansLeft = $photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted ? $photoAllowance->remaining : null;
+            $freeScansLabel = $freeScansLeft === null ? null : strtr(
+                __('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')),
+                ['{{count}}' => (string) $freeScansLeft],
+            );
         @endphp
 
         <div
@@ -505,8 +509,8 @@ class extends Component
 
                 @unless ($photoAllowance->exhausted)
                     <div class="flex flex-col gap-2">
-                        @if ($freeScansLeft !== null)
-                            <p class="px-1 text-center text-sm font-medium text-muted-foreground">{!! e(strtr(__('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $freeScansLeft])) !!}</p>
+                        @if ($freeScansLabel !== null)
+                            <p class="px-1 text-center text-sm font-medium text-muted-foreground">{{ $freeScansLabel }}</p>
                         @endif
                         <x-snap-result.button variant="plain" :href="route('snap-to-track')">
                             <x-snap-result.icon name="camera" />
@@ -530,11 +534,11 @@ class extends Component
             >
                 <div class="mx-auto flex w-full max-w-md flex-col gap-2.5 rounded-t-[1.75rem] bg-card pt-3 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:rounded-[1.75rem] md:shadow-[0_16px_48px_rgba(0,0,0,0.18)] md:ring-1 md:ring-foreground/10">
                     @if ($showPlanChoices)
-                        <div role="radiogroup" aria-label="How to keep this meal" class="flex gap-2">
+                        <div role="radiogroup" aria-label="How to keep this meal" class="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
                             <x-snap-result.plan-choice value="free" :label="__('common.photo_plans.free.price')" description="Save this meal" />
                             <x-snap-result.plan-choice
                                 value="paid"
-                                :label="$barOffer->name"
+                                :label="__('common.photo_plans.offer.scans_and_coach')"
                                 :description="$barOffer->formattedPrice.__('common.checkout_subscription.per_month')"
                                 x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} }, {{ Js::from('result_bar:'.$this->resultKey()) }}); $wire.offerViewed('result_bar')"
                             />
@@ -558,7 +562,11 @@ class extends Component
                                     wire:target="save,upgrade,signInForPlan"
                                     x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
                                 >
-                                    {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                                    @if ($showPlanChoices)
+                                        {{ __('common.photo_plans.offer.continue_to_checkout') }}
+                                    @else
+                                        {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                                    @endif
                                 </x-snap-result.button>
                                 @error('checkout')
                                     <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
@@ -567,7 +575,9 @@ class extends Component
                                     @guest
                                         <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
                                     @endguest
-                                    <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+                                    @unless ($showPlanChoices)
+                                        <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+                                    @endunless
                                 </div>
                             </div>
                         @endif
@@ -580,10 +590,24 @@ class extends Component
                             >
                                 Save this meal free
                             </x-snap-result.button>
-                            @if ($showPlanChoices)
-                                <p class="flex min-h-8 items-center justify-center px-2 text-center text-[11px] leading-snug text-muted-foreground">{{ Arr::last(__('common.photo_plans.free.features')) }}</p>
-                            @endif
                         </div>
+                        @if ($showPlanChoices)
+                            <div class="flex flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
+                                @if ($freeScansLabel !== null)
+                                    <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
+                                        <x-snap-result.icon name="chevron-right" class="size-4 shrink-0 rotate-180" />
+                                        <span class="flex flex-col">
+                                            <span class="text-sm font-semibold">{{ __('common.photo_plans.checkout.try_another') }}</span>
+                                            <span class="text-muted-foreground">{{ $freeScansLabel }}</span>
+                                        </span>
+                                    </a>
+                                @endif
+                                <span x-show="plan === 'paid'" style="display: none;" class="text-muted-foreground">{{ __('common.photo_plans.offer.monthly_renewal') }}</span>
+                                <a href="{{ route('checkout.subscription') }}" target="_blank" rel="noopener" class="ml-auto inline-flex min-h-11 items-center rounded-lg px-1 font-medium underline underline-offset-4 {{ $press }} {{ $ring }}">
+                                    {{ __('common.photo_plans.offer.plan_details') }}
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

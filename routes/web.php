@@ -179,6 +179,9 @@ Route::get('/checkout/start/{product}', Web\Checkout\StartPhotoSubscriptionContr
 
 Route::get('/checkout/subscription', Web\Checkout\CashierShowSubscriptionController::class)
     ->name('checkout.subscription');
+Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
+    ->middleware('throttle:checkout')
+    ->name('checkout.subscription.store');
 
 Route::middleware('auth')->group(function (): void {
     Route::delete('user', [Web\UserController::class, 'destroy'])->name('user.destroy');
@@ -214,10 +217,6 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('settings/two-factor', [Web\UserTwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
-
-    Route::post('/checkout/subscription', Web\Checkout\CashierSubscriptionController::class)
-        ->middleware('throttle:checkout')
-        ->name('checkout.subscription.store');
 
     Route::get('/checkout/success', Web\Checkout\CashierShowSubscriptionController::class)
         ->name('checkout.success');

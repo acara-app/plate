@@ -15,5 +15,7 @@ interface ManagesGuestCheckout
 
     public function findOpenSession(string $reference, CarbonInterface $createdSince): ?GuestCheckoutSession;
 
+    public function expireIfOpen(string $sessionId): bool;
+
     public function subscription(string $subscriptionId): Subscription;
 }

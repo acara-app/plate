@@ -21,6 +21,9 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
      */
     public array $sessions = [];
 
+    /** @var list<string> */
+    public array $expiredSessions = [];
+
     public string $subscriptionStatus = Subscription::STATUS_ACTIVE;
 
     public ?Closure $beforeSubscription = null;
@@ -92,6 +95,13 @@ final class FakeGuestCheckout implements ManagesGuestCheckout
     {
         $this->created = [...$this->created, ...$this->createdLater];
         $this->createdLater = [];
+    }
+
+    public function expireIfOpen(string $sessionId): bool
+    {
+        $this->expiredSessions[] = $sessionId;
+
+        return true;
     }
 
     public function subscription(string $subscriptionId): Subscription

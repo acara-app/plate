@@ -1,9 +1,6 @@
-import {
-    PhotoAllowanceCard,
-    type PhotoAllowance,
-} from '@/components/photo-allowance';
 import ShowSnapToTrackController from '@/actions/App/Http/Controllers/SnapToTrack/ShowSnapToTrackController';
 import { PaymentConfirmation } from '@/components/billing/payment-confirmation';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import AppLayout from '@/layouts/app-layout';
 import { support, login, snapToTrack } from '@/routes';
@@ -21,15 +18,9 @@ interface BillingProduct {
     name: string;
     description: string;
     features: string[];
-    price: number;
-    yearly_price: number;
-    stripe_price_id: string;
-    yearly_stripe_price_id: string;
+    stripe_price_id: string | null;
     popular: boolean;
     formatted_price: string;
-    formatted_yearly_price: string;
-    yearly_savings: number;
-    yearly_savings_percentage: number;
     coming_soon?: boolean;
 }
 
@@ -64,8 +55,7 @@ interface Props {
     meal: PendingMeal | null;
     continueToMeal: boolean;
     selectedProductId: number | null;
-    selectedInterval: 'monthly' | 'yearly';
-    photoAllowance?: PhotoAllowance;
+    planActive: boolean;
     products: BillingProduct[];
     currentSubscription: CashierSubscription | null;
     billingPortalUrl: string | null;
@@ -89,28 +79,24 @@ export default function CashierSubscription({
     meal,
     continueToMeal,
     selectedProductId,
-    selectedInterval,
-    photoAllowance,
+    planActive,
     currentSubscription,
     billingPortalUrl,
     hasIncompletePayment,
     incompletePaymentUrl,
 }: Props) {
     const [isSubscribing, setIsSubscribing] = useState(false);
-    const [billingInterval, setBillingInterval] = useState<
-        'monthly' | 'yearly'
-    >(selectedInterval);
+    const [checkoutError, setCheckoutError] = useState<{
+        productId: number;
+        message: string;
+    } | null>(null);
     const { t } = useTranslation('common');
 
     const Layout = isGuest ? GuestPricingLayout : AppLayout;
-    const planActive = !paymentPending && photoAllowance?.mode === 'premium';
     const selectedPlan =
         isGuest || paymentPending || planActive || currentSubscription
             ? undefined
-            : products.find(
-                  (product) =>
-                      product.id === selectedProductId && product.price > 0,
-              );
+            : products.find((product) => product.id === selectedProductId);
 
     useEffect(() => {
         if (continueToMeal && meal?.save_url) {
@@ -118,34 +104,30 @@ export default function CashierSubscription({
         }
     }, [continueToMeal, meal?.save_url]);
 
-    const formatSavings = (value: number) => `$${parseFloat(value.toFixed(2))}`;
-
-    function handleSubscribe(
-        productId: number,
-        interval: 'monthly' | 'yearly' = billingInterval,
-    ) {
+    function handleSubscribe(productId: number) {
         if (isSubscribing) {
             return;
         }
 
-        if (isGuest) {
-            router.visit(
-                checkout.start(productId, { query: { interval } }).url,
-            );
-            return;
-        }
+        setCheckoutError(null);
         window.umami?.track('snap_to_track_checkout_click', {
             source: 'checkout',
-            interval,
+            interval: 'monthly',
         });
         setIsSubscribing(true);
         router.post(
             checkout.subscription.store(),
             {
                 product_id: productId,
-                billing_interval: interval,
             },
             {
+                preserveScroll: 'errors',
+                onError(errors) {
+                    setCheckoutError({
+                        productId,
+                        message: errors.checkout ?? Object.values(errors)[0],
+                    });
+                },
                 onFinish() {
                     setIsSubscribing(false);
                 },
@@ -218,28 +200,16 @@ export default function CashierSubscription({
                                 })}
                             </h2>
                             <p className="text-2xl font-bold">
-                                {selectedInterval === 'yearly'
-                                    ? `${selectedPlan.formatted_yearly_price}${t('checkout_subscription.per_year')}`
-                                    : `${selectedPlan.formatted_price}${t('checkout_subscription.per_month')}`}
+                                {selectedPlan.formatted_price}
+                                {t('checkout_subscription.per_month')}
                             </p>
                             <p className="text-sm text-muted-foreground">
-                                {t(
-                                    `photo_plans.checkout.${selectedInterval}_terms`,
-                                    {
-                                        price:
-                                            selectedInterval === 'yearly'
-                                                ? selectedPlan.formatted_yearly_price
-                                                : selectedPlan.formatted_price,
-                                    },
-                                )}
+                                {t('photo_plans.checkout.monthly_terms', {
+                                    price: selectedPlan.formatted_price,
+                                })}
                             </p>
                             <Button
-                                onClick={() =>
-                                    handleSubscribe(
-                                        selectedPlan.id,
-                                        selectedInterval,
-                                    )
-                                }
+                                onClick={() => handleSubscribe(selectedPlan.id)}
                                 disabled={isSubscribing}
                                 className="h-auto min-h-11 w-full whitespace-normal sm:w-auto"
                             >
@@ -416,322 +386,178 @@ export default function CashierSubscription({
                         </div>
                     )}
 
-                    <PhotoAllowanceCard
-                        allowance={photoAllowance}
-                        showUpgrade={false}
-                    />
-
-                    {/* Available Plans */}
-                    <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-900">
-                        <div className="border-b border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-800 dark:bg-gray-950">
-                            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                                    {currentSubscription
-                                        ? t('checkout_subscription.change_plan')
-                                        : t(
-                                              'checkout_subscription.choose_plan',
-                                          )}
-                                </h2>
-
-                                {/* Billing Interval Toggle */}
-                                {products.some(
-                                    (product) => product.yearly_price,
-                                ) && (
-                                    <div className="flex items-center space-x-1 rounded-lg bg-gray-200 p-1 dark:bg-gray-800">
-                                        <button
-                                            onClick={() =>
-                                                setBillingInterval('monthly')
-                                            }
-                                            className={clsx(
-                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                                billingInterval === 'monthly'
-                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                            )}
-                                        >
-                                            {t('checkout_subscription.monthly')}
-                                        </button>
-                                        <button
-                                            onClick={() =>
-                                                setBillingInterval('yearly')
-                                            }
-                                            className={clsx(
-                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                                billingInterval === 'yearly'
-                                                    ? 'bg-white text-gray-900 shadow-sm dark:bg-gray-700 dark:text-gray-100'
-                                                    : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100',
-                                            )}
-                                        >
-                                            {t('checkout_subscription.yearly')}
-                                            <span className="ml-1 text-xs font-semibold text-green-600 dark:text-green-400">
-                                                {t(
-                                                    'checkout_subscription.save',
-                                                )}{' '}
-                                                {products[0]
-                                                    ?.yearly_savings_percentage ||
-                                                    17}
-                                                %
-                                            </span>
-                                        </button>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="p-4 sm:p-6">
+                    {checkoutError &&
+                        !products.some(
+                            (product) => product.id === checkoutError.productId,
+                        ) && (
+                            <InputError
+                                role="alert"
+                                message={checkoutError.message}
+                            />
+                        )}
+                    <div
+                        className={clsx(
+                            'grid grid-cols-1 gap-6',
+                            products.length === 2 && 'md:grid-cols-2',
+                            products.length > 2 && 'md:grid-cols-3',
+                        )}
+                    >
+                        {products.map((product) => (
                             <div
+                                key={product.id}
                                 className={clsx(
-                                    'grid grid-cols-1 gap-6',
-                                    products.length === 2
-                                        ? 'md:grid-cols-2'
-                                        : 'md:grid-cols-3',
+                                    'relative flex min-w-0 flex-col rounded-lg border bg-card p-4 wrap-break-word transition-shadow hover:shadow-lg sm:p-6',
+                                    product.popular
+                                        ? 'border-blue-500 shadow-lg ring-2 ring-blue-500 dark:border-blue-400 dark:ring-blue-400'
+                                        : 'border-gray-200 dark:border-gray-700',
                                 )}
                             >
-                                {products.map((product) => (
-                                    <div
-                                        key={product.id}
-                                        className={clsx(
-                                            'relative flex min-w-0 flex-col rounded-lg border p-4 wrap-break-word transition-shadow hover:shadow-lg sm:p-6',
-                                            product.popular
-                                                ? 'border-blue-500 shadow-lg ring-2 ring-blue-500 dark:border-blue-400 dark:ring-blue-400'
-                                                : 'border-gray-200 dark:border-gray-700',
+                                {product.popular && (
+                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform">
+                                        <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white dark:bg-blue-600">
+                                            {t(
+                                                'checkout_subscription.most_popular',
+                                            )}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div className="flex flex-1 flex-col text-center">
+                                    <h2 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
+                                        {product.name}
+                                        {selectedProductId === product.id && (
+                                            <span className="block text-sm text-muted-foreground">
+                                                {t(
+                                                    'photo_plans.checkout.selected',
+                                                )}
+                                            </span>
                                         )}
-                                    >
-                                        {product.popular && (
-                                            <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform">
-                                                <span className="rounded-full bg-blue-500 px-3 py-1 text-xs font-semibold text-white dark:bg-blue-600">
+                                    </h2>
+                                    <div className="mb-4">
+                                        {product.coming_soon ? (
+                                            <div>
+                                                <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
                                                     {t(
-                                                        'checkout_subscription.most_popular',
+                                                        'checkout_subscription.custom_pricing',
+                                                    )}
+                                                </div>
+                                                <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                                    {t(
+                                                        'checkout_subscription.contact_us',
+                                                    )}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+                                                {product.formatted_price}
+                                                <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                                    {t(
+                                                        'checkout_subscription.per_month',
                                                     )}
                                                 </span>
                                             </div>
                                         )}
-
-                                        <div className="flex flex-1 flex-col text-center">
-                                            <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">
-                                                {product.name}
-                                                {selectedProductId ===
-                                                    product.id && (
-                                                    <span className="block text-sm text-muted-foreground">
-                                                        {t(
-                                                            'photo_plans.checkout.selected',
-                                                        )}
-                                                    </span>
-                                                )}
-                                            </h3>
-                                            <div className="mb-4">
-                                                {product.coming_soon ? (
-                                                    <div>
-                                                        <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                                            {t(
-                                                                'checkout_subscription.custom_pricing',
-                                                            )}
-                                                        </div>
-                                                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                            {t(
-                                                                'checkout_subscription.contact_us',
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                ) : product.price === 0 ? (
-                                                    <div className="text-3xl font-bold">
-                                                        {t(
-                                                            'photo_plans.free.price',
-                                                        )}
-                                                    </div>
-                                                ) : billingInterval ===
-                                                  'monthly' ? (
-                                                    <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                                        {
-                                                            product.formatted_price
-                                                        }
-                                                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                            {t(
-                                                                'checkout_subscription.per_month',
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <div>
-                                                        <div className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-                                                            {
-                                                                product.formatted_yearly_price
-                                                            }
-                                                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
-                                                                {t(
-                                                                    'checkout_subscription.per_year',
-                                                                )}
-                                                            </span>
-                                                        </div>
-                                                        <div className="text-sm font-medium text-green-600 dark:text-green-400">
-                                                            {t(
-                                                                'checkout_subscription.save_amount',
-                                                                {
-                                                                    amount: formatSavings(
-                                                                        product.yearly_savings,
-                                                                    ),
-                                                                    percentage:
-                                                                        product.yearly_savings_percentage,
-                                                                },
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="mb-4 flex-1 text-left text-sm">
-                                                <p className="mb-3 font-medium text-gray-600 dark:text-gray-400">
-                                                    {product.description}
-                                                </p>
-                                                <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-                                                    {product.features.map(
-                                                        (feature, index) => (
-                                                            <li
-                                                                key={index}
-                                                                className="flex items-start"
-                                                            >
-                                                                <span className="mt-0.5 mr-2 shrink-0 text-green-500 dark:text-green-400">
-                                                                    ✓
-                                                                </span>
-                                                                {feature}
-                                                            </li>
-                                                        ),
-                                                    )}
-                                                </ul>
-                                            </div>
-
-                                            <div className="mt-auto">
-                                                {product.coming_soon ? (
-                                                    <Button
-                                                        asChild
-                                                        variant="outline"
-                                                        className="h-auto min-h-11 w-full whitespace-normal"
-                                                    >
-                                                        <a href={support().url}>
-                                                            {t(
-                                                                'checkout_subscription.contact_sales',
-                                                            )}
-                                                        </a>
-                                                    </Button>
-                                                ) : product.price === 0 &&
-                                                  photoAllowance?.enabled ? (
-                                                    photoAllowance.mode ===
-                                                        'trial' &&
-                                                    !photoAllowance.exhausted ? (
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            className="h-auto min-h-11 w-full whitespace-normal"
-                                                        >
-                                                            <a
-                                                                href={
-                                                                    snapToTrack()
-                                                                        .url
-                                                                }
-                                                            >
-                                                                {t(
-                                                                    'photo_plans.free.try',
-                                                                )}
-                                                            </a>
-                                                        </Button>
-                                                    ) : (
-                                                        <Button
-                                                            disabled
-                                                            variant="outline"
-                                                            className="h-auto min-h-11 w-full whitespace-normal"
-                                                        >
-                                                            {photoAllowance.mode ===
-                                                            'premium'
-                                                                ? t(
-                                                                      'photo_plans.checkout.premium_active',
-                                                                  )
-                                                                : t(
-                                                                      'photo_plans.free.used',
-                                                                  )}
-                                                        </Button>
-                                                    )
-                                                ) : product.price === 0 ? (
-                                                    <Button
-                                                        disabled
-                                                        variant="outline"
-                                                        className="h-auto min-h-11 w-full whitespace-normal"
-                                                    >
-                                                        {currentSubscription
-                                                            ? t(
-                                                                  'checkout_subscription.free_plan_label',
-                                                              )
-                                                            : t(
-                                                                  'checkout_subscription.current_plan_label',
-                                                              )}
-                                                    </Button>
-                                                ) : (
-                                                    <>
-                                                        <Button
-                                                            onClick={() =>
-                                                                handleSubscribe(
-                                                                    product.id,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                isSubscribing ||
-                                                                (billingInterval ===
-                                                                'monthly'
-                                                                    ? !product.stripe_price_id
-                                                                    : !product.yearly_stripe_price_id)
-                                                            }
-                                                            className="h-auto min-h-11 w-full whitespace-normal"
-                                                            variant={
-                                                                product.popular
-                                                                    ? 'default'
-                                                                    : 'outline'
-                                                            }
-                                                        >
-                                                            {isSubscribing
-                                                                ? t(
-                                                                      'checkout_subscription.processing',
-                                                                  )
-                                                                : isGuest
-                                                                  ? t(
-                                                                        'checkout_subscription.photo_plan.guest_cta',
-                                                                    )
-                                                                  : t(
-                                                                        'photo_plans.checkout.choose',
-                                                                        {
-                                                                            name: product.name,
-                                                                        },
-                                                                    )}
-                                                        </Button>
-
-                                                        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-                                                            {t(
-                                                                `photo_plans.checkout.${billingInterval}_terms`,
-                                                                {
-                                                                    price:
-                                                                        billingInterval ===
-                                                                        'yearly'
-                                                                            ? product.formatted_yearly_price
-                                                                            : product.formatted_price,
-                                                                },
-                                                            )}
-                                                        </p>
-                                                        {((billingInterval ===
-                                                            'monthly' &&
-                                                            !product.stripe_price_id) ||
-                                                            (billingInterval ===
-                                                                'yearly' &&
-                                                                !product.yearly_stripe_price_id)) && (
-                                                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                                                {t(
-                                                                    'checkout_subscription.stripe_price_required',
-                                                                )}
-                                                            </p>
-                                                        )}
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
                                     </div>
-                                ))}
+                                    <div className="mb-4 flex-1 text-left text-sm">
+                                        <p className="mb-3 font-medium text-gray-600 dark:text-gray-400">
+                                            {product.description}
+                                        </p>
+                                        <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                                            {product.features.map(
+                                                (feature, index) => (
+                                                    <li
+                                                        key={index}
+                                                        className="flex items-start"
+                                                    >
+                                                        <span className="mt-0.5 mr-2 shrink-0 text-green-500 dark:text-green-400">
+                                                            ✓
+                                                        </span>
+                                                        {feature}
+                                                    </li>
+                                                ),
+                                            )}
+                                        </ul>
+                                    </div>
+
+                                    <div className="mt-auto">
+                                        {product.coming_soon ? (
+                                            <Button
+                                                asChild
+                                                variant="outline"
+                                                className="h-auto min-h-11 w-full whitespace-normal"
+                                            >
+                                                <a href={support().url}>
+                                                    {t(
+                                                        'checkout_subscription.contact_sales',
+                                                    )}
+                                                </a>
+                                            </Button>
+                                        ) : (
+                                            <>
+                                                <Button
+                                                    onClick={() =>
+                                                        handleSubscribe(
+                                                            product.id,
+                                                        )
+                                                    }
+                                                    disabled={
+                                                        isSubscribing ||
+                                                        !product.stripe_price_id
+                                                    }
+                                                    className="h-auto min-h-11 w-full whitespace-normal"
+                                                    variant={
+                                                        product.popular
+                                                            ? 'default'
+                                                            : 'outline'
+                                                    }
+                                                >
+                                                    {isSubscribing
+                                                        ? t(
+                                                              'checkout_subscription.processing',
+                                                          )
+                                                        : isGuest
+                                                          ? t(
+                                                                'photo_plans.checkout.pay',
+                                                            )
+                                                          : t(
+                                                                'photo_plans.checkout.choose',
+                                                                {
+                                                                    name: product.name,
+                                                                },
+                                                            )}
+                                                </Button>
+                                                {checkoutError?.productId ===
+                                                    product.id && (
+                                                    <InputError
+                                                        role="alert"
+                                                        className="mt-2"
+                                                        message={
+                                                            checkoutError.message
+                                                        }
+                                                    />
+                                                )}
+
+                                                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                                                    {t(
+                                                        'photo_plans.checkout.monthly_terms',
+                                                        {
+                                                            price: product.formatted_price,
+                                                        },
+                                                    )}
+                                                </p>
+                                                {!product.stripe_price_id && (
+                                                    <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                                        {t(
+                                                            'checkout_subscription.stripe_price_required',
+                                                        )}
+                                                    </p>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
 
                     {/* Subscription Management Buttons */}

@@ -351,10 +351,14 @@ it('continues to the waiting meal only once the paid plan is active', function (
     'plan active but meal expired' => [true, ['expires_at' => now()->subMinute()], false, true],
 ]);
 
-it('lets guests view prices without contacting Stripe', function (): void {
+it('shows guests the paid plans without contacting Stripe', function (): void {
+    SubscriptionProduct::factory()->create(['name' => 'Free', 'price' => 0]);
+    $starter = sellPhotoPlans();
     $this->mock(StripeServiceContract::class)->shouldNotReceive('ensureStripeCustomer', 'getBillingPortalUrl');
+
     $this->get(route('checkout.subscription'))->assertOk()
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
+            ->has('products', 1)->where('products.0.id', $starter->id)
             ->where('currentSubscription', null)->where('isGuest', true));
 });
 

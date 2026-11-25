@@ -1062,7 +1062,8 @@ return [
     'checkout_subscription' => [
         'title' => "Gestion de l'abonnement",
         'photo_plan' => [
-            'guest_cta' => 'Créer un compte pour s\'abonner',
+            'unavailable' => 'Ce forfait n’est plus disponible.',
+            'checkout_error' => 'Impossible d’ouvrir la page de paiement. Veuillez réessayer.',
         ],
         'breadcrumb' => 'Abonnement',
         'payment_required' => 'Paiement requis',
@@ -1390,6 +1391,10 @@ return [
             'save_free' => 'Plus tard — enregistrer ce repas gratuitement',
             'login' => 'Déjà un compte ? Se connecter',
             'get_plan' => 'Obtenir {{name}} · {{price}}/mois',
+            'scans_and_coach' => 'Plus de scans + votre coach IA personnel',
+            'plan_details' => 'Détails du forfait',
+            'continue_to_checkout' => 'Passer au paiement',
+            'monthly_renewal' => 'Renouvellement mensuel. Résiliez à tout moment.',
             'no_account' => 'Aucun compte requis. Nous vous enverrons votre lien d’activation par e-mail.',
             'renewal' => 'Une nouvelle allocation d’IA chaque jour. Renouvellement mensuel jusqu’à résiliation dans les paramètres de facturation.',
             'next_meal' => 'Essayez avec un autre repas pour découvrir le suivi photo au quotidien.',

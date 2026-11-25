@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Billing;
 
 use App\Contracts\Billing\ManagesGuestCheckout;
+use App\Contracts\Billing\OffersSubscriptions;
 use App\Data\Billing\GuestCheckoutSession;
 use App\Enums\PhotoPlan;
 use App\Enums\SnapFunnelStage;
@@ -29,44 +30,84 @@ final readonly class StartGuestCheckout
         private ManagesGuestCheckout $checkout,
         private SnapFunnel $funnel,
         private Session $session,
+        private OffersSubscriptions $offers,
     ) {}
 
-    public function handle(string $guestId, string $placement, ?int $freeScansUsed = null): string
+    public function handle(string $guestId, string $placement, ?int $freeScansUsed = null, ?SubscriptionProduct $product = null): string
     {
         $guestHash = hash('sha256', $guestId);
         $lock = Cache::lock('guest-checkout:'.$guestHash, 15);
         $lock->block(10);
 
         try {
-            $latest = PlanPurchase::query()->where('guest_hash', $guestHash)->whereNull('cancelled_at')->latest('id')->first();
+            $latest = PlanPurchase::query()->with('product')->where('guest_hash', $guestHash)->whereNull('cancelled_at')->latest('id')->first();
 
-            return $this->resume($latest) ?? $this->openSession($latest?->isOpeningCheckout() === true ? $latest : $this->createPurchase($guestHash, $placement), $freeScansUsed);
+            $url = $this->resume($latest, $product, $freeScansUsed);
+
+            if ($url !== null) {
+                return $url;
+            }
+
+            $product ??= $this->catalog->product(PhotoPlan::Starter->productName());
+            throw_unless($product instanceof SubscriptionProduct && $product->price > 0 && filled($product->stripe_price_id) && $this->offers->available($product), RuntimeException::class, 'This plan is not on sale.');
+
+            if ($latest instanceof PlanPurchase && ! $this->expireUnpaidCheckout($latest)) {
+                return route('snap-to-track.purchase');
+            }
+
+            return $this->openSession($this->createPurchase($guestHash, $placement, $product), $freeScansUsed);
         } finally {
             $lock->release();
         }
     }
 
-    private function resume(?PlanPurchase $latest): ?string
+    private function resume(?PlanPurchase $purchase, ?SubscriptionProduct $product, ?int $freeScansUsed): ?string
     {
-        if (! $latest instanceof PlanPurchase) {
+        if (! $purchase instanceof PlanPurchase) {
             return null;
         }
 
-        $this->session->put('snap_to_track.purchase', $latest->id);
+        $this->session->put('snap_to_track.purchase', $purchase->id);
+
+        if ($purchase->isPaid() || $purchase->isAwaitingPayment()) {
+            return route('snap-to-track.purchase');
+        }
+
+        $sameProduct = $product === null ? $purchase->product->name === PhotoPlan::Starter->productName() : $purchase->subscription_product_id === $product->id;
+
+        if (! $sameProduct) {
+            return null;
+        }
 
         return match (true) {
-            $latest->isPaid(), $latest->isAwaitingPayment() => route('snap-to-track.purchase'),
-            $latest->canReopenCheckout() => $latest->checkout_url,
+            $purchase->canReopenCheckout() => $purchase->checkout_url,
+            $purchase->isOpeningCheckout() => $this->openSession($purchase, $freeScansUsed),
             default => null,
         };
     }
 
-    private function createPurchase(string $guestHash, string $placement): PlanPurchase
+    private function expireUnpaidCheckout(PlanPurchase $purchase): bool
     {
-        $product = $this->catalog->product(PhotoPlan::Starter->productName());
+        if ($purchase->isOpeningCheckout()) {
+            $this->openSession($purchase, null);
+        }
+
+        if ($purchase->stripe_checkout_session_id !== null && ! $this->checkout->expireIfOpen($purchase->stripe_checkout_session_id)) {
+            $purchase->update(['checkout_returned_at' => $purchase->checkout_returned_at ?? now()]);
+
+            return false;
+        }
+
+        $cancelled = PlanPurchase::query()->whereKey($purchase->id)->whereNull('paid_at')->whereNull('cancelled_at')->update(['cancelled_at' => now()]);
+        throw_unless($cancelled === 1, RuntimeException::class, 'The checkout has changed. Please try again.');
+
+        return true;
+    }
+
+    private function createPurchase(string $guestHash, string $placement, SubscriptionProduct $product): PlanPurchase
+    {
         $limiter = 'guest-checkout:'.request()->ip();
 
-        throw_unless($product instanceof SubscriptionProduct && filled($product->stripe_price_id), RuntimeException::class, 'Starter is not on sale.');
         throw_if(RateLimiter::tooManyAttempts($limiter, 10), RuntimeException::class, 'Too many guest checkouts.');
         RateLimiter::hit($limiter);
 
@@ -83,14 +124,15 @@ final readonly class StartGuestCheckout
     {
         $product = $purchase->product;
         $type = Str::slug($product->name);
+        $returnParameters = $purchase->placement === 'pricing' ? ['purchase' => $purchase->id] : [];
 
         try {
             $session = $this->checkout->open(
                 $purchase->checkoutIdempotencyKey(),
                 (string) $purchase->stripe_price_id,
                 $purchase->id,
-                route('snap-to-track.purchase', ['checkout' => 'success']),
-                route('snap-to-track.purchase', ['checkout' => 'cancelled']),
+                route('snap-to-track.purchase', ['checkout' => 'success', ...$returnParameters]),
+                route('snap-to-track.purchase', ['checkout' => 'cancelled', ...$returnParameters]),
                 array_filter(['plan_purchase' => $purchase->id, 'product_name' => $product->name, 'snap_journey' => $purchase->snap_journey_id, 'name' => $type, 'type' => $type]),
                 "We'll email your activation link to the address above. Please make sure it's correct.",
             );
@@ -103,6 +145,7 @@ final readonly class StartGuestCheckout
             'checkout_url' => $session->url,
             'checkout_expires_at' => $session->expiresAt,
         ]);
+        throw_if($purchase->refresh()->isCancelled(), RuntimeException::class, 'The checkout has changed. Please try again.');
         $this->session->put('snap_to_track.purchase', $purchase->id);
         $this->funnel->record(SnapFunnelStage::CheckoutStarted, $purchase->id, [
             'plan' => SnapFunnel::plan($product->name),

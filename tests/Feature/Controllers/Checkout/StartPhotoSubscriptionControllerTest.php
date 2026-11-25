@@ -21,18 +21,18 @@ it('preserves the chosen offer through account creation without starting payment
     expect(session('url.intended'))->toBe($authenticated ? null : route('checkout.subscription', absolute: false));
 })->with([false, true]);
 
-it('brings the chosen plan and billing interval back after sign-up', function (): void {
+it('preserves the selected plan after sign-up from an old yearly link', function (): void {
     offerAllSubscriptions();
     $product = SubscriptionProduct::factory()->create(['price' => 9, 'stripe_price_id' => 'price_monthly', 'yearly_stripe_lookup_key' => 'lookup_yearly']);
 
     $this->get(route('checkout.start', ['product' => $product, 'interval' => 'yearly']))->assertRedirect(route('register'));
-    $this->post(route('register.store'), ['name' => 'Yearly Buyer', 'email' => 'yearly-buyer@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1', 'health_data_consent' => '1'])
+    $this->post(route('register.store'), ['name' => 'Returning Buyer', 'email' => 'buyer@example.com', 'password' => 'password1234', 'accepted_disclaimer' => '1', 'health_data_consent' => '1'])
         ->assertRedirect(route('checkout.subscription'));
 
     $this->get(route('checkout.subscription'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page
             ->where('selectedProductId', $product->id)
-            ->where('selectedInterval', 'yearly'));
+            ->missing('selectedInterval'));
 });
 
 it('sends a returning member to log in rather than sign up', function (): void {

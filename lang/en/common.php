@@ -1061,7 +1061,8 @@ return [
     'checkout_subscription' => [
         'title' => 'Subscription Management',
         'photo_plan' => [
-            'guest_cta' => 'Create an account to subscribe',
+            'unavailable' => 'This plan is no longer available.',
+            'checkout_error' => 'We couldn’t open checkout. Please try again.',
         ],
         'breadcrumb' => 'Subscription',
         'payment_required' => 'Payment Required',
@@ -1389,6 +1390,10 @@ return [
             'save_free' => 'Not now — save this meal free',
             'login' => 'Already have an account? Log in',
             'get_plan' => 'Get {{name}} · {{price}}/month',
+            'scans_and_coach' => 'More scans + your own AI coach',
+            'plan_details' => 'Plan details',
+            'continue_to_checkout' => 'Continue to checkout',
+            'monthly_renewal' => 'Renews monthly. Cancel anytime.',
             'no_account' => 'No account needed. We\'ll email your activation link.',
             'renewal' => 'A fresh AI allowance every day. Renews monthly until you cancel in Billing settings.',
             'next_meal' => 'Try another meal and see how photo tracking fits your day.',
