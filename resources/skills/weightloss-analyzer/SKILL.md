@@ -4,7 +4,7 @@ description: Analyze weight-management data, estimate energy needs, track calori
 license: MIT
 metadata:
     source: https://github.com/huifer/WellAlly-health/tree/main/.claude/skills/weightloss-analyzer
-allowed-tools: get_user_profile, get_health_summary, get_health_data, predict_glucose_spike, get_diet_reference, get_health_goals, get_fitness_goals
+allowed-tools: get_user_profile health_specialist nutrition_specialist fitness_specialist glucose_spike_specialist
 ---
 
 # Weight Management Analyzer
@@ -212,6 +212,8 @@ Support three common phases:
 
 In Plate, every input this skill needs is reachable through tool calls. Do not invent values. Always source from a tool result this turn.
 
+**Who calls these tools.** Call `get_user_profile` yourself. The other tools in this table belong to the specialists, so ask the specialist that owns a tool instead of calling it: `health_specialist` runs `get_health_summary`, `get_health_data` and `get_health_goals`; `nutrition_specialist` runs `get_diet_reference`; `fitness_specialist` runs `get_fitness_goals`; and `glucose_spike_specialist` predicts a food's glucose response. Give the specialist a self-contained task with the window, the data you need, and the profile facts it needs, and relay only the numbers it reports.
+
 | What you need | Plate upstream | Tool to call | Notes |
 |---|---|---|---|
 | Profile (height, age, sex, target weight, dietary prefs, conditions, medications, locale) | manual onboarding + profile edits | `get_user_profile` | Pass `section: "all"` for the first read; later, request `biometrics` / `goals` / `dietary_preferences` to keep responses focused. |
@@ -221,7 +223,7 @@ In Plate, every input this skill needs is reachable through tool calls. Do not i
 | Daily notes (hunger, symptoms, recovery, mood) | manual entries and chat-derived logs | `get_health_data` (date-ranged) | Pull these only when the analysis demands a qualitative signal. |
 | Sleep | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_health_data` | Use as a plateau-troubleshooting input, not a primary metric. |
 | Blood pressure | Apple HealthKit via **Health Sync** + manual | `get_health_summary`, `get_health_data` | Flag uncontrolled BP and escalate per the safety rules below. |
-| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `predict_glucose_spike` | Required when the user has diabetes or pre-diabetes context. |
+| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `glucose_spike_specialist` | Required when the user has diabetes or pre-diabetes context. |
 | Medications | manual records + Health Sync (where supported) | `get_health_data` (medication-typed entries); `get_user_profile` for the static medication list | Medications affecting appetite, glucose, fluid balance, or thyroid can drive weight changes — flag and escalate. |
 | Health goals & current phase | profile + goal store | `get_health_goals`, `get_fitness_goals` | Use to reconcile the user's stated goal with the data you observe. |
 
@@ -248,7 +250,7 @@ Also clarify:
 
 ### Step 2: Read the Data
 
-Call the tools listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (for static biometrics, goals, locale) and `get_health_summary` over the chosen window (for trend metrics). Only call `get_health_data` afterward to drill into specific dates the summary surfaced as anomalies. If the user asks about glucose response, blood pressure, or sleep, pull those streams in parallel.
+Fetch the data listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (for static biometrics, goals, locale), then ask `health_specialist` for `get_health_summary` over the chosen window (for trend metrics). Have it call `get_health_data` afterward only to drill into specific dates the summary surfaced as anomalies. If the user asks about glucose response, blood pressure, or sleep, ask for those streams in the same task.
 
 Minimum review window:
 - `2 weeks` for a quick check

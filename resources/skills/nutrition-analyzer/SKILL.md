@@ -4,7 +4,7 @@ description: Analyze dietary intake, surface nutrition patterns, screen nutrient
 license: MIT
 metadata:
     source: https://github.com/huifer/WellAlly-health/tree/main/.claude/skills/nutrition-analyzer
-allowed-tools: get_user_profile, get_health_summary, get_health_data, get_diet_reference, get_calorie_level_guideline, get_daily_servings_by_calorie, predict_glucose_spike, get_health_goals, get_fitness_goals
+allowed-tools: get_user_profile health_specialist nutrition_specialist fitness_specialist glucose_spike_specialist
 ---
 
 # Nutrition Analyzer
@@ -222,6 +222,8 @@ Ground recommendations in DRIs/RDA standards, the user's nutrition history, thei
 
 In Plate, every input this skill needs is reachable through tool calls. Do not invent values. Always source from a tool result this turn.
 
+**Who calls these tools.** Call `get_user_profile` yourself. The other tools in this table belong to the specialists, so ask the specialist that owns a tool instead of calling it: `health_specialist` runs `get_health_summary`, `get_health_data` and `get_health_goals`; `nutrition_specialist` runs `get_diet_reference`, `get_calorie_level_guideline` and `get_daily_servings_by_calorie`; `fitness_specialist` runs `get_fitness_goals`; and `glucose_spike_specialist` predicts a food's glucose response. Give the specialist a self-contained task with the window, the data type (for example `type: "food"`), and the profile facts it needs, and relay only the numbers it reports.
+
 | What you need | Plate upstream | Tool to call | Notes |
 |---|---|---|---|
 | Profile (age, sex, height, dietary preferences, conditions, medications, locale) | manual onboarding + profile edits | `get_user_profile` | Pass `section: "all"` for the first read; later request `biometrics` / `dietary_preferences` / `goals` to keep responses focused. |
@@ -231,7 +233,7 @@ In Plate, every input this skill needs is reachable through tool calls. Do not i
 | Activity (steps, exercise minutes, training) | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_fitness_goals` | For fueling adequacy and under-eating checks in active users. |
 | Sleep | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_health_data` | For caffeine-timing and late-meal correlations. |
 | Blood pressure | Apple HealthKit via **Health Sync** + manual | `get_health_summary`, `get_health_data` | For sodium and potassium-to-sodium correlation; flag uncontrolled BP and escalate. |
-| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `predict_glucose_spike` | For carbohydrate-quality and meal-structure effects; required when diabetes or pre-diabetes context applies. |
+| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `glucose_spike_specialist` | For carbohydrate-quality and meal-structure effects; required when diabetes or pre-diabetes context applies. |
 | Medications | manual records + Health Sync (where supported) | `get_health_data` (medication-typed entries); `get_user_profile` for the static medication list | Flag medications affecting appetite, glucose, fluid balance, or nutrient absorption. |
 | Health goals & phase | profile + goal store | `get_health_goals`, `get_fitness_goals` | Reconcile the user's stated goal with what the data shows. |
 
@@ -252,7 +254,7 @@ Identify:
 
 ### Step 2: Read the Data
 
-Call the tools listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (static profile, conditions, medications, locale) and `get_health_summary` with `type: "food"` over the chosen window (the full daily nutrient panel). Drill into specific days with `get_health_data` only where the summary surfaces an anomaly. Pull weight, activity, sleep, blood-pressure, or glucose streams when the question calls for a correlation.
+Fetch the data listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (static profile, conditions, medications, locale), then ask `health_specialist` for `get_health_summary` with `type: "food"` over the chosen window (the full daily nutrient panel). Have it drill into specific days with `get_health_data` only where the summary surfaces an anomaly. Ask for weight, activity, sleep, blood-pressure, or glucose streams when the question calls for a correlation.
 
 Read enough surrounding context to interpret the nutrition data safely. Do not push generic potassium increases in users with kidney-disease risk, and do not push high-protein advice where the clinical context may limit protein. If a tool returns no data over the requested window, say so and ask whether to widen the window — never extrapolate from missing data.
 

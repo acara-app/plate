@@ -3,9 +3,15 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\AgentRunner;
+use App\Services\ToolRegistry;
+use Laravel\Ai\Contracts\Agent;
+use Laravel\Ai\Contracts\HasTools;
 use Laravel\Ai\Skills\Skill;
+use Laravel\Ai\Tools\AgentTool;
 use Laravel\Ai\Tools\LoadSkill;
 use Laravel\Ai\Tools\Request;
+use Laravel\Ai\Tools\ToolNameResolver;
+use Symfony\Component\Yaml\Yaml;
 
 covers(AgentRunner::class);
 
@@ -35,3 +41,27 @@ it("loads a skill's instructions with its licence as the only bundled file", fun
         ->toStartWith("<skill_content name=\"{$name}\">")
         ->toContain("<skill_resources>\nLICENSE.md\n</skill_resources>");
 })->with(['nutrition-analyzer', 'weightloss-analyzer']);
+
+it('names only tools the agent can call itself or reach through a specialist', function (): void {
+    $registry = resolve(ToolRegistry::class);
+    $specialists = $registry->getSubAgents();
+    $names = static fn (array $tools): array => array_map(ToolNameResolver::resolve(...), $tools);
+
+    $direct = [
+        ...$names($registry->getTools()),
+        ...$names($registry->getImageTools([])),
+        ...$names(array_map(static fn (Agent $specialist): AgentTool => new AgentTool($specialist), $specialists)),
+    ];
+    $reachable = [
+        ...$direct,
+        ...collect($specialists)->flatMap(static fn (Agent $specialist): array => $specialist instanceof HasTools ? $names([...$specialist->tools()]) : [])->all(),
+    ];
+
+    foreach (glob(resource_path('skills/*/SKILL.md')) ?: [] as $file) {
+        preg_match('/\A---\R(.*?)\R---\R?(.*)\z/s', (string) file_get_contents($file), $parts);
+        preg_match_all('/`([a-z]+(?:_[a-z]+)+)`/', $parts[2], $named);
+
+        expect(explode(' ', (string) Yaml::parse($parts[1])['allowed-tools']))->each->toBeIn($direct)
+            ->and(array_values(array_diff(array_unique($named[1]), ['dietary_preferences'])))->each->toBeIn($reachable);
+    }
+});
