@@ -30,6 +30,7 @@ return [
     'meal_plan_specialist' => 'Planification de vos repas',
     'glucose_spike_specialist' => 'Prévision de votre réponse glycémique',
     'web_search' => 'Recherche sur le Web',
+    'LoadSkill' => 'Chargement des conseils d’expert',
     'carb_boundary_notice' => 'Estimations, pas des mesures — ne dosez jamais l\'insuline ni d\'autres médicaments à partir de ces chiffres.',
     'approval_not_confirmed' => "L'utilisateur n'a pas confirmé cette entrée, rien n'a donc été enregistré.",
     'approval_awaiting' => 'Pas encore enregistré — merci de confirmer.',

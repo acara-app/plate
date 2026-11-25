@@ -15,7 +15,6 @@ use App\Contracts\Memory\ManagesMemoryContext;
 use App\Contracts\Memory\PullsConversationHistory;
 use App\Contracts\Services\IndexNowServiceContract;
 use App\Contracts\Services\StripeServiceContract;
-use App\Contracts\Skills\LoadsSkills;
 use App\Enums\HealthSyncType;
 use App\Listeners\TrackAiUsage;
 use App\Models\HealthSyncSample;
@@ -33,7 +32,6 @@ use App\Services\IndexNowService;
 use App\Services\Memory\NullConversationHistoryPuller;
 use App\Services\Memory\NullMemoryExtractionDispatcher;
 use App\Services\Memory\NullMemoryPromptContext;
-use App\Services\Skills\NullSkillLoader;
 use App\Services\StripeService;
 use App\Services\TurnDataRegistry;
 use Carbon\CarbonImmutable;
@@ -74,7 +72,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bindIf(ManagesMemoryContext::class, NullMemoryPromptContext::class);
         $this->app->bindIf(DispatchesMemoryExtraction::class, NullMemoryExtractionDispatcher::class);
         $this->app->bindIf(PullsConversationHistory::class, NullConversationHistoryPuller::class);
-        $this->app->bindIf(LoadsSkills::class, NullSkillLoader::class);
 
         $this->app->singleton(
             PlateConversationStore::class,
