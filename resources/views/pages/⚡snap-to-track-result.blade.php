@@ -571,14 +571,14 @@ class extends Component
                                 @error('checkout')
                                     <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
                                 @enderror
-                                <div class="flex flex-col items-center gap-0.5 px-2 pb-1 text-center text-[11px] leading-snug">
-                                    @guest
-                                        <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
-                                    @endguest
-                                    @unless ($showPlanChoices)
+                                @unless ($showPlanChoices)
+                                    <div class="flex flex-col items-center gap-0.5 px-2 pb-1 text-center text-[11px] leading-snug">
+                                        @guest
+                                            <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
+                                        @endguest
                                         <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
-                                    @endunless
-                                </div>
+                                    </div>
+                                @endunless
                             </div>
                         @endif
                         <div @if ($showPlanChoices) x-show="plan === 'free'" @endif class="flex flex-col gap-2">
@@ -592,7 +592,7 @@ class extends Component
                             </x-snap-result.button>
                         </div>
                         @if ($showPlanChoices)
-                            <div class="flex flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
+                            <div class="flex min-h-12 flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
                                 @if ($freeScansLabel !== null)
                                     <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
                                         <x-snap-result.icon name="chevron-right" class="size-4 shrink-0 rotate-180" />
@@ -602,7 +602,12 @@ class extends Component
                                         </span>
                                     </a>
                                 @endif
-                                <span x-show="plan === 'paid'" style="display: none;" class="text-muted-foreground">{{ __('common.photo_plans.offer.monthly_renewal') }}</span>
+                                <div x-show="plan === 'paid'" style="display: none;" class="flex min-w-0 flex-1 flex-col">
+                                    @guest
+                                        <span class="font-medium text-balance">{{ __('common.photo_plans.offer.no_account') }}</span>
+                                    @endguest
+                                    <span class="text-muted-foreground">{{ __('common.photo_plans.offer.monthly_renewal') }}</span>
+                                </div>
                                 <a href="{{ route('checkout.subscription') }}" target="_blank" rel="noopener" class="ml-auto inline-flex min-h-11 items-center rounded-lg px-1 font-medium underline underline-offset-4 {{ $press }} {{ $ring }}">
                                     {{ __('common.photo_plans.offer.plan_details') }}
                                 </a>

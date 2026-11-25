@@ -63,6 +63,12 @@ interface Props {
     incompletePaymentUrl: string | null;
 }
 
+const press =
+    'touch-manipulation select-none [-webkit-tap-highlight-color:transparent] [-webkit-touch-callout:none] transition-[color,box-shadow,scale] duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
+const touchButton = `h-auto min-h-11 ${press}`;
+const planButton = `${touchButton} w-full whitespace-normal`;
+const navLink = `inline-flex min-h-11 items-center ${press}`;
+
 const getBreadcrumbs = (t: (key: string) => string): BreadcrumbItem[] => [
     {
         title: t('checkout_subscription.breadcrumb'),
@@ -211,7 +217,7 @@ export default function CashierSubscription({
                             <Button
                                 onClick={() => handleSubscribe(selectedPlan.id)}
                                 disabled={isSubscribing}
-                                className="h-auto min-h-11 w-full whitespace-normal sm:w-auto"
+                                className={`${planButton} sm:w-auto`}
                             >
                                 {isSubscribing
                                     ? t('checkout_subscription.processing')
@@ -262,7 +268,7 @@ export default function CashierSubscription({
                                         <Button
                                             asChild
                                             variant="default"
-                                            className="bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-800"
+                                            className={`${touchButton} bg-yellow-600 hover:bg-yellow-700 dark:bg-yellow-700 dark:hover:bg-yellow-800`}
                                         >
                                             <a href={incompletePaymentUrl}>
                                                 {t(
@@ -484,7 +490,7 @@ export default function CashierSubscription({
                                             <Button
                                                 asChild
                                                 variant="outline"
-                                                className="h-auto min-h-11 w-full whitespace-normal"
+                                                className={planButton}
                                             >
                                                 <a href={support().url}>
                                                     {t(
@@ -504,7 +510,7 @@ export default function CashierSubscription({
                                                         isSubscribing ||
                                                         !product.stripe_price_id
                                                     }
-                                                    className="h-auto min-h-11 w-full whitespace-normal"
+                                                    className={planButton}
                                                     variant={
                                                         product.popular
                                                             ? 'default'
@@ -563,7 +569,11 @@ export default function CashierSubscription({
                     {/* Subscription Management Buttons */}
                     {currentSubscription && (
                         <div className="flex flex-col gap-3">
-                            <Button asChild variant="default">
+                            <Button
+                                asChild
+                                variant="default"
+                                className={touchButton}
+                            >
                                 <a
                                     href={
                                         billingPortalUrl ?? billing.index().url
@@ -577,7 +587,11 @@ export default function CashierSubscription({
                                     )}
                                 </a>
                             </Button>
-                            <Button asChild variant="outline">
+                            <Button
+                                asChild
+                                variant="outline"
+                                className={touchButton}
+                            >
                                 <Link href={billing.index().url}>
                                     <ReceiptIcon className="h-4 w-4" />
                                     {t(
@@ -602,10 +616,12 @@ function GuestPricingLayout({
     const { t } = useTranslation('common');
 
     return (
-        <main className="min-h-screen bg-background text-foreground">
-            <nav className="mx-auto flex max-w-7xl justify-between px-6 py-4">
-                <a href={snapToTrack().url}>Snap to Track</a>
-                <Link href={login().url}>
+        <main className="min-h-svh bg-background text-foreground">
+            <nav className="mx-auto flex max-w-7xl justify-between px-4 py-1.5 sm:px-6 lg:px-8">
+                <a href={snapToTrack().url} className={navLink}>
+                    Snap to Track
+                </a>
+                <Link href={login().url} className={navLink}>
                     {t('photo_plans.checkout.login')}
                 </Link>
             </nav>

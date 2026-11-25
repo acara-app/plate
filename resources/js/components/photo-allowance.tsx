@@ -44,19 +44,16 @@ export interface PhotoAllowance {
 
 export function PhotoAllowanceCard({
     allowance,
-    showUpgrade = true,
     variant = 'card',
     className,
 }: {
     allowance?: PhotoAllowance;
-    showUpgrade?: boolean;
     variant?: 'card' | 'scanner';
     className?: string;
 }) {
     const { t } = useTranslation('common');
     const offerRef = useRef<HTMLDivElement>(null);
     const showOffer = !!(
-        showUpgrade &&
         allowance?.can_upgrade &&
         allowance.offer &&
         (allowance.exhausted || allowance.preview)
