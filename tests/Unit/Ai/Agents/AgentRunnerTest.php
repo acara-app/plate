@@ -158,18 +158,7 @@ describe('messages', function (): void {
             'arguments' => ['name' => 'nutrition-analyzer'],
             'result' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
         ];
-        $retiredSkillCall = [
-            'id' => 'call-0',
-            'name' => 'activate_skill',
-            'arguments' => ['skillName' => 'nutrition-analyzer'],
-            'result' => '{"success":true,"instructions":"Full nutrition-analyzer instructions"}',
-        ];
 
-        History::factory()->forConversation($conversation)->userMessage()->create(['content' => 'Analyze my dinner']);
-        History::factory()->forConversation($conversation)->assistantMessage()->create([
-            'content' => 'Dinner analysis',
-            'steps' => [['content' => 'Dinner analysis', 'tool_calls' => [$retiredSkillCall], 'reasoning' => '', 'replay_blocks' => [], 'provider_tool_calls' => []]],
-        ]);
         History::factory()->forConversation($conversation)->userMessage()->create(['content' => 'Analyze my breakfast']);
         History::factory()->forConversation($conversation)->assistantMessage()->create([
             'content' => 'Breakfast analysis',
@@ -197,7 +186,6 @@ describe('messages', function (): void {
             ->mapWithKeys(fn (ToolResult $result): array => [$result->id => $result->result]);
 
         expect($skillResults->all())->toBe([
-            'call-0' => 'Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.',
             'call-1' => 'Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.',
             'call-2' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
         ]);

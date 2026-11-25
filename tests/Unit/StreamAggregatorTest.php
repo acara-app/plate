@@ -69,9 +69,10 @@ it('trims oversized tool payloads so chat broadcasts fit the websocket message l
         ->and(mb_strlen((string) json_encode((string) json_encode($payload))))->toBeLessThan(10_000);
 })->with([
     'skill instructions returned by a tool' => [
-        new ToolResultEvent('result-1', new ToolResult('tool-1', 'LoadSkill', ['name' => 'nutrition-analyzer'], "<skill_content name=\"nutrition-analyzer\">\n"
-            .str_repeat("## Step\n\"Weigh\" every ingredient before logging it.\n", 600)
-            .'</skill_content>'), true, null, 1),
+        new ToolResultEvent('result-1', new ToolResult('tool-1', 'activate_skill', [], (string) json_encode([
+            'success' => true,
+            'instructions' => str_repeat("## Step\n\"Weigh\" every ingredient before logging it.\n", 600),
+        ])), true, null, 1),
         'result',
     ],
     'non-latin tool arguments' => [

@@ -13,14 +13,10 @@ use Laravel\Ai\Responses\Data\ToolResult;
 
 covers(CompactStaleToolResults::class);
 
-beforeEach(function (): void {
-    config(['altani.context.turn_scoped_tools' => ['LoadSkill'], 'altani.context.retired_tools' => []]);
-});
-
-it('replaces earlier-turn skill instructions with a stub the model can act on', function (): void {
+it('replaces earlier-turn skill instructions with a stub the model can act on', function (string $tool, array $arguments): void {
     $question = new Message(MessageRole::User, 'Analyze my lunch');
-    $toolCalls = new AssistantMessage('', new Collection([new ToolCall('call-1', 'LoadSkill', ['name' => 'nutrition-analyzer'])]));
-    $skillResult = new ToolResult('call-1', 'LoadSkill', ['name' => 'nutrition-analyzer'], str_repeat('Weigh every ingredient. ', 1200), 'result-1');
+    $toolCalls = new AssistantMessage('', new Collection([new ToolCall('call-1', $tool, $arguments)]));
+    $skillResult = new ToolResult('call-1', $tool, $arguments, str_repeat('Weigh every ingredient. ', 1200), 'result-1');
 
     $messages = resolve(CompactStaleToolResults::class)->handle([
         $question,
@@ -34,25 +30,12 @@ it('replaces earlier-turn skill instructions with a stub the model can act on', 
         ->and($messages[1])->toBe($toolCalls)
         ->and($compacted->id)->toBe('call-1')
         ->and($compacted->resultId)->toBe('result-1')
-        ->and($compacted->arguments)->toBe(['name' => 'nutrition-analyzer'])
+        ->and($compacted->arguments)->toBe($arguments)
         ->and($compacted->result)->toBe('Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.');
-});
-
-it("points a retired tool's earlier results at the tool that replaced it", function (): void {
-    config(['altani.context.retired_tools' => ['activate_skill' => 'LoadSkill']]);
-
-    $retired = new ToolResult('call-1', 'activate_skill', ['skillName' => 'nutrition-analyzer'], str_repeat('Weigh every ingredient. ', 1200), 'result-1');
-
-    $compacted = resolve(CompactStaleToolResults::class)->handle([
-        new ToolResultMessage(new Collection([$retired])),
-    ])[0]->toolResults->first();
-
-    expect($compacted->id)->toBe('call-1')
-        ->and($compacted->name)->toBe('activate_skill')
-        ->and($compacted->resultId)->toBe('result-1')
-        ->and($compacted->arguments)->toBe(['skillName' => 'nutrition-analyzer'])
-        ->and($compacted->result)->toBe('Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.');
-});
+})->with([
+    'LoadSkill' => ['LoadSkill', ['name' => 'nutrition-analyzer']],
+    'the retired activate_skill' => ['activate_skill', ['skillName' => 'nutrition-analyzer']],
+]);
 
 it('leaves other tools and unsuccessful skill calls untouched', function (ToolResult $result): void {
     $messages = resolve(CompactStaleToolResults::class)->handle([
@@ -62,14 +45,14 @@ it('leaves other tools and unsuccessful skill calls untouched', function (ToolRe
     expect($messages[0]->toolResults->first())->toBe($result);
 })->with([
     'a tool that is not turn-scoped' => [new ToolResult('call-1', 'get_user_profile', [], ['age' => 34])],
-    'a denied skill call' => [new ToolResult('call-1', 'LoadSkill', [], 'Denied by user.', denied: true)],
-    'a failed skill call' => [new ToolResult('call-1', 'LoadSkill', [], 'The tool call failed: disk read error', failed: true)],
+    'a denied skill call' => [new ToolResult('call-1', 'activate_skill', [], 'Denied by user.', denied: true)],
+    'a failed skill call' => [new ToolResult('call-1', 'activate_skill', [], "Skill 'unknown' not found.", failed: true)],
 ]);
 
-it('returns the history untouched when no tools are turn-scoped or retired', function (): void {
-    config(['altani.context.turn_scoped_tools' => []]);
+it('returns the history untouched when no tools are turn-scoped', function (): void {
+    config(['altani.context.turn_scoped_tools' => [], 'altani.context.retired_tools' => []]);
 
-    $history = [new ToolResultMessage(new Collection([new ToolResult('call-1', 'LoadSkill', [], 'Full instructions')]))];
+    $history = [new ToolResultMessage(new Collection([new ToolResult('call-1', 'activate_skill', [], 'Full instructions')]))];
 
     expect(resolve(CompactStaleToolResults::class)->handle($history))->toBe($history);
 });
