@@ -10,7 +10,7 @@ use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
-use App\Ai\Tools\GetCalorieLevelGuideline;
+use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetSubscriptionStatus;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
@@ -187,10 +187,10 @@ describe('tools', function (): void {
     });
 
     it('excludes WebSearch when a registered sub-agent can reach a Sensitive tool', function (): void {
-        config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
+        config()->set('plate.tools', [GetHealthSyncSupport::class]);
 
         $user = User::factory()->create();
-        $request = new AgentRequest(message: 'What are calorie recommendations?', model: new AgentModelData('openai', 'gpt-5-mini'));
+        $request = new AgentRequest(message: 'Does Plate support Health Sync?', model: new AgentModelData('openai', 'gpt-5-mini'));
 
         $result = $this->builder->build($request, $user);
 
@@ -199,17 +199,17 @@ describe('tools', function (): void {
             ->all();
 
         expect($toolClasses)
-            ->toContain(GetCalorieLevelGuideline::class)
+            ->toContain(GetHealthSyncSupport::class)
             ->toContain(NutritionSpecialist::class)
             ->not->toContain(WebSearch::class);
     });
 
     it('includes WebSearch when no Sensitive tool is reachable, even via sub-agents', function (): void {
-        config()->set('plate.tools', [GetCalorieLevelGuideline::class]);
+        config()->set('plate.tools', [GetHealthSyncSupport::class]);
         config()->set('plate.sub_agents', []);
 
         $user = User::factory()->create();
-        $request = new AgentRequest(message: 'What are calorie recommendations?', model: new AgentModelData('openai', 'gpt-5-mini'));
+        $request = new AgentRequest(message: 'Does Plate support Health Sync?', model: new AgentModelData('openai', 'gpt-5-mini'));
 
         $result = $this->builder->build($request, $user);
 
@@ -218,7 +218,7 @@ describe('tools', function (): void {
             ->all();
 
         expect($toolClasses)
-            ->toContain(GetCalorieLevelGuideline::class)
+            ->toContain(GetHealthSyncSupport::class)
             ->toContain(WebSearch::class);
     });
 });

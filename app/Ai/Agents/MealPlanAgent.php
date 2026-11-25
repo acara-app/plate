@@ -19,38 +19,33 @@ use App\Enums\MealType;
 use App\Jobs\GenerateInitialMealPlanJob;
 use App\Models\MealPlan;
 use App\Models\User;
-use App\Services\SystemPromptProviderResolver;
-use App\Services\ToolRegistry;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ArrayType;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\File;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\HasProviderOptions;
 use Laravel\Ai\Contracts\HasStructuredOutput;
-use Laravel\Ai\Contracts\HasTools;
-use Laravel\Ai\Contracts\Tool;
 use Laravel\Ai\Promptable;
-use Laravel\Ai\Providers\Tools\ProviderTool;
 use Laravel\Ai\Responses\StructuredAgentResponse;
+use Laravel\Ai\Skills\Skill;
 
 #[MaxTokens(64000)]
 #[Timeout(180)]
-final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput, HasTools
+final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans, HasProviderOptions, HasStructuredOutput
 {
     use HasUsageUser;
     use Promptable;
     use ReasonsWithMediumEffort;
 
-    private ?DietType $dietType = null;
+    private DietType $dietType = DietType::Balanced;
 
     public function __construct(
         private readonly MealPlanPromptBuilder $promptBuilder,
         private readonly AnalyzeGlucoseForNotificationAction $analyzeGlucose,
-        private readonly SystemPromptProviderResolver $systemPromptResolver,
-        private readonly ToolRegistry $toolRegistry,
     ) {}
 
     public function withDietType(DietType $dietType): self
@@ -62,17 +57,16 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
 
     public function instructions(): string
     {
-        $dietType = $this->dietType ?? DietType::Balanced;
+        $directory = resource_path('skills/diets/'.$this->dietType->skillName());
 
-        return $this->systemPromptResolver->resolve($dietType)->run();
-    }
-
-    /**
-     * @return array<int, Tool|ProviderTool>
-     */
-    public function tools(): array
-    {
-        return $this->toolRegistry->getSharedTools();
+        return implode("\n\n", [
+            <<<'PROMPT'
+                Create one day of meals for the selected diet by following the guide below. Respect the user's allergies, medical restrictions and preferences.
+                Return the meals using the requested schema, with ingredient quantities, portions and estimated nutrition values.
+                PROMPT,
+            Skill::fromDirectory($directory)?->instructions,
+            ...array_map(File::get(...), glob($directory.'/references/*.md') ?: []),
+        ]);
     }
 
     /**
@@ -148,6 +142,7 @@ final class MealPlanAgent implements Agent, BillsUsageToUser, GeneratesMealPlans
             $previousDaysContext,
             $glucoseAnalysis,
             $customPrompt,
+            $this->dietType,
         );
 
         /** @var StructuredAgentResponse $response */

@@ -60,6 +60,15 @@ enum DietType: string
         };
     }
 
+    public function skillName(): string
+    {
+        return match ($this) {
+            self::Keto => 'ketogenic-diet',
+            self::LowCarb => 'low-carb-diet',
+            default => $this->value.'-diet',
+        };
+    }
+
     public function focus(): string
     {
         return match ($this) {

@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Ai\Agents;
 
-use App\Ai\Tools\GetCalorieLevelGuideline;
-use App\Ai\Tools\GetDailyServingsByCalorie;
 use App\Ai\Tools\SuggestMeal;
+use Laravel\Ai\Attributes\MaxSteps;
 use Laravel\Ai\Attributes\Timeout;
+use Laravel\Ai\Contracts\HasSkills;
 
+#[MaxSteps(5)]
 #[Timeout(120)]
-final class NutritionSpecialist extends SpecialistAgent
+final class NutritionSpecialist extends SpecialistAgent implements HasSkills
 {
     public function name(): string
     {
@@ -22,6 +23,12 @@ final class NutritionSpecialist extends SpecialistAgent
         return 'Delegate nutrition and meal questions to a specialist that can suggest single meals, look up diet-specific reference material, USDA calorie-level guidelines, and daily serving tables. Pass a complete, self-contained task that includes any relevant user context (allergies, diet type, calorie target, what they asked) — the specialist cannot see the chat history. Do NOT use it to create multi-day meal plans; use meal_plan_specialist for that.';
     }
 
+    /** @return list<string> */
+    public function skills(): array
+    {
+        return [resource_path('skills/diets'), resource_path('skills/nutrition')];
+    }
+
     protected function promptView(): string
     {
         return 'ai.prompts.nutrition-specialist';
@@ -29,11 +36,7 @@ final class NutritionSpecialist extends SpecialistAgent
 
     protected function toolClasses(): array
     {
-        return [
-            SuggestMeal::class,
-            GetCalorieLevelGuideline::class,
-            GetDailyServingsByCalorie::class,
-        ];
+        return [SuggestMeal::class];
     }
 
     protected function includesSharedTools(): bool

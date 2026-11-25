@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Ai\Attributes\AiToolSensitivity;
-use App\Ai\Tools\GetCalorieLevelGuideline;
 use App\Ai\Tools\GetHealthGoals;
+use App\Ai\Tools\GetHealthSyncSupport;
 use App\Ai\Tools\GetUserProfile;
 use App\Enums\DataSensitivity;
 use App\Services\Ai\ToolSensitivityReader;
@@ -20,13 +20,13 @@ describe('forTool', function (): void {
     it('returns the declared sensitivity from the attribute', function (string $toolClass, DataSensitivity $expected): void {
         expect($this->reader->forTool($toolClass))->toBe($expected);
     })->with([
-        'General tool' => [GetCalorieLevelGuideline::class, DataSensitivity::General],
+        'General tool' => [GetHealthSyncSupport::class, DataSensitivity::General],
         'Personal tool' => [GetHealthGoals::class, DataSensitivity::Personal],
         'Sensitive tool' => [GetUserProfile::class, DataSensitivity::Sensitive],
     ]);
 
     it('accepts an instance as well as a class-string', function (): void {
-        expect($this->reader->forTool(new GetCalorieLevelGuideline))
+        expect($this->reader->forTool(resolve(GetHealthSyncSupport::class)))
             ->toBe(DataSensitivity::General);
     });
 
@@ -47,12 +47,12 @@ describe('maxSensitivity', function (): void {
 
     it('returns the max sensitivity across a list of class-strings', function (): void {
         expect($this->reader->maxSensitivity([
-            GetCalorieLevelGuideline::class,
+            GetHealthSyncSupport::class,
             GetHealthGoals::class,
         ]))->toBe(DataSensitivity::Personal);
 
         expect($this->reader->maxSensitivity([
-            GetCalorieLevelGuideline::class,
+            GetHealthSyncSupport::class,
             GetHealthGoals::class,
             GetUserProfile::class,
         ]))->toBe(DataSensitivity::Sensitive);
@@ -65,7 +65,7 @@ describe('maxSensitivity', function (): void {
         };
 
         expect($this->reader->maxSensitivity([
-            GetCalorieLevelGuideline::class,
+            GetHealthSyncSupport::class,
             $unlabeled,
         ]))->toBe(DataSensitivity::Sensitive);
     });

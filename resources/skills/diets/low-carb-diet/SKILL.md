@@ -17,6 +17,10 @@ description: Implements a moderate low-carbohydrate diet (<130g daily) with incr
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Apply a clinical dietitian's attention to glycemic load when designing filling meals. Build each meal around a protein such as salmon, steak, or tofu. Pair it with generous portions of low-glycemic-load vegetables such as leafy greens or roasted cauliflower. Use avocado, olive oil, or savory seasonings for flavor. Calculate nutrient amounts from standard USDA FoodData Central values per 100 g, scaled to the actual portion. Subtract fiber from total carbohydrates and check the day's net carbohydrates against the limit below.
+
 ### Carbohydrate Sources
 
 ```
