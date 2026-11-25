@@ -3,7 +3,7 @@
 Plate is split into a public Laravel app and a private package:
 
 - `acara-app/plate` is the public app.
-- `acara-app/acara-core` is the private package for the semantic memory module and agent skills.
+- `acara-app/acara-core` is the private package for the semantic memory module.
 - `main` must stay community-safe.
 - `acara-core` is the Cloud/deployment branch.
 
@@ -34,8 +34,6 @@ Memory contracts live in:
 - `app/Contracts/Memory/DispatchesMemoryExtraction.php`
 - `app/Contracts/Memory/PullsConversationHistory.php`
 
-The skills contract lives in `app/Contracts/Skills/LoadsSkills.php`.
-
 Cross-boundary DTOs live in:
 
 - `app/Data/Memory/ConversationMessageData.php`
@@ -45,15 +43,22 @@ Community-safe null implementations live in:
 - `app/Services/Memory/NullMemoryPromptContext.php`
 - `app/Services/Memory/NullMemoryExtractionDispatcher.php`
 - `app/Services/Memory/NullConversationHistoryPuller.php`
-- `app/Services/Skills/NullSkillLoader.php`
 
-Default bindings for these memory and skills contracts belong in `App\Providers\AppServiceProvider` using `bindIf()`. This lets the public app boot without `acara-core`, while the private package can override the bindings when installed. Plate-owned implementations, such as billing, use plain `bind()`.
+Default bindings for these memory contracts belong in `App\Providers\AppServiceProvider` using `bindIf()`. This lets the public app boot without `acara-core`, while the private package can override the bindings when installed. Plate-owned implementations, such as billing, use plain `bind()`.
+
+## Agent Skills
+
+Agent skills are public and live in Plate, not in `acara-core`:
+
+- Each skill is a folder `resources/skills/<name>/` with a `SKILL.md`: YAML frontmatter with `name` and `description`, then the instructions. Credit an adapted skill with `license` and `metadata.source` in its frontmatter and a `LICENSE.md` beside it.
+- `App\Ai\Agents\AgentRunner` implements the AI SDK's `HasSkills`. The SDK's `LoadSkill` tool lists each skill's name and description and loads a skill's instructions only when the model asks for them.
+- `LoadSkill` results are turn-scoped through `altani.context.turn_scoped_tools`, so a loaded skill is not replayed on later turns.
 
 ## Private Implementation
 
-Real SaaS memory and skills behavior belongs in `acara-app/acara-core`.
+Real SaaS memory behavior belongs in `acara-app/acara-core`.
 
-Do not copy private memory or skills implementation classes into the Plate app. Do not publish or duplicate `AcaraCoreServiceProvider.php` into the Plate repo. The package service provider should be discovered by Composer/Laravel when `acara-app/acara-core` is installed on `acara-core`.
+Do not copy private memory implementation classes into the Plate app. Do not publish or duplicate `AcaraCoreServiceProvider.php` into the Plate repo. The package service provider should be discovered by Composer/Laravel when `acara-app/acara-core` is installed on `acara-core`.
 
 When adding a new private feature that needs host integration:
 
@@ -92,4 +97,4 @@ vendor/bin/pest
 vendor/bin/pint --dirty --test
 ```
 
-Expected result on `main`: no private Composer dependency, no private namespace imports, and a bootable app with null memory and skills behavior.
+Expected result on `main`: no private Composer dependency, no private namespace imports, and a bootable app with null memory behavior.
