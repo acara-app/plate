@@ -151,12 +151,14 @@ describe('messages', function (): void {
     });
 
     it('sends skill instructions only for the turn that is still waiting on them', function (): void {
+        config(['altani.context.turn_scoped_tools' => ['activate_skill']]);
+
         $conversation = Conversation::factory()->forUser($this->user)->create();
         $skillCall = fn (string $id): array => [
             'id' => $id,
-            'name' => 'LoadSkill',
-            'arguments' => ['name' => 'nutrition-analyzer'],
-            'result' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
+            'name' => 'activate_skill',
+            'arguments' => ['skillName' => 'nutrition-analyzer'],
+            'result' => 'Full nutrition-analyzer instructions',
         ];
 
         History::factory()->forConversation($conversation)->userMessage()->create(['content' => 'Analyze my breakfast']);
@@ -186,8 +188,8 @@ describe('messages', function (): void {
             ->mapWithKeys(fn (ToolResult $result): array => [$result->id => $result->result]);
 
         expect($skillResults->all())->toBe([
-            'call-1' => 'Omitted to save context: this result is from an earlier turn. Call LoadSkill again if you need it.',
-            'call-2' => '<skill_content name="nutrition-analyzer">Full nutrition-analyzer instructions</skill_content>',
+            'call-1' => 'Omitted to save context: this result is from an earlier turn. Call activate_skill again if you need it.',
+            'call-2' => 'Full nutrition-analyzer instructions',
         ]);
     });
 });
