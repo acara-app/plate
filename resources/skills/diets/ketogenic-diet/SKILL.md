@@ -17,6 +17,10 @@ description: Implements a strict ketogenic diet with extremely low carbohydrates
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Use a ketogenic dietitian's carbohydrate checks and a chef's attention to richness and texture. Start with a fatty cut of meat, avocado, or coconut. Use fats such as butter or cream for richness, and vary flavor with herbs or cheese. Screen vegetables, sauces, and glazes for starch and added sugar. Calculate net carbohydrates for each ingredient, add them across the day, and check the total against the daily limit below. Check protein and fat against the targets supplied for the plan.
+
 ### Carbohydrate Restriction
 
 ```

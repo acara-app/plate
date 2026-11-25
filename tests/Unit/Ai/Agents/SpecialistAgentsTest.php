@@ -7,9 +7,6 @@ use App\Ai\Agents\GlucoseSpikeSpecialist;
 use App\Ai\Agents\HealthSpecialist;
 use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
-use App\Ai\Tools\GetCalorieLevelGuideline;
-use App\Ai\Tools\GetDailyServingsByCalorie;
-use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetFitnessGoals;
 use App\Ai\Tools\GetHealthData;
 use App\Ai\Tools\GetHealthGoals;
@@ -26,6 +23,7 @@ use App\Utilities\LanguageUtil;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
 use Laravel\Ai\Contracts\CanActAsTool;
+use Laravel\Ai\Contracts\HasSkills;
 
 covers(NutritionSpecialist::class, GlucoseSpikeSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class, MealPlanSpecialist::class);
 
@@ -35,7 +33,6 @@ dataset('specialists', [
         'meal_plan_specialist',
         [
             StartMealPlanGeneration::class,
-            GetDietReference::class,
         ],
     ],
     'nutrition' => [
@@ -43,9 +40,6 @@ dataset('specialists', [
         'nutrition_specialist',
         [
             SuggestMeal::class,
-            GetDietReference::class,
-            GetCalorieLevelGuideline::class,
-            GetDailyServingsByCalorie::class,
         ],
     ],
     'health' => [
@@ -88,9 +82,9 @@ it('owns exactly its configured domain tools', function (string $class, string $
     expect($toolClasses)->toEqualCanonicalizing($expectedTools);
 })->with('specialists');
 
-it('declares the cross-agent diet reference tool once in the shared group', function (): void {
-    expect(config()->array('plate.shared_tools', []))->toContain(GetDietReference::class);
-});
+it('keeps nutrition skills scoped to the specialists that answer diet questions', function (string $specialist): void {
+    expect(resolve($specialist))->not->toBeInstanceOf(HasSkills::class);
+})->with([GlucoseSpikeSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class]);
 
 it('pulls the shared tool group only for specialists that opt in', function (): void {
     config()->set('plate.shared_tools', [GetUserProfile::class]);

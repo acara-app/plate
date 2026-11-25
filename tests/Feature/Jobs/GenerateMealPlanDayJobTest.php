@@ -20,6 +20,7 @@ use App\Workflows\MealPlanPipeline\MealPlanDayContext;
 use App\Workflows\MealPlanPipeline\SaveDayMealsStep;
 use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Laravel\Ai\Responses\Data\ToolCall;
 
 covers(
     GenerateMealPlanDayJob::class,
@@ -65,7 +66,10 @@ beforeEach(function (): void {
 });
 
 it('generates a day using prior meal context and diet from metadata then stays pending', function (): void {
-    MealPlanAgent::fake([$this->mockResponse]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'ketogenic-diet']),
+        $this->mockResponse,
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
         'duration_days' => 7,
@@ -91,7 +95,10 @@ it('generates a day using prior meal context and diet from metadata then stays p
 });
 
 it('marks the plan completed when the final day is generated', function (): void {
-    MealPlanAgent::fake([$this->mockResponse]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'balanced-diet']),
+        $this->mockResponse,
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->custom(2)->create([
         'duration_days' => 2,
@@ -111,7 +118,10 @@ it('marks the plan completed when the final day is generated', function (): void
 });
 
 it('generates the first day with no prior context and no diet metadata', function (): void {
-    MealPlanAgent::fake([$this->mockResponse]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'balanced-diet']),
+        $this->mockResponse,
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
         'duration_days' => 7,
@@ -125,6 +135,32 @@ it('generates the first day with no prior context and no diet metadata', functio
 
     expect($mealPlan->fresh()->meals()->where('day_number', 1)->count())->toBe(1);
 });
+
+it('leaves a day unsaved when the planner skips a required diet reference', function (array $toolCalls, string $missing): void {
+    MealPlanAgent::fake([...$toolCalls, $this->mockResponse])->preventStrayPrompts();
+    $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
+        'metadata' => [
+            'diet_type' => DietType::Mediterranean->value,
+            'days_completed' => 0,
+            'day_1_status' => MealPlanGenerationStatus::Generating->value,
+        ],
+    ]);
+
+    expect(fn () => dispatch_sync(new GenerateMealPlanDayJob($mealPlan, 1)))
+        ->toThrow(RuntimeException::class, $missing);
+
+    expect($mealPlan->fresh()->metadata)->toMatchArray([
+        'days_completed' => 0,
+        'day_1_status' => MealPlanGenerationStatus::Failed->value,
+    ]);
+    expect($mealPlan->meals()->exists())->toBeFalse();
+})->with([
+    'no diet guide' => [[], 'mediterranean-diet'],
+    'guide without its score card' => [
+        [new ToolCall('guide', 'LoadSkill', ['name' => 'mediterranean-diet'])],
+        'score card',
+    ],
+]);
 
 it('marks the day failed when the job fails', function (): void {
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
@@ -141,7 +177,10 @@ it('marks the day failed when the job fails', function (): void {
 });
 
 it('fails the day instead of finishing it when no meals come back', function (): void {
-    MealPlanAgent::fake([['meals' => []]]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'balanced-diet']),
+        ['meals' => []],
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
         'metadata' => [

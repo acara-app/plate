@@ -17,6 +17,7 @@ use App\Workflows\MealPlanPipeline\MealPlanDayContext;
 use App\Workflows\MealPlanPipeline\SaveDayMealsStep;
 use App\Workflows\SaveDayMealsActivity;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Laravel\Ai\Responses\Data\ToolCall;
 
 covers(
     GenerateInitialMealPlanJob::class,
@@ -61,7 +62,14 @@ beforeEach(function (): void {
 });
 
 it('generates and saves day one then marks the plan pending', function (): void {
-    MealPlanAgent::fake([$this->mockResponse]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'mediterranean-diet']),
+        new ToolCall('score-card', 'LoadSkill', [
+            'name' => 'mediterranean-diet',
+            'path' => 'references/med-diet-nutrient-score-card.md',
+        ]),
+        $this->mockResponse,
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->weekly()->create([
         'duration_days' => 7,
@@ -82,7 +90,10 @@ it('generates and saves day one then marks the plan pending', function (): void 
 });
 
 it('keeps a single day plan pending rather than completed', function (): void {
-    MealPlanAgent::fake([$this->mockResponse]);
+    MealPlanAgent::fake([
+        new ToolCall('guide', 'LoadSkill', ['name' => 'balanced-diet']),
+        $this->mockResponse,
+    ])->preventStrayPrompts();
 
     $mealPlan = MealPlan::factory()->for($this->user)->custom(1)->create([
         'duration_days' => 1,

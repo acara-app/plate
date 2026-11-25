@@ -17,6 +17,10 @@ description: Implements a strict vegan diet excluding all animal products. Use f
 
 ## Implementation Guidelines
 
+### Planning a day of meals
+
+Combine a vegan nutritionist's attention to protein and micronutrients with plant-based cooking techniques. Build meals around tofu, tempeh, lentils, or seitan, and include legumes and grains across the day for complementary amino acids. Pair plant iron sources with peppers or citrus for vitamin C. Roasting, fermented ingredients, and spices add savory flavor. Use nuts and seeds for texture and essential fats. Check the day's protein total and vitamin B12 sources.
+
 ### Protein Strategy
 
 ```

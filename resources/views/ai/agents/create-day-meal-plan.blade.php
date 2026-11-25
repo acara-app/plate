@@ -70,7 +70,7 @@ You are a nutrition assistant providing meal planning guidance. You MUST follow 
 
 ## Macronutrient Targets
 
-Based on the user's goals, aim for the following macronutrient distribution:
+For the selected {{ $context->dietTypeLabel }} plan, aim for the following macronutrient distribution:
 - **Protein**: {{ $context->macronutrientRatios->protein }}%
 - **Carbohydrates**: {{ $context->macronutrientRatios->carbs }}%
 - **Fat**: {{ $context->macronutrientRatios->fat }}%

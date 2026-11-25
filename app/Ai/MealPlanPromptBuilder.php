@@ -10,6 +10,7 @@ use App\Data\MealPlanContext\MacronutrientRatiosData;
 use App\Data\MealPlanContext\MealPlanContextData;
 use App\Data\PreviousDayContext;
 use App\Enums\AllergySeverity;
+use App\Enums\DietType;
 use App\Enums\UserProfileAttributeCategory;
 use App\Models\User;
 use App\Models\UserProfile;
@@ -31,8 +32,9 @@ final readonly class MealPlanPromptBuilder
         ?PreviousDayContext $previousDaysContext = null,
         ?GlucoseAnalysisData $glucoseAnalysis = null,
         ?string $customPrompt = null,
+        ?DietType $dietType = null,
     ): string {
-        $context = $this->buildContext($user, $glucoseAnalysis);
+        $context = $this->buildContext($user, $glucoseAnalysis, $dietType);
 
         ['label' => $language, 'code' => $languageCode] = LanguageUtil::resolve($user->locale);
 
@@ -47,7 +49,7 @@ final readonly class MealPlanPromptBuilder
         ])->render();
     }
 
-    private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis = null): MealPlanContextData
+    private function buildContext(User $user, ?GlucoseAnalysisData $glucoseAnalysis, ?DietType $dietType): MealPlanContextData
     {
         $user->loadMissing([
             'profile.attributes',
@@ -58,7 +60,7 @@ final readonly class MealPlanPromptBuilder
             ? $user->profile
             : $user->profile()->firstOrCreate(['user_id' => $user->id]);
 
-        $dietType = $profile->dietType();
+        $dietType ??= $profile->dietType();
         $macroTargets = $dietType->macroTargets();
 
         return MealPlanContextData::from([

@@ -9,7 +9,6 @@ use App\Ai\Agents\MealPlanSpecialist;
 use App\Ai\Agents\NutritionSpecialist;
 use App\Ai\Tools\AnalyzePhoto;
 use App\Ai\Tools\EnrichAttributeMetadata;
-use App\Ai\Tools\GetDietReference;
 use App\Ai\Tools\GetSubscriptionStatus;
 use App\Ai\Tools\GetUserProfile;
 use App\Ai\Tools\LogHealthEntry;
@@ -42,9 +41,7 @@ return [
         UpdateHouseholdContext::class,
     ],
 
-    'shared_tools' => [
-        GetDietReference::class,
-    ],
+    'shared_tools' => [],
 
     'sub_agents' => [
         MealPlanSpecialist::class,
