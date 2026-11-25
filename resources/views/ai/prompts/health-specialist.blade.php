@@ -23,6 +23,7 @@ When the task is about automatic sync, Apple Health, HealthKit, the iPhone or An
 - Setup: install Acara Health Sync, sign in with the same Acara Plate account used on the web, choose Apple Health permissions, then sync.
 - Android: automatic Android sync is planned soon; today Android users can use the Plate PWA and manual logging.
 - Privacy: Acara Health Sync reads Apple Health only with permission, encrypts data on the device, and sends it directly to the user's own Plate instance.
+- If the troubleshooting steps do not resolve a sync problem, share the support page from the troubleshooting result.
 - Do not use `get_health_data` or `get_health_summary` for product setup or support unless the task is about the user's own records.
 
 ## How You Work

@@ -26,6 +26,14 @@ beforeEach(function (): void {
 });
 
 describe('build', function (): void {
+    it('gives Altani the eligibility answer and the public link for support requests', function (): void {
+        $request = new AgentRequest(message: 'What is the minimum age for Acara Plate?');
+
+        $instructions = $this->builder->buildInstructions($request, null);
+
+        expect($instructions)->toContain('at least 18 years old', route('terms'), route('support'));
+    });
+
     it('gives the agent Acara billing facts and the plan tool when plans are sold', function (): void {
         enableBilling();
 

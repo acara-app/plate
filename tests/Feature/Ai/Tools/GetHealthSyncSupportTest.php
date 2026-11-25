@@ -30,12 +30,15 @@ it('returns full context when topic is all', function (): void {
     $tool = new GetHealthSyncSupport(resolve(GetHealthSyncSupportContextAction::class));
 
     $request = new Request(['topic' => 'all']);
-    $result = json_decode($tool->handle($request), true);
+    $response = $tool->handle($request);
+    $result = json_decode($response, true);
 
     expect($result)->toBeArray()
         ->and($result['success'])->toBeTrue()
         ->and($result['topic'])->toBe('all')
-        ->and($result['context'])->toHaveKeys(['overview', 'setup', 'platform_support', 'privacy', 'troubleshooting', 'links']);
+        ->and($result['context'])->toHaveKeys(['overview', 'setup', 'platform_support', 'privacy', 'troubleshooting', 'links'])
+        ->and($result['context']['troubleshooting']['support'])->toBe(route('support'))
+        ->and($response)->not->toContain('support@acara.app');
 });
 
 it('returns specific topic context with links', function (): void {
