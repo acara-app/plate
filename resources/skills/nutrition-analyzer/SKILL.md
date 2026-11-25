@@ -13,7 +13,7 @@ Use this skill for practical, evidence-based nutrition review. It should behave 
 
 The skill analyzes nutrition logs, meal patterns, and nutrient intake, then relates them to the user's wider health data. It should help users understand what they are eating, where the main gaps or excesses are, how those patterns are changing over time, and which realistic changes would matter most.
 
-> **Data origin in Plate.** Most intake, biometric, activity, sleep, blood-pressure, and glucose data in Plate originates from Apple HealthKit via the Plate **Health Sync** feature; manual logging in Altani (`log_health_entry`, `analyze_photo`) fills gaps. Treat Health Sync data as the authoritative time series. Always pull data through the Plate tools listed in *Where to Get the Data* below — never assume a value the user has not just confirmed or that did not come from a tool result this turn.
+> **Data origin in Plate.** Health Sync imports time-series data from Apple HealthKit. Altani can also record entries with `log_health_entry`. For a meal photo, `analyze_photo` estimates nutrients and the user confirms the entry before logging. Use the tools listed in *Where to Get the Data* for recorded values.
 
 ## Core Principles
 
@@ -73,7 +73,7 @@ Assess whether estimated intake is likely meeting needs, using the correct refer
 
 Always interpret reference values in context: age, sex, pregnancy or lactation, dietary pattern, training load, medical conditions, and medication use.
 
-Reference intake standards vary by region. Default to the US Dietary Guidelines / WHO values as the canonical fallback, and prefer region-appropriate DRIs when `user.locale` returned by `get_user_profile` indicates a specific locale; note the standard you used.
+Reference intake standards vary by region. When the user specifies a region, use the applicable reference and name it. Otherwise use the US Dietary Guidelines / WHO fallback and name the standard used.
 
 **Macronutrients**
 - total protein intake and its distribution across meals
@@ -220,26 +220,26 @@ Ground recommendations in DRIs/RDA standards, the user's nutrition history, thei
 
 ## Where to Get the Data
 
-In Plate, every input this skill needs is reachable through tool calls. Do not invent values. Always source from a tool result this turn.
+Use the records returned by Plate and information the user provides. Identify gaps explicitly.
 
-**Who calls these tools.** Call `get_user_profile` yourself. The other tools in this table belong to the specialists, so ask the specialist that owns a tool instead of calling it: `health_specialist` runs `get_health_summary`, `get_health_data` and `get_health_goals`; `nutrition_specialist` runs `get_diet_reference`, `get_calorie_level_guideline` and `get_daily_servings_by_calorie`; `fitness_specialist` runs `get_fitness_goals`; and `glucose_spike_specialist` predicts a food's glucose response. Give the specialist a self-contained task with the window, the data type (for example `type: "food"`), and the profile facts it needs, and relay only the numbers it reports.
+Call `get_user_profile` directly. Delegate health records and goals to `health_specialist`, diet references and serving guidelines to `nutrition_specialist`, and fitness goals to `fitness_specialist`. Include the date range, metric and relevant profile facts in each task.
 
 | What you need | Plate upstream | Tool to call | Notes |
 |---|---|---|---|
-| Profile (age, sex, height, dietary preferences, conditions, medications, locale) | manual onboarding + profile edits | `get_user_profile` | Pass `section: "all"` for the first read; later request `biometrics` / `dietary_preferences` / `goals` to keep responses focused. |
-| Calorie, macronutrient & micronutrient intake (calories, carbs, protein, fat and its subtypes, fiber, sugar, sodium, potassium, vitamins, minerals) | Apple HealthKit via **Health Sync** + manual logging in Altani (`log_health_entry`, `analyze_photo`) | `get_health_summary` (windowed daily totals — start here), `get_health_data` (individual entries) | Call `get_health_summary` with `type: "food"` to get the full daily nutrient panel in one request; use `get_health_data` to drill into specific days. Treat days without intake entries as logging gaps, not zero-intake days. A nutrient the user does not have in HealthKit simply will not appear — say so rather than infer it. |
-| Reference targets & patterns (DRIs, food groups, serving sizes, diet-pattern cards) | bundled reference content | `get_calorie_level_guideline`, `get_daily_servings_by_calorie`, `get_diet_reference` | Guideline/reference data, not the user's intake. Use to set targets and structure recommendations (e.g. Mediterranean or DASH cards via `get_diet_reference`). |
+| Profile (age, sex, height, dietary preferences, conditions, medications) | manual onboarding + profile edits | `get_user_profile` | Request the smallest relevant section, such as `dietary_preferences` for food preferences or `safety` for allergies, conditions and medications. |
+| Calorie, macronutrient & micronutrient intake (calories, carbs, protein, fat and its subtypes, fiber, sugar, sodium, potassium, vitamins, minerals) | synced and manually logged food entries | `get_health_summary` (daily totals), `get_health_data` (individual entries) | Use `type: "food"` for the available daily nutrient panel. Treat days without entries as logging gaps. Report missing nutrients explicitly. |
+| Food groups, serving sizes and diet reference data | bundled reference content | `get_calorie_level_guideline`, `get_daily_servings_by_calorie`, `get_diet_reference` | Use the USDA guidelines for food groups and servings. The Mediterranean nutrient score card is available through `get_diet_reference`. |
 | Body weight | Apple HealthKit via **Health Sync** + manual | `get_health_summary`, `get_health_data` | For diet ↔ weight correlation. |
 | Activity (steps, exercise minutes, training) | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_fitness_goals` | For fueling adequacy and under-eating checks in active users. |
 | Sleep | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_health_data` | For caffeine-timing and late-meal correlations. |
 | Blood pressure | Apple HealthKit via **Health Sync** + manual | `get_health_summary`, `get_health_data` | For sodium and potassium-to-sodium correlation; flag uncontrolled BP and escalate. |
-| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `glucose_spike_specialist` | For carbohydrate-quality and meal-structure effects; required when diabetes or pre-diabetes context applies. |
+| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `get_meal_glucose_response` | Ask `health_specialist` for observed responses to logged meals. Use `glucose_spike_specialist` for a prospective food comparison or spike estimate. |
 | Medications | manual records + Health Sync (where supported) | `get_health_data` (medication-typed entries); `get_user_profile` for the static medication list | Flag medications affecting appetite, glucose, fluid balance, or nutrient absorption. |
 | Health goals & phase | profile + goal store | `get_health_goals`, `get_fitness_goals` | Reconcile the user's stated goal with what the data shows. |
 
 If a tool call returns no data over the requested window, say so explicitly and ask the user whether to widen the window or continue with what is available — never extrapolate from missing data.
 
-**Not carried by Health Sync.** Plate does not sync trans fat, omega-3 (EPA/DHA/ALA), choline, or added sugars — only *total* sugar is tracked. Treat these as available only when the user states them this turn or shares a meal photo; never populate them from tracked data, and omit them from reports (for example, drop the trans-fat row from the fat-quality table) when no user-provided value exists.
+**Missing nutrient data.** Health Sync tracks total sugar. Neither Health Sync nor meal photo analysis provides added sugar, trans fat, omega-3 (EPA/DHA/ALA), or choline values. Include these only when the user supplies the values.
 
 ## Workflow
 
@@ -254,7 +254,7 @@ Identify:
 
 ### Step 2: Read the Data
 
-Fetch the data listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (static profile, conditions, medications, locale), then ask `health_specialist` for `get_health_summary` with `type: "food"` over the chosen window (the full daily nutrient panel). Have it drill into specific days with `get_health_data` only where the summary surfaces an anomaly. Ask for weight, activity, sleep, blood-pressure, or glucose streams when the question calls for a correlation.
+Ask `health_specialist` for `get_health_summary` with `type: "food"` over the chosen window. This returns the daily nutrient values that were logged. Have it drill into specific days with `get_health_data` where the summary surfaces an anomaly. Ask for weight, activity, sleep, blood-pressure, or glucose streams when the question calls for a correlation.
 
 Read enough surrounding context to interpret the nutrition data safely. Do not push generic potassium increases in users with kidney-disease risk, and do not push high-protein advice where the clinical context may limit protein. If a tool returns no data over the requested window, say so and ask whether to widen the window — never extrapolate from missing data.
 
@@ -313,142 +313,9 @@ Lead with the high-signal findings:
 3. the most useful next changes
 4. any safety flags or escalation points
 
-## Output Formats
+## Report Examples
 
-### Nutrition Trend Report
-
-```markdown
-# Nutrition Intake Trend Review
-
-## Analysis Window
-2026-02-28 to 2026-05-29 (90 days logged)
-
-## High-Level Summary
-- Calorie intake trended modestly downward and is now closer to the user's stated target.
-- Protein intake has been stable and generally adequate.
-- Fiber improved but likely remains below an ideal range for satiety and gut health.
-- Sodium intake improved meaningfully; the potassium-to-sodium ratio is still below target.
-
-## Macronutrient Trends
-
-### Calories
-- Trend: Down
-- Starting average: 2100 kcal/day
-- Current average: 1950 kcal/day
-- Change: -150 kcal/day (-7.1%)
-- Interpretation: Consistent with weight-loss support, assuming adherence is real and energy levels remain acceptable.
-
-### Protein
-- Trend: Stable
-- Average: 82 g/day (target 80 g/day, 93% of days on target)
-- Interpretation: Likely adequate, but should be checked against body size and training load.
-
-### Fiber
-- Trend: Improving
-- Starting average: 18 g/day
-- Current average: 22 g/day (target 30 g/day)
-- Interpretation: Better than baseline, but still low for appetite control and overall diet quality.
-
-### Fat Quality
-| Fat type | Start | Current | Target | Trend |
-|---|---:|---:|---|---|
-| Saturated | 25 g | 20 g | < 20 g | Improving |
-| Monounsaturated | 30 g | 32 g | > 35 g | Slightly up |
-| Polyunsaturated | 15 g | 12 g | 15–20 g | Needs increase |
-
-## Food Pattern Notes
-- More whole grains and produce than baseline
-- Less refined grain intake
-- Better meal regularity on weekdays than weekends
-
-## Top Priorities
-1. Raise fiber toward 30 g/day with legumes, fruit, vegetables, oats, and higher-fiber starches.
-2. Improve unsaturated-fat sources: nuts, seeds, olive oil, and fatty fish.
-3. Protect the sodium gains by limiting convenience foods and restaurant meals.
-```
-
-### Nutrient Adequacy Report
-
-```markdown
-# Nutrient Adequacy Review
-
-## Likely Adequate
-- Protein
-- Vitamin B12
-- Iron
-
-## Borderline or Likely Low
-- Fiber
-- Calcium
-- Folate
-- Vitamin D
-
-## Watch Areas
-- Sodium is acceptable on average but spikes on weekends.
-- Potassium appears lower than ideal for a general healthy pattern; individualize if kidney disease or related medication use is present.
-
-## Interpretation
-- These categories are based on estimated intake, not lab-confirmed deficiency.
-- The most actionable gaps are fiber, calcium-rich foods, and overall produce volume.
-
-## Food-First Actions
-1. Add one calcium-rich food daily.
-2. Replace at least one refined-grain serving with a whole-grain or legume option.
-3. Increase vegetables at lunch and dinner.
-```
-
-### Correlation Review
-
-```markdown
-# Nutrition and Health Correlation Review
-
-## Data Compared
-- Nutrition logs: 90 days
-- Sleep logs: 90 days
-- Weight logs: 90 days
-
-## Observed Patterns
-- Higher-fiber days were associated with less evening snacking.
-- Late caffeine intake was associated with shorter sleep on logged weekdays.
-- Weekend calorie spikes aligned with slower weekly weight loss.
-
-## Interpretation
-- These are descriptive associations from self-tracked data.
-- They suggest useful behavior targets but do not prove cause and effect.
-
-## Practical Adjustments
-1. Move caffeine earlier in the day.
-2. Keep a higher-fiber afternoon meal or snack on workdays and weekends.
-3. Pre-plan one weekend dinner to reduce drift.
-```
-
-### Recommendation Report
-
-```markdown
-# Personalized Nutrition Recommendations
-
-## What to Keep
-- Protein intake is reasonably steady.
-- Produce intake is moving in the right direction.
-- Sodium control has improved.
-
-## What to Change Next
-
-### Priority 1: Improve Fiber Intake
-- Add oats, beans, lentils, berries, fruit, and higher-fiber starches.
-- Increase gradually to reduce GI discomfort.
-
-### Priority 2: Improve Meal Composition
-- Build meals around protein, produce, and a higher-fiber carbohydrate.
-- Reduce reliance on low-satiety snack foods.
-
-### Priority 3: Review Vitamin D Strategy
-- Food sources alone are often insufficient.
-- If the user is supplementing, frame this as monitoring and clinician-aligned follow-up, not self-prescribed dose increases.
-
-## Suggested Next Checkpoint
-- Reassess in 2 to 4 weeks with updated logs and body-weight trend data.
-```
+When you need a report format for nutrition trends, nutrient adequacy, correlations, or recommendations, call `LoadSkill` with `name: "nutrition-analyzer"` and `path: "report-examples.md"`. Use only the user’s own data in the report.
 
 ## Data Structure
 
@@ -524,7 +391,7 @@ In Plate, `get_health_summary` returns **daily per-nutrient aggregates** (one ro
 
 ## Algorithms
 
-These are a **method reference, not executable code** — the agent has no runtime and will not run them. Apply the logic yourself to values returned by the tools, and never fabricate an input or an output. For windowed trends, request the rolling averages and daily totals from `get_health_summary` (it computes them server-side); do not recompute them from raw entries.
+Use these methods to interpret the values the tools return. For a rolling average, ask `health_specialist` to calculate it from the daily aggregates returned by `get_health_summary` and report how many days had data.
 
 ### Nutrient Adequacy Classification
 
@@ -674,6 +541,6 @@ This skill provides educational nutrition guidance only. It does not diagnose, t
 
 ---
 
-**Skill version**: v1.3 (Plate adaptation — data sources point at Plate tools; full nutrient panel via Health Sync; locale-aware DRIs; conservative screening framing with source-specific Red-Flag thresholds preserved.)
-**Last updated**: 2026-05-29
+**Skill version**: v1.4 (Plate adaptation)
+**Last updated**: 2026-11-25
 **Maintainer**: Acara App

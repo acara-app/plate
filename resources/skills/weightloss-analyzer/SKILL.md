@@ -57,7 +57,7 @@ Assess body size and risk markers using weight, height, waist circumference, and
 - Overweight: `24 to < 28`
 - Obesity: `>= 28`
 
-Use the default adult BMI categories unless the user explicitly needs Asian-specific thresholds or the host workflow already uses them. As a heuristic, if `user.locale` returned by `get_user_profile` is one of `mn`, `cn`, `kr`, `jp`, `vn`, or `tw`, prefer the Asian cutoffs and note the choice in your response.
+Use the default adult BMI categories unless the user specifies a different applicable standard. Name the standard you use.
 
 **Waist circumference**
 - Increased cardiometabolic risk is commonly flagged above:
@@ -210,20 +210,20 @@ Support three common phases:
 
 ## Where to Get the Data
 
-In Plate, every input this skill needs is reachable through tool calls. Do not invent values. Always source from a tool result this turn.
+Use the records returned by Plate and information the user provides. Identify gaps explicitly.
 
-**Who calls these tools.** Call `get_user_profile` yourself. The other tools in this table belong to the specialists, so ask the specialist that owns a tool instead of calling it: `health_specialist` runs `get_health_summary`, `get_health_data` and `get_health_goals`; `nutrition_specialist` runs `get_diet_reference`; `fitness_specialist` runs `get_fitness_goals`; and `glucose_spike_specialist` predicts a food's glucose response. Give the specialist a self-contained task with the window, the data you need, and the profile facts it needs, and relay only the numbers it reports.
+Call `get_user_profile` directly. Delegate health records and goals to `health_specialist`, diet references to `nutrition_specialist`, and fitness goals to `fitness_specialist`. Include the date range, metric and relevant profile facts in each task.
 
 | What you need | Plate upstream | Tool to call | Notes |
 |---|---|---|---|
-| Profile (height, age, sex, target weight, dietary prefs, conditions, medications, locale) | manual onboarding + profile edits | `get_user_profile` | Pass `section: "all"` for the first read; later, request `biometrics` / `goals` / `dietary_preferences` to keep responses focused. |
-| Body weight, waist, body-fat trend | Apple HealthKit via **Health Sync** + manual entries | `get_health_summary` (windowed averages, weekly rate of change), `get_health_data` (specific entries) | Always start with `get_health_summary` over the analysis window — it returns the rolling averages this skill needs. |
+| Profile (height, age, sex, target weight, dietary preferences, conditions, medications) | manual onboarding + profile edits | `get_user_profile` | Request the smallest relevant section, such as `biometrics` for measurements or `goals` for target weight. |
+| Body weight, waist, body-fat trend | Apple HealthKit via **Health Sync** + manual entries | `get_health_summary` (daily aggregates), `get_health_data` (specific entries) | Ask the health specialist to calculate rolling averages or weekly changes from the available daily values and report how many days had data. |
 | Activity (steps, exercise minutes, strength sessions) | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_fitness_goals` | Strength sessions may also be inferred from manually logged workouts. |
-| Calorie & macronutrient intake (totals, adherence) | manual logging in Altani (`log_health_entry`, `analyze_photo`) and active meal plans | `get_health_summary`, `get_health_data`, `get_diet_reference` | Treat days without intake entries as logging gaps, not zero-calorie days. |
+| Calorie & macronutrient intake (totals, adherence) | synced and manually logged food entries | `get_health_summary`, `get_health_data` | Use recorded intake to assess adherence. Treat days without intake entries as logging gaps. |
 | Daily notes (hunger, symptoms, recovery, mood) | manual entries and chat-derived logs | `get_health_data` (date-ranged) | Pull these only when the analysis demands a qualitative signal. |
 | Sleep | Apple HealthKit via **Health Sync** | `get_health_summary`, `get_health_data` | Use as a plateau-troubleshooting input, not a primary metric. |
 | Blood pressure | Apple HealthKit via **Health Sync** + manual | `get_health_summary`, `get_health_data` | Flag uncontrolled BP and escalate per the safety rules below. |
-| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `glucose_spike_specialist` | Required when the user has diabetes or pre-diabetes context. |
+| Glucose | Apple HealthKit (CGM) via **Health Sync** + manual | `get_health_summary`, `get_health_data`, `get_meal_glucose_response` | Ask `health_specialist` for observed responses to logged meals. Use `glucose_spike_specialist` for a prospective food comparison or spike estimate. |
 | Medications | manual records + Health Sync (where supported) | `get_health_data` (medication-typed entries); `get_user_profile` for the static medication list | Medications affecting appetite, glucose, fluid balance, or thyroid can drive weight changes — flag and escalate. |
 | Health goals & current phase | profile + goal store | `get_health_goals`, `get_fitness_goals` | Use to reconcile the user's stated goal with the data you observe. |
 
@@ -250,7 +250,7 @@ Also clarify:
 
 ### Step 2: Read the Data
 
-Fetch the data listed in the *Where to Get the Data* table above. Begin with `get_user_profile` (for static biometrics, goals, locale), then ask `health_specialist` for `get_health_summary` over the chosen window (for trend metrics). Have it call `get_health_data` afterward only to drill into specific dates the summary surfaced as anomalies. If the user asks about glucose response, blood pressure, or sleep, ask for those streams in the same task.
+Ask `health_specialist` for `get_health_summary` over the chosen window. Have it call `get_health_data` to drill into specific dates where the summary surfaced an anomaly. If the user asks about glucose response, blood pressure, or sleep, include that question in the same task.
 
 Minimum review window:
 - `2 weeks` for a quick check
@@ -326,129 +326,9 @@ Avoid vague coaching such as:
 - "try harder"
 - "just do more cardio"
 
-## Output Formats
+## Report Examples
 
-### Body Metrics Report
-
-```markdown
-# Body Metrics Review
-
-## Profile
-- Sex: Male
-- Age: 52
-- Height: 175 cm
-- Weight: 75 kg
-
-## Screening Metrics
-
-### BMI
-- Current BMI: 24.5
-- Category: Healthy weight using standard adult BMI cutoffs
-- Reference planning weight: 67 kg (BMI 22)
-- Comment: BMI is only one screening tool and should be interpreted together with waist and body-composition trends.
-
-### Waist and Body Composition
-- Waist circumference: 92 cm
-- Waist-to-hip ratio: 0.94
-- Estimated body fat: 25%
-- Comment: Central fat distribution appears to be a higher priority risk marker than BMI alone.
-
-## Coaching Priorities
-1. Reduce waist circumference gradually through a sustainable calorie deficit.
-2. Preserve lean mass with resistance training and adequate protein intake.
-3. Monitor trend weight and waist rather than reacting to daily fluctuations.
-```
-
-### Energy Needs Report
-
-```markdown
-# Energy Needs Review
-
-## BMR Estimates
-
-| Formula | BMR (kcal/day) | Notes |
-|---|---:|---|
-| Harris-Benedict | 1650 | Older formula |
-| Mifflin-St Jeor | 1620 | Best default estimate |
-| Katch-McArdle | 1700 | Useful only if body-fat estimate is reliable |
-
-**Working BMR:** 1620 kcal/day
-
-## TDEE Estimate
-- Activity level: Moderately active
-- Activity factor: 1.55
-- Estimated TDEE: 2511 kcal/day
-
-## Suggested Intake Ranges
-- Mild deficit: 2000 to 2250 kcal/day
-- Moderate deficit: 1750 to 2000 kcal/day
-- Aggressive deficit: use only if clinically appropriate and adherence is strong
-
-## Interpretation
-- Start with the smallest deficit that the user can sustain.
-- If hunger, fatigue, or rebound eating are already problems, do not force a deeper cut.
-```
-
-### Calorie Balance Report
-
-```markdown
-# Weekly Calorie Balance Review
-
-## Week Summary
-
-| Day | Intake | Activity Burn | Deficit | On Plan |
-|---|---:|---:|---:|---|
-| Mon | 1800 | included in TDEE | 711 | Yes |
-| Tue | 2100 | included in TDEE | 411 | Borderline |
-| Wed | 1750 | included in TDEE | 761 | Yes |
-| Thu | 1950 | included in TDEE | 561 | Yes |
-| Fri | 2200 | included in TDEE | 311 | Borderline |
-| Sat | 2400 | included in TDEE | 111 | No |
-| Sun | 1850 | included in TDEE | 661 | Yes |
-
-## Weekly Interpretation
-- Average daily deficit: 504 kcal/day
-- Estimated weekly loss: 0.46 kg
-- Main issue: weekend intake is eroding an otherwise workable plan
-
-## Next Adjustment
-1. Keep weekday targets unchanged.
-2. Add a weekend meal plan before reducing calories further.
-3. Recheck trend weight after 2 weeks.
-```
-
-### Phase Management Report
-
-```markdown
-# Weight Management Phase Review
-
-## Current Phase
-Fat-loss phase
-
-## Progress
-- Start date: 2025-01-01
-- Starting weight: 82 kg
-- Current weight: 75 kg
-- Goal weight: 67 kg
-- Total lost: 7 kg
-- Remaining: 8 kg
-- Progress toward goal: 47%
-
-## Rate of Change
-- Total duration: 24 weeks
-- Long-term average: 0.29 kg/week
-- Last 4 weeks: 0.35 kg/week
-
-## Status
-- Weight is trending downward
-- Progress is slower than the original target, but still meaningful
-- The current pace may be more sustainable than a more aggressive cut
-
-## Recommended Next Steps
-1. Continue the current calorie range for 2 more weeks.
-2. Add one more resistance-training session weekly.
-3. Review protein intake and weekend consistency.
-```
+When you need a report format for body metrics, energy needs, calorie balance, or progress, call `LoadSkill` with `name: "weightloss-analyzer"` and `path: "report-examples.md"`. Use only the user’s own data in the report.
 
 ## Sample User Prompts that Should Activate This Skill
 
@@ -485,6 +365,6 @@ This skill provides educational weight-management guidance only. It does not dia
 
 ---
 
-**Skill version**: v1.2 (Plate adaptation — data sources point at Plate tools, Health Sync called out, locale-aware BMI cutoffs)
-**Last updated**: 2026-05-04
+**Skill version**: v1.3 (Plate adaptation)
+**Last updated**: 2026-11-25
 **Maintainer**: Acara App
