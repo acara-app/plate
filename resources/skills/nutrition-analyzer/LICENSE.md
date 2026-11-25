@@ -1,8 +1,6 @@
-The nutrition-analyzer skill is adapted from
-https://github.com/huifer/WellAlly-health/tree/main/.claude/skills/nutrition-analyzer
-under the following license. It was obtained via
-https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills/tree/main/skills/nutrition-analyzer,
-which carries an unchanged copy.
+The nutrition-analyzer skill was obtained via
+https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills/tree/main/skills/nutrition-analyzer
+under the following license.
 
 MIT License
 

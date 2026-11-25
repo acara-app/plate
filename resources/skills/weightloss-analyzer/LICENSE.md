@@ -1,8 +1,6 @@
-The weightloss-analyzer skill is adapted from
-https://github.com/huifer/WellAlly-health/tree/main/.claude/skills/weightloss-analyzer
-under the following license. It was obtained via
-https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills/tree/main/skills/weightloss-analyzer,
-which carries an unchanged copy.
+The weightloss-analyzer skill was obtained via
+https://github.com/FreedomIntelligence/OpenClaw-Medical-Skills/tree/main/skills/weightloss-analyzer
+under the following license.
 
 MIT License
 
