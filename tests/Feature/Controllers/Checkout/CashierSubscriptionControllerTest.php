@@ -6,8 +6,10 @@ use App\Contracts\Services\StripeServiceContract;
 use App\Http\Controllers\Checkout\CashierSubscriptionController;
 use App\Models\SubscriptionProduct;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Laravel\Cashier\Subscription;
 use Mockery\MockInterface;
+use Tests\Helpers\FakeGuestCheckout;
 
 covers(CashierSubscriptionController::class);
 
@@ -15,133 +17,26 @@ beforeEach(function (): void {
     offerAllSubscriptions();
 });
 
-it('creates monthly subscription checkout successfully', function (): void {
-    $user = User::factory()->create();
-    $product = SubscriptionProduct::factory()->create([
-        'name' => 'Premium Plan',
-        'stripe_price_id' => 'price_monthly_test',
-        'stripe_lookup_key' => 'lookup_premium_monthly',
-    ]);
+it('starts monthly checkout for a member without a billing interval', function (): void {
+    $product = SubscriptionProduct::factory()->create(['stripe_lookup_key' => 'lookup_monthly']);
+    $this->mock(StripeServiceContract::class, function (MockInterface $mock): void {
+        $mock->shouldReceive('hasActiveSubscription')->andReturnFalse();
+        $mock->shouldReceive('getPriceIdFromLookupKey')->with('lookup_monthly')->andReturn('price_monthly');
+        $mock->shouldReceive('createSubscriptionCheckout')->once()->andReturn('https://checkout.stripe.com/session_123');
+    });
 
-    $stripeMock = new class implements StripeServiceContract
-    {
-        public array $calls = [];
-
-        public function ensureStripeCustomer(User $user): void {}
-
-        public function getBillingPortalUrl(User $user, string $returnUrl): string
-        {
-            return '';
-        }
-
-        public function hasIncompletePayment(User $user, string $subscriptionType): bool
-        {
-            return false;
-        }
-
-        public function hasActiveSubscription(User $user): bool
-        {
-            $this->calls[] = ['method' => 'hasActiveSubscription', 'user' => $user->id];
-
-            return false;
-        }
-
-        public function getPriceIdFromLookupKey(string $lookupKey): string
-        {
-            $this->calls[] = ['method' => 'getPriceIdFromLookupKey', 'lookupKey' => $lookupKey];
-
-            return 'price_actual_id_123';
-        }
-
-        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
-        {
-            $this->calls[] = [
-                'method' => 'createSubscriptionCheckout',
-                'user' => $user->id,
-                'subscriptionType' => $subscriptionType,
-                'priceId' => $priceId,
-            ];
-
-            return 'https://checkout.stripe.com/session_123';
-        }
-
-        public function getIncompletePaymentUrl(Subscription $subscription): ?string
-        {
-            return null;
-        }
-
-        public function getIncompletePaymentUrlForUser(User $user): ?string
-        {
-            return null;
-        }
-    };
-
-    app()->instance(StripeServiceContract::class, $stripeMock);
-
-    $response = $this->actingAs($user)->post(route('checkout.subscription.store'), [
-        'product_id' => $product->id,
-        'billing_interval' => 'monthly',
-    ]);
-
-    $response->assertRedirect('https://checkout.stripe.com/session_123');
+    $this->actingAs(User::factory()->create())->post(route('checkout.subscription.store'), ['product_id' => $product->id])
+        ->assertRedirect('https://checkout.stripe.com/session_123');
 });
 
-it('creates yearly subscription checkout successfully', function (): void {
-    $user = User::factory()->create();
-    $product = SubscriptionProduct::factory()->create([
-        'name' => 'Pro Plan',
-        'yearly_stripe_price_id' => 'price_yearly_test',
-        'yearly_stripe_lookup_key' => 'lookup_pro_yearly',
-    ]);
+it('rejects yearly checkout for a member even when the product has a yearly price', function (): void {
+    $product = SubscriptionProduct::factory()->withYearlyPricing()->create();
+    $this->mock(StripeServiceContract::class);
 
-    $stripeMock = new class implements StripeServiceContract
-    {
-        public function ensureStripeCustomer(User $user): void {}
-
-        public function getBillingPortalUrl(User $user, string $returnUrl): string
-        {
-            return '';
-        }
-
-        public function hasIncompletePayment(User $user, string $subscriptionType): bool
-        {
-            return false;
-        }
-
-        public function hasActiveSubscription(User $user): bool
-        {
-            return false;
-        }
-
-        public function getPriceIdFromLookupKey(string $lookupKey): string
-        {
-            return 'price_yearly_actual_456';
-        }
-
-        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
-        {
-            return 'https://checkout.stripe.com/session_456';
-        }
-
-        public function getIncompletePaymentUrl(Subscription $subscription): ?string
-        {
-            return null;
-        }
-
-        public function getIncompletePaymentUrlForUser(User $user): ?string
-        {
-            return null;
-        }
-    };
-
-    app()->instance(StripeServiceContract::class, $stripeMock);
-
-    $response = $this->actingAs($user)->post(route('checkout.subscription.store'), [
+    $this->actingAs(User::factory()->create())->postJson(route('checkout.subscription.store'), [
         'product_id' => $product->id,
         'billing_interval' => 'yearly',
-    ]);
-
-    $response->assertRedirect('https://checkout.stripe.com/session_456');
+    ])->assertUnprocessable()->assertJsonValidationErrors('billing_interval');
 });
 
 it('redirects when user already has active subscription', function (): void {
@@ -265,7 +160,7 @@ it('validates required fields', function (): void {
 
     $response = $this->actingAs($user)->post(route('checkout.subscription.store'), []);
 
-    $response->assertSessionHasErrors(['product_id', 'billing_interval']);
+    $response->assertSessionHasErrors('product_id')->assertSessionDoesntHaveErrors('billing_interval');
 });
 
 it('validates product exists', function (): void {
@@ -291,15 +186,34 @@ it('validates billing interval values', function (): void {
     $response->assertSessionHasErrors(['billing_interval']);
 });
 
-it('requires authentication', function (): void {
-    $product = SubscriptionProduct::factory()->create();
-
-    $response = $this->post(route('checkout.subscription.store'), [
-        'product_id' => $product->id,
-        'billing_interval' => 'monthly',
+it('sends a guest directly to Stripe for the selected monthly plan', function (string $plan): void {
+    $product = SubscriptionProduct::factory()->create([
+        'name' => $plan,
+        'coming_soon' => false,
+        'stripe_price_id' => 'price_monthly',
     ]);
+    $checkout = FakeGuestCheckout::install();
 
-    $response->assertRedirect(route('login'));
+    $this->withHeader('X-Inertia', 'true')->post(route('checkout.subscription.store'), ['product_id' => $product->id])
+        ->assertConflict()->assertHeader('X-Inertia-Location', 'https://checkout.stripe.com/c/pay/cs_test_guest_1');
+
+    expect($checkout->sessions[0]['price'])->toBe('price_monthly')
+        ->and($checkout->sessions[0]['metadata']['product_name'])->toBe($plan);
+})->with(['Starter', 'Snap Pro']);
+
+it('closes the old Stripe checkout when a guest changes plans', function (): void {
+    $starter = sellPhotoPlans();
+    $pro = SubscriptionProduct::query()->where('name', 'Snap Pro')->sole();
+    $pro->update(['purchasable' => true, 'stripe_price_id' => 'price_pro']);
+    $checkout = FakeGuestCheckout::install();
+    $this->withCookie('photo_guest', (string) Str::uuid());
+
+    $this->post(route('checkout.subscription.store'), ['product_id' => $starter->id])
+        ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
+    $this->post(route('checkout.subscription.store'), ['product_id' => $pro->id])
+        ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_2');
+
+    expect($checkout->expiredSessions)->toBe(['cs_test_guest_1']);
 });
 
 it('lets unverified users pay and sends repeat clicks back to the same Stripe checkout', function (): void {
@@ -328,62 +242,14 @@ it('lets unverified users pay and sends repeat clicks back to the same Stripe ch
     $subscribe()->assertRedirect('https://checkout.stripe.com/session_unverified');
 });
 
-it('handles missing yearly lookup key gracefully', function (): void {
-    $user = User::factory()->create();
-    $product = SubscriptionProduct::factory()->create([
-        'name' => 'Monthly-Only Plan',
-        'stripe_price_id' => 'price_monthly',
-        'stripe_lookup_key' => 'lookup_monthly_only',
-        'yearly_stripe_price_id' => null,
-        'yearly_stripe_lookup_key' => null,
-    ]);
+it('rejects a yearly guest checkout before opening Stripe', function (): void {
+    $product = sellPhotoPlans();
+    $checkout = FakeGuestCheckout::install();
 
-    $stripeMock = new class implements StripeServiceContract
-    {
-        public function ensureStripeCustomer(User $user): void {}
-
-        public function getBillingPortalUrl(User $user, string $returnUrl): string
-        {
-            return '';
-        }
-
-        public function hasIncompletePayment(User $user, string $subscriptionType): bool
-        {
-            return false;
-        }
-
-        public function hasActiveSubscription(User $user): bool
-        {
-            return false;
-        }
-
-        public function getPriceIdFromLookupKey(string $lookupKey): ?string
-        {
-            return null;
-        }
-
-        public function createSubscriptionCheckout(User $user, string $subscriptionType, string $priceId, string $successUrl, string $cancelUrl, array $metadata = [], ?int $trialDays = null): string
-        {
-            return '';
-        }
-
-        public function getIncompletePaymentUrl(Subscription $subscription): ?string
-        {
-            return null;
-        }
-
-        public function getIncompletePaymentUrlForUser(User $user): ?string
-        {
-            return null;
-        }
-    };
-
-    app()->instance(StripeServiceContract::class, $stripeMock);
-
-    $response = $this->actingAs($user)->post(route('checkout.subscription.store'), [
+    $this->postJson(route('checkout.subscription.store'), [
         'product_id' => $product->id,
         'billing_interval' => 'yearly',
-    ]);
+    ])->assertUnprocessable()->assertJsonValidationErrors('billing_interval');
 
-    $response->assertUnprocessable();
+    expect($checkout->sessions)->toBeEmpty();
 });

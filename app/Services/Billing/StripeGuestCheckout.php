@@ -10,6 +10,7 @@ use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Laravel\Cashier\Cashier;
 use Stripe\Checkout\Session;
+use Stripe\Exception\InvalidRequestException;
 use Stripe\Subscription;
 
 /**
@@ -51,6 +52,23 @@ final readonly class StripeGuestCheckout implements ManagesGuestCheckout
     public function subscription(string $subscriptionId): Subscription
     {
         return Cashier::stripe()->subscriptions->retrieve($subscriptionId);
+    }
+
+    public function expireIfOpen(string $sessionId): bool
+    {
+        $sessions = Cashier::stripe()->checkout->sessions;
+
+        try {
+            $sessions->expire($sessionId);
+
+            return true;
+        } catch (InvalidRequestException $exception) {
+            return match ($sessions->retrieve($sessionId)->status) {
+                Session::STATUS_EXPIRED => true,
+                Session::STATUS_COMPLETE => false,
+                default => throw $exception,
+            };
+        }
     }
 
     private function toSession(Session $session): GuestCheckoutSession

@@ -46,6 +46,8 @@ final readonly class BuildSnapFunnelReport
 
     /** @var list<string> */
     private const array HISTORY = [
+        '2026-11-26: the pricing page shows paid monthly plans. Guests continue directly to Stripe for their selected plan. These guest checkouts record the pricing placement.',
+        '2026-11-26: the first-scan result bar shows the remaining free scan with a link back to the scanner. The paid choice highlights more scans and a personal AI coach, with the monthly price and a link to plan details.',
         '2026-11-24: guest offer views, upgrade clicks and checkouts record free_scans_used, the free scans the guest had used when the offer showed. On result_bar, 1 is the free-or-Starter choice after the first scan and 2 is the offer after both free scans. Earlier result_bar events have no such property and cannot be split.',
         '2026-11-24: after payment, guests can activate Starter with a matching verified Gmail or Google Workspace account in the checkout browser. Purchase claimed records google or email_link as the method.',
         '2026-11-24: guests open Stripe straight from the result and the scan limit with Get Starter, including from the free-or-Starter choice after the first scan. Stripe collects the email, and the buyer activates the plan from an emailed link. Members can log in from a link under the Starter button before paying. The upgrade path now runs Offer viewed, Checkout opened, First payment, so sign-up and the offer click are no longer required steps.',

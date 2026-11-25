@@ -16,8 +16,8 @@ use Livewire\Attributes\Title;
 use Livewire\Component;
 
 new
-#[Layout('layouts.mini-app', ['bodyClass' => 'bg-muted text-foreground', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'themeColor' => '#f5f5f5', 'metaDescription' => 'Your Snap to Track Starter checkout.'])]
-#[Title('Your Starter plan | Snap to Track')]
+#[Layout('layouts.mini-app', ['bodyClass' => 'bg-muted text-foreground', 'viewport' => 'width=device-width, initial-scale=1, viewport-fit=cover', 'themeColor' => '#f5f5f5', 'metaDescription' => 'Your Acara Plate plan checkout.'])]
+#[Title('Your plan | Acara Plate')]
 class extends Component
 {
     #[Locked]
@@ -36,6 +36,13 @@ class extends Component
         $purchase = $this->purchase;
 
         if (! $purchase instanceof PlanPurchase) {
+            return;
+        }
+
+        $returnPurchase = request()->query('purchase', $purchase->placement === 'pricing' ? null : $purchase->id);
+        if (request()->has('checkout') && $returnPurchase !== $purchase->id) {
+            $this->redirect(route('snap-to-track.purchase'));
+
             return;
         }
 
@@ -86,8 +93,14 @@ class extends Component
             return;
         }
 
+        if ($purchase->id !== session('snap_to_track.purchase')) {
+            $this->redirect(route('snap-to-track.purchase'));
+
+            return;
+        }
+
         try {
-            $this->redirect($startCheckout->handle($guestId, $purchase->placement));
+            $this->redirect($startCheckout->handle($guestId, $purchase->placement, product: $purchase->product));
         } catch (Throwable $exception) {
             report($exception);
             $this->addError('checkout', 'We could not open checkout just now. Please try again.');
@@ -135,7 +148,7 @@ class extends Component
     $gutter = 'pr-[max(1rem,env(safe-area-inset-right))] pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1.5rem,env(safe-area-inset-right))] sm:pl-[max(1.5rem,env(safe-area-inset-left))]';
     $press = 'touch-manipulation select-none [-webkit-touch-callout:none] transition duration-150 ease-out active:scale-[0.97] motion-reduce:transition-none motion-reduce:active:scale-100';
     $ring = 'outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50';
-    $starterLabel = $purchase instanceof PlanPurchase
+    $planLabel = $purchase instanceof PlanPurchase
         ? strtr(__('common.photo_plans.offer.get_plan'), ['{{name}}' => $purchase->product->name, '{{price}}' => $purchase->product->formatted_price])
         : null;
     $mealWaiting = is_string(session('snap_to_track.result.draft'));
@@ -226,7 +239,7 @@ class extends Component
                     {{ $state === 'cancelled' ? 'It is no longer active, and nothing more will be charged. You can start again whenever you like.' : 'Nothing has been charged. Pick up where you left off whenever you are ready.' }}
                 </p>
                 <x-snap-result.button variant="plan" wire:click="continueCheckout" wire:loading.attr="disabled" wire:target="continueCheckout">
-                    {{ $starterLabel }}
+                    {{ $planLabel }}
                 </x-snap-result.button>
                 @error('checkout')
                     <p role="alert" class="text-sm text-destructive">{{ $message }}</p>
@@ -237,7 +250,7 @@ class extends Component
                 </x-snap-result.button>
             @else
                 <h1 class="text-2xl font-semibold tracking-tight">Nothing to show here yet</h1>
-                <p class="text-sm leading-relaxed text-muted-foreground">We could not find a Starter checkout in this browser. If you already paid, check your inbox for your activation link.</p>
+                <p class="text-sm leading-relaxed text-muted-foreground">We could not find a plan checkout in this browser. If you already paid, check your inbox for your activation link.</p>
                 <x-snap-result.button :href="route('snap-to-track')">
                     <x-snap-result.icon name="camera" />
                     Back to Snap to Track

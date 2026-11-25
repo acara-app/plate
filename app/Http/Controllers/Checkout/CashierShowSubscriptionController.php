@@ -68,7 +68,7 @@ final readonly class CashierShowSubscriptionController
         }
 
         $offers = resolve(OffersSubscriptions::class);
-        $availableProducts = $products->filter($offers->available(...))->map($offers->present(...))->values();
+        $availableProducts = $products->where('price', '>', 0)->filter($offers->available(...))->map($offers->present(...))->values();
 
         $allowance = resolve(ManagesPhotoAnalyses::class)->entitlement($user, PhotoAnalysisContext::guestId($request));
         $returningFromCheckout = $request->routeIs('checkout.success');
@@ -108,8 +108,7 @@ final readonly class CashierShowSubscriptionController
             'meal' => $meal?->toArray(),
             'continueToMeal' => $returningFromCheckout && ! $premiumNotYetActive && $meal?->saveUrl !== null,
             'selectedProductId' => $request->session()->get('checkout.selected_product'),
-            'selectedInterval' => $request->session()->get('checkout.selected_interval') === 'yearly' ? 'yearly' : 'monthly',
-            'photoAllowance' => $allowance->toArray(),
+            'planActive' => ! $paymentPending && $allowance->mode === 'premium',
             'currentSubscription' => $currentSubscription ? [
                 'id' => $currentSubscription->id,
                 'type' => $currentSubscription->type,
