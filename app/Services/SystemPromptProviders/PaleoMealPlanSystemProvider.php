@@ -34,8 +34,7 @@ final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
                 '2. DIETITIAN: Ensure absolutely zero gluten, soy, or lactose enters the menu.',
                 '3. CHEF: Use sweet potatoes or fruit for sweetness, avoiding all refined sugars.',
                 '4. NUTRITIONIST: Ensure specific micronutrient density (Iron, B12) is high from the animal products.',
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "paleo", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Output the strict Paleo meal plan using the structured response schema.',
+                '5. TEAM: Output the strict Paleo meal plan using the structured response schema.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class PaleoMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

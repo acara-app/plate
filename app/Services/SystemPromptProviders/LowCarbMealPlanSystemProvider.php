@@ -34,8 +34,7 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
                 '2. CHEF: Pair it with high-volume, low-carb vegetables (roasted crucifers, leafy greens) for texture.',
                 '3. DIETITIAN: Verify that every vegetable selected has a low Glycemic Load (GL).',
                 '4. NUTRITIONIST: Calculate "Net Carbs" (Total Carbs - Fiber) to ensure the meal stays under the strict limit (<130g daily).',
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "low_carb", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Finalize the structured meal plan using exact 100g portions and standard USDA reference values.',
+                '5. TEAM: Finalize the structured meal plan using exact 100g portions and standard USDA reference values.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class LowCarbMealPlanSystemProvider implements SystemPromptProvid
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

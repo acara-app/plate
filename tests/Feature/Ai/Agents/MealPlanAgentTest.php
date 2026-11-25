@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Ai\Agents\MealPlanAgent;
+use App\Ai\Tools\GetDietReference;
+use App\Ai\Tools\StartMealPlanGeneration;
 use App\Enums\DietType;
 use App\Enums\GoalChoice;
 use App\Enums\Sex;
@@ -11,6 +13,12 @@ use App\Models\User;
 use Illuminate\Support\Facades\Queue;
 
 covers(MealPlanAgent::class);
+
+it('can look up diet references without starting another plan while generating meals', function (): void {
+    $tools = array_map(get_class(...), resolve(MealPlanAgent::class)->tools());
+
+    expect($tools)->toContain(GetDietReference::class)->not->toContain(StartMealPlanGeneration::class);
+});
 
 it('returns fluent interface when setting diet type', function (): void {
     $action = resolve(MealPlanAgent::class);

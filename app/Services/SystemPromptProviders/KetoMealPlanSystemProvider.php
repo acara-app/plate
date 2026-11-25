@@ -34,8 +34,7 @@ final readonly class KetoMealPlanSystemProvider implements SystemPromptProvider
                 '2. DIETITIAN: Strictly filter out any starchy vegetables or sugary glazes.',
                 '3. CHEF: Add low-carb flavor enhancers like cheese, bacon, or fresh herbs to prevent "diet fatigue."',
                 '4. NUTRITIONIST: Double-check that the "Net Carbs" are near zero (<20g/day) for every ingredient.',
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "keto", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Generate the structured meal plan using standard nutrition reference values.',
+                '5. TEAM: Generate the structured meal plan using standard nutrition reference values.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class KetoMealPlanSystemProvider implements SystemPromptProvider
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

@@ -34,8 +34,7 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
                 '2. DIETITIAN: Ensure variety—rotate colors and protein sources to cover all vitamin bases.',
                 '3. CHEF: Use simple cooking methods (grilling, steaming, sautéing) accessible to a home cook.',
                 "4. NUTRITIONIST: Verify that total calories match the user's TDEE without extremes.",
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "balanced", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Output the balanced meal plan using the structured response schema.',
+                '5. TEAM: Output the balanced meal plan using the structured response schema.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class BalancedMealPlanSystemProvider implements SystemPromptProvi
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

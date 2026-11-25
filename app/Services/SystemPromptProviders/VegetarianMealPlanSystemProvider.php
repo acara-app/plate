@@ -34,8 +34,7 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
                 '2. DIETITIAN: Ensure a high volume of vegetables to prevent the diet from becoming "Carbo-tarian" (just cheese pizza).',
                 '3. CHEF: Use whole grains for nuttiness and texture.',
                 '4. NUTRITIONIST: Calculate the macro balance to prevent excessive Saturated Fat from the dairy.',
-                '5. DIETITIAN: Use the get_diet_reference tool with {"diet_type": "vegetarian", "reference_name": "REFERENCE_NAME"} to fetch any additional reference materials if available.',
-                '6. TEAM: Compile the structured meal plan.',
+                '5. TEAM: Compile the structured meal plan.',
             ],
             output: [
                 'Return the structured response requested by the schema.',
@@ -44,7 +43,7 @@ final readonly class VegetarianMealPlanSystemProvider implements SystemPromptPro
                 'Keep ingredient entries as structured objects with name, quantity, and specificity.',
             ],
             toolsUsage: [
-                'Use the get_diet_reference tool to fetch detailed reference materials and food lists on-demand',
+                'The diet guide is included above. Use get_diet_reference only when you need a named supplementary reference.',
             ],
         );
     }

@@ -22,38 +22,40 @@ final readonly class GetDietReference implements Tool
 
     public function description(): string
     {
-        return 'Fetch diet-specific reference materials (nutrient score cards, food lists, detailed guidelines) on-demand. Use this when you need specific reference data for meal planning that is not in your immediate context.';
+        return 'Fetch diet-specific reference materials for meal planning. Choose a diet to read its guide, or supply the name of a supplementary reference such as the Mediterranean nutrient score card.';
     }
 
     public function handle(Request $request): string
     {
-        /** @var string $dietTypeValue */
-        $dietTypeValue = $request['diet_type'] ?? '';
-        /** @var string $referenceName */
-        $referenceName = $request['reference_name'] ?? '';
+        $dietTypeValue = $request['diet_type'];
+        $referenceName = $request['reference_name'] ?? null;
 
-        $dietType = DietType::tryFrom($dietTypeValue);
+        $dietType = is_string($dietTypeValue) ? DietType::tryFrom($dietTypeValue) : null;
         if ($dietType === null) {
             return (string) json_encode([
                 'success' => false,
-                'error' => sprintf("Invalid diet type '%s'. Valid options: ", $dietTypeValue).implode(', ', array_map(fn (DietType $t) => $t->value, DietType::cases())),
+                'error' => 'Invalid diet type. Valid options: '.implode(', ', array_column(DietType::cases(), 'value')),
             ]);
         }
 
-        $sanitizedName = preg_replace('/[^a-zA-Z0-9_-]/', '', $referenceName);
-        if ($sanitizedName !== $referenceName || ($sanitizedName === '' || $sanitizedName === '0')) {
+        if ($referenceName !== null && (! is_string($referenceName) || ! preg_match('/\A[a-zA-Z0-9_-]+\z/', $referenceName))) {
             return (string) json_encode([
                 'success' => false,
                 'error' => 'Invalid reference name. Use only alphanumeric characters, hyphens, and underscores.',
             ]);
         }
 
-        $filePath = resource_path(sprintf('markdown/%s/references/%s.md', $dietType->value, $sanitizedName));
+        $directory = resource_path("markdown/{$dietType->value}");
+        $filePath = $referenceName === null
+            ? "{$directory}/{$dietType->value}.md"
+            : "{$directory}/references/{$referenceName}.md";
 
         if (! File::exists($filePath)) {
             return (string) json_encode([
                 'success' => false,
-                'error' => sprintf("Reference '%s' not found for diet '%s'. Available references may vary by diet type.", $sanitizedName, $dietType->value),
+                'error' => $referenceName === null
+                    ? "Guide not found for diet '{$dietType->value}'."
+                    : "Reference '{$referenceName}' not found for diet '{$dietType->value}'. Omit reference_name to read the diet guide.",
             ]);
         }
 
@@ -62,7 +64,7 @@ final readonly class GetDietReference implements Tool
         return (string) json_encode([
             'success' => true,
             'diet_type' => $dietType->value,
-            'reference_name' => $sanitizedName,
+            'reference_name' => $referenceName,
             'content' => $content,
         ]);
     }
@@ -74,11 +76,12 @@ final readonly class GetDietReference implements Tool
     {
         return [
             'diet_type' => $schema->string()
-                ->description('The diet type (e.g., mediterranean, keto, dash, low_carb, vegetarian, vegan, paleo, balanced)')
+                ->enum(DietType::class)
+                ->description('The diet to look up.')
                 ->required(),
             'reference_name' => $schema->string()
-                ->description('Name of the reference file without extension (e.g., med-diet-nutrient-score-card, keto-food-list)')
-                ->required(),
+                ->nullable()
+                ->description('Omit this for the diet guide. For a supplementary file, use its name without the extension, such as med-diet-nutrient-score-card for mediterranean.'),
         ];
     }
 }
