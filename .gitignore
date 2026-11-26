@@ -43,6 +43,7 @@ yarn-error.log
 /.zed
 /tmp/
 package-lock.json
+!/package-lock.json
 bun.lock
 bun.lockb
 composer.local.json
