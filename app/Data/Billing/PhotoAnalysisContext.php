@@ -17,6 +17,7 @@ final readonly class PhotoAnalysisContext
         public string $requestId,
         public string $source,
         public string $fingerprint,
+        public ?string $region = null,
     ) {}
 
     public static function guestId(Request $request): ?string

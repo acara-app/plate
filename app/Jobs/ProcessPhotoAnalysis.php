@@ -83,7 +83,7 @@ final class ProcessPhotoAnalysis implements ShouldBeEncrypted, ShouldQueue
             $result = $photoAnalyses->analyze($context, function (PhotoModel $model) use ($analyzer, $request, $base64, $context): FoodAnalysisData {
                 throw_unless($request->isStillProcessing(), PhotoAnalysisNotProcessingException::class);
 
-                return $analyzer->analyzeUsingModel($base64, $request->mime_type, $model, user: $context->user, requestId: $request->request_id);
+                return $analyzer->analyzeUsingModel($base64, $request->mime_type, $model, user: $context->user, requestId: $request->request_id, region: $context->region);
             });
 
             if ($result->items->count() === 0) {

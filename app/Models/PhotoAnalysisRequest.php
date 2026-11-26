@@ -33,6 +33,7 @@ use Illuminate\Support\Facades\Log;
  * @property string|null $image_base64
  * @property string|null $draft_token
  * @property bool $keep_photo
+ * @property string|null $region
  * @property PhotoAnalysisStatus $status
  * @property PhotoAnalysisFailure|null $failure_code
  * @property CarbonInterface $deadline_at
@@ -121,6 +122,7 @@ final class PhotoAnalysisRequest extends Model
             $this->request_id,
             $this->source,
             $this->fingerprint,
+            $this->region,
         );
     }
 
@@ -193,7 +195,7 @@ final class PhotoAnalysisRequest extends Model
     {
         $query->select([
             'id', 'request_id', 'retry_request_id', 'user_id', 'guest_hash', 'guest_id', 'fingerprint', 'source', 'mime_type',
-            'draft_token', 'keep_photo', 'status', 'failure_code', 'deadline_at', 'expires_at', 'started_at', 'completed_at',
+            'draft_token', 'keep_photo', 'region', 'status', 'failure_code', 'deadline_at', 'expires_at', 'started_at', 'completed_at',
             'failed_at', 'created_at', 'updated_at',
         ]);
     }
