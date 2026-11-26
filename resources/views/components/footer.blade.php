@@ -52,7 +52,7 @@
                         <a href="{{ route('spike-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Check glucose impact of foods">Spike Calculator</a>
                     </li>
                     <li>
-                        <a href="{{ route('snap-to-track') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Estimate calories and macros from a food photo">Photo Calorie Counter</a>
+                        <a href="{{ route('snap-to-track') }}" @guest data-umami-event="snap_to_track_cta_click" data-umami-event-location="footer" @endguest class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="Estimate calories and macros from a food photo">Photo Calorie Counter</a>
                     </li>
                     <li>
                         <a href="{{ route('usda-servings-calculator') }}" class="text-sm leading-6 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white" title="USDA 2025-2030 daily serving calculator">Daily Servings Calculator</a>

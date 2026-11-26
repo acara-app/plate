@@ -154,7 +154,8 @@ it('validates photo is required', function (): void {
     Livewire::test('pages::snap-to-track')
         ->set('turnstileToken', Turnstile::dummy())
         ->call('analyze')
-        ->assertHasErrors(['photo' => 'required']);
+        ->assertHasErrors(['photo' => 'required'])
+        ->assertNotDispatched('snap-analysis-requested');
 });
 
 it('validates photo max size', function (): void {
@@ -221,7 +222,8 @@ it('queues full-size photos at 2048 pixels so the background scan never decodes 
     Livewire::test('pages::snap-to-track')
         ->set('photo', $photo)
         ->set('turnstileToken', verifiedTurnstileTokenForSnapToTrack())
-        ->call('analyze');
+        ->call('analyze')
+        ->assertDispatched('snap-analysis-requested', requestId: PhotoAnalysisRequest::query()->sole()->request_id, retry: false);
 
     $queuedPhoto = (string) base64_decode((string) PhotoAnalysisRequest::query()->sole()->image_base64, true);
 
@@ -865,10 +867,12 @@ it('resumes one retry after losing its response without requiring another upload
 
     $first = Livewire::test('pages::snap-to-track')->assertSet('canRetryAnalysis', true);
     $lostResponse = Livewire::test('pages::snap-to-track');
-    $first->call('retryAnalysis')->assertSet('loading', true);
+    $first->call('retryAnalysis')->assertSet('loading', true)
+        ->assertDispatched('snap-analysis-requested', requestId: $first->instance()->analysisRequestId, retry: true);
     exhaustSnapToTrackAnalysisLimit();
 
     $lostResponse->call('retryAnalysis')
+        ->assertNotDispatched('snap-analysis-requested')
         ->assertSet('loading', true)
         ->assertSet('analysisRequestId', $first->instance()->analysisRequestId)
         ->assertSet('photo', null);

@@ -40,6 +40,23 @@ final class PhotoEntitlement extends Data
         return $this->exhausted;
     }
 
+    /** @return array{source: string, placement: string, variant: string, free_scans_used?: int} */
+    public function publicOfferProperties(string $placement): array
+    {
+        $properties = [
+            'source' => 'public_snap_to_track',
+            'placement' => $placement,
+            'variant' => $this->variant ?? 'baseline',
+        ];
+
+        $freeScansUsed = $this->freeScansUsed();
+        if ($freeScansUsed !== null) {
+            $properties['free_scans_used'] = $freeScansUsed;
+        }
+
+        return $properties;
+    }
+
     public function freeScansUsed(): ?int
     {
         return $this->mode === 'trial' ? $this->used : null;

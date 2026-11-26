@@ -116,8 +116,9 @@ export default function CashierSubscription({
         }
 
         setCheckoutError(null);
-        window.umami?.track('snap_to_track_checkout_click', {
-            source: 'checkout',
+        window.umami?.track('pricing_checkout_click', {
+            audience: isGuest ? 'guest' : 'member',
+            product_id: productId,
             interval: 'monthly',
         });
         setIsSubscribing(true);

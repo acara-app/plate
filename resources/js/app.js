@@ -46,6 +46,14 @@ window.acaraTrackOnce = (eventName, properties, key) => {
     window.acaraTrack(eventName, properties);
 };
 
+window.addEventListener('snap-analysis-requested', ({ detail }) => {
+    window.acaraTrackOnce(
+        'snap_to_track_analysis_requested',
+        { source: 'public_snap_to_track', retry: detail.retry },
+        detail.requestId,
+    );
+});
+
 window.acaraKeepSnapPhoto = keepSnapPhoto;
 window.acaraPrepareSnapPhoto = prepareSnapPhoto;
 window.acaraTagSnapPhoto = tagSnapPhoto;

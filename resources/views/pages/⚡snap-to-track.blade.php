@@ -241,6 +241,7 @@ class extends Component
                 $this->browserRegion(),
             ), keepPhoto: $this->keepPhoto);
             $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id);
+            $this->dispatch('snap-analysis-requested', requestId: $analysis->request_id, retry: false);
             $this->showAnalysis($analysis);
         } catch (ValidationException $e) {
             $this->funnel->record(SnapFunnelStage::UploadRejected, (string) $this->analysisRequestId, [
@@ -305,6 +306,7 @@ class extends Component
             RateLimiter::hit($this->analysisRateLimitKey(), 3600);
             $analysis = $retryAnalysis->handle($previous, auth()->user(), $this->analysisGuestId());
             $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id, ['retry' => true]);
+            $this->dispatch('snap-analysis-requested', requestId: $analysis->request_id, retry: true);
             $this->showAnalysis($analysis);
         } catch (Throwable $e) {
             $this->error = 'We could not restart the analysis. Please try again.';
@@ -771,7 +773,6 @@ class extends Component
                             <button
                                 type="button"
                                 wire:click="continueInApp('register')"
-                                x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'register' })"
                                 class="{{ $pill }} mt-5 bg-primary text-emerald-950"
                             >
                                 Keep analyzing — free
@@ -781,7 +782,6 @@ class extends Component
                                 <button
                                     type="button"
                                     wire:click="continueInApp('login')"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { auth_path: 'login' })"
                                     class="min-h-11 rounded-full px-1 font-medium text-white underline underline-offset-4 {{ $ring }}"
                                 >Log in</button>
                             </p>
@@ -987,8 +987,6 @@ class extends Component
                                 <button
                                     type="submit"
                                     x-on:click="window.acaraTagSnapPhoto?.($wire.analysisRequestId)"
-                                    data-umami-event="snap_to_track_analyze_click"
-                                    data-umami-event-location="main_form"
                                     class="{{ $pill }} bg-primary text-emerald-950 disabled:cursor-wait"
                                     @disabled($loading)
                                 >

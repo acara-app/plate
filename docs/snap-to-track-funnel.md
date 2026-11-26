@@ -94,9 +94,30 @@ These are listed beside the funnel, not inside it:
 
 `--json` returns these as `conversion`, `placements`, `purchases` and `open_purchases`.
 
-## What Umami still shows
+## Reading Cloud Umami
 
-Umami keeps the raw browser events and acquisition analytics. Some of its event names match the stage names above, but its counts are raw browser events, not journeys, and can cover different buttons: its `snap_to_track_save_click` fires only from the Save buttons, not from the Log in links, and names the button in `placement`: `meal` (the meal card), `result` (the plan offer) or `result_bar` (the result sheet). Ad blockers can drop them. Signed-in scans in the app also send `snap_to_track_result_viewed`, with `source` set to `authenticated_snap_to_track`. The journey ledger sends nothing to Umami.
+Open **Acara Plate → Behavior → Funnels**. The three saved funnels use Umami's 60-minute window and count visitors who took the steps in order.
+
+| Funnel | Steps |
+| --- | --- |
+| Snap · Scan to guest result | Public scanner page → photo selected → guest result page |
+| Snap · Guest result to saved meal | Guest result page → Save or Log in to save → meal logged |
+| Snap · Guest result to Starter interest | Guest result page → offer viewed → upgrade clicked |
+
+Visitors can also enter directly at the scan limit. Use the ledger's upgrade path for that entry point and for checkout opens, confirmed payments and activation. A Stripe redirect and a paid invoice can happen in different sessions or on different devices.
+
+The photo-selection and authentication goals use `snap_to_track_upload_selected` and `snap_to_track_auth_completed`. Goal percentages use all site visitors in the selected period. Use Funnels for the proportion advancing from one step to the next. Events shows raw occurrences, including multiple scans or placements per visitor.
+
+### Browser events after the tracking update
+
+- `snap_to_track_cta_click` identifies links into the public scanner, including the tools directory, related-tool cards and footer. The `location` property identifies the link. Direct arrivals still enter the scan funnel on the pageview.
+- `snap_to_track_analysis_requested` fires when the server accepts a scan. The `retry` property distinguishes a new request from a retry. The Analyze button click is retired.
+- Public offers and upgrade clicks carry `placement`, `variant` and, for a free trial allowance, numeric `free_scans_used`. The sheet uses `result_bar` for both scan counts. Selecting the paid radio option alone does not open checkout.
+- `snap_to_track_save_click` includes Log in buttons that continue to saving. Use `auth_path` and `placement` to separate them from the Save buttons. The header login uses `header`. `snap_to_track_scan_again_click` measures a visitor choosing another scan from the result or its sheet.
+- The public result and meal events retain their names. In-app automatic saves send `snap_to_track_app_meal_logged`; member offer impressions and clicks use `snap_to_track_app_offer_viewed` and `snap_to_track_app_upgrade_click`. The pricing page sends `pricing_checkout_click` with the selected product and audience. A member's return with an active premium allowance sends `member_checkout_returned`.
+- Email-field blur, draft restoration on successful save and Snap auth-start clicks are retired. Signup completion, meal logging and expired-draft diagnostics remain available.
+
+Use the deployment time for comparisons. Before this update, result and meal totals included signed-in app scans, the sheet missed second-scan offer impressions in Umami, and Save clicks excluded login links. The dedicated guest result URL dates from November 4. Historical events retain their original meanings. Browser tracking can be blocked; the ledger records the server-side journey independently.
 
 ## Recording a change
 
@@ -108,4 +129,4 @@ Analytics properties never include email addresses, photos, meal or health value
 
 ## History notes
 
-The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-26 change of that bar into a sheet that opens once after 2.5 seconds, the 2026-11-26 plan card after the first scan, the 2026-11-24 guest checkout before sign-up and Google activation option, the 2026-11-24 free-scan count on guest offers and checkouts, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.
+The report prints dated notes from `BuildSnapFunnelReport::HISTORY`, together with the day the ledger started. They cover the 2026-10-24 Umami event changes, the 2026-11-04 move of guest results to their own page, the 2026-11-07 Save layout on that page, the 2026-11-22 plan choice in its action bar, the 2026-11-26 change of that bar into a sheet that initially opened after 2.5 seconds and now opens 10 seconds after the calorie summary appears, the 2026-11-26 plan card after the first scan, the 2026-11-24 guest checkout before sign-up and Google activation option, the 2026-11-24 free-scan count on guest offers and checkouts, the 2026-11-07 change to paying before email verification and the 2026-11-07 removal of the review page before the food log. There is no data before the ledger start, and none is estimated. Don't build a "comparable" historical funnel from Umami totals.

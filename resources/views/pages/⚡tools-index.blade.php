@@ -188,7 +188,7 @@ class extends Component
                     <li class="border-b border-[#D9CFBC] last:border-b-0 sm:[&:nth-last-child(-n+2)]:border-b-0">
                         <a
                             href="{{ $tool['route'] }}"
-                            data-umami-event="tool_card_click"
+                            data-umami-event="{{ $tool['route'] === route('snap-to-track') ? 'snap_to_track_cta_click' : 'tool_card_click' }}"
                             data-umami-event-tool="{{ Str::slug($tool['name']) }}"
                             data-umami-event-location="tools_index"
                             class="group flex h-full flex-col px-2 py-8 transition-colors hover:bg-[#EBE2D0]/60 sm:px-7 sm:py-10 focus:outline-none focus-visible:bg-[#EBE2D0]"

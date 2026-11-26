@@ -99,20 +99,11 @@ final readonly class AnalyzeSnapToTrackPhotoController
         );
 
         Inertia::flash('analytics', [
-            [
-                'name' => 'snap_to_track_result_viewed',
-                'properties' => [
-                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                    'items_count' => $analysis->items->count(),
-                    'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
-                ],
-            ],
-            [
-                'name' => 'snap_to_track_meal_logged',
-                'properties' => [
-                    'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
-                    'items_count' => $analysis->items->count(),
-                ],
+            'name' => 'snap_to_track_app_meal_logged',
+            'properties' => [
+                'source' => AnalysisDraftSource::AuthenticatedSnapToTrack->value,
+                'items_count' => $analysis->items->count(),
+                'confidence_band' => ConfidenceBand::fromScore($analysis->confidence)->value,
             ],
         ]);
         Inertia::flash('toast', ['type' => 'success', 'message' => __('common.snap_to_track.saved')]);

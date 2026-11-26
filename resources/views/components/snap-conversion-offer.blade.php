@@ -1,12 +1,13 @@
 @props(['allowance', 'placement'])
 
 @php
+    $properties = $allowance->publicOfferProperties($placement);
     $pill = 'inline-flex min-h-14 w-full touch-manipulation items-center justify-center rounded-full px-6 text-center text-base font-semibold select-none transition duration-150 ease-out outline-none focus-visible:ring-[3px] focus-visible:ring-white/70 active:scale-[0.97] disabled:opacity-60 motion-reduce:transition-none';
 @endphp
 
 <article
-    @if ($allowance->canUpgrade && ($allowance->exhausted || $allowance->preview !== null))
-        x-data x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') }, @js($placement.':'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed(@js($placement))"
+    @if ($allowance->canUpgrade && $allowance->offer && ($allowance->exhausted || $allowance->preview !== null))
+        x-data x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', @js($properties), @js($placement.':'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed(@js($placement))"
     @endif
     class="rounded-[2rem] bg-white/10 p-6 text-white"
 >
@@ -38,7 +39,7 @@
     @if ($allowance->canUpgrade && $allowance->offer && ($allowance->exhausted || $allowance->preview !== null))
         <p class="mt-3 text-[15px] leading-relaxed text-white/80">{!! e(strtr(__('common.photo_plans.offer.body'), ['@{{name}}' => $allowance->offer->name])) !!}</p>
         <div class="mt-5">
-            <button type="button" wire:click="upgrade(@js($placement))" wire:loading.attr="disabled" wire:target="upgrade,signInForPlan" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: @js($placement), variant: @js($allowance->variant ?? 'baseline') })" class="{{ $pill }} bg-primary py-3 text-emerald-950">
+            <button type="button" wire:click="upgrade(@js($placement))" wire:loading.attr="disabled" wire:target="upgrade,signInForPlan" x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', @js($properties))" class="{{ $pill }} bg-primary py-3 text-emerald-950">
                 {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $allowance->offer->name, '@{{price}}' => $allowance->offer->formattedPrice])) !!}
             </button>
             @error('checkout')
@@ -53,7 +54,7 @@
 
     @guest
         @if ($allowance->canUpgrade && $allowance->offer && $allowance->exhausted)
-            <button type="button" wire:click="signInForPlan" wire:loading.attr="disabled" wire:target="upgrade,signInForPlan" x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { source: 'public_snap_to_track', auth_path: 'login', intent: 'upgrade' })" class="mt-3 min-h-11 touch-manipulation rounded-full text-sm font-medium underline underline-offset-4 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-white/70">{{ __('common.photo_plans.offer.login') }}</button>
+            <button type="button" wire:click="signInForPlan" wire:loading.attr="disabled" wire:target="upgrade,signInForPlan" class="mt-3 min-h-11 touch-manipulation rounded-full text-sm font-medium underline underline-offset-4 outline-none select-none focus-visible:ring-[3px] focus-visible:ring-white/70">{{ __('common.photo_plans.offer.login') }}</button>
         @else
             <button type="button" wire:click="continueInApp('login')" class="mt-2 min-h-11 touch-manipulation rounded-full text-sm font-medium underline underline-offset-4 outline-none focus-visible:ring-[3px] focus-visible:ring-white/70">{{ __('common.photo_plans.offer.login') }}</button>
         @endif
