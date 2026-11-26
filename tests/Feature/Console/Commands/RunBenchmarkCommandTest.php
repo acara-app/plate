@@ -110,7 +110,7 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2, '--force' => true])
-        ->expectsOutputToContain('gemini-3.8-flash/p7')
+        ->expectsOutputToContain('gemini-3.8-flash/p8')
         ->expectsOutputToContain('Raw model')
         ->expectsOutputToContain('1 / 2 / 0')
         ->expectsOutputToContain('1.00 / 1.00 (1 meals)')
@@ -119,7 +119,7 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
 
     $run = BenchmarkRun::query()->sole();
 
-    expect($run->analyzer_version)->toBe('gemini-3.8-flash/p7')
+    expect($run->analyzer_version)->toBe('gemini-3.8-flash/p8')
         ->and($run->toHarnessReport()->provider)->toBe('gemini')
         ->and($run->smoke)->toBeFalse()
         ->and($run->repeats)->toBe(2)
@@ -185,7 +185,7 @@ it('benchmarks an explicit premium model and refuses to treat unmetered calls as
 
     $report = BenchmarkRun::query()->sole()->toHarnessReport();
     expect($report->provider)->toBe('openai')
-        ->and($report->analyzerVersion)->toBe('gpt-5.6-terra/p7')
+        ->and($report->analyzerVersion)->toBe('gpt-5.6-terra/p8')
         ->and($report->maxTokens)->toBe(4096)
         ->and($report->datasetHash)->not->toBeNull()
         ->and($report->paths[0]->unmeteredRuns)->toBe(3)

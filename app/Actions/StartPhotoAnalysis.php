@@ -51,6 +51,7 @@ final readonly class StartPhotoAnalysis
                     'mime_type' => $mimeType,
                     'image_base64' => $base64,
                     'keep_photo' => $keepPhoto && ! $context->user instanceof User,
+                    'region' => $context->region,
                     'status' => PhotoAnalysisStatus::Queued,
                     'deadline_at' => now()->addMinutes(10),
                     'expires_at' => now()->addMinutes(PhotoAnalysisRequest::TTL_MINUTES),

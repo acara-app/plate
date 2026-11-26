@@ -15,6 +15,7 @@ use App\Models\AnalysisDraft;
 use App\Models\PhotoAnalysisRequest;
 use App\Services\Billing\SnapFunnel;
 use App\Utilities\Base64Image;
+use App\Utilities\CountryUtil;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\RateLimiter;
@@ -237,6 +238,7 @@ class extends Component
             $analysis = $start->handle($this->analysisRequestId, $base64, $image->mimeType, new PhotoAnalysisContext(
                 auth()->user(), $this->analysisGuestId(), $this->analysisRequestId,
                 'public_snap_to_track', hash('sha256', $base64),
+                $this->browserRegion(),
             ), keepPhoto: $this->keepPhoto);
             $this->funnel->record(SnapFunnelStage::AnalysisRequested, $analysis->request_id);
             $this->showAnalysis($analysis);
@@ -348,6 +350,13 @@ class extends Component
             session()->put('snap_to_track.result', ['draft' => $analysis->draft_token, 'request_id' => $analysis->request_id]);
             $this->redirect(route('snap-to-track.result'));
         }
+    }
+
+    private function browserRegion(): ?string
+    {
+        $timezone = session('timezone');
+
+        return is_string($timezone) ? CountryUtil::fromTimezone($timezone) : null;
     }
 
     private function analysisGuestId(): string

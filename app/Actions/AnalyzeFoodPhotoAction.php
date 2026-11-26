@@ -10,6 +10,7 @@ use App\Data\Billing\PhotoAnalysisContext;
 use App\Data\Billing\PhotoModel;
 use App\Data\FoodAnalysisData;
 use App\Models\User;
+use App\Utilities\CountryUtil;
 use Illuminate\Support\Facades\Log;
 
 final readonly class AnalyzeFoodPhotoAction
@@ -27,16 +28,22 @@ final readonly class AnalyzeFoodPhotoAction
 
         return resolve(ManagesPhotoAnalyses::class)->analyze(
             $context,
-            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user, $context->requestId),
+            fn (PhotoModel $model): FoodAnalysisData => $this->analyzeUsingModel($imageBase64, $mimeType, $model, $language, $languageCode, $context->user, $context->requestId, $context->region),
         );
     }
 
-    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?User $user = null, ?string $requestId = null): FoodAnalysisData
+    public function analyzeUsingModel(string $imageBase64, string $mimeType, PhotoModel $model, ?string $language = null, ?string $languageCode = null, ?User $user = null, ?string $requestId = null, ?string $region = null): FoodAnalysisData
     {
         $agent = $this->agent->usingModel($model, $user);
 
         if ($language !== null && $languageCode !== null) {
             $agent->withLanguage($language, $languageCode);
+        }
+
+        $region ??= CountryUtil::fromTimezone($user?->resolveTimezone());
+
+        if ($region !== null) {
+            $agent->withRegion($region);
         }
 
         $jpeg = $this->jpegForModel($imageBase64);

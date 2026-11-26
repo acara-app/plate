@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace App\Utilities;
 
-use DateTimeZone;
-use Exception;
-
 final class EmergencyNumberUtil
 {
     /**
@@ -51,18 +48,7 @@ final class EmergencyNumberUtil
 
     public static function countryFromTimezone(string $timezone): string
     {
-        try {
-            $tz = new DateTimeZone($timezone);
-            $location = $tz->getLocation();
-
-            if ($location !== false && $location['country_code'] !== '??') {
-                return $location['country_code'];
-            }
-        } catch (Exception) {
-            //
-        }
-
-        return 'US';
+        return CountryUtil::fromTimezone($timezone) ?? 'US';
     }
 
     public static function emergencyNumber(string $timezone): string
