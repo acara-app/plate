@@ -186,7 +186,7 @@ final readonly class SnapFunnel
             'acquisition_medium' => $acquired('medium'),
             'acquisition_campaign' => $acquired('campaign'),
             'started_at' => now(),
-            'expires_at' => now()->addDays(config()->integer('snap.journey_days')),
+            'expires_at' => now()->addDays(config()->integer('acara.snap.journey_days')),
         ]);
     }
 

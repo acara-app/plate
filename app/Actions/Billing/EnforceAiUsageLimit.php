@@ -19,6 +19,6 @@ final readonly class EnforceAiUsageLimit
     {
         $allowance = $this->resolveAiAllowance->handle($user);
 
-        throw_if($allowance instanceof AiAllowance && ! $allowance->allows(config()->float('plate.ai_call_estimate_usd')), UsageLimitExceededException::class, $allowance);
+        throw_if($allowance instanceof AiAllowance && ! $allowance->allows(config()->float('acara.ai_call_estimate_usd')), UsageLimitExceededException::class, $allowance);
     }
 }

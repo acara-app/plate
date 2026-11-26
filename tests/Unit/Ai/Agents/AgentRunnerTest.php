@@ -125,7 +125,7 @@ describe('tools', function (): void {
 
 describe('messages', function (): void {
     it('replays the latest eligible history rows with their tool results intact', function (int $limit, int $placeholders): void {
-        config(['altani.context.history_limit' => $limit]);
+        config(['acara.altani.context.history_limit' => $limit]);
 
         $conversation = Conversation::factory()->forUser($this->user)->create();
         $history = History::factory()->forConversation($conversation);

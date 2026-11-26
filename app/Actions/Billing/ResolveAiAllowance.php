@@ -25,7 +25,7 @@ final readonly class ResolveAiAllowance
         }
 
         /** @var array<string, array{usd: float|int, resets: string}> $allowances */
-        $allowances = config()->array('plate.ai_allowance');
+        $allowances = config()->array('acara.ai_allowance');
         $plan = $allowances[$entitlement->tier->value] ?? $allowances[SubscriptionTier::Free->value];
         $reset = AiAllowanceReset::from($plan['resets']);
         $periodStart = $reset->periodStart(CarbonImmutable::now($user->resolveTimezone()));

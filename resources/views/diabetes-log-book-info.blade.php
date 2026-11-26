@@ -20,7 +20,7 @@
             "name": "Is a digital diabetes tracker better than a paper log book?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Three options work well. (1) Digital trackers like Acara Plate offer automatic A1C estimation, trend analysis, food-glucose correlation, and secure cloud backup — you tap in your readings and the app does the math. (2) For iPhone users, fully automatic tracking with Acara Health Sync ({{ config('plate.health_sync.app_store_url') }}) reads glucose data directly from Apple Health, so if your meter is HealthKit-compatible you never type a number. (3) Paper log books require no technology and work for people who prefer writing by hand. Many users combine methods for maximum benefit."
+                "text": "Three options work well. (1) Digital trackers like Acara Plate offer automatic A1C estimation, trend analysis, food-glucose correlation, and secure cloud backup — you tap in your readings and the app does the math. (2) For iPhone users, fully automatic tracking with Acara Health Sync ({{ config('acara.health_sync.app_store_url') }}) reads glucose data directly from Apple Health, so if your meter is HealthKit-compatible you never type a number. (3) Paper log books require no technology and work for people who prefer writing by hand. Many users combine methods for maximum benefit."
             }
         },
         {
@@ -155,7 +155,7 @@
                                     How it works →
                                 </a>
                             </div>
-                            <p class="mt-3 text-xs text-slate-500 dark:text-slate-500 mb-0!">Requires iPhone on iOS {{ config('plate.health_sync.minimum_ios_version') }} or later. Android users, stick with Option 1 for now.</p>
+                            <p class="mt-3 text-xs text-slate-500 dark:text-slate-500 mb-0!">Requires iPhone on iOS {{ config('acara.health_sync.minimum_ios_version') }} or later. Android users, stick with Option 1 for now.</p>
                         </div>
                     </div>
                 </div>

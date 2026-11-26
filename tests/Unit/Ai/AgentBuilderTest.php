@@ -195,7 +195,7 @@ describe('tools', function (): void {
     });
 
     it('excludes WebSearch when a registered sub-agent can reach a Sensitive tool', function (): void {
-        config()->set('plate.tools', [GetHealthSyncSupport::class]);
+        config()->set('acara.tools', [GetHealthSyncSupport::class]);
 
         $user = User::factory()->create();
         $request = new AgentRequest(message: 'Does Plate support Health Sync?', model: new AgentModelData('openai', 'gpt-5-mini'));
@@ -213,8 +213,8 @@ describe('tools', function (): void {
     });
 
     it('includes WebSearch when no Sensitive tool is reachable, even via sub-agents', function (): void {
-        config()->set('plate.tools', [GetHealthSyncSupport::class]);
-        config()->set('plate.sub_agents', []);
+        config()->set('acara.tools', [GetHealthSyncSupport::class]);
+        config()->set('acara.sub_agents', []);
 
         $user = User::factory()->create();
         $request = new AgentRequest(message: 'Does Plate support Health Sync?', model: new AgentModelData('openai', 'gpt-5-mini'));

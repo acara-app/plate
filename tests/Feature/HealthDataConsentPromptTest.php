@@ -24,7 +24,7 @@ it('asks existing accounts once for health-data consent, ahead of the privacy no
     $consent = $user->consents()->sole();
 
     expect([$consent->purpose, $consent->granted, $consent->source])->toBe([ConsentPurpose::ProcessHealthData, true, ConsentSource::Dashboard])
-        ->and($user->refresh()->privacy_version)->toBe(config('plate.privacy_policy_version'));
+        ->and($user->refresh()->privacy_version)->toBe(config('acara.privacy_policy_version'));
 
     $this->get(route('dashboard'))
         ->assertInertia(fn (AssertableInertia $page): AssertableInertia => $page->where('showHealthDataConsent', false)->where('showPrivacyUpdate', false));

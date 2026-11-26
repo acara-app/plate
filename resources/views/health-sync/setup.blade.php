@@ -64,7 +64,7 @@
                         <div>
                             <x-app-store-badge size="md" />
                         </div>
-                        <p class="text-xs text-slate-500 dark:text-slate-500">Requires iOS {{ config('plate.health_sync.minimum_ios_version') }} or later.</p>
+                        <p class="text-xs text-slate-500 dark:text-slate-500">Requires iOS {{ config('acara.health_sync.minimum_ios_version') }} or later.</p>
                     </div>
                 </div>
 

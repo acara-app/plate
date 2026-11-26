@@ -26,6 +26,26 @@ return [
         'temporary_retention_hours' => (int) env('CHAT_TEMPORARY_RETENTION_HOURS', 48),
     ],
 
+    'altani' => [
+        'context' => [
+            'history_limit' => 50,
+            'recent_summaries' => 3,
+        ],
+
+        'summarization' => [
+            'threshold' => 20,
+            'buffer' => 25,
+            'timeout' => 90,
+        ],
+    ],
+
+    'snap' => [
+        'free_trial_scans' => 2,
+        'cost_alert_usd' => 0.03,
+        'journey_days' => 7,
+        'guest_cookie_days' => 365,
+    ],
+
     'health_sync' => [
         'app_store_url' => (string) env('HEALTH_SYNC_APP_STORE_URL', 'https://apps.apple.com/us/app/acara-health-sync/id6761504525'),
         'minimum_ios_version' => (string) env('HEALTH_SYNC_MIN_IOS_VERSION', '18.0'),

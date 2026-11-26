@@ -96,7 +96,7 @@ final readonly class BuildSnapFunnelReport
         return new SnapFunnelReportData(
             from: $from->toIso8601String(),
             to: $to->toIso8601String(),
-            windowDays: config()->integer('snap.journey_days'),
+            windowDays: config()->integer('acara.snap.journey_days'),
             includesInternal: $includeInternal,
             journeys: $journeys->count(),
             openJourneys: $journeys->filter(fn (SnapJourney $journey): bool => $journey->expires_at->isFuture())->count(),

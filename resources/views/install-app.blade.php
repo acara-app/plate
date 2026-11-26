@@ -12,7 +12,7 @@
             "name": "How do I install Acara Plate on my phone?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "There are two options. (1) iPhone users who want Apple Health data to sync automatically can install Acara Health Sync from the App Store at {{ config('plate.health_sync.app_store_url') }}. (2) Anyone who just wants the Plate dashboard on their home screen can install our Progressive Web App: on iPhone, open Safari and tap Share then 'Add to Home Screen'; on Android, open Chrome and tap the menu then 'Install app'."
+                "text": "There are two options. (1) iPhone users who want Apple Health data to sync automatically can install Acara Health Sync from the App Store at {{ config('acara.health_sync.app_store_url') }}. (2) Anyone who just wants the Plate dashboard on their home screen can install our Progressive Web App: on iPhone, open Safari and tap Share then 'Add to Home Screen'; on Android, open Chrome and tap the menu then 'Install app'."
             }
         },
         {
@@ -28,7 +28,7 @@
             "name": "Do I need to download anything from the App Store?",
             "acceptedAnswer": {
                 "@@type": "Answer",
-                "text": "Only if you want Apple Health data to sync automatically. Acara Health Sync is our iOS companion app on the App Store ({{ config('plate.health_sync.app_store_url') }}) that reads Apple Health data and sends it to your Plate dashboard. If you just want the Plate dashboard on your home screen, our Progressive Web App installs directly from your browser — no App Store download required."
+                "text": "Only if you want Apple Health data to sync automatically. Acara Health Sync is our iOS companion app on the App Store ({{ config('acara.health_sync.app_store_url') }}) that reads Apple Health data and sends it to your Plate dashboard. If you just want the Plate dashboard on your home screen, our Progressive Web App installs directly from your browser — no App Store download required."
             }
         }
     ]
@@ -108,7 +108,7 @@
                     </ul>
                     <div class="mt-5 flex flex-col items-start gap-2">
                         <x-app-store-badge size="md" />
-                        <p class="text-[11px] text-slate-500 dark:text-slate-500">Requires iPhone on iOS {{ config('plate.health_sync.minimum_ios_version') }} or later</p>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-500">Requires iPhone on iOS {{ config('acara.health_sync.minimum_ios_version') }} or later</p>
                     </div>
                 </div>
 

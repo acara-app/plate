@@ -73,7 +73,7 @@ final readonly class StartGuestCheckout
             return route('snap-to-track.purchase');
         }
 
-        $sameProduct = $product === null ? $purchase->product->name === PhotoPlan::Starter->productName() : $purchase->subscription_product_id === $product->id;
+        $sameProduct = $product instanceof SubscriptionProduct ? $purchase->subscription_product_id === $product->id : $purchase->product->name === PhotoPlan::Starter->productName();
 
         if (! $sameProduct) {
             return null;

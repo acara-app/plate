@@ -30,7 +30,7 @@ return new class extends Migration
             $table->json('nutrients');
 
             if (DB::getDriverName() === 'pgsql') {
-                $dimensions = config()->integer('plate.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
+                $dimensions = config()->integer('acara.food_photo_analyzer.reference_lookup.embeddings.dimensions', 1536);
                 $table->vector('embedding', $dimensions)->nullable()->index();
             } else {
                 $table->json('embedding')->nullable();

@@ -205,6 +205,7 @@ it('closes the old Stripe checkout when a guest changes plans', function (): voi
     $starter = sellPhotoPlans();
     $pro = SubscriptionProduct::query()->where('name', 'Snap Pro')->sole();
     $pro->update(['purchasable' => true, 'stripe_price_id' => 'price_pro']);
+
     $checkout = FakeGuestCheckout::install();
     $this->withCookie('photo_guest', (string) Str::uuid());
 

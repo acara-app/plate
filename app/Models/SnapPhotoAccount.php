@@ -32,7 +32,7 @@ final class SnapPhotoAccount extends Model
 
     public static function guestCookieExpiredBefore(): CarbonImmutable
     {
-        return CarbonImmutable::today('UTC')->subDays(config()->integer('snap.guest_cookie_days'));
+        return CarbonImmutable::today('UTC')->subDays(config()->integer('acara.snap.guest_cookie_days'));
     }
 
     /**
