@@ -1384,7 +1384,7 @@ return [
             'plan_details' => 'Plan details',
             'continue_to_checkout' => 'Continue to checkout',
             'monthly_renewal' => 'Renews monthly. Cancel anytime.',
-            'no_account' => 'No account needed. We\'ll email your activation link.',
+            'no_account' => 'No sign-up needed. Set up your account after checkout.',
             'renewal' => 'A fresh AI allowance every day. Renews monthly until you cancel in Billing settings.',
             'next_meal' => 'Try another meal and see how photo tracking fits your day.',
             'keep_meal' => 'Keep this meal in your food log',

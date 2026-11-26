@@ -262,7 +262,6 @@ class extends Component
             ];
             $barOffer = $this->offerForPlacement('result_bar');
             $showPlanChoices = $barOffer !== null && ! $photoAllowance->exhausted;
-            $barClearance = $barOffer ? 232 : 96;
             $freeScansLeft = $photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted ? $photoAllowance->remaining : null;
             $freeScansLabel = $freeScansLeft === null ? null : strtr(
                 __('common.photo_plans.free.remaining_'.($freeScansLeft === 1 ? 'one' : 'other')),
@@ -313,7 +312,7 @@ class extends Component
                 },
             }"
             x-init="window.acaraTrackOnce?.('snap_to_track_result_viewed', { source: 'public_snap_to_track' }, @js($analysisRequestId ?? 'restored'))"
-            @class([$gutter, 'pt-2 sm:pt-4', $showPlanChoices ? 'pb-[calc(env(safe-area-inset-bottom)+16rem)]' : 'pb-[calc(env(safe-area-inset-bottom)+6.5rem)]'])
+            class="{{ $gutter }} pt-2 pb-[calc(env(safe-area-inset-bottom)+4rem)] sm:pt-4"
         >
             <div class="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6">
                 <h1 class="sr-only">Your meal preview</h1>
@@ -444,8 +443,8 @@ class extends Component
 
                         <div class="flex flex-col gap-2">
                             <div
-                                x-intersect:enter.margin.0.0.-{{ $barClearance }}px.0="actionsOnScreen.meal = true"
-                                x-intersect:leave.margin.0.0.-{{ $barClearance }}px.0="actionsOnScreen.meal = false"
+                                x-intersect:enter="actionsOnScreen.meal = true"
+                                x-intersect:leave="actionsOnScreen.meal = false"
                             >
                                 <x-snap-result.button
                                     wire:click="save('register')"
@@ -503,7 +502,7 @@ class extends Component
                     </p>
                 </section>
 
-                <x-snap-result.offer :allowance="$photoAllowance" :clearance="$barClearance" />
+                <x-snap-result.offer :allowance="$photoAllowance" />
 
                 <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 
@@ -521,98 +520,184 @@ class extends Component
             </div>
 
             <div
-                x-data="{ plan: 'free' }"
-                x-show="! actionsOnScreen.meal && ! actionsOnScreen.offer"
-                x-transition:enter="transition duration-300 ease-out motion-reduce:transition-none"
-                x-transition:enter-start="translate-y-full"
-                x-transition:enter-end="translate-y-0"
-                x-transition:leave="transition duration-200 ease-out motion-reduce:transition-none"
-                x-transition:leave-start="translate-y-0"
-                x-transition:leave-end="translate-y-full"
-                style="display: none;"
-                class="fixed inset-x-0 bottom-0 z-30 md:pb-4"
+                x-data="{
+                    plan: 'free',
+                    opened: false,
+                    closed: false,
+                    timer: null,
+                    drag: { active: false, startY: 0, startedAt: 0, offset: 0 },
+                    init() {
+                        this.$watch('open', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+                        this.timer = setTimeout(() => {
+                            this.opened = ! this.actionsOnScreen.meal && ! this.actionsOnScreen.offer;
+                        }, 2500);
+                    },
+                    destroy() {
+                        clearTimeout(this.timer);
+                        document.documentElement.classList.remove('overflow-hidden');
+                    },
+                    get open() {
+                        return this.opened && ! this.closed;
+                    },
+                    close() {
+                        this.closed = true;
+                    },
+                    startDrag(event) {
+                        if (event.target.closest('button')) return;
+
+                        this.drag = { active: true, startY: event.clientY, startedAt: event.timeStamp, offset: 0 };
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                    },
+                    moveDrag(event) {
+                        if (this.drag.active) this.drag.offset = Math.max(0, event.clientY - this.drag.startY);
+                    },
+                    endDrag(event) {
+                        if (! this.drag.active) return;
+
+                        this.drag.active = false;
+                        const velocity = this.drag.offset / Math.max(1, event.timeStamp - this.drag.startedAt);
+
+                        if (this.drag.offset > 96 || (this.drag.offset > 24 && velocity > 0.5)) this.close();
+                        else this.drag.offset = 0;
+                    },
+                }"
+                x-on:keydown.escape.window="open && close()"
             >
-                <div class="mx-auto flex w-full max-w-md flex-col gap-2.5 rounded-t-[1.75rem] bg-card pt-3 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] md:rounded-[1.75rem] md:shadow-[0_16px_48px_rgba(0,0,0,0.18)] md:ring-1 md:ring-foreground/10">
-                    @if ($showPlanChoices)
-                        <div role="radiogroup" aria-label="How to keep this meal" class="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-2">
-                            <x-snap-result.plan-choice value="free" :label="__('common.photo_plans.free.price')" description="Save this meal" />
-                            <x-snap-result.plan-choice
-                                value="paid"
-                                :label="__('common.photo_plans.offer.scans_and_coach')"
-                                :description="$barOffer->formattedPrice.__('common.checkout_subscription.per_month')"
-                                x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} }, {{ Js::from('result_bar:'.$this->resultKey()) }}); $wire.offerViewed('result_bar')"
-                            />
-                        </div>
-                    @endif
-                    <div class="flex flex-col gap-2">
-                        @if ($barOffer)
-                            <div
-                                @if ($showPlanChoices)
-                                    x-show="plan === 'paid'" style="display: none;"
-                                @else
-                                    x-intersect.once="$wire.offerViewed('result_bar')"
-                                @endif
-                                class="flex flex-col gap-2"
-                            >
-                                <x-snap-result.button
-                                    variant="plan"
-                                    size="sm"
-                                    wire:click="upgrade('result_bar')"
-                                    wire:loading.attr="disabled"
-                                    wire:target="save,upgrade,signInForPlan"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
+                <div
+                    aria-hidden="true"
+                    x-show="open"
+                    x-on:click="close()"
+                    x-transition:enter="transition-opacity duration-300 ease-out"
+                    x-transition:enter-start="opacity-0"
+                    x-transition:enter-end="opacity-100"
+                    x-transition:leave="transition-opacity duration-200 ease-out"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    style="display: none;"
+                    class="fixed inset-0 z-40 touch-none bg-black/40"
+                ></div>
+
+                <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="result-sheet-heading"
+                    x-show="open"
+                    x-trap="open"
+                    x-transition:enter="transition duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-opacity motion-reduce:duration-200"
+                    x-transition:enter-start="translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0"
+                    x-transition:enter-end="translate-y-0"
+                    x-transition:leave="transition duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-opacity motion-reduce:duration-200"
+                    x-transition:leave-start="translate-y-0"
+                    x-transition:leave-end="translate-y-full motion-reduce:translate-y-0 motion-reduce:opacity-0"
+                    style="display: none;"
+                    class="fixed inset-x-0 bottom-0 z-50 md:pb-4"
+                >
+                    <div
+                        class="mx-auto flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col gap-4 overflow-y-auto overscroll-contain rounded-t-[1.75rem] bg-card pt-3 pr-[max(0.75rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))] pl-[max(0.75rem,env(safe-area-inset-left))] shadow-[0_-16px_48px_rgba(0,0,0,0.2)] md:rounded-[1.75rem] md:ring-1 md:ring-foreground/10"
+                        :class="drag.active ? 'transition-none' : 'transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] motion-reduce:transition-none'"
+                        :style="{ transform: drag.offset ? `translateY(${drag.offset}px)` : '' }"
+                    >
+                        <div
+                            x-on:pointerdown="startDrag($event)"
+                            x-on:pointermove="moveDrag($event)"
+                            x-on:pointerup="endDrag($event)"
+                            x-on:pointercancel="endDrag($event)"
+                            class="-mt-3 flex touch-none flex-col gap-2 pt-2.5 select-none [-webkit-touch-callout:none]"
+                        >
+                            <span aria-hidden="true" class="mx-auto h-1.5 w-10 rounded-full bg-muted-foreground/25 md:hidden"></span>
+                            <div class="flex items-start justify-between gap-3 pt-1 pl-2">
+                                <h2 id="result-sheet-heading" tabindex="-1" autofocus class="min-w-0 text-xl leading-tight font-semibold tracking-tight text-balance outline-none">{{ __('common.photo_plans.offer.keep_meal') }}</h2>
+                                <button
+                                    type="button"
+                                    aria-label="Close"
+                                    x-on:click="close()"
+                                    class="relative inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground [-webkit-touch-callout:none] before:absolute before:-inset-1.5 hover:text-foreground {{ $press }} {{ $ring }}"
                                 >
-                                    @if ($showPlanChoices)
-                                        {{ __('common.photo_plans.offer.continue_to_checkout') }}
-                                    @else
-                                        {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
-                                    @endif
-                                </x-snap-result.button>
-                                @error('checkout')
-                                    <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
-                                @enderror
-                                @unless ($showPlanChoices)
-                                    <div class="flex flex-col items-center gap-0.5 px-2 pb-1 text-center text-[11px] leading-snug">
-                                        @guest
-                                            <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
-                                        @endguest
-                                        <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
-                                    </div>
-                                @endunless
+                                    <x-snap-result.icon name="x" class="size-4" stroke-width="2.5" />
+                                </button>
                             </div>
-                        @endif
-                        <div @if ($showPlanChoices) x-show="plan === 'free'" @endif class="flex flex-col gap-2">
-                            <x-snap-result.button
-                                wire:click="save('register')"
-                                wire:loading.attr="disabled"
-                                wire:target="save,upgrade,signInForPlan"
-                                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
-                            >
-                                Save this meal free
-                            </x-snap-result.button>
                         </div>
                         @if ($showPlanChoices)
-                            <div class="flex min-h-12 flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
-                                @if ($freeScansLabel !== null)
-                                    <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
-                                        <x-snap-result.icon name="chevron-right" class="size-4 shrink-0 rotate-180" />
-                                        <span class="flex flex-col">
-                                            <span class="text-sm font-semibold">{{ __('common.photo_plans.checkout.try_another') }}</span>
-                                            <span class="text-muted-foreground">{{ $freeScansLabel }}</span>
-                                        </span>
-                                    </a>
-                                @endif
-                                <div x-show="plan === 'paid'" style="display: none;" class="flex min-w-0 flex-1 flex-col">
-                                    @guest
-                                        <span class="font-medium text-balance">{{ __('common.photo_plans.offer.no_account') }}</span>
-                                    @endguest
-                                    <span class="text-muted-foreground">{{ __('common.photo_plans.offer.monthly_renewal') }}</span>
-                                </div>
-                                <a href="{{ route('checkout.subscription') }}" target="_blank" rel="noopener" class="ml-auto inline-flex min-h-11 items-center rounded-lg px-1 font-medium underline underline-offset-4 {{ $press }} {{ $ring }}">
-                                    {{ __('common.photo_plans.offer.plan_details') }}
-                                </a>
+                            <div role="radiogroup" aria-label="How to keep this meal" class="grid gap-2">
+                                <x-snap-result.plan-choice value="free" :label="__('common.photo_plans.free.price')" description="Save this meal" />
+                                <x-snap-result.plan-choice
+                                    value="paid"
+                                    :label="__('common.photo_plans.offer.scans_and_coach')"
+                                    :description="$barOffer->formattedPrice.__('common.checkout_subscription.per_month')"
+                                    x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} }, {{ Js::from('result_bar:'.$this->resultKey()) }}); $wire.offerViewed('result_bar')"
+                                />
                             </div>
                         @endif
+                        <div class="flex flex-col gap-2">
+                            @if ($barOffer)
+                                <div
+                                    @if ($showPlanChoices)
+                                        x-show="plan === 'paid'" style="display: none;"
+                                    @else
+                                        x-intersect.once="$wire.offerViewed('result_bar')"
+                                    @endif
+                                    class="flex flex-col gap-2"
+                                >
+                                    <x-snap-result.button
+                                        variant="plan"
+                                        size="sm"
+                                        wire:click="upgrade('result_bar')"
+                                        wire:loading.attr="disabled"
+                                        wire:target="save,upgrade,signInForPlan"
+                                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
+                                    >
+                                        @if ($showPlanChoices)
+                                            {{ __('common.photo_plans.offer.continue_to_checkout') }}
+                                        @else
+                                            {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $barOffer->name, '@{{price}}' => $barOffer->formattedPrice])) !!}
+                                        @endif
+                                    </x-snap-result.button>
+                                    @error('checkout')
+                                        <p role="alert" class="px-2 text-center text-sm text-destructive">{{ $message }}</p>
+                                    @enderror
+                                    @unless ($showPlanChoices)
+                                        <div class="flex flex-col items-center gap-0.5 px-2 pb-1 text-center text-[11px] leading-snug">
+                                            @guest
+                                                <p class="text-xs font-medium">{{ __('common.photo_plans.offer.no_account') }}</p>
+                                            @endguest
+                                            <p class="text-muted-foreground">{{ __('common.photo_plans.offer.renewal') }}</p>
+                                        </div>
+                                    @endunless
+                                </div>
+                            @endif
+                            <div @if ($showPlanChoices) x-show="plan === 'free'" @endif class="flex flex-col gap-2">
+                                <x-snap-result.button
+                                    wire:click="save('register')"
+                                    wire:loading.attr="disabled"
+                                    wire:target="save,upgrade,signInForPlan"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
+                                >
+                                    Save this meal free
+                                </x-snap-result.button>
+                            </div>
+                            @if ($showPlanChoices)
+                                <div class="flex min-h-12 flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
+                                    @if ($freeScansLabel !== null)
+                                        <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
+                                            <x-snap-result.icon name="chevron-right" class="size-4 shrink-0 rotate-180" />
+                                            <span class="flex flex-col">
+                                                <span class="text-sm font-semibold">{{ __('common.photo_plans.checkout.try_another') }}</span>
+                                                <span class="text-muted-foreground">{{ $freeScansLabel }}</span>
+                                            </span>
+                                        </a>
+                                    @endif
+                                    <div x-show="plan === 'paid'" style="display: none;" class="flex min-w-0 flex-1 flex-col">
+                                        @guest
+                                            <span class="font-medium text-balance">{{ __('common.photo_plans.offer.no_account') }}</span>
+                                        @endguest
+                                        <span class="text-muted-foreground">{{ __('common.photo_plans.offer.monthly_renewal') }}</span>
+                                    </div>
+                                    <a href="{{ route('checkout.subscription') }}" target="_blank" rel="noopener" class="ml-auto inline-flex min-h-11 items-center rounded-lg px-1 font-medium underline underline-offset-4 {{ $press }} {{ $ring }}">
+                                        {{ __('common.photo_plans.offer.plan_details') }}
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
             </div>

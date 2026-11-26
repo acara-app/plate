@@ -1,4 +1,4 @@
-@props(['allowance', 'clearance' => 0])
+@props(['allowance'])
 
 @php
     $offer = $allowance->canUpgrade && $allowance->exhausted ? $allowance->offer : null;
@@ -33,8 +33,8 @@
         </ul>
 
         <div
-            x-intersect:enter.margin.0.0.-{{ $clearance }}px.0="actionsOnScreen.offer = true"
-            x-intersect:leave.margin.0.0.-{{ $clearance }}px.0="actionsOnScreen.offer = false"
+            x-intersect:enter="actionsOnScreen.offer = true"
+            x-intersect:leave="actionsOnScreen.offer = false"
             class="flex flex-col gap-2"
         >
             <x-snap-result.button

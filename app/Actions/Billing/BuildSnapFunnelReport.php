@@ -46,6 +46,7 @@ final readonly class BuildSnapFunnelReport
 
     /** @var list<string> */
     private const array HISTORY = [
+        '2026-11-26: the action bar on the guest result page became a sheet over a dimmed page with a title and a close button. It opens once, 2.5 seconds after the result loads, and only when no Save or plan button is already on screen; it no longer follows scrolling and does not return after it is closed. result_bar offer views and clicks now come from that one opening, so they are not comparable with earlier dates. The guest checkout note now reads "No sign-up needed. Set up your account after checkout." Event names and placements are unchanged.',
         '2026-11-26: the pricing page shows paid monthly plans. Guests continue directly to Stripe for their selected plan. These guest checkouts record the pricing placement.',
         '2026-11-26: the first-scan result bar shows the remaining free scan with a link back to the scanner. The paid choice highlights more scans and a personal AI coach, with the monthly price and a link to plan details.',
         '2026-11-24: guest offer views, upgrade clicks and checkouts record free_scans_used, the free scans the guest had used when the offer showed. On result_bar, 1 is the free-or-Starter choice after the first scan and 2 is the offer after both free scans. Earlier result_bar events have no such property and cannot be split.',
