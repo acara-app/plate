@@ -345,6 +345,13 @@
       "sourceType": "github",
       "computedHash": ""
     },
+    "reddit-marketing": {
+      "source": "social-media-skills/skills",
+      "commit": "f28cef2b7067ec64e79c9d85421c022c06659e03",
+      "sourceType": "github",
+      "skillPath": "skills/reddit-marketing/SKILL.md",
+      "computedHash": "b65287ed300e092b1dc8e11da931c0c9511216868797eaa59535739f53bc32f2"
+    },
     "referral-program": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
