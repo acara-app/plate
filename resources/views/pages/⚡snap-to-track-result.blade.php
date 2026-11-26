@@ -521,12 +521,15 @@ class extends Component
             <div
                 x-data="{
                     plan: 'free',
-                    opened: false,
-                    closed: false,
+                    sheetState: 'waiting',
                     timer: null,
                     drag: { active: false, startY: 0, startedAt: 0, offset: 0 },
                     init() {
                         this.$watch('open', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+                        // Let both intersection observers report the scroll before opening.
+                        this.$watch('canOpen', () => requestAnimationFrame(() => {
+                            if (this.canOpen) this.sheetState = 'open';
+                        }));
                     },
                     trackSheetOffer() {
                         window.acaraTrackOnce?.('snap_to_track_offer_viewed', @js($sheetProperties), @js('result_bar:'.$this->resultKey()));
@@ -534,18 +537,21 @@ class extends Component
                     },
                     scheduleSheet() {
                         this.timer = setTimeout(() => {
-                            this.opened = ! this.actionsOnScreen.meal && ! this.actionsOnScreen.offer;
+                            this.sheetState = 'ready';
                         }, 10_000);
+                    },
+                    get canOpen() {
+                        return this.sheetState === 'ready' && ! this.actionsOnScreen.meal && ! this.actionsOnScreen.offer;
                     },
                     destroy() {
                         clearTimeout(this.timer);
                         document.documentElement.classList.remove('overflow-hidden');
                     },
                     get open() {
-                        return this.opened && ! this.closed;
+                        return this.sheetState === 'open';
                     },
                     close() {
-                        this.closed = true;
+                        this.sheetState = 'closed';
                     },
                     startDrag(event) {
                         if (event.target.closest('button')) return;

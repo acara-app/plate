@@ -90,3 +90,34 @@ it('shows one Starter impression with two scans used when the exhausted guest se
         ]])
         ->assertNoJavaScriptErrors();
 });
+
+it('opens once after both inline actions leave view following the ten-second delay', function (): void {
+    $page = openGuestResultWithScansUsed(1);
+    $page->assertVisible('#calorie-goal-heading')->wait(1);
+
+    $save = "document.querySelector('#meal-result button')";
+    $starter = "document.querySelector('[aria-labelledby=\"result-offer-heading\"] button')";
+    $page->script("$save.scrollIntoView({ block: 'center', behavior: 'instant' })");
+
+    $page->assertScript("$save.getBoundingClientRect().bottom <= innerHeight")
+        ->wait(11)
+        ->assertMissing('[role="dialog"]');
+
+    $page->script("$starter.scrollIntoView({ block: 'center', behavior: 'instant' })");
+    $page->assertScript("$starter.getBoundingClientRect().bottom <= innerHeight")
+        ->wait(1)
+        ->assertMissing('[role="dialog"]');
+
+    $page->script('window.scrollTo(0, 0)');
+    $page->assertVisible('[role="dialog"]')
+        ->click('button[aria-label="Close"]')
+        ->assertMissing('[role="dialog"]');
+
+    $page->script("$save.scrollIntoView({ block: 'center', behavior: 'instant' })");
+    $page->assertScript("$save.getBoundingClientRect().bottom <= innerHeight");
+    $page->script('window.scrollTo(0, 0)');
+    $page->assertScript('window.scrollY === 0')
+        ->wait(1)
+        ->assertMissing('[role="dialog"]')
+        ->assertNoJavaScriptErrors();
+});
