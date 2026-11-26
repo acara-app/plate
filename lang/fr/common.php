@@ -1385,7 +1385,7 @@ return [
             'plan_details' => 'Détails du forfait',
             'continue_to_checkout' => 'Passer au paiement',
             'monthly_renewal' => 'Renouvellement mensuel. Résiliez à tout moment.',
-            'no_account' => 'Aucun compte requis. Nous vous enverrons votre lien d’activation par e-mail.',
+            'no_account' => 'Aucune inscription requise. Créez votre compte après le paiement.',
             'renewal' => 'Une nouvelle allocation d’IA chaque jour. Renouvellement mensuel jusqu’à résiliation dans les paramètres de facturation.',
             'next_meal' => 'Essayez avec un autre repas pour découvrir le suivi photo au quotidien.',
             'keep_meal' => 'Gardez ce repas dans votre journal alimentaire',
