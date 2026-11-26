@@ -32,11 +32,10 @@ return [
             'recent_summaries' => 3,
         ],
 
-        // Summarize once enough unsummarized messages fall outside the recent buffer.
         'summarization' => [
             'threshold' => 20,
             'buffer' => 25,
-            'timeout' => 90, // seconds
+            'timeout' => 90,
         ],
     ],
 
