@@ -39,7 +39,9 @@ it('starts checkout only when the guest confirms Starter in the first-scan sheet
     $paidButton = 'button:has-text("Continue to checkout")';
     $page = visit(route('snap-to-track.result', absolute: false))->resize(390, 844);
     $page->assertMissing('[role="dialog"]')
-        ->wait(3)
+        ->wait(8)
+        ->assertMissing('[role="dialog"]')
+        ->wait(2)
         ->assertSee('Keep this meal in your food log')
         ->assertChecked($free)
         ->assertVisible('Save this meal free')

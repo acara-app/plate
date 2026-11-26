@@ -349,7 +349,7 @@ class extends Component
                 </nav>
 
                 <div class="flex flex-col gap-2.5">
-                    <section aria-labelledby="calorie-goal-heading" class="{{ $card }} flex items-center justify-between gap-4 p-5 sm:p-6">
+                    <section aria-labelledby="calorie-goal-heading" x-intersect.once="$dispatch('snap-result-visible')" class="{{ $card }} flex items-center justify-between gap-4 p-5 sm:p-6">
                         <div class="flex min-w-0 flex-col gap-1">
                             <h2 id="calorie-goal-heading" class="text-sm text-muted-foreground">Daily calories</h2>
                             <p class="flex flex-wrap items-baseline gap-x-1.5">
@@ -524,9 +524,11 @@ class extends Component
                     drag: { active: false, startY: 0, startedAt: 0, offset: 0 },
                     init() {
                         this.$watch('open', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+                    },
+                    scheduleSheet() {
                         this.timer = setTimeout(() => {
                             this.opened = ! this.actionsOnScreen.meal && ! this.actionsOnScreen.offer;
-                        }, 2500);
+                        }, 10_000);
                     },
                     destroy() {
                         clearTimeout(this.timer);
@@ -557,6 +559,7 @@ class extends Component
                         else this.drag.offset = 0;
                     },
                 }"
+                x-on:snap-result-visible.window.once="scheduleSheet()"
                 x-on:keydown.escape.window="open && close()"
             >
                 <div
