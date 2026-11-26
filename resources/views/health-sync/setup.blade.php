@@ -115,8 +115,9 @@
                     <div class="prose prose-sm prose-slate max-w-none dark:prose-invert">
                         <ul>
                             <li><strong>Change data types:</strong> Settings &gt; Manage Health Data Permissions</li>
+                            <li><strong>Manual sync:</strong> Settings &gt; Sync Now</li>
                             <li><strong>View health data:</strong> Settings &gt; Health Data</li>
-                            <li><strong>Disconnect from the app:</strong> Settings &gt; Disconnect Account (clears all credentials, keeps Apple Health data intact)</li>
+                            <li><strong>Disconnect from the app:</strong> Settings &gt; Sign Out (keeps Apple Health data intact)</li>
                         </ul>
                     </div>
                 </div>
@@ -144,11 +145,11 @@
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Sync fails</td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Make sure your Plate instance is online and the API is responding. Try a manual sync from Settings.</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Make sure your Plate instance is online and the API is responding. Try Settings &gt; Sync Now.</td>
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Want to reconnect</td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Disconnect from app settings first, then sign in again. Your Apple Health data stays intact.</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Go to Settings &gt; Sign Out, then sign in again. Your Apple Health data stays intact.</td>
                             </tr>
                         </tbody>
                     </table>
