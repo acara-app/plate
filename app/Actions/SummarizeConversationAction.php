@@ -53,7 +53,7 @@ final readonly class SummarizeConversationAction
     public function shouldSummarize(Conversation $conversation): bool
     {
         $totalCount = History::query()->where('conversation_id', $conversation->id)->count();
-        $buffer = ConfigHelper::int('altani.summarization.buffer', 25);
+        $buffer = ConfigHelper::int('acara.altani.summarization.buffer', 25);
 
         if ($totalCount <= $buffer) {
             return false;
@@ -68,7 +68,7 @@ final readonly class SummarizeConversationAction
             ->whereNotIn('id', $bufferedIds)
             ->count();
 
-        return $unsummarizedOld >= ConfigHelper::int('altani.summarization.threshold', 20);
+        return $unsummarizedOld >= ConfigHelper::int('acara.altani.summarization.threshold', 20);
     }
 
     /**
@@ -76,7 +76,7 @@ final readonly class SummarizeConversationAction
      */
     private function getMessagesToSummarize(Conversation $conversation): Collection
     {
-        $buffer = ConfigHelper::int('altani.summarization.buffer', 25);
+        $buffer = ConfigHelper::int('acara.altani.summarization.buffer', 25);
 
         $bufferedIds = History::query()->where('conversation_id', $conversation->id)->latest()
             ->take($buffer)

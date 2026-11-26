@@ -103,6 +103,6 @@ final class AiUsage extends Model
     #[Scope]
     protected function specialist(Builder $query): void
     {
-        $query->whereIn('agent', config()->array('plate.sub_agents', []));
+        $query->whereIn('agent', config()->array('acara.sub_agents', []));
     }
 }

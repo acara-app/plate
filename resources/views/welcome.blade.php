@@ -287,7 +287,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                                 </svg>
                             </a>
-                            <p class="text-xs text-slate-500">Requires iOS {{ config('plate.health_sync.minimum_ios_version') }} or later. Free.</p>
+                            <p class="text-xs text-slate-500">Requires iOS {{ config('acara.health_sync.minimum_ios_version') }} or later. Free.</p>
                         </div>
                     </div>
                 </div>

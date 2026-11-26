@@ -20,8 +20,8 @@ enum LegalPage: string
     public function versionConfigKey(): string
     {
         return match ($this) {
-            self::PrivacyPolicy => 'plate.privacy_policy_version',
-            self::TermsOfService => 'plate.terms_version',
+            self::PrivacyPolicy => 'acara.privacy_policy_version',
+            self::TermsOfService => 'acara.terms_version',
         };
     }
 

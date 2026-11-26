@@ -28,7 +28,7 @@ it('asks people who joined before the privacy update to acknowledge it once', fu
     $this->post(route('privacy-policy.acknowledge'))->assertRedirect();
 
     expect($user->refresh())
-        ->privacy_version->toBe(config('plate.privacy_policy_version'))
+        ->privacy_version->toBe(config('acara.privacy_policy_version'))
         ->privacy_accepted_at->not->toBeNull();
 
     $this->get(route('dashboard'))

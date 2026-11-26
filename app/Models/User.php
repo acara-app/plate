@@ -273,7 +273,7 @@ final class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
 
     public function needsPrivacyPolicyNotice(): bool
     {
-        $version = config()->string('plate.privacy_policy_version');
+        $version = config()->string('acara.privacy_policy_version');
 
         return $this->privacy_version !== $version
             && $this->created_at->toDateString() <= $version;

@@ -60,7 +60,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
         }
 
         if (! $user instanceof User && $guestId !== null && ! SnapPhotoAccount::query()->whereKey("guest:{$guestId}")->exists()) {
-            return $this->meteredEntitlement(config()->integer('snap.free_trial_scans', 2), 0, null, 'trial');
+            return $this->meteredEntitlement(config()->integer('acara.snap.free_trial_scans', 2), 0, null, 'trial');
         }
 
         return DB::transaction(fn (): PhotoEntitlement => $this->allowance($this->period($this->subject($user, $guestId))), 3);
@@ -261,7 +261,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
         $start = CarbonImmutable::create(2000, 1, 1, 0, 0, 0, 'UTC');
         SnapPhotoPeriod::query()->insertOrIgnore([
             'subject' => $subject, 'starts_at' => $start, 'ends_at' => null, 'mode' => 'trial',
-            'allowance' => config()->integer('snap.free_trial_scans', 2),
+            'allowance' => config()->integer('acara.snap.free_trial_scans', 2),
         ]);
 
         return SnapPhotoPeriod::query()->where('subject', $subject)->where('starts_at', $start)->where('mode', 'trial')->lockForUpdate()->sole();
@@ -287,7 +287,7 @@ final readonly class MeteredPhotoAnalyses implements ManagesPhotoAnalyses
 
     private function costAlertThreshold(): float
     {
-        $threshold = config('snap.cost_alert_usd', 0.03);
+        $threshold = config('acara.snap.cost_alert_usd', 0.03);
 
         return is_numeric($threshold) ? (float) $threshold : 0.03;
     }

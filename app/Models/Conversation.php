@@ -147,7 +147,7 @@ final class Conversation extends Model
     protected function expired(Builder $query, ?int $retentionHours = null): void
     {
         // @codeCoverageIgnoreStart
-        $retentionHours ??= Config::integer('plate.chat.temporary_retention_hours');
+        $retentionHours ??= Config::integer('acara.chat.temporary_retention_hours');
 
         $query->whereNull('pinned_at')
             ->whereNull('kept_at')

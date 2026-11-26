@@ -27,7 +27,7 @@ final class SnapJourneyFactory extends Factory
             'acquisition_campaign' => null,
             'internal' => false,
             'started_at' => now(),
-            'expires_at' => now()->addDays(config()->integer('snap.journey_days')),
+            'expires_at' => now()->addDays(config()->integer('acara.snap.journey_days')),
         ];
     }
 }

@@ -18,8 +18,8 @@ final readonly class RecordSignUpAgreements
             'accepted_disclaimer_at' => now(),
             'terms_accepted_at' => now(),
             'privacy_accepted_at' => now(),
-            'consent_version' => config()->string('plate.terms_version'),
-            'privacy_version' => config()->string('plate.privacy_policy_version'),
+            'consent_version' => config()->string('acara.terms_version'),
+            'privacy_version' => config()->string('acara.privacy_policy_version'),
         ]);
 
         $this->recordConsent->handle($user, ConsentPurpose::ProcessHealthData, true, ConsentSource::SignUp);

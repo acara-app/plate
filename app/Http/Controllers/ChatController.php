@@ -48,7 +48,7 @@ final readonly class ChatController
             'conversations' => Inertia::scroll(
                 fn (): LengthAwarePaginator => $this->user->paginatedConversations()
             ),
-            'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
+            'temporaryRetentionHours' => Config::integer('acara.chat.temporary_retention_hours'),
         ]);
     }
 
@@ -63,7 +63,7 @@ final readonly class ChatController
             'conversationId' => $conversation->id,
             'isPinned' => $conversation->isPinned(),
             'isKept' => $conversation->isKept(),
-            'temporaryRetentionHours' => Config::integer('plate.chat.temporary_retention_hours'),
+            'temporaryRetentionHours' => Config::integer('acara.chat.temporary_retention_hours'),
             'messages' => fn (): array => $this->messagesAction->handle($conversation),
             'initialPrompt' => $request->initialPrompt(),
             'autoSendInitialPrompt' => $request->shouldAutoSendPrompt(),

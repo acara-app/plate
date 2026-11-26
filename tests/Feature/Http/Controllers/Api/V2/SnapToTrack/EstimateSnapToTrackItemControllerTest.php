@@ -47,7 +47,7 @@ it('requires a food name', function (): void {
 });
 
 it('returns 402 without calling the AI when the credit budget is used up', function (): void {
-    config()->set('plate.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
+    config()->set('acara.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
     FoodItemEstimatorAgent::fake(function (): void {
         throw new Exception('The estimator must not run when the credit budget is used up');
     });

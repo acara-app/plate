@@ -17,7 +17,7 @@ covers(GlucoseSpikeSpecialist::class);
 it('is exposed as a unique structured sub-agent tool', function (): void {
     $agent = new GlucoseSpikeSpecialist;
 
-    $subAgentNames = collect(config()->array('plate.sub_agents', []))
+    $subAgentNames = collect(config()->array('acara.sub_agents', []))
         ->map(fn (string $class): string => resolve($class)->name())
         ->all();
 

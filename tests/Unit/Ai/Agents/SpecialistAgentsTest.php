@@ -87,7 +87,7 @@ it('keeps nutrition skills scoped to the specialists that answer diet questions'
 })->with([GlucoseSpikeSpecialist::class, HealthSpecialist::class, FitnessSpecialist::class]);
 
 it('pulls the shared tool group only for specialists that opt in', function (): void {
-    config()->set('plate.shared_tools', [GetUserProfile::class]);
+    config()->set('acara.shared_tools', [GetUserProfile::class]);
 
     $tools = fn (string $class): array => collect(resolve($class)->tools())
         ->map(fn (mixed $tool): string => $tool::class)

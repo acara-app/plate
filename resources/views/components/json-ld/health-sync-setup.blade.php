@@ -38,8 +38,8 @@
             "@@type": "HowToStep",
             "position": 1,
             "name": "Get the App",
-            "text": "Download Acara Health Sync from the App Store ({{ config('plate.health_sync.app_store_url') }}) on your iPhone running iOS {{ config('plate.health_sync.minimum_ios_version') }} or later.",
-            "url": "{{ config('plate.health_sync.app_store_url') }}"
+            "text": "Download Acara Health Sync from the App Store ({{ config('acara.health_sync.app_store_url') }}) on your iPhone running iOS {{ config('acara.health_sync.minimum_ios_version') }} or later.",
+            "url": "{{ config('acara.health_sync.app_store_url') }}"
         },
         {
             "@@type": "HowToStep",

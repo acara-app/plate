@@ -30,7 +30,7 @@
 @endphp
 
 <a
-    href="{{ config('plate.health_sync.app_store_url') }}"
+    href="{{ config('acara.health_sync.app_store_url') }}"
     target="_blank"
     rel="noopener noreferrer"
     aria-label="{{ $label }}"

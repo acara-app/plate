@@ -46,7 +46,7 @@
 
                 <h2>Acara Health Sync (iOS)</h2>
                 <p>
-                    <strong>Acara Health Sync</strong> is our companion iOS app — it bridges your Apple Health data to your Plate instance with end-to-end encryption. If you haven't installed it yet, <a href="{{ config('plate.health_sync.app_store_url') }}" target="_blank" rel="noopener noreferrer">grab it on the App Store</a>. Need help pairing, syncing, or sorting out HealthKit permissions? Email <a href="mailto:support@acara.app">support@acara.app</a> — we answer every message personally.
+                    <strong>Acara Health Sync</strong> is our companion iOS app — it bridges your Apple Health data to your Plate instance with end-to-end encryption. If you haven't installed it yet, <a href="{{ config('acara.health_sync.app_store_url') }}" target="_blank" rel="noopener noreferrer">grab it on the App Store</a>. Need help pairing, syncing, or sorting out HealthKit permissions? Email <a href="mailto:support@acara.app">support@acara.app</a> — we answer every message personally.
                 </p>
                 <p class="not-prose">
                     <x-app-store-badge size="md" />

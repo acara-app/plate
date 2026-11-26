@@ -8,12 +8,13 @@ use App\Data\Billing\PhotoOffer;
 use App\Models\AnalysisDraft;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Support\Str;
+use Pest\Browser\Api\AwaitableWebpage;
 use Tests\Helpers\FakeGuestCheckout;
 use Tests\TestCase;
 
 uses(TestCase::class, LazilyRefreshDatabase::class);
 
-function openGuestResultWithScansUsed(int $used): Pest\Browser\Api\AwaitableWebpage
+function openGuestResultWithScansUsed(int $used): AwaitableWebpage
 {
     $starter = sellPhotoPlans();
     $allowance = test()->mock(ManagesPhotoAnalyses::class);
@@ -44,6 +45,7 @@ it('starts checkout only when the guest confirms Starter in the first-scan sheet
     $paidButton = 'button:has-text("Continue to checkout")';
     $page = openGuestResultWithScansUsed(1);
     $page->script('window.snapEvents = []; window.umami = { track: (name, properties) => window.snapEvents.push({ name, ...properties }) };');
+
     $sheetEvents = "window.snapEvents.filter(event => event.placement === 'result_bar').map(event => [event.name, event.free_scans_used])";
 
     $page->assertMissing('[role="dialog"]')

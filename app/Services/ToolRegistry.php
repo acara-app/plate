@@ -26,7 +26,7 @@ final readonly class ToolRegistry
     public function getTools(): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config()->array('plate.tools', []);
+        $classes = config()->array('acara.tools', []);
 
         return $this->resolve($classes);
     }
@@ -38,7 +38,7 @@ final readonly class ToolRegistry
     public function getImageTools(array $images, ?User $user = null, ?string $requestId = null): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config()->array('plate.image_tools', []);
+        $classes = config()->array('acara.image_tools', []);
 
         return $this->resolve($classes, ['images' => $images, 'user' => $user, 'requestId' => $requestId]);
     }
@@ -49,7 +49,7 @@ final readonly class ToolRegistry
     public function getSharedTools(): array
     {
         /** @var array<int, class-string> $classes */
-        $classes = config()->array('plate.shared_tools', []);
+        $classes = config()->array('acara.shared_tools', []);
 
         return $this->resolve($classes);
     }
@@ -60,7 +60,7 @@ final readonly class ToolRegistry
     public function getSubAgents(?User $user = null): array
     {
         /** @var array<int, string> $classes */
-        $classes = config()->array('plate.sub_agents', []);
+        $classes = config()->array('acara.sub_agents', []);
 
         return collect($classes)
             ->map(function (string $class) use ($user): Agent {
@@ -78,7 +78,7 @@ final readonly class ToolRegistry
     public function getProviderTools(): array
     {
         /** @var array<int, class-string<ProviderTool>> $classes */
-        $classes = config()->array('plate.provider_tools', []);
+        $classes = config()->array('acara.provider_tools', []);
 
         /** @var array<int, ProviderTool> */
         return $this->resolve($classes);

@@ -36,7 +36,7 @@ final readonly class GetHealthSyncSupportContextAction
             'platform_support' => [
                 'ios' => [
                     'supported' => true,
-                    'minimum_version' => config()->string('plate.health_sync.minimum_ios_version'),
+                    'minimum_version' => config()->string('acara.health_sync.minimum_ios_version'),
                     'requirement' => 'iPhone with Apple Health data.',
                 ],
                 'android' => [
@@ -58,7 +58,7 @@ final readonly class GetHealthSyncSupportContextAction
                 'support' => route('support'),
             ],
             'links' => [
-                'app_store_url' => config()->string('plate.health_sync.app_store_url'),
+                'app_store_url' => config()->string('acara.health_sync.app_store_url'),
                 'health_sync_url' => route('health-sync'),
                 'setup_guide_url' => route('health-sync.setup'),
                 'install_app_url' => route('install-app'),

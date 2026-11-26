@@ -32,7 +32,7 @@ final readonly class PhotoPlanOffers implements OffersSubscriptions
             return $offer;
         }
 
-        $scans = config()->integer('snap.free_trial_scans', 2);
+        $scans = config()->integer('acara.snap.free_trial_scans', 2);
         $plural = $scans === 1 ? 'one' : 'other';
         $offer->setAttribute('name', __('common.photo_plans.free.name'));
         $offer->setAttribute('description', strtr(__('common.photo_plans.free.description_'.$plural), ['{{count}}' => (string) $scans]));

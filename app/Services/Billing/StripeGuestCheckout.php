@@ -62,11 +62,11 @@ final readonly class StripeGuestCheckout implements ManagesGuestCheckout
             $sessions->expire($sessionId);
 
             return true;
-        } catch (InvalidRequestException $exception) {
+        } catch (InvalidRequestException $invalidRequestException) {
             return match ($sessions->retrieve($sessionId)->status) {
                 Session::STATUS_EXPIRED => true,
                 Session::STATUS_COMPLETE => false,
-                default => throw $exception,
+                default => throw $invalidRequestException,
             };
         }
     }

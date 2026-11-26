@@ -182,7 +182,7 @@ final class AgentRunner implements AcceptsImages, Agent, BillsUsageToUser, Conve
     // @codeCoverageIgnoreStart
     protected function maxConversationMessages(): int
     {
-        return ConfigHelper::int('altani.context.history_limit', 50);
+        return ConfigHelper::int('acara.altani.context.history_limit', 50);
     }
 
     // @codeCoverageIgnoreEnd

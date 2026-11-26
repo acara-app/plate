@@ -87,8 +87,8 @@ final readonly class StartChatStream
             return;
         }
 
-        $buffer = ConfigHelper::int('altani.summarization.buffer', 25);
-        $threshold = ConfigHelper::int('altani.summarization.threshold', 20);
+        $buffer = ConfigHelper::int('acara.altani.summarization.buffer', 25);
+        $threshold = ConfigHelper::int('acara.altani.summarization.threshold', 20);
 
         if ($messageCount < ($buffer + $threshold)) {
             return;

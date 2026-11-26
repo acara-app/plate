@@ -10,8 +10,8 @@ covers(ShowLegalPageController::class, LegalPage::class);
 
 beforeEach(function (): void {
     config([
-        'plate.privacy_policy_version' => '2026-11-08',
-        'plate.terms_version' => '2026-11-08',
+        'acara.privacy_policy_version' => '2026-11-08',
+        'acara.terms_version' => '2026-11-08',
     ]);
 });
 
@@ -38,7 +38,7 @@ it('serves each translation at its own URL, linked both ways with the English pa
 ]);
 
 it('writes Mongolian dates with the endings official documents use', function (): void {
-    config(['plate.privacy_policy_version' => '2027-02-14']);
+    config(['acara.privacy_policy_version' => '2027-02-14']);
 
     $this->get(route('privacy.locale', ['locale' => 'mn']))
         ->assertOk()
