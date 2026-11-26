@@ -13,7 +13,7 @@ use Tests\TestCase;
 uses(TestCase::class, LazilyRefreshDatabase::class);
 
 it('gives every photo chosen in the scanner its own analysis request ID', function (): void {
-    $user = User::factory()->create(['privacy_version' => config()->string('plate.privacy_policy_version')]);
+    $user = User::factory()->create(['privacy_version' => config()->string('acara.privacy_policy_version')]);
     Consent::factory()->for($user)->create(['purpose' => ConsentPurpose::ProcessHealthData]);
     UserProfile::factory()->for($user)->create(['onboarding_completed' => true]);
     $this->actingAs($user);

@@ -70,7 +70,7 @@
                     </a>
                 </div>
                 <p class="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-[#6E665C]">
-                    Free · iPhone on iOS {{ config('plate.health_sync.minimum_ios_version') }} or later
+                    Free · iPhone on iOS {{ config('acara.health_sync.minimum_ios_version') }} or later
                 </p>
             </header>
 

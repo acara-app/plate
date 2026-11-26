@@ -35,8 +35,8 @@ it('records consent timestamps with the versions currently in force', function (
     expect($user->terms_accepted_at)->not->toBeNull()
         ->and($user->privacy_accepted_at)->not->toBeNull()
         ->and($user->accepted_disclaimer_at)->not->toBeNull()
-        ->and($user->consent_version)->toBe(config('plate.terms_version'))
-        ->and($user->privacy_version)->toBe(config('plate.privacy_policy_version'));
+        ->and($user->consent_version)->toBe(config('acara.terms_version'))
+        ->and($user->privacy_version)->toBe(config('acara.privacy_policy_version'));
 });
 
 it('requires the medical disclaimer to be accepted', function (): void {

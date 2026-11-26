@@ -67,7 +67,7 @@ it('does not offer a photo plan whose catalog entry was not prepared for sale', 
 });
 
 it('presents the configured total free scans without a timed trial', function (int $scans, string $description, string $feature): void {
-    config(['snap.free_trial_scans' => $scans]);
+    config(['acara.snap.free_trial_scans' => $scans]);
     $free = SubscriptionProduct::query()->where('name', 'Free')->sole();
 
     $presented = resolve(OffersSubscriptions::class)->present($free);

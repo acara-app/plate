@@ -14,7 +14,7 @@ uses(TestCase::class, LazilyRefreshDatabase::class);
 beforeEach(function (): void {
     $user = User::factory()->create([
         'name' => 'Bartholomew Example',
-        'privacy_version' => config()->string('plate.privacy_policy_version'),
+        'privacy_version' => config()->string('acara.privacy_policy_version'),
     ]);
     Consent::factory()->for($user)->create(['purpose' => ConsentPurpose::ProcessHealthData]);
     UserProfile::factory()->for($user)->create(['onboarding_completed' => true]);

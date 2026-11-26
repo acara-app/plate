@@ -51,7 +51,7 @@
             <div class="flex flex-col items-start gap-3 lg:col-span-2 lg:items-end">
                 <x-app-store-badge size="lg" />
                 <p class="text-xs text-slate-500 dark:text-slate-400">
-                    Requires iOS {{ config('plate.health_sync.minimum_ios_version') }} or later. Free.
+                    Requires iOS {{ config('acara.health_sync.minimum_ios_version') }} or later. Free.
                 </p>
                 @if ($secondaryLinkUrl)
                     <a href="{{ $secondaryLinkUrl }}" class="inline-flex items-center gap-1 text-sm font-medium text-emerald-700 hover:underline dark:text-emerald-400">

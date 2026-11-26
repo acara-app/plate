@@ -39,7 +39,7 @@ final readonly class BuildGuestScanReport
             guestsByScans: $guestsByScans,
             cameBack: $totals['came_back'],
             signedIn: $totals['signed_in'],
-            retentionDays: config()->integer('snap.guest_cookie_days'),
+            retentionDays: config()->integer('acara.snap.guest_cookie_days'),
         );
     }
 }

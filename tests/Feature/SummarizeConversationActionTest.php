@@ -30,32 +30,21 @@ function createConversationWithMessages(User $user, int $count): Conversation
 }
 
 describe('shouldSummarize', function (): void {
-    it('returns false when total messages are below buffer', function (): void {
-        $user = User::factory()->create();
-        $conversation = createConversationWithMessages($user, 20);
+    it('requires the configured number of unsummarized messages outside the buffer', function (int $messages, bool $shouldSummarize): void {
+        config([
+            'acara.altani.summarization.buffer' => 3,
+            'acara.altani.summarization.threshold' => 2,
+        ]);
+        $conversation = createConversationWithMessages(User::factory()->create(), $messages);
 
         $action = resolve(SummarizeConversationAction::class);
 
-        expect($action->shouldSummarize($conversation))->toBeFalse();
-    });
-
-    it('returns false when unsummarized old messages are below threshold', function (): void {
-        $user = User::factory()->create();
-        $conversation = createConversationWithMessages($user, 30);
-
-        $action = resolve(SummarizeConversationAction::class);
-
-        expect($action->shouldSummarize($conversation))->toBeFalse();
-    });
-
-    it('returns true when enough unsummarized old messages exist', function (): void {
-        $user = User::factory()->create();
-        $conversation = createConversationWithMessages($user, 50);
-
-        $action = resolve(SummarizeConversationAction::class);
-
-        expect($action->shouldSummarize($conversation))->toBeTrue();
-    });
+        expect($action->shouldSummarize($conversation))->toBe($shouldSummarize);
+    })->with([
+        'all messages buffered' => [3, false],
+        'one message short' => [4, false],
+        'threshold reached' => [5, true],
+    ]);
 
     it('returns false when old messages are already summarized', function (): void {
         $user = User::factory()->create();

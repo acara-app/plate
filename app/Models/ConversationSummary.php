@@ -63,7 +63,7 @@ final class ConversationSummary extends Model
      */
     public static function getRecentForContext(string $conversationId, ?int $count = null): Collection
     {
-        $count ??= ConfigHelper::int('altani.context.recent_summaries', 3);
+        $count ??= ConfigHelper::int('acara.altani.context.recent_summaries', 3);
 
         return self::query()->forConversation($conversationId)
             ->recent($count)

@@ -149,7 +149,7 @@ it('keeps no photo when the scan is blocked by the credit limit', function (): v
             return new TierEntitlement(tier: SubscriptionTier::Free);
         }
     });
-    config()->set('plate.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
+    config()->set('acara.ai_allowance.free', ['usd' => 0.0, 'resets' => 'monthly']);
 
     $this->actingAs($this->user)->post(route('snap-to-track.analyze'), [
         'photo' => UploadedFile::fake()->image('meal.jpg'),
