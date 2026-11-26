@@ -284,7 +284,7 @@
                                 Ready to stop typing in your glucose readings?
                             </h2>
                             <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#F2EBDD]/80 sm:text-base">
-                                Install the app, scan one QR code, and your data flows automatically from that point on.
+                                Install Acara Health Sync, sign in with the same Acara Plate account you use on the web, then open Sync and choose what to share.
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 lg:justify-end">
