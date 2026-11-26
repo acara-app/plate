@@ -1,14 +1,14 @@
-@props(['allowance', 'offer' => null])
+@props(['allowance', 'offer' => null, 'resultKey'])
 
 @php
-    $variant = $allowance->variant ?? 'baseline';
+    $properties = $allowance->publicOfferProperties('result');
 @endphp
 
 @if ($offer !== null)
     <section
         aria-labelledby="result-offer-heading"
         x-data
-        x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result', variant: @js($variant) }, @js('result:'.$allowance->mode.':'.$allowance->used.':'.$allowance->resetsAt)); $wire.offerViewed('result')"
+        x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', @js($properties), @js('result:'.$resultKey)); $wire.offerViewed('result')"
         class="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5 sm:p-6"
     >
         <div class="flex flex-col gap-2">
@@ -43,7 +43,7 @@
                 wire:click="upgrade('result')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade,signInForPlan"
-                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result', variant: {{ Js::from($variant) }} })"
+                x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', {{ Js::from($properties) }})"
             >
                 {!! e(strtr(__('common.photo_plans.offer.get_plan'), ['@{{name}}' => $offer->name, '@{{price}}' => $offer->formattedPrice])) !!}
             </x-snap-result.button>
@@ -62,7 +62,6 @@
                     wire:click="signInForPlan"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade,signInForPlan"
-                    x-on:click="window.acaraTrack?.('snap_to_track_auth_started', { source: 'public_snap_to_track', auth_path: 'login', intent: 'upgrade' })"
                     class="inline-flex min-h-11 touch-manipulation items-center justify-center self-center rounded-full px-3 text-sm font-medium text-primary transition duration-150 ease-out outline-none select-none [-webkit-touch-callout:none] focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
                 >
                     {{ __('common.photo_plans.offer.login') }}
@@ -73,7 +72,7 @@
                 wire:click="save('register')"
                 wire:loading.attr="disabled"
                 wire:target="save,upgrade,signInForPlan"
-                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result' })"
+                x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result', auth_path: 'register' })"
                 class="inline-flex min-h-11 touch-manipulation items-center justify-center self-center rounded-full px-3 text-sm font-medium transition duration-150 ease-out outline-none select-none hover:bg-muted focus-visible:ring-[3px] focus-visible:ring-ring/50 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 motion-reduce:transition-none motion-reduce:active:scale-100"
             >
                 {{ __('common.photo_plans.offer.save_free') }}

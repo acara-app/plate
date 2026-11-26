@@ -19,7 +19,7 @@
                 <h1>AI Accuracy &amp; Limitations</h1>
 
                 <p>
-                    "How accurate is it?" is the right first question to ask any AI nutrition tool. This page is our honest answer — what the <a href="{{ route('snap-to-track') }}">food photo analyzer</a> actually does, where it predictably fails, and what its numbers do and don't mean.
+                    "How accurate is it?" is the right first question to ask any AI nutrition tool. This page is our honest answer — what the <a href="{{ route('snap-to-track') }}" data-umami-event="snap_to_track_cta_click" data-umami-event-location="ai_accuracy_intro">food photo analyzer</a> actually does, where it predictably fails, and what its numbers do and don't mean.
                 </p>
 
                 <h2>How the photo analysis works</h2>

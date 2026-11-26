@@ -56,9 +56,6 @@ const SNAP_DESCRIPTIONS = {
 const LEGAL_LINK =
     'underline underline-offset-4 [-webkit-tap-highlight-color:transparent] hover:text-foreground';
 
-const trackSignupEmailBlur = () =>
-    window.umami?.track('signup_field_blur_email');
-
 function isEmail(value: string): boolean {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
 }
@@ -231,7 +228,6 @@ export default function Register({
                                         form.clearErrors('email');
                                         setShowProblem(false);
                                     }}
-                                    onBlur={trackSignupEmailBlur}
                                     aria-invalid={
                                         !!form.errors.email ||
                                         (showProblem && !emailReady)

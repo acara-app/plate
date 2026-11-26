@@ -433,6 +433,8 @@
                     </div>
                 </a>
                 <a href="{{ route('snap-to-track') }}"
+                    data-umami-event="snap_to_track_cta_click"
+                    data-umami-event-location="ten_day_meal_plan_tools"
                     class="group flex items-center gap-3 rounded-lg border border-slate-200 p-4 transition-all hover:border-blue-300 hover:bg-blue-50">
                     <span
                         class="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600 group-hover:bg-blue-200">

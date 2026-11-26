@@ -72,7 +72,7 @@ export function PhotoAllowanceCard({
             ([entry]) => {
                 if (entry.isIntersecting && !seenOffers.has(key)) {
                     seenOffers.add(key);
-                    window.umami?.track('snap_to_track_offer_viewed', {
+                    window.umami?.track('snap_to_track_app_offer_viewed', {
                         source: 'app',
                         mode: allowance.mode,
                         variant: allowance.variant ?? 'baseline',
@@ -181,7 +181,7 @@ export function PhotoAllowanceCard({
                         >
                             <Link
                                 href={checkout.start(offer.product_id).url}
-                                data-umami-event="snap_to_track_upgrade_click"
+                                data-umami-event="snap_to_track_app_upgrade_click"
                             >
                                 {t('photo_plans.offer.cta', {
                                     name: offer.name,
