@@ -244,7 +244,6 @@ class extends Component
                     @endphp
                     <div
                         x-data
-                        x-init="window.acaraTrack?.('spike_calculator_result_viewed', { risk_level: @js($result['riskLevel']) })"
                         class="flex flex-col gap-4 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-2 motion-safe:duration-200"
                     >
                         {{-- Headline result --}}
@@ -325,8 +324,6 @@ class extends Component
                                 </p>
                                 <a
                                     href="{{ route('register') }}"
-                                    data-umami-event="signup_cta_click"
-                                    data-umami-event-location="spike_calculator_result"
                                     class="mt-5 inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
                                 >
                                     Get my free meal plan

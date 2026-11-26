@@ -140,8 +140,6 @@
             <a href="{{ route('login') }}" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">Log in</a>
             <a
                 href="{{ route('register') }}"
-                data-umami-event="signup_cta_click"
-                data-umami-event-location="food_show_header"
                 class="rounded-full bg-slate-900 dark:bg-white px-5 py-2 text-sm font-semibold text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-all"
             >
                 Get Started

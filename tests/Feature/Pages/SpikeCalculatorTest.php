@@ -84,7 +84,9 @@ it('displays result after successful prediction', function (): void {
         ->assertSee('HIGH')
         ->assertSee('White rice is a refined carbohydrate.')
         ->assertSee('Try cauliflower rice instead.')
-        ->assertSee('about 40% lower');
+        ->assertSee('about 40% lower')
+        ->assertDontSee('spike_calculator_result_viewed')
+        ->assertDontSee('signup_cta_click');
 });
 
 it('shows example suggestions when no result', function (): void {

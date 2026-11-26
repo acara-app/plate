@@ -271,8 +271,6 @@ class extends Component
                     </div>
                     <a
                         href="{{ route('register') }}"
-                        data-umami-event="signup_cta_click"
-                        data-umami-event-location="tools_index_bottom"
                         class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-none bg-[#C4623A] px-6 text-base font-semibold text-[#F2EBDD] transition hover:bg-[#A04A28]"
                     >
                         Create free account
