@@ -83,6 +83,8 @@
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+@include('layouts.components.timezone')
+
 @yield('head')
 @stack('head')
 

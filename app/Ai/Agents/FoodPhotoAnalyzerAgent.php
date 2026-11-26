@@ -32,7 +32,7 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     use Promptable;
     use ReasonsWithMediumEffort;
 
-    public const string PROMPT_VERSION = '7';
+    public const string PROMPT_VERSION = '8';
 
     public ?User $user = null;
 
@@ -41,6 +41,8 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     private ?string $language = null;
 
     private ?string $languageCode = null;
+
+    private ?string $region = null;
 
     public static function pinnedModel(): string
     {
@@ -70,6 +72,13 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     {
         $this->language = $language;
         $this->languageCode = $languageCode;
+
+        return $this;
+    }
+
+    public function withRegion(string $countryCode): self
+    {
+        $this->region = $countryCode;
 
         return $this;
     }
@@ -104,6 +113,12 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
                 'You have extensive knowledge of food portions, calories, macronutrients (protein, carbs, fat), and dietary fiber.',
                 'You can accurately estimate portion sizes from visual inspection.',
                 'Accuracy per ingredient matters more than speed — users track per-item carbohydrate values closely.',
+            ],
+            context: $this->region === null ? [] : [
+                sprintf(
+                    'The person is probably in the country with ISO 3166-1 code `%s`. Use this only to choose between look-alike dishes: prefer the one commonly eaten there. What is visible in the photo always wins — never add or rename food because of the location.',
+                    $this->region,
+                ),
             ],
             steps: [
                 '1. Carefully identify ALL distinct food items visible in the image — do not merge separate ingredients into one entry',
