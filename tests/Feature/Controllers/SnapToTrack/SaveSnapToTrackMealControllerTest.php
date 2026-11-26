@@ -37,7 +37,6 @@ it('saves a guest meal at its analysis time and opens it in the logbook', functi
         ->assertInertiaFlash('toast', ['type' => 'success', 'message' => __('common.snap_to_track.saved')])
         ->assertInertiaFlash('analytics', [
             ['name' => 'snap_to_track_auth_completed', 'properties' => ['auth_path' => 'register']],
-            ['name' => 'snap_to_track_draft_restored', 'properties' => ['draft_age_band' => 'lt_15m']],
             ['name' => 'snap_to_track_meal_logged', 'properties' => ['source' => 'public_snap_to_track', 'items_count' => 2]],
         ]);
 

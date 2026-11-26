@@ -222,6 +222,7 @@ class extends Component
                 <button
                     type="button"
                     wire:click="save('login')"
+                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'header', auth_path: 'login' })"
                     wire:loading.attr="disabled"
                     wire:target="save,upgrade,signInForPlan"
                     class="-mr-3 inline-flex min-h-11 items-center justify-center rounded-full px-3 text-[15px] font-medium text-muted-foreground hover:text-foreground disabled:pointer-events-none disabled:opacity-50 {{ $press }} {{ $ring }}"
@@ -257,6 +258,7 @@ class extends Component
                 ['label' => 'Fiber', 'value' => $analysis['total_fiber'] ?? null, 'goal' => $goals->fiber, 'icon' => 'salad', 'tile' => 'bg-green-100', 'iconColor' => 'text-green-600', 'text' => 'text-green-700', 'ring' => 'stroke-green-500'],
             ];
             $barOffer = $this->offerForPlacement('result_bar');
+            $sheetProperties = $photoAllowance->publicOfferProperties('result_bar');
             $showPlanChoices = $barOffer !== null && ! $photoAllowance->exhausted;
             $freeScansLeft = $photoAllowance->enabled && $photoAllowance->mode === 'trial' && ! $photoAllowance->exhausted ? $photoAllowance->remaining : null;
             $freeScansLabel = $freeScansLeft === null ? null : strtr(
@@ -446,7 +448,7 @@ class extends Component
                                     wire:click="save('register')"
                                     wire:loading.attr="disabled"
                                     wire:target="save,upgrade,signInForPlan"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal' })"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal', auth_path: 'register' })"
                                 >
                                     Save this meal
                                 </x-snap-result.button>
@@ -465,6 +467,7 @@ class extends Component
                                     <button
                                         type="button"
                                         wire:click="save('login')"
+                                        x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'meal', auth_path: 'login' })"
                                         wire:loading.attr="disabled"
                                         wire:target="save,upgrade,signInForPlan"
                                         class="{{ $link }}"
@@ -498,7 +501,7 @@ class extends Component
                     </p>
                 </section>
 
-                <x-snap-result.offer :allowance="$photoAllowance" :offer="$barOffer" />
+                <x-snap-result.offer :allowance="$photoAllowance" :offer="$barOffer" :result-key="$this->resultKey()" />
 
                 <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 
@@ -507,7 +510,7 @@ class extends Component
                         @if ($freeScansLabel !== null)
                             <p class="px-1 text-center text-sm font-medium text-muted-foreground">{{ $freeScansLabel }}</p>
                         @endif
-                        <x-snap-result.button variant="plain" :href="route('snap-to-track')">
+                        <x-snap-result.button variant="plain" :href="route('snap-to-track')" data-umami-event="snap_to_track_scan_again_click" data-umami-event-placement="result">
                             <x-snap-result.icon name="camera" />
                             Analyze another photo
                         </x-snap-result.button>
@@ -524,6 +527,10 @@ class extends Component
                     drag: { active: false, startY: 0, startedAt: 0, offset: 0 },
                     init() {
                         this.$watch('open', (open) => document.documentElement.classList.toggle('overflow-hidden', open));
+                    },
+                    trackSheetOffer() {
+                        window.acaraTrackOnce?.('snap_to_track_offer_viewed', @js($sheetProperties), @js('result_bar:'.$this->resultKey()));
+                        this.$wire.offerViewed('result_bar');
                     },
                     scheduleSheet() {
                         this.timer = setTimeout(() => {
@@ -621,9 +628,9 @@ class extends Component
                                 <x-snap-result.plan-choice value="free" :label="__('common.photo_plans.free.price')" description="Save this meal" />
                                 <x-snap-result.plan-choice
                                     value="paid"
+                                    x-intersect.once="trackSheetOffer()"
                                     :label="__('common.photo_plans.offer.scans_and_coach')"
                                     :description="$barOffer->formattedPrice.__('common.checkout_subscription.per_month')"
-                                    x-intersect.once="window.acaraTrackOnce?.('snap_to_track_offer_viewed', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} }, {{ Js::from('result_bar:'.$this->resultKey()) }}); $wire.offerViewed('result_bar')"
                                 />
                             </div>
                         @endif
@@ -633,7 +640,7 @@ class extends Component
                                     @if ($showPlanChoices)
                                         x-show="plan === 'paid'" style="display: none;"
                                     @else
-                                        x-intersect.once="$wire.offerViewed('result_bar')"
+                                        x-intersect.once="trackSheetOffer()"
                                     @endif
                                     class="flex flex-col gap-2"
                                 >
@@ -643,7 +650,7 @@ class extends Component
                                         wire:click="upgrade('result_bar')"
                                         wire:loading.attr="disabled"
                                         wire:target="save,upgrade,signInForPlan"
-                                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', { source: 'public_snap_to_track', placement: 'result_bar', variant: {{ Js::from($photoAllowance->variant ?? 'baseline') }} })"
+                                        x-on:click="window.acaraTrack?.('snap_to_track_upgrade_click', {{ Js::from($sheetProperties) }})"
                                     >
                                         @if ($showPlanChoices)
                                             {{ __('common.photo_plans.offer.continue_to_checkout') }}
@@ -669,7 +676,7 @@ class extends Component
                                     wire:click="save('register')"
                                     wire:loading.attr="disabled"
                                     wire:target="save,upgrade,signInForPlan"
-                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar' })"
+                                    x-on:click="window.acaraTrack?.('snap_to_track_save_click', { source: 'public_snap_to_track', placement: 'result_bar', auth_path: 'register' })"
                                 >
                                     Save this meal free
                                 </x-snap-result.button>
@@ -677,7 +684,7 @@ class extends Component
                             @if ($showPlanChoices)
                                 <div class="flex min-h-12 flex-wrap items-center justify-between gap-x-3 px-1 text-xs">
                                     @if ($freeScansLabel !== null)
-                                        <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
+                                        <a href="{{ route('snap-to-track') }}" x-show="plan === 'free'" data-umami-event="snap_to_track_scan_again_click" data-umami-event-placement="result_bar" class="inline-flex min-h-11 items-center gap-1.5 rounded-lg px-1 hover:bg-muted {{ $press }} {{ $ring }}">
                                             <x-snap-result.icon name="chevron-right" class="size-4 shrink-0 rotate-180" />
                                             <span class="flex flex-col">
                                                 <span class="text-sm font-semibold">{{ __('common.photo_plans.checkout.try_another') }}</span>

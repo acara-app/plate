@@ -50,7 +50,6 @@ final readonly class SaveSnapToTrackMealController
             $events[] = ['name' => 'snap_to_track_auth_completed', 'properties' => ['auth_path' => $authPath]];
         }
 
-        $events[] = ['name' => 'snap_to_track_draft_restored', 'properties' => ['draft_age_band' => $draftModel->ageBand()]];
         $events[] = ['name' => 'snap_to_track_meal_logged', 'properties' => [
             'source' => $draftModel->source->value,
             'items_count' => count(is_array($draftModel->payload['items'] ?? null) ? $draftModel->payload['items'] : []),

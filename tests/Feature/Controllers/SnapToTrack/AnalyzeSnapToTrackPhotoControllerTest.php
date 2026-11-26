@@ -49,18 +49,8 @@ it('analyzes an uploaded photo, logs the meal and opens it', function (): void {
 
     $response->assertRedirectToRoute('health-entries.show', $meal)
         ->assertInertiaFlash('analytics', [
-            [
-                'name' => 'snap_to_track_result_viewed',
-                'properties' => [
-                    'source' => 'authenticated_snap_to_track',
-                    'items_count' => 1,
-                    'confidence_band' => 'medium',
-                ],
-            ],
-            [
-                'name' => 'snap_to_track_meal_logged',
-                'properties' => ['source' => 'authenticated_snap_to_track', 'items_count' => 1],
-            ],
+            'name' => 'snap_to_track_app_meal_logged',
+            'properties' => ['source' => 'authenticated_snap_to_track', 'items_count' => 1, 'confidence_band' => 'medium'],
         ]);
 });
 

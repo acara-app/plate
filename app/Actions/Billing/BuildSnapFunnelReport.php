@@ -46,6 +46,7 @@ final readonly class BuildSnapFunnelReport
 
     /** @var list<string> */
     private const array HISTORY = [
+        '2026-11-26: the guest result sheet now waits 10 seconds after the calorie summary appears. It opens only if the meal and offer actions are off screen.',
         '2026-11-26: the plan card on the guest result page, below the ingredients, now also shows after the first scan, so a guest who closes the sheet can still open checkout. Its offer views, clicks and checkouts use the result placement with free_scans_used 1; before this date result only appeared after both free scans. The card lists a fourth benefit about the AI health coach.',
         '2026-11-26: the action bar on the guest result page became a sheet over a dimmed page with a title and a close button. It opens once, 2.5 seconds after the result loads, and only when no Save or plan button is already on screen; it no longer follows scrolling and does not return after it is closed. result_bar offer views and clicks now come from that one opening, so they are not comparable with earlier dates. The guest checkout note now reads "No sign-up needed. Set up your account after checkout." Event names and placements are unchanged.',
         '2026-11-26: the pricing page shows paid monthly plans. Guests continue directly to Stripe for their selected plan. These guest checkouts record the pricing placement.',
