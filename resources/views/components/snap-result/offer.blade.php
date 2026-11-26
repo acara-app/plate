@@ -1,7 +1,6 @@
-@props(['allowance'])
+@props(['allowance', 'offer' => null])
 
 @php
-    $offer = $allowance->canUpgrade && $allowance->exhausted ? $allowance->offer : null;
     $variant = $allowance->variant ?? 'baseline';
 @endphp
 
@@ -13,7 +12,9 @@
         class="flex flex-col gap-5 rounded-[1.75rem] bg-card p-5 sm:p-6"
     >
         <div class="flex flex-col gap-2">
-            <p class="self-start rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
+            @if ($allowance->exhausted)
+                <p class="self-start rounded-full bg-muted px-3 py-1.5 text-xs font-medium text-muted-foreground">{{ __('common.photo_plans.free.used') }}</p>
+            @endif
             <h2 id="result-offer-heading" class="text-2xl font-semibold tracking-tight text-balance">{{ __('common.photo_plans.offer.heading') }}</h2>
             <p class="text-sm leading-relaxed text-muted-foreground">
                 {{ __('common.photo_plans.offer.save_note') }}

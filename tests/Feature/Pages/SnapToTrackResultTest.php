@@ -130,20 +130,21 @@ it('shows an unknown fiber estimate as missing rather than zero', function (): v
         ->assertSeeInOrder(['Fiber', '—', '/ 28 g', 'Your meal']);
 });
 
-it('offers Free and Starter after the first scan and counts only the visible sheet offer', function (): void {
+it('offers Free and Starter after the first scan and counts the sheet and the plan card once each', function (): void {
     sellPhotoPlans();
     stubResultPhotoAllowance(used: 1);
     session()->put('snap_to_track.analysis_guest_id', (string) Str::uuid());
     guestResultDraft();
 
     Livewire::test('pages::snap-to-track-result')
-        ->assertSeeInOrder(['More scans + your own AI coach', 'US$2.99/month'])
+        ->assertSeeInOrder(['Make photo logging part of your routine', 'Get Starter', 'More scans + your own AI coach', 'US$2.99/month'])
+        ->assertDontSee('Your free scans are complete.')
         ->call('offerViewed', 'result')
         ->call('offerViewed', 'result_bar')
         ->call('offerViewed', 'result_bar');
 
-    $impression = SnapAnalyticsEvent::query()->where('name', SnapFunnelStage::OfferViewed->value)->sole();
-    expect($impression->properties)->toMatchArray(['placement' => 'result_bar', 'plan' => 'starter']);
+    $placements = SnapAnalyticsEvent::query()->where('name', SnapFunnelStage::OfferViewed->value)->get()->map(fn (SnapAnalyticsEvent $event): mixed => $event->properties['placement']);
+    expect($placements->sort()->values()->all())->toBe(['result', 'result_bar']);
     $this->assertDatabaseMissing('snap_analytics_events', ['name' => SnapFunnelStage::UpgradeClicked->value]);
 });
 
@@ -180,7 +181,7 @@ it('offers Starter with its price once both free scans are used, while saving st
         ->assertRedirect(route('register'));
 });
 
-it('opens Stripe directly when a guest confirms Starter after a free scan', function (int $used): void {
+it('opens Stripe directly when a guest confirms Starter after a free scan', function (int $used, string $placement): void {
     $checkout = FakeGuestCheckout::install();
     $starter = sellPhotoPlans();
     stubResultPhotoAllowance(used: $used, offer: new PhotoOffer(productId: $starter->id, name: $starter->name, formattedPrice: $starter->formatted_price));
@@ -190,14 +191,18 @@ it('opens Stripe directly when a guest confirms Starter after a free scan', func
     $result = Livewire::test('pages::snap-to-track-result')->assertNoRedirect();
     expect($checkout->sessions)->toBeEmpty();
 
-    $result->call('upgrade', 'result_bar')
+    $result->call('upgrade', $placement)
         ->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
 
     expect($checkout->sessions[0]['price'])->toBe('price_starter')
         ->and($checkout->sessions[0]['metadata'])->toMatchArray(['product_name' => 'Starter', 'type' => 'starter'])
         ->and($checkout->sessions[0]['submit_message'])->toContain('activation link')
-        ->and(PlanPurchase::query()->sole()->placement)->toBe('result_bar');
-})->with(['first scan' => 1, 'last free scan' => 2]);
+        ->and(PlanPurchase::query()->sole()->placement)->toBe($placement);
+})->with([
+    'first scan, from the sheet' => [1, 'result_bar'],
+    'first scan, from the plan card' => [1, 'result'],
+    'last free scan' => [2, 'result_bar'],
+]);
 
 it('lets a member log in before paying and keeps Starter selected', function (): void {
     stubResultPhotoAllowance(used: 2);

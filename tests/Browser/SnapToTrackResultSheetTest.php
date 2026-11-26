@@ -53,7 +53,7 @@ it('starts checkout only when the guest confirms Starter in the first-scan sheet
     expect($checkout->sessions)->toBeEmpty();
 
     $page->click($paidButton)
-        ->assertSeeIn('[role="alert"]', 'We could not open checkout just now. Please try again.');
+        ->assertSeeIn('[role="dialog"] [role="alert"]', 'We could not open checkout just now. Please try again.');
     expect($checkout->sessions)->toHaveCount(1);
 
     $page->keys($paid, 'ArrowLeft')
