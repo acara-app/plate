@@ -1160,8 +1160,6 @@ class extends Component
                         </div>
                         <a
                             href="{{ route('register') }}"
-                            data-umami-event="signup_cta_click"
-                            data-umami-event-location="snap_to_track_bottom_promo"
                             class="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-emerald-950 sm:w-auto {{ $press }} {{ $ringOnLight }}"
                         >
                             Get Started

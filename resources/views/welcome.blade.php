@@ -131,8 +131,10 @@
                             </a>
                         </div>
                         <a href="{{ route(auth()->check() ? 'health-entries.index' : 'register') }}"
-                           data-umami-event="{{ auth()->check() ? 'health_log_cta_click' : 'signup_cta_click' }}"
-                           data-umami-event-location="home_hero"
+                           @auth
+                               data-umami-event="health_log_cta_click"
+                               data-umami-event-location="home_hero"
+                           @endauth
                            class="inline-flex min-h-12 items-center justify-center self-stretch rounded-full border border-[#D9CFC3] bg-white px-7 py-3.5 text-sm font-semibold text-slate-800 transition hover:border-[#C94F35] hover:bg-orange-50 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#C94F35] sm:self-start sm:text-base">
                             {{ auth()->check() ? 'Open My Health Log' : 'Create My Health Log' }}
                         </a>
