@@ -175,11 +175,7 @@ class extends Component
             return null;
         }
 
-        if ($allowance->exhausted) {
-            return $allowance->offer;
-        }
-
-        return $placement === 'result_bar' && $allowance->offer?->name === PhotoPlan::Starter->productName() ? $allowance->offer : null;
+        return $allowance->exhausted || $allowance->offer?->name === PhotoPlan::Starter->productName() ? $allowance->offer : null;
     }
 
     private function guestId(): ?string
@@ -502,7 +498,7 @@ class extends Component
                     </p>
                 </section>
 
-                <x-snap-result.offer :allowance="$photoAllowance" />
+                <x-snap-result.offer :allowance="$photoAllowance" :offer="$barOffer" />
 
                 <p class="px-2 text-xs leading-relaxed text-muted-foreground">{{ App\Services\AiTransparency::carbBoundaryNotice() }}</p>
 

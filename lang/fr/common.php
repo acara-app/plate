@@ -1375,6 +1375,7 @@ return [
                 'Estimez les calories et macros à partir d’une photo',
                 'Enregistrez vos repas dans votre journal et ajustez les portions à tout moment',
                 'Utilisez vos objectifs personnalisés de calories et de macros',
+                'Posez vos questions à votre coach santé IA personnel : repas, sport, sommeil ou stress',
             ],
             'cta' => 'Continuer avec {{name}} — {{price}}/mois',
             'terms' => 'Renouvellement mensuel jusqu’à résiliation, depuis les paramètres de facturation. Aucun frais de dépassement.',

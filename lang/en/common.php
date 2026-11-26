@@ -1374,6 +1374,7 @@ return [
                 'Estimate calories and macros from a meal photo',
                 'Save meals to your food log and adjust portions anytime',
                 'Use your personalised calorie and macro goals',
+                'Ask your own AI health coach about meals, workouts, sleep or stress',
             ],
             'cta' => 'Keep tracking with {{name}} — {{price}}/month',
             'terms' => 'Renews monthly until cancelled. Cancel through Billing settings. No overage charges.',
