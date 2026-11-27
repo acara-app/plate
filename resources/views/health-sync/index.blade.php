@@ -205,8 +205,8 @@
             </section>
 
             <div class="mx-auto mt-24 max-w-7xl lg:px-8">
-                <x-snap-promo heading="Glucose shows what happened. Your meal shows why." location="health_sync">
-                    Your readings show the spike. A photo of the meal shows what caused it: snap your plate and our <x-snap-link location="health_sync">AI calorie estimator</x-snap-link> breaks it into calories, carbs, protein, and fat.
+                <x-snap-promo heading="See what you ate alongside your glucose readings." location="health_sync">
+                    Snap a meal photo for an estimate of calories, carbs, protein, and fat with our <x-snap-link location="health_sync">AI calorie estimator</x-snap-link>. Use your meal log alongside glucose readings to look for patterns.
                 </x-snap-promo>
             </div>
 
@@ -284,7 +284,7 @@
                                 Ready to stop typing in your glucose readings?
                             </h2>
                             <p class="mt-3 max-w-xl text-sm leading-relaxed text-[#F2EBDD]/80 sm:text-base">
-                                Install the app, scan one QR code, and your data flows automatically from that point on.
+                                Install Acara Health Sync, sign in with the same Acara Plate account you use on the web, then open Sync and choose what to share.
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-3 lg:justify-end">

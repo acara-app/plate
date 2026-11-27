@@ -51,19 +51,19 @@
             "@@type": "HowToStep",
             "position": 3,
             "name": "Pick Your Data",
-            "text": "Choose which health categories to share with Plate. Toggle individual data types on or off, then approve the Apple Health permissions prompt."
+            "text": "Open the Sync tab and choose which health data to share. When prompted, allow access to the categories you want to sync in Apple Health."
         },
         {
             "@@type": "HowToStep",
             "position": 4,
             "name": "Start Syncing",
-            "text": "Your dashboard shows the connection status. Data syncs automatically when you open the app, or tap Sync Now for an immediate sync."
+            "text": "After you connect Apple Health, open the Sync tab to check your connection."
         },
         {
             "@@type": "HowToStep",
             "position": 5,
             "name": "Manage Your Connection",
-            "text": "Use the app settings to change data permissions, run a manual sync, view sync history, or disconnect the account from the device."
+            "text": "Use Settings to manage permissions or view health data. For a manual sync, choose Sync Now. To disconnect your account from the device, choose Sign Out."
         }
     ]
 }

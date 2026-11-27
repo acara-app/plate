@@ -83,8 +83,8 @@
                     <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">3</div>
                     <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Pick Your Data</h3>
                     <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                        <p>Choose which health categories to share. Toggle individual types on or off — glucose but not reproductive health, exercise but not hearing. Your call.</p>
-                        <p>Tap <strong class="text-slate-800 dark:text-slate-200">"Continue"</strong> and approve the Apple Health permissions prompt.</p>
+                        <p>Open the <strong class="text-slate-800 dark:text-slate-200">Sync</strong> tab and choose which health data to share.</p>
+                        <p>When prompted, allow access to the categories you want to sync in Apple Health.</p>
                         <p>Only the types you selected get read. Everything else stays private.</p>
                     </div>
                 </div>
@@ -94,13 +94,7 @@
                     <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">4</div>
                     <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">You're Syncing</h3>
                     <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                        <p>That's it. Your dashboard shows the connection status:</p>
-                        <div class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-mono text-xs dark:border-slate-600 dark:bg-slate-800">
-                            <p class="text-emerald-600 dark:text-emerald-400">&#10003; HealthKit connected</p>
-                            <p class="text-emerald-600 dark:text-emerald-400">&#10003; Acara Plate connected</p>
-                            <p class="text-slate-500 dark:text-slate-400">&#128336; Last synced: just now</p>
-                        </div>
-                        <p>Data syncs automatically when you open the app. Want it now? Tap <strong class="text-slate-800 dark:text-slate-200">"Sync Now"</strong> or pull to refresh on the Health Data screen.</p>
+                        <p>After you connect Apple Health, open the <strong class="text-slate-800 dark:text-slate-200">Sync</strong> tab to check your connection.</p>
                     </div>
                 </div>
 
@@ -109,7 +103,7 @@
                     <div class="absolute -top-3 left-6 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white">5</div>
                     <h3 class="mt-1 text-lg font-semibold text-slate-900 dark:text-white">Manage Your Connection</h3>
                     <div class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-400">
-                        <p>Use the app settings to change data permissions, run a manual sync, view sync history, or disconnect the account from the device.</p>
+                        <p>Use the app settings to manage permissions, view health data, or disconnect your account from the device.</p>
                     </div>
                 </div>
             </section>
@@ -121,10 +115,9 @@
                     <div class="prose prose-sm prose-slate max-w-none dark:prose-invert">
                         <ul>
                             <li><strong>Change data types:</strong> Settings &gt; Manage Health Data Permissions</li>
-                            <li><strong>View sync history:</strong> Logs tab in the app</li>
-                            <li><strong>Manual sync:</strong> Dashboard &gt; Sync Now, or Settings &gt; Sync Now</li>
+                            <li><strong>Manual sync:</strong> Settings &gt; Sync Now</li>
                             <li><strong>View health data:</strong> Settings &gt; Health Data</li>
-                            <li><strong>Disconnect from the app:</strong> Settings &gt; Disconnect Account (clears all credentials, keeps Apple Health data intact)</li>
+                            <li><strong>Disconnect from the app:</strong> Settings &gt; Sign Out (keeps Apple Health data intact)</li>
                         </ul>
                     </div>
                 </div>
@@ -152,11 +145,11 @@
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Sync fails</td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Make sure your Plate instance is online and the API is responding. Try a manual sync from Settings.</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Make sure your Plate instance is online and the API is responding. Try Settings &gt; Sync Now.</td>
                             </tr>
                             <tr>
                                 <td class="px-4 py-3 font-medium text-slate-700 dark:text-slate-300">Want to reconnect</td>
-                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Disconnect from app settings first, then sign in again. Your Apple Health data stays intact.</td>
+                                <td class="px-4 py-3 text-slate-600 dark:text-slate-400">Go to Settings &gt; Sign Out, then sign in again. Your Apple Health data stays intact.</td>
                             </tr>
                         </tbody>
                     </table>
