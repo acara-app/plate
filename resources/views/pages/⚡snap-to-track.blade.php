@@ -1147,6 +1147,51 @@ class extends Component
                             <a href="{{ route('install-app') }}" class="font-medium text-foreground underline underline-offset-4">Add Acara Plate to your home screen</a>,
                             then create a free account when you're ready to save meals to your food log.
                         </p>
+                        <div class="flex flex-col items-start gap-3">
+                            <p>Scan meals and save them to your food log with Acara Health Sync for iPhone and iPad.</p>
+                            <x-app-store-badge size="sm" variant="outline" />
+                        </div>
+                    </div>
+                </section>
+
+                <section id="cal-ai-comparison" aria-labelledby="cal-ai-comparison-heading" class="scroll-mt-8">
+                    <h2 id="cal-ai-comparison-heading" class="text-3xl font-bold tracking-tight text-balance sm:text-4xl">Snap to Track vs Cal AI</h2>
+                    <p class="mt-3 max-w-2xl text-lg leading-relaxed text-pretty text-neutral-600">
+                        Try Snap to Track for a quick calorie and macro estimate from a restaurant or home-cooked meal. Cal AI suits people who want to log meals daily and use barcodes or meal descriptions alongside photos.
+                    </p>
+
+                    <div class="mt-6 overflow-hidden rounded-3xl border border-neutral-200">
+                        <table class="w-full table-fixed text-left text-sm leading-snug wrap-break-word sm:text-base" aria-labelledby="cal-ai-comparison-heading">
+                            <thead class="bg-neutral-100">
+                                <tr class="*:px-2.5 *:py-3 sm:*:px-5 sm:*:py-4">
+                                    <th scope="col" class="w-1/4 font-semibold">Feature</th>
+                                    <th scope="col" class="font-semibold">Snap to Track</th>
+                                    <th scope="col" class="font-semibold">Cal AI</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-neutral-200 text-neutral-600">
+                                <tr class="*:px-2.5 *:py-3 *:align-top sm:*:px-5 sm:*:py-4">
+                                    <th scope="row" class="font-medium text-foreground">Access</th>
+                                    <td>Web browser or installable web app, plus Acara Health Sync for iPhone and iPad</td>
+                                    <td>iOS and Android app</td>
+                                </tr>
+                                <tr class="*:px-2.5 *:py-3 *:align-top sm:*:px-5 sm:*:py-4">
+                                    <th scope="row" class="font-medium text-foreground">Food entry</th>
+                                    <td>Meal photos with per-item and meal totals for calories and macros</td>
+                                    <td>Meal photos, barcodes, and meal descriptions</td>
+                                </tr>
+                                <tr class="*:px-2.5 *:py-3 *:align-top sm:*:px-5 sm:*:py-4">
+                                    <th scope="row" class="font-medium text-foreground">Scan cost</th>
+                                    <td>Limited free scans on the web without an account or payment card</td>
+                                    <td>Photo scan results require a subscription. Check the app for your price.</td>
+                                </tr>
+                                <tr class="*:px-2.5 *:py-3 *:align-top sm:*:px-5 sm:*:py-4">
+                                    <th scope="row" class="font-medium text-foreground">Meal history</th>
+                                    <td>Save meals to your food log with a free account</td>
+                                    <td>Track daily calories and macros in the app</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
 
