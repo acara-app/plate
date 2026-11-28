@@ -23,7 +23,6 @@ final class PhotoEntitlement extends Data
         public string $mode = 'standard',
         public bool $canUpgrade = false,
         public ?PhotoOffer $offer = null,
-        public ?PhotoPreview $preview = null,
         public ?string $variant = null,
     ) {
         $this->remaining = $this->limit === null ? null : max(0, $this->limit - $this->used);

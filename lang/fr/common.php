@@ -1411,18 +1411,6 @@ return [
             'verify_save' => 'Pas encore prêt à payer ? Vérifiez votre adresse e-mail pour enregistrer ce repas gratuitement.',
             'login' => 'Se connecter',
         ],
-        'preview' => [
-            'heading' => 'Votre routine photo sur trois jours',
-            'available' => 'Essayez le suivi pendant trois jours',
-            'body' => 'Essayez trois scans photo supplémentaires : un toutes les 24 heures pendant trois jours. Les scans inutilisés ne sont pas reportés. Sans carte ni abonnement automatique.',
-            'remaining' => '{{count}} scan disponible sur cette période de 24 heures.',
-            'ends' => 'Fin de l’aperçu : {{time}}. Aucun abonnement automatique.',
-            'next' => 'Prochain scan : {{time}}.',
-            'activate' => 'Activer mon aperçu de trois jours',
-            'verify' => 'Créer ou vérifier mon compte gratuit',
-            'complete' => 'Votre aperçu de trois jours est terminé.',
-            'try' => 'Essayer un scan par jour pendant trois jours',
-        ],
         'payment' => [
             'checking' => 'Nous confirmons votre paiement. Les scans seront accessibles une fois le paiement vérifié.',
             'timeout' => 'La confirmation du paiement prend plus de temps que prévu. Réessayez ou consultez votre abonnement dans les paramètres de facturation.',

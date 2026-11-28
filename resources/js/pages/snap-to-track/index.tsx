@@ -61,8 +61,6 @@ export default function SnapToTrackIndex({
     const scansUsedUp = !!(photoAllowance?.enabled && photoAllowance.exhausted);
     const paused = !!aiAllowance?.exhausted;
     const canScan = !scansUsedUp && !paused;
-    const showsAllowanceCard =
-        scansUsedUp || !!(photoAllowance?.enabled && photoAllowance.preview);
 
     function selectPhoto(file: File): void {
         setPhoto(file);
@@ -219,7 +217,7 @@ export default function SnapToTrackIndex({
                                     />
                                 )}
 
-                                {showsAllowanceCard && (
+                                {scansUsedUp && (
                                     <PhotoAllowanceCard
                                         allowance={photoAllowance}
                                         variant="scanner"
