@@ -64,8 +64,7 @@ it("runs a paying member's scans on the shared photo model without a scan allowa
         return mealAnalysisWithItems(1);
     });
 
-    expect($usedModel?->provider)->toBe('gemini')
-        ->and($usedModel?->model)->toBe('gemini-3.8-flash')
+    expect($usedModel)->toEqual(PhotoModel::standard())
         ->and($access->entitlement($member, null)->mode)->toBe('premium')
         ->and($access->entitlement($member, null)->limit)->toBeNull();
 });
