@@ -15,6 +15,7 @@ use App\Models\User;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\JsonSchema\Types\ObjectType;
 use Illuminate\JsonSchema\Types\Type;
+use Illuminate\Support\Facades\Log;
 use Laravel\Ai\Attributes\MaxTokens;
 use Laravel\Ai\Attributes\Timeout;
 use Laravel\Ai\Contracts\Agent;
@@ -23,6 +24,7 @@ use Laravel\Ai\Contracts\HasStructuredOutput;
 use Laravel\Ai\Files\Base64Image;
 use Laravel\Ai\Promptable;
 use Laravel\Ai\Responses\StructuredAgentResponse;
+use Spatie\LaravelData\Exceptions\CannotCreateData;
 
 #[MaxTokens(35000)]
 #[Timeout(30)]
@@ -164,16 +166,41 @@ final class FoodPhotoAnalyzerAgent implements AcceptsImages, Agent, BillsUsageTo
     public function analyze(string $imageBase64, string $mimeType): FoodAnalysisData
     {
         $model = $this->photoModel ?? PhotoModel::standard();
+        $response = $this->promptPhoto($imageBase64, $mimeType, $model->providers());
 
-        /** @var StructuredAgentResponse $response */
-        $response = $this->prompt(
+        try {
+            return $this->toAnalysisData($response, $model);
+        } catch (CannotCreateData $cannotCreateData) {
+            Log::warning('food_photo_output_retried', [
+                'provider' => $response->meta->provider,
+                'model' => $response->meta->model,
+                'reason' => $cannotCreateData->getMessage(),
+            ]);
+
+            $retryResponse = $this->promptPhoto($imageBase64, $mimeType, [
+                $response->meta->provider ?? $model->provider => $response->meta->model,
+            ]);
+
+            return $this->toAnalysisData($retryResponse, $model);
+        }
+    }
+
+    /**
+     * @param  array<string, string|null>  $providers
+     */
+    private function promptPhoto(string $imageBase64, string $mimeType, array $providers): StructuredAgentResponse
+    {
+        return $this->prompt(
             'Analyze this food photo and provide nutritional breakdown for all food items visible.',
             attachments: [
                 new Base64Image($imageBase64, $mimeType),
             ],
-            provider: $model->providers(),
+            provider: $providers,
         );
+    }
 
+    private function toAnalysisData(StructuredAgentResponse $response, PhotoModel $model): FoodAnalysisData
+    {
         /** @var array<string, mixed> $data */
         $data = $response->toArray();
         $data['analyzer_version'] = self::version($response->meta->model ?? $model->model);
