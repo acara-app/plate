@@ -238,7 +238,7 @@ it('shows an abandoned guest checkout from the limit wall without inventing a pa
     session()->put('snap_to_track.analysis_guest_id', $guest);
     offerStarterInSnapJourney($starter, used: 2);
 
-    Livewire::test('pages::snap-to-track')->call('upgrade', 'wall')->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
+    Livewire::test('pages::snap-to-track')->call('upgrade')->assertRedirect('https://checkout.stripe.com/c/pay/cs_test_guest_1');
     $this->withCookie('photo_guest', $guest)->withoutVite()
         ->get(route('snap-to-track.purchase', ['checkout' => 'cancelled']))
         ->assertSee('Your checkout is waiting');

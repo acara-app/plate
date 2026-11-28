@@ -48,8 +48,6 @@ const SNAP_DESCRIPTIONS = {
     save: 'Create your free account to save this meal and correct its breakdown.',
     upgrade:
         'Create your account, then pay for your selected plan securely with Stripe. You can verify your email afterwards.',
-    preview:
-        'Create and verify your free account, then activate one photo scan per day for three days. No card or automatic subscription.',
     scan: 'Keep your meals together in your food log. Your remaining free scans follow your account.',
 };
 

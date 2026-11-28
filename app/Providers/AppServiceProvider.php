@@ -6,7 +6,6 @@ namespace App\Providers;
 
 use App\Contracts\Billing\ManagesGuestCheckout;
 use App\Contracts\Billing\ManagesPhotoAnalyses;
-use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Contracts\Billing\OffersSubscriptions;
 use App\Contracts\Billing\ResolvesFailedPhotoAnalysis;
 use App\Contracts\Billing\ResolvesUserTier;
@@ -23,7 +22,6 @@ use App\Services\Ai\AgentModelContext;
 use App\Services\Ai\PlateConversationStore;
 use App\Services\Billing\DatabaseFailedPhotoAnalysisResolver;
 use App\Services\Billing\MeteredPhotoAnalyses;
-use App\Services\Billing\NullPhotoPreview;
 use App\Services\Billing\PhotoPlanCatalog;
 use App\Services\Billing\PhotoPlanOffers;
 use App\Services\Billing\StripeGuestCheckout;
@@ -65,7 +63,6 @@ final class AppServiceProvider extends ServiceProvider
         $this->app->bind(ManagesPhotoAnalyses::class, MeteredPhotoAnalyses::class);
         $this->app->bind(ManagesGuestCheckout::class, StripeGuestCheckout::class);
         $this->app->bind(ResolvesFailedPhotoAnalysis::class, DatabaseFailedPhotoAnalysisResolver::class);
-        $this->app->bindIf(ManagesPhotoPreview::class, NullPhotoPreview::class);
         $this->app->bind(StripeServiceContract::class, StripeService::class);
         $this->app->bind(IndexNowServiceContract::class, IndexNowService::class);
         $this->app->bind(ResolvesUserTier::class, SubscriptionTierResolver::class);

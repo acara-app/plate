@@ -1410,18 +1410,6 @@ return [
             'verify_save' => 'Not ready to pay? Verify your email to save this meal for free.',
             'login' => 'Log in',
         ],
-        'preview' => [
-            'heading' => 'Your three-day photo habit',
-            'available' => 'Build a three-day tracking habit',
-            'body' => 'Try three more photo scans: one per 24 hours for three days. Unused scans don’t roll over. No card or automatic subscription.',
-            'remaining' => '{{count}} scan available in this 24-hour window.',
-            'ends' => 'Preview ends {{time}}. No automatic subscription.',
-            'next' => 'Next scan {{time}}.',
-            'activate' => 'Activate my three-day preview',
-            'verify' => 'Create or verify my free account',
-            'complete' => 'Your three-day preview is complete.',
-            'try' => 'Try one scan a day for three days',
-        ],
         'payment' => [
             'checking' => 'We’re confirming your payment. Your scans will unlock when payment is verified.',
             'timeout' => 'Payment confirmation is taking longer than expected. Check again or open Billing settings to view your subscription.',
