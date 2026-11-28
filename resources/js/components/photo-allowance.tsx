@@ -11,7 +11,6 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import checkout from '@/routes/checkout';
-import { snapToTrack } from '@/routes';
 import { cn } from '@/lib/utils';
 import { Link } from '@inertiajs/react';
 import { ActivityIcon, ChevronDown, ScanLine, Sparkles } from 'lucide-react';
@@ -29,12 +28,6 @@ export interface PhotoAllowance {
     mode: string;
     can_upgrade: boolean;
     variant?: string | null;
-    preview?: {
-        status: 'available' | 'active' | 'expired';
-        starts_at: string | null;
-        expires_at: string | null;
-        next_scan_at: string | null;
-    } | null;
     offer?: {
         product_id: number;
         name: string;
@@ -56,7 +49,7 @@ export function PhotoAllowanceCard({
     const showOffer = !!(
         allowance?.can_upgrade &&
         allowance.offer &&
-        (allowance.exhausted || allowance.preview)
+        allowance.exhausted
     );
     useEffect(() => {
         if (!showOffer || !offerRef.current || !allowance) {
@@ -147,22 +140,6 @@ export function PhotoAllowanceCard({
                         })}
                     </p>
                 )}
-                {allowance.preview?.status === 'available' && (
-                    <Button asChild className="min-h-11">
-                        <a href={snapToTrack().url}>
-                            {t('photo_plans.preview.try')}
-                        </a>
-                    </Button>
-                )}
-                {allowance.preview?.expires_at && (
-                    <p className={cn('text-sm', muted)}>
-                        {t('photo_plans.preview.ends', {
-                            time: new Date(
-                                allowance.preview.expires_at,
-                            ).toLocaleString(),
-                        })}
-                    </p>
-                )}
                 {showOffer && offer && (
                     <div
                         ref={offerRef}
@@ -211,8 +188,7 @@ export function PhotoAllowanceMenu({
     if (
         !allowance?.enabled ||
         allowance.limit === null ||
-        allowance.exhausted ||
-        allowance.preview
+        allowance.exhausted
     ) {
         return null;
     }

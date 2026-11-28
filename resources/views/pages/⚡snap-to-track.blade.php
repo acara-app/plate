@@ -8,7 +8,6 @@ use App\Actions\PrepareSnapToTrackUpgrade;
 use App\Actions\RetryPhotoAnalysis;
 use App\Actions\ShrinkOversizedPhoto;
 use App\Actions\StartPhotoAnalysis;
-use App\Contracts\Billing\ManagesPhotoPreview;
 use App\Data\Billing\PhotoAnalysisContext;
 use App\Enums\SnapFunnelStage;
 use App\Models\AnalysisDraft;
@@ -79,35 +78,15 @@ class extends Component
         }
     }
 
-    public function startPreview(ManagesPhotoPreview $preview): void
-    {
-        abort_unless($this->photoAllowance->preview?->status === 'available', 403);
-        session()->put('snap_to_track.intent', 'preview');
-        session()->put('url.intended', route('snap-to-track', absolute: false));
-        if (! auth()->check()) {
-            $this->redirect(route('register'));
-
-            return;
-        }
-        if (! auth()->user()->hasVerifiedEmail()) {
-            $this->redirect(route('verification.notice'));
-
-            return;
-        }
-        $preview->activate(auth()->user(), $this->analysisGuestId());
-        session()->forget(['snap_to_track.preview_draft', 'snap_to_track.intent']);
-        unset($this->photoAllowance);
-    }
-
     #[\Livewire\Attributes\Computed]
     public function photoAllowance(): \App\Data\Billing\PhotoEntitlement
     {
         return resolve(\App\Contracts\Billing\ManagesPhotoAnalyses::class)->entitlement(auth()->user(), $this->analysisGuestId());
     }
 
-    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, StartGuestCheckout $startCheckout, string $placement = 'wall'): void
+    public function upgrade(PrepareSnapToTrackUpgrade $prepareUpgrade, StartGuestCheckout $startCheckout): void
     {
-        $placement = in_array($placement, ['wall', 'preview_upload'], true) ? $placement : 'wall';
+        $placement = 'wall';
         $offer = $this->photoAllowance->offer;
         $freeScansUsed = $this->photoAllowance->freeScansUsed();
         $this->funnel->recordOffer($placement, $placement, $offer?->name, $freeScansUsed, clicked: true);
@@ -142,15 +121,15 @@ class extends Component
 
     #[Async]
     #[Renderless]
-    public function offerViewed(string $placement): void
+    public function offerViewed(): void
     {
         $allowance = $this->photoAllowance;
 
-        if (! in_array($placement, ['wall', 'preview_upload'], true) || ! $allowance->canUpgrade || $allowance->offer === null || ! ($allowance->exhausted || $allowance->preview !== null)) {
+        if (! $allowance->canUpgrade || $allowance->offer === null || ! $allowance->exhausted) {
             return;
         }
 
-        $this->funnel->recordOffer($placement, $placement, $allowance->offer->name, $allowance->freeScansUsed());
+        $this->funnel->recordOffer('wall', 'wall', $allowance->offer->name, $allowance->freeScansUsed());
     }
 
     public function _startUpload($name, $fileInfo, $isMultiple): void
@@ -435,10 +414,9 @@ class extends Component
             return;
         }
 
-        $previewAvailable = $this->photoAllowance->preview?->status === 'available';
-        session()->put('url.intended', route($previewAvailable ? 'snap-to-track' : 'snap-to-track.index', absolute: false));
+        session()->put('url.intended', route('snap-to-track.index', absolute: false));
         session()->put('snap_to_track.auth_path', $intent);
-        session()->put('snap_to_track.intent', $previewAvailable ? 'preview' : 'scan');
+        session()->put('snap_to_track.intent', 'scan');
 
         $this->redirect(route($intent));
     }
@@ -963,8 +941,6 @@ class extends Component
                                         @endif
                                         <p id="scan-terms" class="text-balance text-white/60">{!! e(strtr(__('common.photo_plans.free.terms_'.($photoAllowance->limit === 1 ? 'one' : 'other')), ['@{{count}}' => (string) $photoAllowance->limit])) !!}</p>
                                     </div>
-                                @elseif ($photoAllowance->preview?->status === 'active')
-                                    <p class="text-center text-sm text-white/70">Your daily preview scan is ready. Preview ends <time x-data x-text="new Date(@js($photoAllowance->preview->expiresAt)).toLocaleString()">{{ $photoAllowance->preview->expiresAt }}</time>.</p>
                                 @endif
                             @else
                                 @guest
@@ -1007,9 +983,6 @@ class extends Component
                         </div>
                     </form>
 
-                    @if ($photoAllowance->preview?->status === 'active')
-                        <x-snap-conversion-offer :allowance="$photoAllowance" placement="preview_upload" />
-                    @endif
                 @endunless
             </div>
         </div>
