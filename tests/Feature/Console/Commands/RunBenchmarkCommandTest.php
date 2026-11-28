@@ -7,6 +7,7 @@ use App\Data\Benchmark\HarnessReport;
 use App\Data\Benchmark\MealEvaluation;
 use App\Data\Benchmark\PathMetrics;
 use App\Data\Benchmark\PredictedRun;
+use App\Data\Billing\PhotoModel;
 use App\Data\NutrientValues;
 use App\Enums\Benchmark\AnalysisPath;
 use App\Models\BenchmarkMeal;
@@ -110,7 +111,7 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
     FoodPhotoAnalyzerAgent::fake(fn (): array => perfectAnalysisPayload());
 
     $this->artisan('benchmark:run', ['--repeats' => 2, '--force' => true])
-        ->expectsOutputToContain('gemini-3.8-flash/p8')
+        ->expectsOutputToContain(FoodPhotoAnalyzerAgent::version())
         ->expectsOutputToContain('Raw model')
         ->expectsOutputToContain('1 / 2 / 0')
         ->expectsOutputToContain('1.00 / 1.00 (1 meals)')
@@ -119,8 +120,8 @@ it('benchmarks the production analyzer, reports its metrics, and persists the ru
 
     $run = BenchmarkRun::query()->sole();
 
-    expect($run->analyzer_version)->toBe('gemini-3.8-flash/p8')
-        ->and($run->toHarnessReport()->provider)->toBe('gemini')
+    expect($run->analyzer_version)->toBe(FoodPhotoAnalyzerAgent::version())
+        ->and($run->toHarnessReport()->provider)->toBe(PhotoModel::standard()->provider)
         ->and($run->smoke)->toBeFalse()
         ->and($run->repeats)->toBe(2)
         ->and($run->meal_count)->toBe(1)

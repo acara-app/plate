@@ -24,11 +24,11 @@ return [
     'default_for_classification' => 'openai',
 
     'photo_analysis' => [
-        'provider' => 'gemini',
-        'model' => 'gemini-3.8-flash',
+        'provider' => 'openai',
+        'model' => 'gpt-6.1-terra',
         'failover' => [
-            'provider' => 'openai',
-            'model' => 'gpt-6.1-terra',
+            'provider' => 'gemini',
+            'model' => 'gemini-3.8-flash',
         ],
     ],
 
