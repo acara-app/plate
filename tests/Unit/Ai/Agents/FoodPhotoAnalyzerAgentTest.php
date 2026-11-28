@@ -138,8 +138,9 @@ it('retries once when the structured output is malformed', function (): void {
 });
 
 it('retries a malformed answer on the provider that gave it, not the whole failover chain', function (): void {
-    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === 'gemini'
-        ? throw RateLimitedException::forProvider('gemini', 429)
+    $primary = PhotoModel::standard()->provider;
+    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === $primary
+        ? throw RateLimitedException::forProvider($primary, 429)
         : []);
 
     expect(function (): void {
@@ -181,16 +182,17 @@ it('uses the selected photo model without changing the shared default', function
 
 it('fails over to the next model when the primary provider is unavailable', function (): void {
     Log::spy();
+    $standard = PhotoModel::standard();
     $spendCap = new RequestException(new Response(new Psr7Response(429, [], json_encode([
         'error' => ['message' => 'Your billing account has exceeded its monthly spending cap.'],
     ]))));
-    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === 'gemini'
-        ? throw RateLimitedException::forProvider('gemini', 429, $spendCap)
+    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === $standard->provider
+        ? throw RateLimitedException::forProvider($standard->provider, 429, $spendCap)
         : ['items' => [], 'total_calories' => 0, 'total_protein' => 0, 'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 0]);
 
     $result = (new FoodPhotoAnalyzerAgent)->analyze('aW1hZ2U=', 'image/jpeg');
 
-    expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version('gpt-6.1-terra'));
-    Log::shouldHaveReceived('error')->once()->with('ai_provider_failed_over', Mockery::on(fn (array $context): bool => $context['provider'] === 'gemini'
+    expect($result->analyzerVersion)->toBe(FoodPhotoAnalyzerAgent::version($standard->failoverModel));
+    Log::shouldHaveReceived('error')->once()->with('ai_provider_failed_over', Mockery::on(fn (array $context): bool => $context['provider'] === $standard->provider
         && $context['reason'] === 'Your billing account has exceeded its monthly spending cap.'));
 });
