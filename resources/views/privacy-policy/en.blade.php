@@ -106,8 +106,8 @@ This data is collected on a read-only basis. Acara Health Sync does not write an
 <p>
     <strong>a. Providers we currently use:</strong>
 <ul>
-    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, meal photo analysis and Acara Cloud's long-term memory features when Google is unavailable, and processing the meal photos you let us use to improve food recognition (see Section 2).</li>
-    <li><strong>Google</strong> — meal photo analysis and Acara Cloud's long-term memory features, via Gemini and any successor or specialized Google-hosted models served through the same Google API surface.</li>
+    <li><strong>OpenAI</strong> — conversational chat (the Altani chat agent), meal-plan generation and day-by-day meal suggestions, glucose insights, conversation summarization, audio transcription, text embeddings, Acara Cloud's long-term memory features, meal photo analysis when Google is unavailable, and processing the meal photos you let us use to improve food recognition (see Section 2).</li>
+    <li><strong>Google</strong> — meal photo analysis, and Acara Cloud's long-term memory features when OpenAI is unavailable, via Gemini and any successor or specialized Google-hosted models served through the same Google API surface.</li>
 </ul>
 We disclose <strong>processors</strong>, not individual models. Swapping to a different model offered by the same processor (e.g., a newer Gemini release, or a specialized medical model hosted by Google) does not change which company receives your data and does not require a separate notice. We will update this list only when a new <strong>processor</strong> (a different company or a self-hosted deployment) is introduced for your data.
 </p>
