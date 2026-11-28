@@ -131,13 +131,23 @@ it('handles empty food detection', function (): void {
         ->and($result->items)->toHaveCount(0);
 });
 
-it('throws exception when structured data is empty', function (): void {
-    FoodPhotoAnalyzerAgent::fake([[]]);
+it('retries once when the structured output is malformed', function (): void {
+    FoodPhotoAnalyzerAgent::fake([[], ['items' => [], 'total_calories' => 0, 'total_protein' => 0, 'total_carbs' => 0, 'total_fat' => 0, 'confidence' => 80]]);
 
-    $imageBase64 = base64_encode('fake-image-data');
+    expect($this->agent->analyze('aW1hZ2U=', 'image/jpeg')->confidence)->toBe(80);
+});
 
-    $this->agent->analyze($imageBase64, 'image/jpeg');
-})->throws(CannotCreateData::class);
+it('retries a malformed answer on the provider that gave it, not the whole failover chain', function (): void {
+    FoodPhotoAnalyzerAgent::fake(fn (string $prompt, $attachments, Provider $provider): array => $provider->name() === 'gemini'
+        ? throw RateLimitedException::forProvider('gemini', 429)
+        : []);
+
+    expect(function (): void {
+        (new FoodPhotoAnalyzerAgent)->analyze('aW1hZ2U=', 'image/jpeg');
+    })->toThrow(CannotCreateData::class);
+
+    FoodPhotoAnalyzerAgent::assertPromptedTimes(3);
+});
 
 it('stamps the analyzer version on analysis results', function (): void {
     FoodPhotoAnalyzerAgent::fake([
